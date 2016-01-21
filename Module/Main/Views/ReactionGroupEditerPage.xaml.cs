@@ -1,5 +1,4 @@
-﻿using Microsoft.Practices.Prism.Mvvm;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,18 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Main.Views
+namespace Modules.Main.Views
 {
 	/// <summary>
-	/// FolderListPage.xaml の相互作用ロジック
+	/// ReactionGroupEditerPage.xaml の相互作用ロジック
 	/// </summary>
-	public partial class FolderListPage : Page, IView
+	public partial class ReactionGroupEditerPage : UserControl
 	{
-		public FolderListPage()
+		public ReactionGroupEditerPage()
 		{
 			InitializeComponent();
-
-			ViewModelLocator.SetAutoWireViewModel(this, true);
 		}
 	}
 }

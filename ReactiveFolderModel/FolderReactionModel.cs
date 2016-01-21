@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Practices.Prism.Mvvm;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -10,35 +11,43 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Model
 {
-	public class FolderReactionModel
+	public class FolderReactionModel : BindableBase
 	{
 		// What 対象ファイルやフォルダのフィルター方法
 
+		public string Name { get; set; }
+
+		public bool IsDisable { get; set; }
+
 		public ReactionTargetFilter Filter { get; private set; }
-
-		// When 実行のタイミング
-		// How アクションパイプライン
-
-		
 
 		public FolderReactionModel()
 		{
+			Name = "";
+			IsDisable = false;
+		}
+
+		public bool Validate()
+		{
+
+			return true;
+		}
+
+		public void Initialize(DirectoryInfo dirInfo)
+		{
+			Filter.Initialize(dirInfo);
 		}
 
 		public IObservable<ReactionPayload> Generate(IObservable<ReactionPayload> stream)
 		{
-			var first = stream;
+			var first = stream
+				// IsDisableがtrueの時はこのリアクションをスキップ
+				.SkipWhile(_ => IsDisable);
 
 			var reactionChains = new []{
 
 				Filter
 			};
-
-			foreach(var chain in reactionChains)
-			{
-				chain.OnReadyToChain();
-			}
-
 
 			IObservable<ReactionPayload> chainObserver = first;
 			foreach (var chain in reactionChains)
@@ -54,7 +63,7 @@ namespace ReactiveFolder.Model
 
 	public class ChainItemContext
 	{
-		public virtual void Initialize()
+		public virtual void Initialize(DirectoryInfo workDir)
 		{
 
 		}
@@ -78,9 +87,9 @@ namespace ReactiveFolder.Model
 			}
 		}
 
-		public void OnReadyToChain()
+		public void Initialize(DirectoryInfo workDir)
 		{
-			Context?.Initialize();
+			Context?.Initialize(workDir);
 		}
 
 		public abstract IObservable<ReactionPayload> Chain(IObservable<ReactionPayload> prev);
@@ -193,44 +202,52 @@ namespace ReactiveFolder.Model
 
 	class FileUpdateReactionTimingContext : ChainItemContext
 	{
-		private List<PreservedFileInfo> CurrentFiles;
-		private List<PreservedFileInfo> PreviewFiles;
+		private List<PreservedFileInfo> Files;
 
-
-
-
-		
 
 		public FileUpdateReactionTimingContext()
 		{
-			PreviewFiles = new List<PreservedFileInfo>();
+			Files = new List<PreservedFileInfo>();
 		}
 
-		public override void Initialize()
+		public override void Initialize(DirectoryInfo workDir)
 		{
-			PreviewFiles = CurrentFiles.ToList();
-			CurrentFiles.Clear();
+			Files.AddRange(workDir.GetFiles().Select(x => new PreservedFileInfo(x.FullName)));
+			Files.AddRange(workDir.GetDirectories().Select(x => new PreservedFileInfo(x.FullName)));
 		}
 
 		public bool FileIsNeedUpdate(ReactionPayload payload)
 		{
-			// 
-			var needUpdate = PreviewFiles.Any(x =>
+			var fileAlreadyExist = Files.Any(x => 
 			{
-				if (payload.Path == x.Path)
-				{
-					var lastUpdateTime = File.GetLastWriteTime(payload.Path);
-					return lastUpdateTime > x.UpdateTime;
-				}
-
-				return false;
+				return x.Path == payload.Path;
 			});
 
-			PreviewFiles.Add(new PreservedFileInfo(payload.Path));
+			if (fileAlreadyExist)
+			{
+				// すでに同一のPathが登録されていれば
+				// 更新時間をチェックして更新が必要か判断する
+				var needUpdate = Files.Any(x =>
+				{
+					if (payload.Path == x.Path)
+					{
+						var lastUpdateTime = File.GetLastWriteTime(payload.Path);
+						return lastUpdateTime > x.UpdateTime;
+					}
+					return false;
+				});
 
-			return needUpdate;
+				return needUpdate;
+			}
+			else
+			{
+				// まだPathが登録されていない場合は
+				// 新しく作成して、更新するよう返す
+				Files.Add(new PreservedFileInfo(payload.Path));
+
+				return true;
+			}
 		}
-
 	}
 
 	public class FileUpdateReactionTiming : ReactionTimingBase

@@ -10,6 +10,7 @@ using Microsoft.Practices.Unity;
 using Prism.Unity;
 using ReactiveFolder.Views;
 using ReactiveFolder.Model;
+using Prism.Modularity;
 
 namespace ReactiveFolder
 {
@@ -20,16 +21,32 @@ namespace ReactiveFolder
 			return Container.Resolve<MainWindow>();
 		}
 
+		protected override void ConfigureContainer()
+		{
+			base.ConfigureContainer();
+
+			this.Container.RegisterInstance(new FolderReactionMonitorModel());
+		}
+
 		protected override void InitializeShell()
 		{
 			base.InitializeShell();
 
-			var monitor = new FolderReactionMonitorModel();
-			Container.RegisterInstance(monitor);
-
+			
 			App.Current.MainWindow = (Window)this.Shell;
 
-			//			App.Current.MainWindow.Show();
+#if DEBUG
+			App.Current.MainWindow.Show();
+#endif
+		}
+
+		protected override void ConfigureModuleCatalog()
+		{
+			base.ConfigureModuleCatalog();
+			ModuleCatalog moduleCatalog = (ModuleCatalog)this.ModuleCatalog;
+
+			moduleCatalog.AddModule(typeof(Modules.Monitor.MonitorModule));
+			moduleCatalog.AddModule(typeof(Modules.Main.MainModule));
 		}
 	}
 }

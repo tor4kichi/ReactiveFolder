@@ -1,13 +1,13 @@
 ﻿using System.Windows.Controls;
 
-namespace Main.Views
+namespace Modules.Monitor.Views
 {
 	/// <summary>
 	/// FolderListPage.xaml の相互作用ロジック
 	/// </summary>
-	public partial class FolderListPage : UserControl
+	public partial class MonitorDebug : UserControl
 	{
-		public FolderListPage()
+		public MonitorDebug()
 		{
 			InitializeComponent();
 		}

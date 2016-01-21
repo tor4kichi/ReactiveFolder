@@ -1,14 +1,16 @@
-﻿<Page x:Class="Main.Views.FolderListPage"
+﻿<UserControl x:Class="Modules.Monitor.Views.MonitorDebug"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="Main."
+      xmlns:local="clr-namespace:Modules.Monitor.Views"
+      xmlns:prism="http://prismlibrary.com/"
       mc:Ignorable="d" 
       d:DesignHeight="300" d:DesignWidth="300"
-      Title="FolderListPage">
+      prism:ViewModelLocator.AutoWireViewModel="True"
+      >
 
-    <Grid>
-        <TextBlock Text="FolderList" />
+    <Grid HorizontalAlignment="Right">
+        <TextBlock Text="{Binding MyText}" />
     </Grid>
-</Page>
+</UserControl>

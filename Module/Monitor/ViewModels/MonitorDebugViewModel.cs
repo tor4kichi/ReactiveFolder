@@ -6,17 +6,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Main.ViewModels
+namespace Modules.Monitor.ViewModels
 {
-	public class FolderListPageViewModel : BindableBase
+	public class MonitorDebugViewModel : BindableBase
 	{
-
 		public string MyText { get; private set; }
 		public FolderReactionMonitorModel MonitorModel { get; private set; }
 
 
 
-		public FolderListPageViewModel(FolderReactionMonitorModel monitor)
+		public MonitorDebugViewModel(FolderReactionMonitorModel monitor)
 		{
 			MonitorModel = monitor;
 

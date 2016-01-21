@@ -25,16 +25,11 @@ namespace ReactiveFolder
 	/// </summary>
 	public partial class App : Application
 	{
-		private const string ViewNamespace = "Views";
-		private const string ViewModelNamespace = "ViewModels";
-
-
 		/// <summary>
 		/// タスクトレイに表示するアイコン
 		/// </summary>
 		private NotifyIconWrapper _NotifyIcon;
 
-		//		private FolderReactionMonitorModel _MonitorModel;
 
 		/// <summary>
 		/// System.Windows.Application.Startup イベント を発生させます。
@@ -43,31 +38,17 @@ namespace ReactiveFolder
 		protected override void OnStartup(StartupEventArgs e)
 		{
 			base.OnStartup(e);
+
+			// タスクトレイ常駐アプリとして振る舞うため
+			// ウィンドウを閉じる動作でアプリを終了しないようにする
 			this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+			// タスクトレイアイコン
 			this._NotifyIcon = new NotifyIconWrapper();
 
+			// Prismのアプリ立ち上げ作法に則る
 			Bootstrapper bs = new Bootstrapper();
 			bs.Run();
-
-			
-			// Model
-			//			_MonitorModel = 
-			//			_Container
-
-
-			// 監視処理を開始する
-#if !DEBUG
-			//			_MonitorModel.Start(TimeSpan.FromSeconds(600));
-#else
-//			var subject = _MonitorModel.Debug_Start();
-
-//			subject.OnNext(0);
-//			subject.OnCompleted();
-
-//			subject.Dispose();
-
-#endif
-
 		}
 
 		/// <summary>
@@ -78,7 +59,6 @@ namespace ReactiveFolder
 		{
 			base.OnExit(e);
 
-			
 			this._NotifyIcon.Dispose();
 		}
 	}

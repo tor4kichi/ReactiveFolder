@@ -1,19 +1,21 @@
 ﻿using Prism.Modularity;
 using Prism.Regions;
-using Main.Views;
+using Modules.Main.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReactiveFolder.Model;
 
-namespace MainModule
+namespace Modules.Main
 {
-	public class ModuleAModule : IModule
+	[ModuleDependency("MonitorModule")]
+	public class MainModule : IModule
 	{
 		IRegionManager _regionManager;
 
-		public ModuleAModule(IRegionManager regionManager)
+		public MainModule(IRegionManager regionManager)
 		{
 			_regionManager = regionManager;
 		}
@@ -21,6 +23,9 @@ namespace MainModule
 		public void Initialize()
 		{
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(FolderListPage));
+			_regionManager.RegisterViewWithRegion("MainRegion", typeof(ReactionGroupEditerPage));
+
+			_regionManager.RequestNavigate("MainRegion", nameof(FolderListPage));
 		}
 	}
 }

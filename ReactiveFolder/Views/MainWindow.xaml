@@ -9,5 +9,6 @@
         Title="ReactiveFolder" Height="350" Width="525">
     <Grid>
         <ContentControl prism:RegionManager.RegionName="MainRegion" />
+        <ContentControl prism:RegionManager.RegionName="DebugRegion" />
     </Grid>
 </Window>
