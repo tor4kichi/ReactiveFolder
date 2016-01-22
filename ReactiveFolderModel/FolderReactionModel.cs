@@ -6,23 +6,34 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ReactiveFolder.Model
 {
+	[DataContract]
 	public class FolderReactionModel : BindableBase
 	{
-		// What 対象ファイルやフォルダのフィルター方法
 
+		[DataMember]
+		public int ReactionId { get; private set; }
+
+		[DataMember]
 		public string Name { get; set; }
 
+		[DataMember]
 		public bool IsDisable { get; set; }
 
+		// What 対象ファイルやフォルダのフィルター方法
+		[DataMember]
 		public ReactionTargetFilter Filter { get; private set; }
 
-		public FolderReactionModel()
+
+
+		public FolderReactionModel(int id)
 		{
+			ReactionId = id;
 			Name = "";
 			IsDisable = false;
 		}

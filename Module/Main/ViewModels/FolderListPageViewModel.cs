@@ -12,7 +12,7 @@ using Reactive.Bindings.Extensions;
 
 namespace Modules.Main.ViewModels
 {
-	public class FolderListPageViewModel : BindableBase, INavigationAware, IRegionMemberLifetime
+	public class FolderListPageViewModel : BindableBase, INavigationAware
 	{
 		private IRegionManager _RegionManager;
 		public FolderReactionMonitorModel MonitorModel { get; private set; }
@@ -48,17 +48,6 @@ namespace Modules.Main.ViewModels
 
 
 
-		/* Implement IRegionMemberLifetime */
-
-		public bool KeepAlive
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-
 		private DelegateCommand _AddReactionFolderGroupCommand;
 		public DelegateCommand AddReactionFolderGroupCommand
 		{
@@ -72,6 +61,9 @@ namespace Modules.Main.ViewModels
 						var group = new FolderReactionGroupModel(new System.IO.DirectoryInfo(desktop));
 						group.Name = "Test";
 						MonitorModel.ReactionGroups.Add(group);
+
+						var reaction = group.AddReaction();
+						reaction.Name = "something reaction";
 
 						NavigationToReactionGroupEditerPage(group);
 					}));

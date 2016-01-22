@@ -19,6 +19,10 @@ namespace ReactiveFolder.Model
 	public class FolderReactionGroupModel : BindableBase
 	{
 		// Note: WorkFolderをNameとして使う
+
+		[DataMember]
+		private int ChildReactionIdSeed { get; set; }
+
 		[DataMember]
 		public Guid Guid { get; private set; }
 
@@ -51,8 +55,15 @@ namespace ReactiveFolder.Model
 			}
 		}
 
+
+
 		[DataMember]
-		public ObservableCollection<FolderReactionModel> Reactions { get; private set; }
+		private ObservableCollection<FolderReactionModel> _Reactions;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public ReadOnlyObservableCollection<FolderReactionModel> Reactions { get; private set; }
 
 		public bool IsValidate { get; private set; }
 
@@ -60,12 +71,57 @@ namespace ReactiveFolder.Model
 
 		private IDisposable GroupDisposer;
 
+
+
+
 		public FolderReactionGroupModel(DirectoryInfo dir)
 		{
+			ChildReactionIdSeed = 1;
 			Guid = Guid.NewGuid();
 			WorkFolder = dir;
-			Reactions = new ObservableCollection<FolderReactionModel>();
+			_Reactions = new ObservableCollection<FolderReactionModel>();
+			Reactions = new ReadOnlyObservableCollection<FolderReactionModel>(_Reactions);
 			TriggerByReaction = new Dictionary<FolderReactionModel, BehaviorSubject<ReactionPayload>>();
+		}
+
+
+
+
+		[OnDeserialized]
+		private void SetValuesOnDeserialized(StreamingContext context)
+		{
+			TriggerByReaction = new Dictionary<FolderReactionModel, BehaviorSubject<ReactionPayload>>();
+			Reactions = new ReadOnlyObservableCollection<FolderReactionModel>(_Reactions);
+		}
+
+
+
+		public FolderReactionModel AddReaction()
+		{
+			var id = ChildReactionIdSeed;
+
+
+			FolderReactionModel reaction = new FolderReactionModel(id);
+
+			// TODO: Defaultの設定を追加
+
+			_Reactions.Add(reaction);
+
+			// 
+			ChildReactionIdSeed += 1;
+
+			return reaction;
+		}
+
+		public void RemoveReaction(FolderReactionModel reaction)
+		{
+			if (false == _Reactions.Contains(reaction))
+			{
+				throw new Exception("can not remove FolderReactionModel from FolderReactionGroupModel. argument reaction is not contain FolderReactionGroupModel.");
+			}
+
+			RemoveTrigger(reaction);
+			_Reactions.Remove(reaction);
 		}
 
 		public void ValidateCheck()
@@ -118,11 +174,7 @@ namespace ReactiveFolder.Model
 			return new ReactionPayload(WorkFolder, "");
 		}
 
-		[OnDeserialized]
-		private void SetValuesOnDeserialized(StreamingContext context)
-		{
-			TriggerByReaction = new Dictionary<FolderReactionModel, BehaviorSubject<ReactionPayload>>();
-		}
+		
 
 		public IObservable<ReactionPayload> Generate<T>(IObservable<T> stream)
 		{
@@ -205,5 +257,13 @@ namespace ReactiveFolder.Model
 			}
 		}
 
+
+		private void RemoveTrigger(FolderReactionModel model)
+		{
+			if (TriggerByReaction.ContainsKey(model))
+			{
+				TriggerByReaction.Remove(model);
+			}
+		}
 	}
 }

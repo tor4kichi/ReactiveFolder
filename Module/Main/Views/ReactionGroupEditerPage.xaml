@@ -10,6 +10,30 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
     <Grid>
-        <TextBlock Text="{Binding Name.Value}" />
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="14*"/>
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="Menu">
+            <Button Content="Back" Command="{Binding BackCommand}" Width="50" HorizontalAlignment="Left"/>
+            <Button Content="Add Reaction" Command="{Binding AddReactionCommand}" Width="120" HorizontalAlignment="Right"/>
+        </Grid>
+
+        <Grid x:Name="ReactionGroupContent" Grid.Row="1">
+            <TextBlock Text="Reactions" />
+            <ListView ItemsSource="{Binding ListItemReactions, Mode=OneWay}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Height="40">
+                            <TextBlock Text="{Binding Name}" HorizontalAlignment="Left" />
+
+                            <Button Content="Edit"  Width="40" Height="24" Command="{Binding EditCommand}" HorizontalAlignment="Right" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            
+        </Grid>
     </Grid>
 </UserControl>

@@ -7,7 +7,7 @@
     <ProjectGuid>{44C5F8D7-918C-43E9-88AD-D874D2254885}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Module.Monitor</RootNamespace>
+    <RootNamespace>Modules.Monitor</RootNamespace>
     <AssemblyName>Monitor</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -24,6 +24,7 @@ namespace Modules.Main
 		{
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(FolderListPage));
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(ReactionGroupEditerPage));
+			_regionManager.RegisterViewWithRegion("MainRegion", typeof(ReactionEditerPage));
 
 			_regionManager.RequestNavigate("MainRegion", nameof(FolderListPage));
 		}
