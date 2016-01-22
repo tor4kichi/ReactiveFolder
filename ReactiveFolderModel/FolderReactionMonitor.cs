@@ -70,7 +70,7 @@ namespace ReactiveFolder.Model
 			RemoteTrigger?.OnNext(0);
 		}
 
-		public void Start(Action<ReactionPayload> subscribe)
+		public void Start(Action<ReactiveStreamContext> subscribe)
 		{
 			// 既に走っている監視処理を終了させる
 			Exit();

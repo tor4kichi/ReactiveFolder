@@ -67,7 +67,7 @@ namespace ReactiveFolder.Model
 
 		public bool IsValidate { get; private set; }
 
-		private Dictionary<FolderReactionModel, BehaviorSubject<ReactionPayload>> TriggerByReaction;
+		private Dictionary<FolderReactionModel, BehaviorSubject<ReactiveStreamContext>> TriggerByReaction;
 
 		private IDisposable GroupDisposer;
 
@@ -81,7 +81,7 @@ namespace ReactiveFolder.Model
 			WorkFolder = dir;
 			_Reactions = new ObservableCollection<FolderReactionModel>();
 			Reactions = new ReadOnlyObservableCollection<FolderReactionModel>(_Reactions);
-			TriggerByReaction = new Dictionary<FolderReactionModel, BehaviorSubject<ReactionPayload>>();
+			TriggerByReaction = new Dictionary<FolderReactionModel, BehaviorSubject<ReactiveStreamContext>>();
 		}
 
 
@@ -90,7 +90,7 @@ namespace ReactiveFolder.Model
 		[OnDeserialized]
 		private void SetValuesOnDeserialized(StreamingContext context)
 		{
-			TriggerByReaction = new Dictionary<FolderReactionModel, BehaviorSubject<ReactionPayload>>();
+			TriggerByReaction = new Dictionary<FolderReactionModel, BehaviorSubject<ReactiveStreamContext>>();
 			Reactions = new ReadOnlyObservableCollection<FolderReactionModel>(_Reactions);
 		}
 
@@ -169,14 +169,14 @@ namespace ReactiveFolder.Model
 			}
 		}
 
-		private ReactionPayload CreatePayload()
+		private ReactiveStreamContext CreatePayload()
 		{
-			return new ReactionPayload(WorkFolder, "");
+			return new ReactiveStreamContext(WorkFolder, "");
 		}
 
 		
 
-		public IObservable<ReactionPayload> Generate<T>(IObservable<T> stream)
+		public IObservable<ReactiveStreamContext> Generate<T>(IObservable<T> stream)
 		{
 			TriggerByReaction.Clear();
 
@@ -194,12 +194,12 @@ namespace ReactiveFolder.Model
 				// 
 
 
-			List<IConnectableObservable<ReactionPayload>> reactionStreams = new List<IConnectableObservable<ReactionPayload>>();
+			List<IConnectableObservable<ReactiveStreamContext>> reactionStreams = new List<IConnectableObservable<ReactiveStreamContext>>();
 
 			foreach(var reaction in Reactions)
 			{
 				// ストリームの手動実行用トリガーを仕込みつつ、
-				var remoteTrigger = new BehaviorSubject<ReactionPayload>(CreatePayload());
+				var remoteTrigger = new BehaviorSubject<ReactiveStreamContext>(CreatePayload());
 
 				var triggerStream = Observable.Merge(
 					reaction.Generate(rootStream),
