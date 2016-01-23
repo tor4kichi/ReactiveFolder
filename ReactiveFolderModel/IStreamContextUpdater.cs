@@ -9,6 +9,14 @@ namespace ReactiveFolder.Model
 {
 	public interface IStreamContextUpdater
 	{
-		void Update(string sourcePath, DirectoryInfo destFolder);
+		OutputItemType Update(string sourcePath, DirectoryInfo destFolder);
+	}
+
+	public enum OutputItemType
+	{
+		File,
+		Folder,
+
+		Failed,
 	}
 }
