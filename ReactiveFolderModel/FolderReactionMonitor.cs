@@ -22,13 +22,11 @@ namespace ReactiveFolder.Model
 
 	// FolderReactionGroupごとに処理の開始や停止をハンドリングできるようにする
 
-
-	class MonitorSettings
+	public class MonitorSettings
 	{
 		public int MonitorIntervalSeconds { get; set; }
 	}
 
-	[Serializable]
 	public class FolderReactionMonitorModel : BindableBase, IDisposable
 	{
 
@@ -58,7 +56,6 @@ namespace ReactiveFolder.Model
 
 		public ReadOnlyObservableCollection<FolderReactionGroupModel> ReactionGroups { get; private set; }
 
-		[DataMember]
 		private TimeSpan _Interval;
 		public TimeSpan Interval
 		{
@@ -149,6 +146,10 @@ namespace ReactiveFolder.Model
 
 				this.Interval = TimeSpan.FromSeconds(settings.MonitorIntervalSeconds);
 			}
+			else
+			{
+				await SaveSettings();
+			}
 		}
 
 
@@ -212,7 +213,10 @@ namespace ReactiveFolder.Model
 		{
 			var groupsFolder = SaveFolder;
 
-			foreach (var fileInfo in groupsFolder.EnumerateFiles("*.json"))
+			var files = groupsFolder.EnumerateFiles("*.json")
+				.Where(x => x.Name != MONITOR_SETTINGS_FILENAME);
+
+			foreach (var fileInfo in files)
 			{
 				try
 				{
