@@ -11,6 +11,11 @@ namespace ReactiveFolder.Model.Destinations
 	[DataContract]
 	public class SameInputReactiveDestination : ReactiveDestinationBase
 	{
+		public override ValidationResult Validate()
+		{
+			return ValidationResult.Valid;
+		}
+
 		protected override DirectoryInfo CreateOutputFolder(ReactiveStreamContext context)
 		{
 			return context.WorkFolder;

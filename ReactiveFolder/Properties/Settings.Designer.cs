@@ -22,5 +22,17 @@ namespace ReactiveFolder.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string MonitorDataSaveFolderPath {
+            get {
+                return ((string)(this["MonitorDataSaveFolderPath"]));
+            }
+            set {
+                this["MonitorDataSaveFolderPath"] = value;
+            }
+        }
     }
 }

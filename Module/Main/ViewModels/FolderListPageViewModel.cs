@@ -9,6 +9,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Reactive.Bindings.Extensions;
+using ReactiveFolder.Model.Filters;
+using ReactiveFolder.Model.Timings;
+using ReactiveFolder.Model.Actions;
+using ReactiveFolder.Model.Destinations;
 
 namespace Modules.Main.ViewModels
 {
@@ -58,12 +62,24 @@ namespace Modules.Main.ViewModels
 					{
 						var desktop = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
-						var group = new FolderReactionGroupModel(new System.IO.DirectoryInfo(desktop));
+						var targetDir = new System.IO.DirectoryInfo(desktop);
+
+						var group = MonitorModel.CreateNewReactionGroup(targetDir);
+
 						group.Name = "Test";
-						MonitorModel.ReactionGroups.Add(group);
 
 						var reaction = group.AddReaction();
 						reaction.Name = "something reaction";
+
+						reaction.Destination = new SameInputReactiveDestination();
+						reaction.Timing = new FileUpdateReactiveTiming();
+						reaction.Filter = new FileReactiveFilter();
+
+						reaction.AddAction(new RenameReactiveAction("#{name}"));
+
+
+
+						MonitorModel.SaveReactionGroup(group.Guid);
 
 						NavigationToReactionGroupEditerPage(group);
 					}));

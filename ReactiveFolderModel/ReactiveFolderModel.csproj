@@ -42,6 +42,10 @@
       <HintPath>..\packages\Prism.Mvvm.1.1.1\lib\net45\Microsoft.Practices.Prism.SharedInterfaces.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="ReactiveProperty, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -88,6 +92,10 @@
   <ItemGroup>
     <Compile Include="Actions\ReactiveActionBase.cs" />
     <Compile Include="Actions\RenameReactiveAction.cs" />
+    <Compile Include="Destinations\AbsolutePathReactiveDestination.cs" />
+    <Compile Include="Destinations\ChildReactiveDestination.cs" />
+    <Compile Include="Destinations\SameInputReactiveDestination.cs" />
+    <Compile Include="Destinations\ReactiveDestinationBase.cs" />
     <Compile Include="Filters\FileReactiveFilter.cs" />
     <Compile Include="Filters\FolderReactiveFilter.cs" />
     <Compile Include="Filters\ReactiveFilterBase.cs" />
@@ -102,13 +110,12 @@
     <Compile Include="Timings\FileUpdateReactiveTiming.cs" />
     <Compile Include="Timings\ReactiveTimingBase.cs" />
     <Compile Include="Timings\TimerReactiveTiming.cs" />
+    <Compile Include="Util\ExternalObejct.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Destinations\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

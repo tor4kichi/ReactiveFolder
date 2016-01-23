@@ -12,20 +12,53 @@ using ReactiveFolder.Views;
 using ReactiveFolder.Model;
 using Prism.Modularity;
 
+using ReactiveFolder.Properties;
+using System.IO;
+
 namespace ReactiveFolder
 {
 	class Bootstrapper : UnityBootstrapper
 	{
+		public static readonly string MonitorSettingsSaveFolderPath =
+			Path.Combine(
+//				System.Windows.Forms.Application.LocalUserAppDataPath,
+				Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+				"ReactiveFolder/"
+			);
+
+
 		protected override DependencyObject CreateShell()
 		{
 			return Container.Resolve<MainWindow>();
+		}
+
+
+		private async Task<FolderReactionMonitorModel> InitializeMonitorModel()
+		{
+			var monitorSaveFolderPath = Properties.Settings.Default.MonitorDataSaveFolderPath;
+			if (false == Directory.Exists(monitorSaveFolderPath))
+			{
+				monitorSaveFolderPath = MonitorSettingsSaveFolderPath;
+				Properties.Settings.Default.MonitorDataSaveFolderPath = MonitorSettingsSaveFolderPath;
+				Properties.Settings.Default.Save();
+			}
+
+			var model = await FolderReactionMonitorModel.LoadOrCreate(new DirectoryInfo(MonitorSettingsSaveFolderPath));
+
+			return model;
 		}
 
 		protected override void ConfigureContainer()
 		{
 			base.ConfigureContainer();
 
-			this.Container.RegisterInstance(new FolderReactionMonitorModel());
+
+			var modelInitTask = InitializeMonitorModel();
+
+			modelInitTask.Wait();
+//			modelInitTask.RunSynchronously();
+
+			this.Container.RegisterInstance(modelInitTask.Result);
 		}
 
 		protected override void InitializeShell()

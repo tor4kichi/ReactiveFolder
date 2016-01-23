@@ -24,11 +24,23 @@ namespace ReactiveFolder.Model.Timings
 
 
 
+		public override ValidationResult Validate()
+		{
+			return ValidationResult.Valid;
+		}
+
+
+
+
 		public override void Initialize(DirectoryInfo workDir)
 		{
 			Files.AddRange(workDir.GetFiles().Select(x => new PreservedFileInfo(x.FullName)));
 			Files.AddRange(workDir.GetDirectories().Select(x => new PreservedFileInfo(x.FullName)));
 		}
+
+
+
+
 
 		public bool FileIsNeedUpdate(ReactiveStreamContext payload)
 		{
@@ -62,6 +74,8 @@ namespace ReactiveFolder.Model.Timings
 				return true;
 			}
 		}
+
+		
 	}
 
 	struct PreservedFileInfo

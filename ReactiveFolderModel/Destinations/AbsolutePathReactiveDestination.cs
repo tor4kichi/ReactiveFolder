@@ -14,6 +14,22 @@ namespace ReactiveFolder.Model.Destinations
 		[DataMember]
 		public string AbsoluteFolderPath { get; set; }
 
+		public override ValidationResult Validate()
+		{
+			var result = new ValidationResult();
+			if (String.IsNullOrWhiteSpace(AbsoluteFolderPath))
+			{
+				result.AddMessage($"{(nameof(AbsolutePathReactiveDestination))}: Need path string.");
+            }
+
+			if (false == Path.IsPathRooted(AbsoluteFolderPath))
+			{
+				result.AddMessage($"{(nameof(AbsolutePathReactiveDestination))}: Path is not absolute path.");
+			}
+
+			return result;
+		}
+
 		protected override DirectoryInfo CreateOutputFolder(ReactiveStreamContext context)
 		{
 			return context.WorkFolder;

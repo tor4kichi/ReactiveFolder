@@ -15,7 +15,7 @@ namespace ReactiveFolder.Model
 	// TODO: Generateメソッドがあたかも内部では状態を持たなそうなメソッド名なのに状態を持ってしまっている。
 
 
-	[Serializable]
+	[DataContract]
 	public class FolderReactionGroupModel : BindableBase
 	{
 		// Note: WorkFolderをNameとして使う
@@ -64,8 +64,6 @@ namespace ReactiveFolder.Model
 		/// 
 		/// </summary>
 		public ReadOnlyObservableCollection<FolderReactionModel> Reactions { get; private set; }
-
-		public bool IsValidate { get; private set; }
 
 		private Dictionary<FolderReactionModel, BehaviorSubject<ReactiveStreamContext>> TriggerByReaction;
 
@@ -124,71 +122,98 @@ namespace ReactiveFolder.Model
 			_Reactions.Remove(reaction);
 		}
 
-		public void ValidateCheck()
+		public ValidationResult Validate()
 		{
-			IsValidate = false;
+			var result = new ValidationResult();
 
-			if (false == WorkFolder.Exists)
+			if (false == WorkFolder?.Exists)
 			{
-				Exit();
-				return;
+				result.AddMessage($"{Name}: Work Folder is not exist.");
 			}
 
-			if (Reactions.Count == 0)
+			if (Reactions.Count != 0)
 			{
-				Exit();
-				return;
+				var invalidReactions = Reactions
+					.Select(x => x.Validate())
+					.Where(x => x.HasValidationError);
+
+				foreach (var react in invalidReactions)
+				{
+					result.AddMessages(react.Messages);
+				}
+			}
+			else
+			{
+				result.AddMessage($"{Name}: not have any Reactions.");
 			}
 
-			var invalidReactions = Reactions.Where(x => x.Validate());
-			if (invalidReactions.Count() > 0)
-			{
-				return;
-			}
-
-
-			IsValidate = true;
+			return result;
 		}
 
 		
-
-		private void PreGenerate()
-		{
-			Exit();
-
-			ValidateCheck();
-
-			if (false == IsValidate)
-			{
-				throw new Exception();
-			}
-
-			foreach (var reaction in Reactions)
-			{
-				reaction.Initialize(WorkFolder);
-			}
-		}
 
 		private ReactiveStreamContext CreatePayload()
 		{
 			return new ReactiveStreamContext(WorkFolder, "");
 		}
 
-		
+		public IObservable<ReactiveStreamContext> TestGenerate(BehaviorSubject<long> trigger)
+		{
+			var validateResults = Reactions.Select(x => x.Validate());
+
+			if (validateResults.Count() > 0)
+			{
+				return null;
+			}
+
+
+			var rootStream = trigger.Select(_ => CreatePayload());
+
+			var mergedStream =
+				Observable.Merge(Reactions.Select(x => x.Generate(rootStream)))
+				.Publish();
+
+			mergedStream.Connect();
+
+			return mergedStream;
+		}
+
+		public IObservable<ReactiveStreamContext> TestGenerateSingle(BehaviorSubject<long> trigger, FolderReactionModel model)
+		{
+			var validateResult = model.Validate();
+			if (validateResult.HasValidationError)
+			{
+				return null;
+			}
+
+			var rootStream = trigger
+				.Select(_ => CreatePayload());
+
+			return model.Generate(rootStream);
+		}
 
 		public IObservable<ReactiveStreamContext> Generate<T>(IObservable<T> stream)
 		{
+			var validationResult = this.Validate();
+			if (validationResult.HasValidationError)
+			{
+				return null;
+			}
+
+
+			Exit();
+
 			TriggerByReaction.Clear();
 
-
-			PreGenerate();
+			foreach (var reaction in Reactions)
+			{
+				reaction.ResetWorkingFolder(WorkFolder);
+			}
 
 
 			var rootStream = stream
 				// IsDisableがtrueの時はストリームの流れをスキップさせる
 				.SkipWhile(_ => IsDisable)
-				// 
-				.Do(_ => ValidateCheck())
 				// 親ストリームのアイテムを無視して、ReactionPayloadを生成してストリームに流す
 				.Select(_ => CreatePayload());
 				// 
@@ -209,7 +234,6 @@ namespace ReactiveFolder.Model
 
 				triggerStream
 					.Connect();
-
 
 				reactionStreams.Add(triggerStream);
 

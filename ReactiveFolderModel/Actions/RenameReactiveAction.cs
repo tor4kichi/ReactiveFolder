@@ -135,10 +135,42 @@ namespace ReactiveFolder.Model.Actions
 
 		public string NameWithFormat { get; set; }
 
+
+		public RenameReactiveAction(string name = "#{name}")
+		{
+			NameWithFormat = name;
+		}
+
+
 		public override void Reaction(ReactiveStreamContext context)
 		{
 			// context.Name = String.Format();
 			context.Name = FormatedString(context);
+		}
+
+		public override ValidationResult Validate()
+		{
+			var dummyContext = new ReactiveStreamContext(new DirectoryInfo(""), "/filename.ext");
+			var formatString = FormatedString(dummyContext);
+
+			var result = new ValidationResult();
+
+			foreach (var invalidChar in Path.GetInvalidFileNameChars())
+			{
+				if (formatString.Contains(invalidChar))
+				{
+					result.AddMessage($"Rename string can not contain '{invalidChar}'");
+				}
+			}
+
+			if (result.HasValidationError)
+			{
+				// FormatMapのKeysをresult.Messagesに書き出す
+				var renamecanUse =  String.Join(",", FormatMap.Keys);
+				result.AddMessage($"Rename can use tags:{renamecanUse}");
+			}
+
+			return result;
 		}
 
 		private string FormatedString(ReactiveStreamContext context)
