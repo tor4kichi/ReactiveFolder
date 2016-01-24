@@ -263,7 +263,7 @@ namespace ReactiveFolder.Model
 
 
 
-		private void SaveReaction(FolderReactionModel reaction)
+		public void SaveReaction(FolderReactionModel reaction)
 		{
 			var saveFolder = Folder;
 
