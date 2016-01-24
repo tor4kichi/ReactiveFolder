@@ -21,9 +21,6 @@ namespace Modules.Main.ViewModels
 		private IRegionManager _RegionManager;
 		public FolderReactionMonitorModel MonitorModel { get; private set; }
 
-	
-
-
 		public FolderListItemViewModel FolderRootListItem { get; private set; }
 
 
@@ -35,10 +32,7 @@ namespace Modules.Main.ViewModels
 			_RegionManager = regionManager;
 			MonitorModel = monitor;
 
-			FolderRootListItem = new FolderListItemViewModel(MonitorModel.RootFolder);
-
-//			Groups = MonitorModel.ReactionGroups
-//				.ToReadOnlyReactiveCollection(x => new ReactiveFolderGroupViewModel(this, x));
+			FolderRootListItem = new FolderListItemViewModel(this, MonitorModel.RootFolder);
 		}
 
 		
@@ -75,21 +69,28 @@ namespace Modules.Main.ViewModels
 	// ReactiveFolderModel.FolderModelのVM
 	public class FolderListItemViewModel : BindableBase
 	{
+		public FolderListPageViewModel PageVM { get; private set; }
 		public FolderModel Folder { get; private set; }
+
+		public string FolderName { get; private set; }
 
 		public ReadOnlyReactiveCollection<ReactionListItemViewModel> ReactionListItems { get; private set; }
 
 		public ReadOnlyReactiveCollection<FolderListItemViewModel> ChildrenFolderListItems { get; private set; }
 
-		public FolderListItemViewModel(FolderModel folderModel)
+		public FolderListItemViewModel(FolderListPageViewModel pageVM, FolderModel folderModel)
 		{
+			PageVM = pageVM;
 			Folder = folderModel;
 
+
+			FolderName = folderModel.Folder.Name;
+
 			ReactionListItems = Folder.Models
-				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(x));
+				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(PageVM, x));
 
 			ChildrenFolderListItems = Folder.Children
-				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(x));
+				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(PageVM, x));
 		}
 
 		// TODO: Rename Folder
@@ -100,24 +101,20 @@ namespace Modules.Main.ViewModels
 		// TODO: Remove Folder
 		// TODO: Remove Reaction
 
-		/*
-		private DelegateCommand _AddReactionFolderGroupCommand;
-		public DelegateCommand AddReactionFolderGroupCommand
+		
+		private DelegateCommand _AddReactionFolderCommand;
+		public DelegateCommand AddReactionFolderCommand
 		{
 			get
 			{
-				return _AddReactionFolderGroupCommand
-					?? (_AddReactionFolderGroupCommand = new DelegateCommand(() =>
+				return _AddReactionFolderCommand
+					?? (_AddReactionFolderCommand = new DelegateCommand(() =>
 					{
 						var desktop = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
 						var targetDir = new System.IO.DirectoryInfo(desktop);
-
-						var group = MonitorModel.CreateNewReactionGroup(targetDir);
-
-						group.Name = "Test";
-
-						var reaction = group.AddReaction();
+						
+						var reaction = Folder.AddReaction(targetDir);
 						reaction.Name = "something reaction";
 
 						reaction.Destination = new SameInputReactiveDestination();
@@ -127,24 +124,46 @@ namespace Modules.Main.ViewModels
 						reaction.AddAction(new RenameReactiveAction("#{name}"));
 
 
+						// save
+						Folder.SaveReaction(reaction);
 
-						MonitorModel.SaveReactionGroup(group.Guid);
-
-						NavigationToReactionEditerPage(group);
+						// move to Reaction editer page.
+						PageVM.NavigationToReactionEditerPage(reaction);
 					}));
 			}
 		}
-		*/
+		private DelegateCommand _AddFolderCommand;
+		public DelegateCommand AddFolderCommand
+		{
+			get
+			{
+				return _AddFolderCommand
+					?? (_AddFolderCommand = new DelegateCommand(() =>
+					{
+						
+					}));
+			}
+		}
 	}
 
 	// ReactiveFolderModel.FolderModelに含まれるFolderReactionModelのVM
 	public class ReactionListItemViewModel : BindableBase
 	{
+		public FolderListPageViewModel PageVM { get; private set; }
+
 		public FolderReactionModel ReactionModel { get; private set; }
 
-		public ReactionListItemViewModel(FolderReactionModel reactionModel)
+
+		public string Name { get; private set; }
+
+
+
+		public ReactionListItemViewModel(FolderListPageViewModel pageVM, FolderReactionModel reactionModel)
 		{
+			PageVM = pageVM;
 			ReactionModel = reactionModel;
+
+			Name = ReactionModel.Guid.ToString();
 		}
 	}
 }
