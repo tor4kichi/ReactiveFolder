@@ -443,7 +443,7 @@ namespace ReactiveFolder.Model
 
 			var remoteTrigger = new BehaviorSubject<ReactiveStreamContext>(CreatePayload());
 			var mergedTrigger =
-				Observable.Merge(RemoteTrigger, timerTrigger);
+				Observable.Merge(remoteTrigger, timerTrigger);
 
 			var hotMergedTrigger = mergedTrigger.Publish();
 
