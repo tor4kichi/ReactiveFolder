@@ -24,13 +24,25 @@ namespace ReactiveFolder.Model
 
 	public class MonitorSettings
 	{
-		public int MonitorIntervalSeconds { get; set; }
+		public int DefaultIntervalSeconds { get; set; }
 	}
 
 	public class FolderReactionMonitorModel : BindableBase, IDisposable
 	{
+		public static async Task<FolderReactionMonitorModel> LoadOrCreate(DirectoryInfo saveFolder)
+		{
+			var model = new FolderReactionMonitorModel(saveFolder);
+
+			await model.InitializeSettings();
+			await model.InitializeReactions();
+
+			return model;
+		}
+
 
 		public const string MONITOR_SETTINGS_FILENAME = "settings.json";
+
+
 
 		private DirectoryInfo _SaveFolder;
 		public DirectoryInfo SaveFolder
@@ -56,47 +68,27 @@ namespace ReactiveFolder.Model
 
 		public ReadOnlyObservableCollection<FolderReactionGroupModel> ReactionGroups { get; private set; }
 
-		private TimeSpan _Interval;
-		public TimeSpan Interval
+		private TimeSpan _DefaultInterval;
+		public TimeSpan DefaultInterval
 		{
 			get
 			{
-				return _Interval;
+				return _DefaultInterval;
 			}
 			set
 			{
-				SetProperty(ref _Interval, value);
+				SetProperty(ref _DefaultInterval, value);
 			}
 		}
 
-		public TimeSpan RunningInterval { get; private set; }
-
+		
 		public bool IsRunning
 		{
 			get
 			{
-				return MonitorMasterDisposer != null &&
-					ReactionGroups.Count != 0;
+				return ReactionGroups.Any(x => x.IsRunning);
 
 			}
-		}
-
-
-
-
-		private IDisposable MonitorMasterDisposer;
-
-		private BehaviorSubject<long> RemoteTrigger;
-
-
-		public static async Task<FolderReactionMonitorModel> LoadOrCreate(DirectoryInfo saveFolder)
-		{
-			var model = new FolderReactionMonitorModel(saveFolder);
-
-			await model.InitializeSettings();
-			await model.InitializeReactions();
-
-			return model;
 		}
 
 
@@ -104,10 +96,9 @@ namespace ReactiveFolder.Model
 		{
 			SaveFolder = saveFolder;
 
-			Interval = TimeSpan.FromMinutes(15);
+			DefaultInterval = TimeSpan.FromMinutes(15);
 			_ReactionGroups = new ObservableCollection<FolderReactionGroupModel>();
 			ReactionGroups = new ReadOnlyObservableCollection<FolderReactionGroupModel>(_ReactionGroups);
-
 		}
 
 
@@ -144,7 +135,13 @@ namespace ReactiveFolder.Model
 			{
 				var settings = await Util.FileSerializeHelper.LoadAsync<MonitorSettings>(settingSaveFileInfo);
 
-				this.Interval = TimeSpan.FromSeconds(settings.MonitorIntervalSeconds);
+				if (settings == null)
+				{
+					settingSaveFileInfo.Delete();
+					return;
+				}
+
+				this.DefaultInterval = TimeSpan.FromSeconds(settings.DefaultIntervalSeconds);
 			}
 			else
 			{
@@ -163,7 +160,7 @@ namespace ReactiveFolder.Model
 		{
 			var settings = new MonitorSettings();
 
-			settings.MonitorIntervalSeconds = (int)this.Interval.TotalSeconds;
+			settings.DefaultIntervalSeconds = (int)this.DefaultInterval.TotalSeconds;
 
 			var settingSaveFileInfo = MakeSettingFileInfo();
 
@@ -254,7 +251,7 @@ namespace ReactiveFolder.Model
 
 		public FolderReactionGroupModel CreateNewReactionGroup(DirectoryInfo targetDir)
 		{
-			var groupModel = new FolderReactionGroupModel(targetDir);
+			var groupModel = new FolderReactionGroupModel(targetDir, DefaultInterval);
 
 			groupModel.Name = targetDir.Name;
 
@@ -297,10 +294,10 @@ namespace ReactiveFolder.Model
 
 		public void Exit()
 		{
-			MonitorMasterDisposer?.Dispose();
-			MonitorMasterDisposer = null;
-
-			RemoteTrigger = null;
+			foreach(var group in ReactionGroups)
+			{
+				group.Exit();
+			}
 		}
 
 		public void Dispose()
@@ -308,11 +305,17 @@ namespace ReactiveFolder.Model
 			Exit();
 		}
 
-
+		public void CheckNow(Guid groupGuid)
+		{
+			ReactionGroups.SingleOrDefault(x => x.Guid == groupGuid)?.CheckNow();
+		}
 
 		public void CheckNow()
 		{
-			RemoteTrigger?.OnNext(0);
+			foreach (var group in ReactionGroups)
+			{
+				group.CheckNow();
+			}
 		}
 
 		public void Start(Action<ReactiveStreamContext> subscribe = null)
@@ -343,43 +346,10 @@ namespace ReactiveFolder.Model
 				return;
 			}
 
-
-			// 手動でモニター処理を走らせるためのトリガー用サブジェクト
-			RemoteTrigger = new BehaviorSubject<long>(0);
-
-
-			// モニター処理の起動要因ストリーム
-			var monitorTriggersStream =
-				Observable.Merge(
-					// １．タイマー
-					Observable.Timer(TimeSpan.FromSeconds(0), Interval),
-					// ２．手動トリガー
-					RemoteTrigger
-					);
-
-			// 起動要因ストリームを元に
-			// ReactionGroupsから処理ストリームに射影
-			var reactionGroupStreams = validReactions
-				.Select(x => x.Generate(monitorTriggersStream));
-
-
-			// ReactionGroupsそれぞれの処理ストリームを一本にまとめて
-			// Hotストリームに変換
-			var mergedStream = Observable
-				.Merge(reactionGroupStreams)
-				.Publish();
-
-
-			// 購読が必要なら
-			if (subscribe != null)
+			foreach(var reaction in validReactions)
 			{
-				mergedStream.Subscribe(subscribe);
+				reaction.Start(subscribe);
 			}
-
-			// ストリームを始動させる
-			MonitorMasterDisposer = mergedStream.Connect();
-
-			RunningInterval = Interval;
 
 			// Done!
 		}

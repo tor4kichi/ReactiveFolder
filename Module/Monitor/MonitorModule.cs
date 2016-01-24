@@ -24,7 +24,7 @@ namespace Modules.Monitor
 
 		public void Initialize()
 		{
-			_MonitorModel.Interval = TimeSpan.FromHours(1);
+			_MonitorModel.DefaultInterval = TimeSpan.FromHours(1);
 			_MonitorModel.Start();
 
 		}

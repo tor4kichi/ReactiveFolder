@@ -65,21 +65,28 @@ namespace ReactiveFolder.Model
 		/// </summary>
 		public ReadOnlyObservableCollection<FolderReactionModel> Reactions { get; private set; }
 
-		private Dictionary<FolderReactionModel, BehaviorSubject<ReactiveStreamContext>> TriggerByReaction;
-
-		private IDisposable GroupDisposer;
+		private BehaviorSubject<ReactiveStreamContext> MasterTrigger;
 
 
+		public TimeSpan CheckInterval { get; set; }
 
 
-		public FolderReactionGroupModel(DirectoryInfo dir)
+		public bool IsRunning
 		{
+			get
+			{
+				return MasterTrigger != null;
+			}
+		}
+
+		public FolderReactionGroupModel(DirectoryInfo dir, TimeSpan checkInterval)
+		{
+			WorkFolder = dir;
+			CheckInterval = checkInterval;
 			ChildReactionIdSeed = 1;
 			Guid = Guid.NewGuid();
-			WorkFolder = dir;
 			_Reactions = new ObservableCollection<FolderReactionModel>();
 			Reactions = new ReadOnlyObservableCollection<FolderReactionModel>(_Reactions);
-			TriggerByReaction = new Dictionary<FolderReactionModel, BehaviorSubject<ReactiveStreamContext>>();
 		}
 
 
@@ -88,7 +95,6 @@ namespace ReactiveFolder.Model
 		[OnDeserialized]
 		private void SetValuesOnDeserialized(StreamingContext context)
 		{
-			TriggerByReaction = new Dictionary<FolderReactionModel, BehaviorSubject<ReactiveStreamContext>>();
 			Reactions = new ReadOnlyObservableCollection<FolderReactionModel>(_Reactions);
 		}
 
@@ -113,13 +119,14 @@ namespace ReactiveFolder.Model
 
 		public void RemoveReaction(FolderReactionModel reaction)
 		{
+
 			if (false == _Reactions.Contains(reaction))
 			{
 				throw new Exception("can not remove FolderReactionModel from FolderReactionGroupModel. argument reaction is not contain FolderReactionGroupModel.");
 			}
 
-			RemoveTrigger(reaction);
 			_Reactions.Remove(reaction);
+
 		}
 
 		public ValidationResult Validate()
@@ -157,137 +164,49 @@ namespace ReactiveFolder.Model
 			return new ReactiveStreamContext(WorkFolder, "");
 		}
 
-		public IObservable<ReactiveStreamContext> TestGenerate(BehaviorSubject<long> trigger)
+		public bool Start(Action<ReactiveStreamContext> subscribe = null)
 		{
-			var validateResults = Reactions.Select(x => x.Validate());
+			Exit();
 
-			if (validateResults.Count() > 0)
-			{
-				return null;
-			}
-
-
-			var rootStream = trigger.Select(_ => CreatePayload());
-
-			var mergedStream =
-				Observable.Merge(Reactions.Select(x => x.Generate(rootStream)))
-				.Publish();
-
-			mergedStream.Connect();
-
-			return mergedStream;
-		}
-
-		public IObservable<ReactiveStreamContext> TestGenerateSingle(BehaviorSubject<long> trigger, FolderReactionModel model)
-		{
-			var validateResult = model.Validate();
-			if (validateResult.HasValidationError)
-			{
-				return null;
-			}
-
-			var rootStream = trigger
-				.Select(_ => CreatePayload());
-
-			return model.Generate(rootStream);
-		}
-
-		public IObservable<ReactiveStreamContext> Generate<T>(IObservable<T> stream)
-		{
 			var validationResult = this.Validate();
 			if (validationResult.HasValidationError)
 			{
-				return null;
+				return false;
 			}
 
-
-			Exit();
-
-			TriggerByReaction.Clear();
+			if (IsDisable)
+			{
+				return true;
+			}
 
 			foreach (var reaction in Reactions)
 			{
 				reaction.ResetWorkingFolder(WorkFolder);
 			}
 
+			var masterTrigger = new BehaviorSubject<ReactiveStreamContext>(CreatePayload());			
 
-			var rootStream = stream
-				// IsDisableがtrueの時はストリームの流れをスキップさせる
-				.SkipWhile(_ => IsDisable)
-				// 親ストリームのアイテムを無視して、ReactionPayloadを生成してストリームに流す
-				.Select(_ => CreatePayload());
-				// 
-
-
-			List<IConnectableObservable<ReactiveStreamContext>> reactionStreams = new List<IConnectableObservable<ReactiveStreamContext>>();
-
-			foreach(var reaction in Reactions)
+			foreach (var reaction in Reactions)
 			{
-				// ストリームの手動実行用トリガーを仕込みつつ、
-				var remoteTrigger = new BehaviorSubject<ReactiveStreamContext>(CreatePayload());
-
-				var triggerStream = Observable.Merge(
-					reaction.Generate(rootStream),
-					remoteTrigger
-					)
-					.Publish();
-
-				triggerStream
-					.Connect();
-
-				reactionStreams.Add(triggerStream);
-
-				TriggerByReaction.Add(reaction, remoteTrigger);
+				reaction.Start(masterTrigger, subscribe);
 			}
 
-			reactionStreams.ForEach(x => x.Connect());
+			MasterTrigger = masterTrigger;
 
-			var aggregateStream = Observable.Merge(
-				reactionStreams
-				)
-				.Publish();
-
-			GroupDisposer = aggregateStream.Connect();
-
-			return aggregateStream;
+			return true;
 		}
-
 
 		public void Exit()
 		{
-			GroupDisposer?.Dispose();
-			GroupDisposer = null;
+			MasterTrigger?.Dispose();
+			MasterTrigger = null;
 		}
 
-		public void Trigger(FolderReactionModel model)
+		
+
+		public void CheckNow()
 		{
-			if (TriggerByReaction.ContainsKey(model))
-			{
-				var behavior = TriggerByReaction[model];
-
-				behavior.OnNext(CreatePayload());
-			}
-			else
-			{
-				throw new Exception(model.Name + "はReactionStreamが生成されていないため実行できません。");
-			}
-		}
-
-		public void TriggerAll()
-		{
-			foreach(var reaction in TriggerByReaction.Keys)
-			{
-				Trigger(reaction);
-			}
-		}
-
-
-		private void RemoveTrigger(FolderReactionModel model)
-		{
-			if (TriggerByReaction.ContainsKey(model))
-			{
-				TriggerByReaction.Remove(model);
-			}
-		}
+			MasterTrigger?.OnNext(new ReactiveStreamContext(WorkFolder, ""));
+		}		
 	}
 }

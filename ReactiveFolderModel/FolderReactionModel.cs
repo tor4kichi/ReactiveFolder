@@ -31,6 +31,9 @@ namespace ReactiveFolder.Model
 		[DataMember]
 		public bool IsDisable { get; set; }
 
+
+
+
 		// What 対象ファイルやフォルダのフィルター方法
 		[DataMember]
 		private ReactionFilterBase _Filter;
@@ -46,6 +49,9 @@ namespace ReactiveFolder.Model
 			}
 		}
 
+
+
+
 		[DataMember]
 		private ReactiveTimingBase _Timing;
 		public ReactiveTimingBase Timing
@@ -60,6 +66,9 @@ namespace ReactiveFolder.Model
 			}
 		}
 
+
+
+
 		[DataMember]
 		private ObservableCollection<ReactiveActionBase> _Actions;
 
@@ -68,6 +77,9 @@ namespace ReactiveFolder.Model
 		/// コレクションの操作はAddAction() または RemoveAction()を利用してください。
 		/// </summary>
 		public ReadOnlyObservableCollection<ReactiveActionBase> Actions { get; private set; }
+
+
+
 
 		[DataMember]
 		private ReactiveDestinationBase _Destination;
@@ -84,6 +96,23 @@ namespace ReactiveFolder.Model
 		}
 
 
+		public bool IsRunning
+		{
+			get
+			{
+				return _Disposer != null;
+			}
+		}
+
+		private IDisposable _Disposer;
+
+
+		/// <summary>
+		/// FolderReactionModelを作成します。
+		/// idはあなたが管理するオブジェクトから
+		/// 一意に判別できる値が割り振られるようにしてください。
+		/// </summary>
+		/// <param name="id"></param>
 		public FolderReactionModel(int id)
 		{
 			ReactionId = id;
@@ -94,14 +123,28 @@ namespace ReactiveFolder.Model
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
 		}
 
-
+		/// <summary>
+		/// アクションを追加します。
+		/// <para>このメソッドは最初にExit()を呼び出します。</para>
+		/// </summary>
+		/// <param name="action"></param>
 		public void AddAction(ReactiveActionBase action)
 		{
+			Exit();
+
 			_Actions.Add(action);
 		}
 
+
+		/// <summary>
+		/// アクションを削除します。
+		/// <para>このメソッドは最初にExit()を呼び出します。</para>
+		/// </summary>
+		/// <param name="action"></param>
 		public void RemoveAction(ReactiveActionBase action)
 		{
+			Exit();
+
 			_Actions.Remove(action);
 		}
 
@@ -110,8 +153,8 @@ namespace ReactiveFolder.Model
 		/// <para>検証対象のプロパティは Filter/Timing/Actions/Destination です。</para>
 		/// <para>Filter/Timing/DestinationがNullまたはValidationに失敗した場合、失敗を示します。</para>
 		/// <para>Actionsも個々のActionに対して検証を行い、その結果に準じて失敗を示す可能性がありますが、
-		/// もし、Actionsの要素が０個の場合は検証は必ず成功を示します。</para>
-		/// <para>いずれかのValidation処理に失敗した場合でも、全ての検証を行います。</para>
+		/// もし、Actionsの要素が０個の場合は検証は成功を示します。</para>
+		/// <para>いずれかのValidationが失敗を示した場合でも、全ての検証を行います。</para>
 		/// </summary>
 		/// <returns>if no errors, ValidationResult.HasValidationError is false</returns>
 		public ValidationResult Validate()
@@ -224,8 +267,16 @@ namespace ReactiveFolder.Model
 			return validationResult;
 		}
 
+
+		/// <summary>
+		/// 監視対象となるフォルダを再設定します。
+		/// このメソッドは最初にExit()を呼び出します。
+		/// </summary>
+		/// <param name="folderInfo"></param>
 		public void ResetWorkingFolder(DirectoryInfo folderInfo)
 		{
+			Exit();
+
 			Filter.Initialize(folderInfo);
 			Timing.Initialize(folderInfo);
 			foreach(var action in Actions)
@@ -234,15 +285,19 @@ namespace ReactiveFolder.Model
 			}
 
 			Destination.Initialize(folderInfo);
-
-
 		}
 
-		public IObservable<ReactiveStreamContext> Generate(IObservable<ReactiveStreamContext> stream)
+
+		
+		/// <summary>
+		/// 処理ストリームを作成します。
+		/// ストリームは引数のtriggerによって実行タイミングが管理されます。
+		/// </summary>
+		/// <param name="trigger"></param>
+		/// <returns></returns>
+		private IObservable<ReactiveStreamContext> Generate(ISubject<ReactiveStreamContext> trigger)
 		{
-			var first = stream
-				// IsDisableがtrueの時はこのリアクションをスキップ
-				.SkipWhile(_ => IsDisable);
+
 
 			var reactionChains = new List<ReactiveStreamBase>();
 			reactionChains.Add(Filter);
@@ -251,21 +306,109 @@ namespace ReactiveFolder.Model
 			reactionChains.Add(Destination);
 
 
-			
-			IObservable<ReactiveStreamContext> chainObserver = first;
+
+			IObservable<ReactiveStreamContext> chainObserver = trigger;
 			foreach (var reaction in reactionChains)
 			{
 				try
 				{
 					chainObserver = reaction.Chain(chainObserver);
 				}
-				catch(Exception e)
+				catch (Exception e)
 				{
 					throw new Exception($"stream generate failed in FolderReactionModel. name:{Name}", e);
 				}
 			}
 
 			return chainObserver;
+		}
+
+
+
+		/// <summary>
+		/// <para>監視タスクを開始します。</para>
+		/// <para>このメソッドは最初にExit()を呼び出します。</para>
+		/// <para>タスクの作成前にValidate()による妥当性チェックが呼び出され
+		/// このチェックに失敗した場合、監視タスクは開始されません。</para>
+		/// </summary>
+		/// <param name="rootTrigger"></param>
+		/// <param name="subscriber"></param>
+		/// <returns></returns>
+		public bool Start(ISubject<ReactiveStreamContext> rootTrigger, Action<ReactiveStreamContext> subscriber = null)
+		{
+			Exit();
+
+
+			var result = Validate();
+			if (result.HasValidationError)
+			{
+				return false;
+			}
+
+
+			if (IsDisable)
+			{
+				return true;
+			}
+
+			_Disposer = Generate(rootTrigger)
+				.Publish()
+				.Connect();
+
+			return true;
+		}
+
+		/// <summary>
+		/// <para>現在の設定で処理ストリームを作成します。</para>
+		/// <para>このメソッドは最初にExit()を呼び出します。</para>
+		/// <para>テスト前にValidate()による妥当性チェックが呼び出され
+		/// このチェックに失敗した場合、テストは開始されません。</para>
+		/// </summary>
+		/// <param name="testContext"></param>
+		/// <param name="forceEnabling">trueを指定すると、IsDisableの設定を一時的にtrueに設定してテストを開始します。</param>
+		public bool Test(ReactiveStreamContext testContext, bool forceEnabling = false)
+		{
+			Exit();
+
+
+
+			var result = Validate();
+			if (result.HasValidationError)
+			{
+				return false;
+			}
+
+
+			if (this.IsDisable && false == forceEnabling)
+			{
+				return true;
+			}
+			
+			// 仮のトリガー
+			var trigger = new BehaviorSubject<ReactiveStreamContext>(testContext);
+
+			// ストリームを作る
+			var observer = Generate(trigger);
+
+			// ストリームにtestContextのアイテムを流す
+			var disposer = observer.Publish()
+				.Connect();
+
+			// ストリームを閉じる
+			disposer.Dispose();
+
+			return true;
+		}
+
+
+
+		/// <summary>
+		/// 監視タスクを終了します。
+		/// </summary>
+		public void Exit()
+		{
+			_Disposer?.Dispose();
+			_Disposer = null;
 		}
 	}
 }
