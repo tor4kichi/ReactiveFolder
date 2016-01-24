@@ -24,15 +24,21 @@ namespace ReactiveFolder.Model
 		private IEnumerable<ReactiveStreamContext> Filter(ReactiveStreamContext payload)
 		{
 			var files = FileFilter(payload.WorkFolder);
-			foreach (var fileInfo in files)
+			if (files != null)
 			{
-				yield return new ReactiveStreamContext(payload.WorkFolder, fileInfo.FullName);
+				foreach (var fileInfo in files)
+				{
+					yield return new ReactiveStreamContext(payload.WorkFolder, fileInfo.FullName);
+				}
 			}
 
 			var directories = DirectoryFilter(payload.WorkFolder);
-			foreach (var dirInfo in directories)
+			if (directories != null)
 			{
-				yield return new ReactiveStreamContext(payload.WorkFolder, dirInfo.FullName);
+				foreach (var dirInfo in directories)
+				{
+					yield return new ReactiveStreamContext(payload.WorkFolder, dirInfo.FullName);
+				}
 			}
 		}
 
