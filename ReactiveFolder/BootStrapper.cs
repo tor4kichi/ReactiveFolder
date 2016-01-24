@@ -52,12 +52,8 @@ namespace ReactiveFolder
 		{
 			base.ConfigureContainer();
 
-
 			var modelInitTask = InitializeMonitorModel();
-
 			modelInitTask.Wait();
-//			modelInitTask.RunSynchronously();
-
 			this.Container.RegisterInstance(modelInitTask.Result);
 		}
 

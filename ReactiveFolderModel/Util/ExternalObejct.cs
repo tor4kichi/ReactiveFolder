@@ -127,7 +127,8 @@ namespace ReactiveFolder.Util
 				s.SetLength(0);
 
 				// 書き込み
-				await s.WriteAsync(buf, 0, buf.Length);
+				s.Write(buf, 0, buf.Length);
+//				await s.WriteAsync();
 			}
 		}
 
