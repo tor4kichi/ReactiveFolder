@@ -144,7 +144,11 @@ namespace ReactiveFolder.Model
 		{
 			// TODO: アプリ空間のテンポラリフォルダに仮フォルダを作成して返す
 			// Context上に一つあれば十分かも
-			return new DirectoryInfo("");
+			return new DirectoryInfo(
+				Path.Combine(
+					Path.GetTempPath(),
+					"ReactiveFolder/")
+				);
 		}
 
 		public string Finalize(IStreamContextFinalizer finalizer)
@@ -173,7 +177,8 @@ namespace ReactiveFolder.Model
 
 			try
 			{
-				if (this.WorkFolder.FullName == finalizer.DestinationFolder.FullName &&
+				var destFolder = finalizer.GetDestinationFolder();
+				if (this.WorkFolder.FullName == destFolder.FullName &&
 				Path.GetFileName(OriginalPath) == Path.GetFileName(SourcePath) &&
 				IsProtectOriginal == true
 				)
@@ -188,11 +193,11 @@ namespace ReactiveFolder.Model
 
 					if (IsFile)
 					{
-						outputPath = FinalizeFile(finalizer.DestinationFolder);
+						outputPath = FinalizeFile(destFolder);
 					}
 					else
 					{
-						outputPath = FinalizeFolder(finalizer.DestinationFolder);
+						outputPath = FinalizeFolder(destFolder);
 					}
 
 				}

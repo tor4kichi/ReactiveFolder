@@ -11,8 +11,25 @@ namespace ReactiveFolder.Model.Destinations
 	[DataContract]
 	public class ChildReactiveDestination : ReactiveDestinationBase
 	{
+		private DirectoryInfo InputFolderInfo;
+
+
 		[DataMember]
 		public string ChildFolderName { get; set; }
+
+		public override DirectoryInfo GetDestinationFolder()
+		{
+			return new DirectoryInfo(
+				Path.Combine(InputFolderInfo.FullName, ChildFolderName)
+				);
+		}
+
+		public override void Initialize(DirectoryInfo workDir)
+		{
+			InputFolderInfo = workDir;
+
+			base.Initialize(workDir);
+		}
 
 		public override ValidationResult Validate()
 		{
@@ -35,12 +52,14 @@ namespace ReactiveFolder.Model.Destinations
 				}
 			}
 
-			return result;
-		}
+			var destFolder = GetDestinationFolder();
 
-		protected override DirectoryInfo CreateOutputFolder(ReactiveStreamContext context)
-		{
-			return context.WorkFolder;
+			if (false == destFolder.Exists)
+			{
+				throw new Exception("not call initialize?");
+			}
+
+			return result;
 		}
 	}
 }

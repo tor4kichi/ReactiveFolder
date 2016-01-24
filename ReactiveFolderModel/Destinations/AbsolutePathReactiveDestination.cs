@@ -14,6 +14,11 @@ namespace ReactiveFolder.Model.Destinations
 		[DataMember]
 		public string AbsoluteFolderPath { get; set; }
 
+		public override DirectoryInfo GetDestinationFolder()
+		{
+			return new DirectoryInfo(AbsoluteFolderPath);
+		}
+
 		public override ValidationResult Validate()
 		{
 			var result = new ValidationResult();
@@ -28,11 +33,6 @@ namespace ReactiveFolder.Model.Destinations
 			}
 
 			return result;
-		}
-
-		protected override DirectoryInfo CreateOutputFolder(ReactiveStreamContext context)
-		{
-			return context.WorkFolder;
 		}
 	}
 }

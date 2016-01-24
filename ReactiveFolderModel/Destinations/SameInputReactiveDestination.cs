@@ -11,14 +11,25 @@ namespace ReactiveFolder.Model.Destinations
 	[DataContract]
 	public class SameInputReactiveDestination : ReactiveDestinationBase
 	{
+
+		private DirectoryInfo InputFolderInfo;
+
+		public override DirectoryInfo GetDestinationFolder()
+		{
+			return InputFolderInfo;
+		}
+
+		public override void Initialize(DirectoryInfo workDir)
+		{
+			InputFolderInfo = workDir;
+
+			base.Initialize(workDir);
+		}
+
 		public override ValidationResult Validate()
 		{
 			return ValidationResult.Valid;
 		}
 
-		protected override DirectoryInfo CreateOutputFolder(ReactiveStreamContext context)
-		{
-			return context.WorkFolder;
-		}
 	}
 }
