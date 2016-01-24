@@ -65,6 +65,7 @@ namespace ReactiveFolder
 #if DEBUG
 			App.Current.MainWindow.Show();
 #endif
+			
 		}
 
 		protected override void ConfigureModuleCatalog()

@@ -35,9 +35,20 @@ namespace ReactiveFolder
 		private void ToolStripMenuItem_Open_Click(object sender, EventArgs e)
 		{
 			// MainWindow を生成、表示
-			App.Current.MainWindow.Show();
+			ShowWindow(App.Current.MainWindow);
 		}
 
 		
+		private void ShowWindow(Window win)
+		{
+			// ウィンドウ表示&最前面に持ってくる
+			if (win.WindowState == System.Windows.WindowState.Minimized)
+				win.WindowState = System.Windows.WindowState.Normal;
+
+			win.Show();
+			win.Activate();
+			// タスクバーでの表示をする
+			win.ShowInTaskbar = true;
+		}
 	}
 }

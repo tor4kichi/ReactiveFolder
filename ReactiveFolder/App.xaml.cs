@@ -49,6 +49,7 @@ namespace ReactiveFolder
 			// Prismのアプリ立ち上げ作法に則る
 			Bootstrapper bs = new Bootstrapper();
 			bs.Run();
+
 		}
 
 		/// <summary>

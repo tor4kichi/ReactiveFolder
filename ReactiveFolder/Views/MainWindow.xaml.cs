@@ -21,13 +21,19 @@ namespace ReactiveFolder.Views
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-
-
 		public MainWindow()
 		{
 			InitializeComponent();
 
+			Closing += Window_Closing;
+		}
 
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			// クローズ処理をキャンセルして、タスクバーの表示も消す
+			e.Cancel = true;
+			this.WindowState = System.Windows.WindowState.Minimized;
+			this.ShowInTaskbar = false;
 		}
 	}
 }
