@@ -28,11 +28,11 @@ namespace ReactiveFolder.Model
 	{
 
 		
-		public static async Task<FolderReactionMonitorModel> LoadOrCreate(DirectoryInfo saveFolder)
+		public static FolderReactionMonitorModel LoadOrCreate(DirectoryInfo saveFolder)
 		{
 			var model = new FolderReactionMonitorModel(saveFolder);
 
-			await model.InitializeSettings();
+			model.InitializeSettings();
 			model.InitializeReactions();
 
 			return model;
@@ -89,7 +89,7 @@ namespace ReactiveFolder.Model
 
 		public async void Save()
 		{
-			await SaveSettings();
+			SaveSettings();
 		}
 
 
@@ -108,14 +108,14 @@ namespace ReactiveFolder.Model
 		}
 
 
-		private async Task InitializeSettings()
+		private void InitializeSettings()
 		{
 			// saveFolder内のsettings.jsonを読む
 			var settingSaveFileInfo = MakeSettingFileInfo();
 
 			if (settingSaveFileInfo.Exists)
 			{
-				var settings = await Util.FileSerializeHelper.LoadAsync<MonitorSettings>(settingSaveFileInfo);
+				var settings = Util.FileSerializeHelper.LoadAsync<MonitorSettings>(settingSaveFileInfo);
 
 				if (settings == null)
 				{
@@ -127,7 +127,7 @@ namespace ReactiveFolder.Model
 			}
 			else
 			{
-				await SaveSettings();
+				SaveSettings();
 			}
 		}
 
@@ -138,7 +138,7 @@ namespace ReactiveFolder.Model
 
 		#region public Settings
 
-		public async Task SaveSettings()
+		public void SaveSettings()
 		{
 			var settings = new MonitorSettings();
 
@@ -146,7 +146,7 @@ namespace ReactiveFolder.Model
 
 			var settingSaveFileInfo = MakeSettingFileInfo();
 
-			await Util.FileSerializeHelper.Save(settingSaveFileInfo, settings);
+			Util.FileSerializeHelper.Save(settingSaveFileInfo, settings);
 		}
 
 

@@ -72,20 +72,16 @@ namespace ReactiveFolder.Model
 				.Where(x => x.Name != FolderReactionMonitorModel.MONITOR_SETTINGS_FILENAME);
 
 
-			var models = files.Select(async fileInfo =>
+			var models = files.Select(fileInfo =>
 			{
-				var task = await Util.FileSerializeHelper.LoadAsync<FolderReactionModel>(fileInfo);
-				return task;
+				return Util.FileSerializeHelper.LoadAsync<FolderReactionModel>(fileInfo);
 			})
 			.ToArray();
-
-			Task.WaitAll(models);
 
 
 			// すでに読み込まれていて、Folderにデータが存在しているReactionModelに影響を与えずに
 			// Modelsの内容を更新していく。
-			var loadedModels = models.Select(x => x.Result)
-				.Where(x => x != null);
+			var loadedModels = models.Where(x => x != null);
 
 
 			// 追加されたモデル
@@ -267,7 +263,7 @@ namespace ReactiveFolder.Model
 
 
 
-		private async Task SaveReaction(FolderReactionModel reaction)
+		private void SaveReaction(FolderReactionModel reaction)
 		{
 			var saveFolder = Folder;
 
@@ -279,7 +275,7 @@ namespace ReactiveFolder.Model
 				reactionFileInfo.Delete();
 			}
 
-			await Util.FileSerializeHelper.Save(reactionFileInfo, reaction);
+			Util.FileSerializeHelper.Save(reactionFileInfo, reaction);
 		}
 
 

@@ -23,12 +23,12 @@ namespace ReactiveFolder.Util
 	{
 
 
-		public static Task Save<T>(FileInfo file, T saveTarget)
+		public static void Save<T>(FileInfo file, T saveTarget)
 			where T : class
 		{
 			try
 			{
-				return _InserSave(file, saveTarget);
+				_InserSave(file, saveTarget);
 			}
 			catch (Exception)
 			{
@@ -36,13 +36,13 @@ namespace ReactiveFolder.Util
 			}
 		}
 
-		public static Task Save<T>(string file, T saveTarget) 
+		public static void Save<T>(string file, T saveTarget) 
 			where T : class
 		{
-			return Save(new FileInfo(file), saveTarget);
+			Save(new FileInfo(file), saveTarget);
         }
 		
-		public static async Task _InserSave<T>(FileInfo fileInfo, T saveTarget)
+		public static void _InserSave<T>(FileInfo fileInfo, T saveTarget)
 			where T : class
 		{
 			var format = ExtentionToContentFormat(fileInfo.Extension);
@@ -132,7 +132,7 @@ namespace ReactiveFolder.Util
 			}
 		}
 
-		static public async Task<T> LoadAsync<T>(FileInfo fileInfo)
+		static public T LoadAsync<T>(FileInfo fileInfo)
 			where T : class
 			
 		{

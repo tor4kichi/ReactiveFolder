@@ -33,7 +33,7 @@ namespace ReactiveFolder
 		}
 
 
-		private async Task<FolderReactionMonitorModel> InitializeMonitorModel()
+		private FolderReactionMonitorModel InitializeMonitorModel()
 		{
 			var monitorSaveFolderPath = Properties.Settings.Default.MonitorDataSaveFolderPath;
 			if (false == Directory.Exists(monitorSaveFolderPath))
@@ -43,7 +43,7 @@ namespace ReactiveFolder
 				Properties.Settings.Default.Save();
 			}
 
-			var model = await FolderReactionMonitorModel.LoadOrCreate(new DirectoryInfo(MonitorSettingsSaveFolderPath));
+			var model = FolderReactionMonitorModel.LoadOrCreate(new DirectoryInfo(MonitorSettingsSaveFolderPath));
 
 			return model;
 		}
@@ -52,9 +52,7 @@ namespace ReactiveFolder
 		{
 			base.ConfigureContainer();
 
-			var modelInitTask = InitializeMonitorModel();
-			modelInitTask.Wait();
-			this.Container.RegisterInstance(modelInitTask.Result);
+			this.Container.RegisterInstance(InitializeMonitorModel());
 		}
 
 		protected override void InitializeShell()
