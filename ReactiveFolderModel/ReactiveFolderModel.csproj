@@ -103,7 +103,7 @@
     <Compile Include="Filters\FileReactiveFilter.cs" />
     <Compile Include="Filters\FolderReactiveFilter.cs" />
     <Compile Include="Filters\ReactiveFilterBase.cs" />
-    <Compile Include="FolderReactionGroupModel.cs" />
+    <Compile Include="FolderModel.cs" />
     <Compile Include="FolderReactionModel.cs" />
     <Compile Include="FolderReactionMonitor.cs" />
     <Compile Include="IStreamContextFinalizer.cs" />

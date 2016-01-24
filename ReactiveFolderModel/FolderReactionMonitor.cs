@@ -15,12 +15,9 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Model
 {
-	// TODO: 監視タスクが正常に動作しているかのチェック、実行保証
 
 	
-	// 設定は別に保存する
 
-	// FolderReactionGroupごとに処理の開始や停止をハンドリングできるようにする
 
 	public class MonitorSettings
 	{
@@ -29,12 +26,14 @@ namespace ReactiveFolder.Model
 
 	public class FolderReactionMonitorModel : BindableBase, IDisposable
 	{
+
+		
 		public static async Task<FolderReactionMonitorModel> LoadOrCreate(DirectoryInfo saveFolder)
 		{
 			var model = new FolderReactionMonitorModel(saveFolder);
 
 			await model.InitializeSettings();
-			await model.InitializeReactions();
+			model.InitializeReactions();
 
 			return model;
 		}
@@ -64,9 +63,7 @@ namespace ReactiveFolder.Model
 
 
 
-		private ObservableCollection<FolderReactionGroupModel> _ReactionGroups;
-
-		public ReadOnlyObservableCollection<FolderReactionGroupModel> ReactionGroups { get; private set; }
+		public FolderModel RootFolder { get; private set; }
 
 		private TimeSpan _DefaultInterval;
 		public TimeSpan DefaultInterval
@@ -79,26 +76,13 @@ namespace ReactiveFolder.Model
 			{
 				SetProperty(ref _DefaultInterval, value);
 			}
-		}
-
-		
-		public bool IsRunning
-		{
-			get
-			{
-				return ReactionGroups.Any(x => x.IsRunning);
-
-			}
-		}
-
+		}		
 
 		private FolderReactionMonitorModel(DirectoryInfo saveFolder)
 		{
 			SaveFolder = saveFolder;
 
 			DefaultInterval = TimeSpan.FromMinutes(15);
-			_ReactionGroups = new ObservableCollection<FolderReactionGroupModel>();
-			ReactionGroups = new ReadOnlyObservableCollection<FolderReactionGroupModel>(_ReactionGroups);
 		}
 
 
@@ -106,7 +90,6 @@ namespace ReactiveFolder.Model
 		public async void Save()
 		{
 			await SaveSettings();
-			await SaveReactionGroups();
 		}
 
 
@@ -124,7 +107,6 @@ namespace ReactiveFolder.Model
 				);
 		}
 
-		
 
 		private async Task InitializeSettings()
 		{
@@ -173,131 +155,47 @@ namespace ReactiveFolder.Model
 
 
 
-
-		#region private ReactionGroup
-		
-
-		private async Task SaveSingleReactionGroup(FolderReactionGroupModel reaction)
+		public FolderReactionModel FindReaction(Guid guid)
 		{
-			var groupsFolder = SaveFolder;
-
-			var reactionGroupFileName = Path.Combine(groupsFolder.FullName, reaction.Guid.ToString() + ".json");
-
-			var reactionGroupFileInfo = new FileInfo(reactionGroupFileName);
-			if (reactionGroupFileInfo.Exists)
-			{
-				reactionGroupFileInfo.Delete();
-			}
-
-			await Util.FileSerializeHelper.Save(reactionGroupFileInfo, reaction);
+			return RootFolder.FindReaction(guid);
 		}
 
-
-		private async void DeleteSingleReactionGroup(FolderReactionGroupModel reaction)
+		public FolderModel FindReactionParentFolder(Guid guid)
 		{
-			var groupsFolder = SaveFolder;
-
-			var reactionGroupFileName = Path.Combine(groupsFolder.FullName, reaction.Guid.ToString() + ".json");
-
-			var reactionGroupFileInfo = new FileInfo(reactionGroupFileName);
-			if (reactionGroupFileInfo.Exists)
-			{
-				await Task.Run(() => reactionGroupFileInfo.Delete());
-			}
+			return RootFolder.FindReactionParent(guid);
 		}
 
-		private async Task InitializeReactions()
+		public FolderModel FindReactionParentFolder(FolderReactionModel model)
 		{
-			var groupsFolder = SaveFolder;
-
-			var files = groupsFolder.EnumerateFiles("*.json")
-				.Where(x => x.Name != MONITOR_SETTINGS_FILENAME);
-
-			foreach (var fileInfo in files)
-			{
-				try
-				{
-					var groupModel = await Util.FileSerializeHelper.LoadAsync<FolderReactionGroupModel>(fileInfo);
-
-					if (groupModel == null)
-					{
-						throw new Exception("");
-					}
-					this._ReactionGroups.Add(groupModel);
-				}
-				catch(Exception e)
-				{
-					System.Diagnostics.Debug.WriteLine("FolderReactionGroupModelの読み込みに失敗。");
-					System.Diagnostics.Debug.WriteLine(fileInfo.FullName);
-				}
-			}
+			return RootFolder.FindReactionParent(model);
 		}
 
+		// TODO: 再帰的にフォルダをめぐってFolderModelを構築する
 
-		#endregion
-
-
-
-		#region public ReactionGroup
-
-
-		public async Task SaveReactionGroups()
+		private void InitializeReactions()
 		{
-			foreach (var reaction in ReactionGroups)
-			{
-				await SaveSingleReactionGroup(reaction);
-			}
+			RootFolder = FolderModel.LoadFolder(SaveFolder);
 		}
 
-		public FolderReactionGroupModel CreateNewReactionGroup(DirectoryInfo targetDir)
-		{
-			var groupModel = new FolderReactionGroupModel(targetDir, DefaultInterval);
-
-			groupModel.Name = targetDir.Name;
-
-			this._ReactionGroups.Add(groupModel);
-
-			return groupModel;
-		}
-
-		public async void SaveReactionGroup(Guid reactionGroupGuid)
-		{
-			var group = ReactionGroups.SingleOrDefault(x => x.Guid == reactionGroupGuid);
-
-			if (group == null)
-			{
-				throw new Exception();
-			}
-
-			await SaveSingleReactionGroup(group);
-		}
-
-		public void RevmoeReactionGroup(Guid reactionGroupGuid)
-		{
-			var group = ReactionGroups.SingleOrDefault(x => x.Guid == reactionGroupGuid);
-
-			if (group == null)
-			{
-				throw new Exception();
-			}
-
-			_ReactionGroups.Remove(group);
-			DeleteSingleReactionGroup(group);
-		}
-
-
-		#endregion
 
 
 
 		#region Monitor Manage
 
+		public void Start()
+		{
+			// 既に走っている監視処理を終了させる
+			Exit();
+
+
+			RootFolder.Start();
+		}
+
+
+
 		public void Exit()
 		{
-			foreach(var group in ReactionGroups)
-			{
-				group.Exit();
-			}
+			RootFolder.Exit();
 		}
 
 		public void Dispose()
@@ -305,54 +203,6 @@ namespace ReactiveFolder.Model
 			Exit();
 		}
 
-		public void CheckNow(Guid groupGuid)
-		{
-			ReactionGroups.SingleOrDefault(x => x.Guid == groupGuid)?.CheckNow();
-		}
-
-		public void CheckNow()
-		{
-			foreach (var group in ReactionGroups)
-			{
-				group.CheckNow();
-			}
-		}
-
-		public void Start(Action<ReactiveStreamContext> subscribe = null)
-		{
-			// 既に走っている監視処理を終了させる
-			Exit();
-
-
-			// 監視対象が存在しなければ切り上げる
-			if (ReactionGroups.Count == 0)
-			{
-				return;
-			}
-
-			// 妥当性チェックをパスしたストリームのみを抽出
-			var validReactions = ReactionGroups.Where(x =>
-			{
-				return false == x.Validate().HasValidationError;
-			});
-
-			// 妥当性チェックを一つも通らなかったら監視タスクは不要になる
-			if (validReactions.Count() == 0)
-			{
-				System.Diagnostics.Debug.WriteLine("ストリームを開始させられるReactionGroupがありません。");
-#if DEBUG
-				System.Diagnostics.Debugger.Break();
-#endif
-				return;
-			}
-
-			foreach(var reaction in validReactions)
-			{
-				reaction.Start(subscribe);
-			}
-
-			// Done!
-		}
 
 
 

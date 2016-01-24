@@ -16,8 +16,6 @@ namespace Modules.Main.ViewModels
 		private IRegionManager _RegionManager;
 		public FolderReactionMonitorModel MonitorModel { get; private set; }
 
-
-		private FolderReactionGroupModel ReactionGroup;
 		private FolderReactionModel Reaction;
 
 
@@ -35,7 +33,7 @@ namespace Modules.Main.ViewModels
 
 		private void Initialize()
 		{
-
+			// TODO: initialize with this.Reaction
 		}
 
 
@@ -52,32 +50,19 @@ namespace Modules.Main.ViewModels
 		public void OnNavigatedTo(NavigationContext navigationContext)
 		{
 			// 対象となるFolderReactionGroupModelのGuidをパラメータから求める
-			var groupGuid = (Guid)navigationContext.Parameters["guid"];
-			var group = MonitorModel.ReactionGroups.SingleOrDefault(x => x.Guid == groupGuid);
-			if (group == null)
-			{
-				System.Diagnostics.Debug.WriteLine("error in ReactionEditerPageViewModel.OnNavigatedTo");
-				System.Diagnostics.Debug.WriteLine("ReactionGroup guid:" + groupGuid.ToString());
-				throw new Exception("invalid navigation parameter. not exist ReactionGroup");
-			}
+			var reactionGuid = (Guid)navigationContext.Parameters["guid"];
 
-			// 対象となるFolderReactionModelをReactionIdを使って
-			// 先に入手したGroupから求めるのReactionを
-			var reactionId = (int)navigationContext.Parameters["reactionid"];
-			var reaction = group.Reactions.SingleOrDefault(x => x.ReactionId == reactionId);
+			var reaction = MonitorModel.FindReaction(reactionGuid);
+
 			if (reaction == null)
 			{
 				System.Diagnostics.Debug.WriteLine("error in ReactionEditerPageViewModel.OnNavigatedTo");
-				System.Diagnostics.Debug.WriteLine("ReactionGroup guid:" +groupGuid.ToString());
-				System.Diagnostics.Debug.WriteLine("Reaction Id:" + reactionId);
-				throw new Exception("invalid navigation parameter. not exist Reaction in ReactionGroup");
+				System.Diagnostics.Debug.WriteLine("Reaction guid:" + reactionGuid.ToString());
+				throw new Exception("invalid navigation parameter. not exist FolderReactionModel.");
 			}
 
-
 			// done
-			ReactionGroup = group;
 			Reaction = reaction;
-
 
 			Initialize();
 		}
@@ -92,9 +77,7 @@ namespace Modules.Main.ViewModels
 				return _BackCommand
 					?? (_BackCommand = new DelegateCommand(() =>
 					{
-						var param = new NavigationParameters();
-						param.Add("guid", this.ReactionGroup.Guid);
-						_RegionManager.RequestNavigate("MainRegion", nameof(ReactionGroupEditerPage), param);
+						_RegionManager.RequestNavigate("MainRegion", nameof(Views.FolderListPage));
 					}));
 			}
 		}

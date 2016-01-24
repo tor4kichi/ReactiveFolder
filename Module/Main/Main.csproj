@@ -125,15 +125,11 @@
     </Compile>
     <Compile Include="ViewModels\FolderListPageViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditerPageViewModel.cs" />
-    <Compile Include="ViewModels\ReactionGroupEditerPageViewModel.cs" />
     <Compile Include="Views\FolderListPage.xaml.cs">
       <DependentUpon>FolderListPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ReactionEditerPage.xaml.cs">
       <DependentUpon>ReactionEditerPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ReactionGroupEditerPage.xaml.cs">
-      <DependentUpon>ReactionGroupEditerPage.xaml</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -155,10 +151,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ReactionEditerPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ReactionGroupEditerPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

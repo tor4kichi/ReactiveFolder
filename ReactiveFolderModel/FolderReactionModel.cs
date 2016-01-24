@@ -23,7 +23,7 @@ namespace ReactiveFolder.Model
 	{
 
 		[DataMember]
-		public int ReactionId { get; private set; }
+		public Guid Guid { get; private set; }
 
 		[DataMember]
 		public string Name { get; set; }
@@ -31,6 +31,33 @@ namespace ReactiveFolder.Model
 		[DataMember]
 		public bool IsDisable { get; set; }
 
+		[DataMember]
+		private DirectoryInfo _WorkFolder;
+
+		/// <summary>
+		/// ワークフォルダが変更されると直ちに
+		/// Generate()で作成したストリームを停止させます。
+		/// 変更後は再度ストリームを構築してください。
+		/// </summary>
+		public DirectoryInfo WorkFolder
+		{
+			get
+			{
+				return _WorkFolder;
+			}
+			set
+			{
+				if (SetProperty(ref _WorkFolder, value))
+				{
+					Exit();
+
+					IsReactionParameterChanged = true;
+				}
+			}
+		}
+
+		[DataMember]
+		public TimeSpan CheckInterval { get; set; }
 
 
 
@@ -45,7 +72,10 @@ namespace ReactiveFolder.Model
 			}
 			set
 			{
-				SetProperty(ref _Filter, value);
+				if (SetProperty(ref _Filter, value))
+				{
+					IsReactionParameterChanged = true;
+				}
 			}
 		}
 
@@ -62,7 +92,10 @@ namespace ReactiveFolder.Model
 			}
 			set
 			{
-				SetProperty(ref _Timing, value);
+				if (SetProperty(ref _Timing, value))
+				{
+					IsReactionParameterChanged = true;
+				}
 			}
 		}
 
@@ -91,7 +124,10 @@ namespace ReactiveFolder.Model
 			}
 			set
 			{
-				SetProperty(ref _Destination, value);
+				if (SetProperty(ref _Destination, value))
+				{
+					IsReactionParameterChanged = true;
+				}
 			}
 		}
 
@@ -107,20 +143,60 @@ namespace ReactiveFolder.Model
 		private IDisposable _Disposer;
 
 
+		private BehaviorSubject<ReactiveStreamContext> RemoteTrigger;
+
+
+		[DataMember]
+		private bool IsReactionParameterChanged;
+
+
+		
+
+		public bool IsValid
+		{
+			get
+			{
+				if (NeedValidation)
+				{
+					ValidationResult = Validate();
+					OnPropertyChanged(nameof(ValidationResult));
+					OnPropertyChanged(nameof(IsValid));
+				}
+
+				return !ValidationResult.HasValidationError;
+			}
+		}
+
+		public ValidationResult ValidationResult { get; private set; }
+		
+
+		private bool NeedValidation
+		{
+			get
+			{
+				return IsReactionParameterChanged ||
+					ValidationResult == null;
+			}
+		}
+
 		/// <summary>
 		/// FolderReactionModelを作成します。
 		/// idはあなたが管理するオブジェクトから
 		/// 一意に判別できる値が割り振られるようにしてください。
 		/// </summary>
 		/// <param name="id"></param>
-		public FolderReactionModel(int id)
+		public FolderReactionModel(DirectoryInfo targetFolder)
 		{
-			ReactionId = id;
+			WorkFolder = targetFolder;
+			Guid = Guid.NewGuid();
 			Name = "";
 			IsDisable = false;
 
+			IsReactionParameterChanged = true;
+
 			_Actions = new ObservableCollection<ReactiveActionBase>();
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
+
 		}
 
 		/// <summary>
@@ -133,6 +209,8 @@ namespace ReactiveFolder.Model
 			Exit();
 
 			_Actions.Add(action);
+
+			IsReactionParameterChanged = true;
 		}
 
 
@@ -146,6 +224,8 @@ namespace ReactiveFolder.Model
 			Exit();
 
 			_Actions.Remove(action);
+
+			IsReactionParameterChanged = true;
 		}
 
 		/// <summary>
@@ -157,7 +237,7 @@ namespace ReactiveFolder.Model
 		/// <para>いずれかのValidationが失敗を示した場合でも、全ての検証を行います。</para>
 		/// </summary>
 		/// <returns>if no errors, ValidationResult.HasValidationError is false</returns>
-		public ValidationResult Validate()
+		private ValidationResult Validate()
 		{
 			// 何も問題がなければValidationResultのMessagesは空のまま返されます。
 			ValidationResult validationResult = new ValidationResult();
@@ -261,7 +341,7 @@ namespace ReactiveFolder.Model
 			}
 
 
-
+			IsReactionParameterChanged = false;
 
 
 			return validationResult;
@@ -273,21 +353,22 @@ namespace ReactiveFolder.Model
 		/// このメソッドは最初にExit()を呼び出します。
 		/// </summary>
 		/// <param name="folderInfo"></param>
-		public void ResetWorkingFolder(DirectoryInfo folderInfo)
+		private void ResetWorkingFolder()
 		{
-			Exit();
-
-			Filter.Initialize(folderInfo);
-			Timing.Initialize(folderInfo);
+			Filter?.Initialize(WorkFolder);
+			Timing?.Initialize(WorkFolder);
 			foreach(var action in Actions)
 			{
-				action.Initialize(folderInfo);
+				action.Initialize(WorkFolder);
 			}
 
-			Destination.Initialize(folderInfo);
+			Destination?.Initialize(WorkFolder);
 		}
 
-
+		private ReactiveStreamContext CreatePayload()
+		{
+			return new ReactiveStreamContext(WorkFolder, "");
+		}
 		
 		/// <summary>
 		/// 処理ストリームを作成します。
@@ -295,9 +376,15 @@ namespace ReactiveFolder.Model
 		/// </summary>
 		/// <param name="trigger"></param>
 		/// <returns></returns>
-		private IObservable<ReactiveStreamContext> Generate(ISubject<ReactiveStreamContext> trigger)
+		private IObservable<ReactiveStreamContext> Generate(IObservable<ReactiveStreamContext> trigger)
 		{
+			if (false == IsValid)
+			{
+				throw new Exception();
+			}
 
+
+			ResetWorkingFolder();
 
 			var reactionChains = new List<ReactiveStreamBase>();
 			reactionChains.Add(Filter);
@@ -334,13 +421,11 @@ namespace ReactiveFolder.Model
 		/// <param name="rootTrigger"></param>
 		/// <param name="subscriber"></param>
 		/// <returns></returns>
-		public bool Start(ISubject<ReactiveStreamContext> rootTrigger, Action<ReactiveStreamContext> subscriber = null)
+		public bool Start(Action<ReactiveStreamContext> subscriber = null)
 		{
 			Exit();
-
-
-			var result = Validate();
-			if (result.HasValidationError)
+			
+			if (false == IsValid)
 			{
 				return false;
 			}
@@ -351,11 +436,34 @@ namespace ReactiveFolder.Model
 				return true;
 			}
 
-			_Disposer = Generate(rootTrigger)
+
+			// タイマーによるトリガーを作成
+			var timerTrigger = Observable.Timer(CheckInterval)
+				.Select(_ => CreatePayload());
+
+			var remoteTrigger = new BehaviorSubject<ReactiveStreamContext>(CreatePayload());
+			var mergedTrigger =
+				Observable.Merge(RemoteTrigger, timerTrigger);
+
+			var hotMergedTrigger = mergedTrigger.Publish();
+
+
+			Generate(hotMergedTrigger)
 				.Publish()
 				.Connect();
 
+
+			_Disposer = hotMergedTrigger.Connect();
+
+			RemoteTrigger = remoteTrigger;
+
 			return true;
+		}
+
+
+		public void CheckNow()
+		{
+			RemoteTrigger?.OnNext(CreatePayload());
 		}
 
 		/// <summary>
@@ -366,17 +474,17 @@ namespace ReactiveFolder.Model
 		/// </summary>
 		/// <param name="testContext"></param>
 		/// <param name="forceEnabling">trueを指定すると、IsDisableの設定を一時的にtrueに設定してテストを開始します。</param>
-		public bool Test(ReactiveStreamContext testContext, bool forceEnabling = false)
+		public bool Test( bool forceEnabling = false)
 		{
 			Exit();
 
 
 
-			var result = Validate();
-			if (result.HasValidationError)
+			if (false == IsValid)
 			{
 				return false;
 			}
+
 
 
 			if (this.IsDisable && false == forceEnabling)
@@ -385,7 +493,7 @@ namespace ReactiveFolder.Model
 			}
 			
 			// 仮のトリガー
-			var trigger = new BehaviorSubject<ReactiveStreamContext>(testContext);
+			var trigger = new BehaviorSubject<ReactiveStreamContext>(CreatePayload());
 
 			// ストリームを作る
 			var observer = Generate(trigger);

@@ -21,7 +21,12 @@ namespace Modules.Main.ViewModels
 		private IRegionManager _RegionManager;
 		public FolderReactionMonitorModel MonitorModel { get; private set; }
 
-		public ReadOnlyReactiveCollection<ReactiveFolderGroupViewModel> Groups { get; private set; }
+	
+
+
+		public FolderListItemViewModel FolderRootListItem { get; private set; }
+
+
 
 		
 
@@ -30,8 +35,10 @@ namespace Modules.Main.ViewModels
 			_RegionManager = regionManager;
 			MonitorModel = monitor;
 
-			Groups = MonitorModel.ReactionGroups
-				.ToReadOnlyReactiveCollection(x => new ReactiveFolderGroupViewModel(this, x));
+			FolderRootListItem = new FolderListItemViewModel(MonitorModel.RootFolder);
+
+//			Groups = MonitorModel.ReactionGroups
+//				.ToReadOnlyReactiveCollection(x => new ReactiveFolderGroupViewModel(this, x));
 		}
 
 		
@@ -52,13 +59,55 @@ namespace Modules.Main.ViewModels
 
 
 
+		
+
+		
+
+		public void NavigationToReactionEditerPage(FolderReactionModel reaction)
+		{
+			var param = new NavigationParameters();
+			param.Add("guid", reaction.Guid);
+			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.ReactionEditerPage), param);
+		}
+	}
+
+
+	// ReactiveFolderModel.FolderModelのVM
+	public class FolderListItemViewModel : BindableBase
+	{
+		public FolderModel Folder { get; private set; }
+
+		public ReadOnlyReactiveCollection<ReactionListItemViewModel> ReactionListItems { get; private set; }
+
+		public ReadOnlyReactiveCollection<FolderListItemViewModel> ChildrenFolderListItems { get; private set; }
+
+		public FolderListItemViewModel(FolderModel folderModel)
+		{
+			Folder = folderModel;
+
+			ReactionListItems = Folder.Models
+				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(x));
+
+			ChildrenFolderListItems = Folder.Children
+				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(x));
+		}
+
+		// TODO: Rename Folder
+
+		// TODO: Add Folder
+		// TODO: Add Reaction
+
+		// TODO: Remove Folder
+		// TODO: Remove Reaction
+
+		/*
 		private DelegateCommand _AddReactionFolderGroupCommand;
 		public DelegateCommand AddReactionFolderGroupCommand
 		{
 			get
 			{
 				return _AddReactionFolderGroupCommand
-					?? (_AddReactionFolderGroupCommand = new DelegateCommand(() => 
+					?? (_AddReactionFolderGroupCommand = new DelegateCommand(() =>
 					{
 						var desktop = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
@@ -81,53 +130,21 @@ namespace Modules.Main.ViewModels
 
 						MonitorModel.SaveReactionGroup(group.Guid);
 
-						NavigationToReactionGroupEditerPage(group);
+						NavigationToReactionEditerPage(group);
 					}));
 			}
 		}
-
-		
-
-		public void NavigationToReactionGroupEditerPage(FolderReactionGroupModel group)
-		{
-			var param = new NavigationParameters();
-			param.Add("guid", group.Guid);
-			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.ReactionGroupEditerPage), param);
-		}
+		*/
 	}
 
-
-	public class ReactiveFolderGroupViewModel : BindableBase
+	// ReactiveFolderModel.FolderModelに含まれるFolderReactionModelのVM
+	public class ReactionListItemViewModel : BindableBase
 	{
-		public FolderListPageViewModel PageVM { get; private set; }
-		public FolderReactionGroupModel GroupModel { get; private set; }
-		public ReactiveProperty<string> Name { get; private set; }
+		public FolderReactionModel ReactionModel { get; private set; }
 
-
-		public ReactiveFolderGroupViewModel(FolderListPageViewModel parentVM, FolderReactionGroupModel model)
+		public ReactionListItemViewModel(FolderReactionModel reactionModel)
 		{
-			PageVM = parentVM;
-			GroupModel = model;
-
-
-			Name = GroupModel.ObserveProperty(x => x.Name)
-				.ToReactiveProperty();
-//			Name = model.ToReactiveProperty
+			ReactionModel = reactionModel;
 		}
-
-
-		private DelegateCommand _OpenReactionFolderGroupInEditer;
-		public DelegateCommand OpenReactionFolderGroupInEditer
-		{
-			get
-			{
-				return _OpenReactionFolderGroupInEditer
-					?? (_OpenReactionFolderGroupInEditer = new DelegateCommand(() =>
-					{
-						PageVM.NavigationToReactionGroupEditerPage(GroupModel);
-					}));
-			}
-		}
-
 	}
 }
