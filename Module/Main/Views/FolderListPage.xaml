@@ -202,92 +202,33 @@
         <!-- Top Buttons -->
         <Grid>
             <StackPanel HorizontalAlignment="Left">
-                <Button Content="aaa" />
+                <Button Content="Settings?" />
             </StackPanel>
             <StackPanel HorizontalAlignment="Right">
-                <Button Content="Settings" />
+                <Button Content="Add Folder" 
+                        Command="{Binding AddFolderCommand}">
+                </Button>
             </StackPanel>
         </Grid>
 
 
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
-                <RowDefinition Height="1*"/>
-            </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="1">
 
-            <StackPanel Orientation="Horizontal" 
-                        HorizontalAlignment="Stretch" 
-                        Grid.Row="0"
-                        DataContext="{Binding FolderRootListItem}"
-                        >
-                <Button Content="+Folder" Command="{Binding AddFolderCommand}" />
-                <Button Content="+Reaction" Command="{Binding AddReactionFolderCommand}" />
-            </StackPanel>
+            <ListBox ItemsSource="{Binding FolderRootListItem.ChildrenFolderListItems}">
 
-            <StackPanel Orientation="Vertical"
-                        Grid.Row="1"
-                        HorizontalAlignment="Center"
-                        Width="500"
-                        >
-                <TreeView ItemsSource="{Binding FolderRootListItem.ChildrenFolderListItems}" 
-                      HorizontalContentAlignment="Stretch"
-                      VerticalContentAlignment="Stretch"
-                      
-                      >
-                    <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate DataType="{x:Type vm:FolderListItemViewModel}" ItemsSource="{Binding ChildrenFolderListItems}">
-                            <TreeViewItem HorizontalContentAlignment="Stretch"
-                                      VerticalContentAlignment="Stretch"
-                                      >
-
-                                <!-- Folder ItemTemplate-->
-                                <TreeViewItem.Header>
-                                    <Grid HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Text="{Binding FolderName}" />
-                                        </StackPanel>
-                                    </Grid>
-                                </TreeViewItem.Header>
-
-                                <StackPanel Orientation="Vertical">
-
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                                        <Button Content="+Folder" Command="{Binding AddFolderCommand}" />
-                                        <Button Content="+Reaction" Command="{Binding AddReactionFolderCommand}" />
-                                    </StackPanel>
-
-                                    <!-- ReactionListItem Template -->
-                                    <ListBox ItemsSource="{Binding ReactionListItems}">
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Name}" Margin="15,0,0,0"/>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-
-
-                                    </ListBox>
-                                </StackPanel>
-
-                            </TreeViewItem>
-
-                        </HierarchicalDataTemplate>
-                    </TreeView.ItemTemplate>
-                </TreeView>
-
-                <!-- ReactionListItem Template -->
-                <ListBox ItemsSource="{Binding FolderRootListItem.ReactionListItems}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}" Margin="15,0,0,0"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-
-
-                </ListBox>
-            </StackPanel>
-            
-        </Grid>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel >
+                            <Button Content="{Binding FolderName}"
+                                    Command="{Binding OpenFolderReactionListCommand}"
+                                    >
+                                
+                            </Button>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
     </Grid>
 
 </UserControl>

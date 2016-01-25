@@ -123,13 +123,19 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="ViewModels\FolderListItemViewModel.cs" />
     <Compile Include="ViewModels\FolderListPageViewModel.cs" />
+    <Compile Include="ViewModels\PageViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditerPageViewModel.cs" />
+    <Compile Include="ViewModels\ReactionListPageViewModel.cs" />
     <Compile Include="Views\FolderListPage.xaml.cs">
       <DependentUpon>FolderListPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ReactionEditerPage.xaml.cs">
       <DependentUpon>ReactionEditerPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ReactionListPage.xaml.cs">
+      <DependentUpon>ReactionListPage.xaml</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -151,6 +157,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ReactionEditerPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ReactionListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

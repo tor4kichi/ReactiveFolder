@@ -1,19 +1,24 @@
-﻿<UserControl x:Class="Modules.Main.Views.ReactionEditerPage"
+﻿<UserControl x:Class="Modules.Main.Views.ReactionListPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Modules.Main.Views"
-             xmlns:prism="http://prismlibrary.com/"             
+             xmlns:prism="http://prismlibrary.com/"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
-             prism:ViewModelLocator.AutoWireViewModel="True">
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             >
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="14*"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-
 
         <!-- Top Buttons -->
         <Grid>
@@ -42,43 +47,47 @@
                     </Style>
                 </StackPanel.Resources>
 
-                <TextBox Text="{Binding Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <TextBox Text="{Binding FolderName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                 </TextBox>
             </StackPanel>
-            <!-- 
             <StackPanel HorizontalAlignment="Right">
                 <Button Content="Create New" 
                         Command="{Binding AddReactionCommand}">
                 </Button>
             </StackPanel>
-            -->
         </Grid>
 
-        <Grid x:Name="ReactionContent" Grid.Row="1">
-            <TextBlock Text="{Binding Name.Value}" Grid.RowSpan="2" />
 
-            <ScrollViewer HorizontalScrollBarVisibility="Hidden">
-                <StackPanel Orientation="Vertical">
-                    
-                    <Grid x:Name="FilterContainer">
-                        <TextBlock Text="Filter" />
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <ListBox ItemsSource="{Binding ReactionListItems}">
 
-                    </Grid>
-                    <Grid x:Name="TimingContainer">
-                        <TextBlock Text="Timing" />
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel >
+                            <Button Content="{Binding Name}"
+                                Command="{Binding OpenReactionCommand}"
+                                >
 
-                    </Grid>
-                    <Grid x:Name="ActionsContainer">
-                        <TextBlock Text="Actions" />
+                            </Button>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <Expander x:Name="WarningZone" VerticalAlignment="Bottom" Width="300" Margin="0, 16, 0,0">
+                <Expander.Header>
+                    <TextBlock Text="Delete this folder"></TextBlock>
+                </Expander.Header>
 
-                    </Grid>
-                    <Grid x:Name="DestinationContainer">
-                        <TextBlock Text="Destination" />
-
-                    </Grid>
-                </StackPanel>
-
-            </ScrollViewer>
-        </Grid>
+                <Expander.Content>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="description what effect to delete this folder."></TextBlock>
+                        <Button HorizontalAlignment="Right" Content="Delete" Foreground="Red" 
+                                Command="{Binding RemoveFolderCommand}"/>
+                    </StackPanel>
+                </Expander.Content>
+            </Expander>
+        </StackPanel>
+        
     </Grid>
+
 </UserControl>

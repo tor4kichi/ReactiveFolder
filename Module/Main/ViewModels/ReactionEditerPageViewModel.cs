@@ -11,22 +11,17 @@ using Modules.Main.Views;
 
 namespace Modules.Main.ViewModels
 {
-	public class ReactionEditerPageViewModel : BindableBase, INavigationAware
+	public class ReactionEditerPageViewModel : PageViewModelBase, INavigationAware
 	{
-		private IRegionManager _RegionManager;
-		public FolderReactionMonitorModel MonitorModel { get; private set; }
-
 		private FolderReactionModel Reaction;
 
-
+		public IRegionNavigationService NavigationService;
 
 		public ReactiveProperty<string> Text { get; private set; }
 
-		public ReactionEditerPageViewModel(IRegionManager regionManager, FolderReactionMonitorModel monitor)
+		public ReactionEditerPageViewModel(IRegionManager regionManager, IRegionNavigationService navService, FolderReactionMonitorModel monitor)
+			: base(regionManager, monitor)
 		{
-			_RegionManager = regionManager;
-			MonitorModel = monitor;
-
 			Text = new ReactiveProperty<string>("いやっっふうううううううぅ");
 		}
 
@@ -34,6 +29,7 @@ namespace Modules.Main.ViewModels
 		private void Initialize()
 		{
 			// TODO: initialize with this.Reaction
+			Text.Value = Reaction.Name;
 		}
 
 
@@ -49,20 +45,8 @@ namespace Modules.Main.ViewModels
 
 		public void OnNavigatedTo(NavigationContext navigationContext)
 		{
-			// 対象となるFolderReactionGroupModelのGuidをパラメータから求める
-			var reactionGuid = (Guid)navigationContext.Parameters["guid"];
-
-			var reaction = MonitorModel.FindReaction(reactionGuid);
-
-			if (reaction == null)
-			{
-				System.Diagnostics.Debug.WriteLine("error in ReactionEditerPageViewModel.OnNavigatedTo");
-				System.Diagnostics.Debug.WriteLine("Reaction guid:" + reactionGuid.ToString());
-				throw new Exception("invalid navigation parameter. not exist FolderReactionModel.");
-			}
-
-			// done
-			Reaction = reaction;
+			NavigationService = navigationContext.NavigationService;
+			Reaction = base.ReactionModelFromNavigationParameters(navigationContext.Parameters);
 
 			Initialize();
 		}
@@ -77,7 +61,14 @@ namespace Modules.Main.ViewModels
 				return _BackCommand
 					?? (_BackCommand = new DelegateCommand(() =>
 					{
-						_RegionManager.RequestNavigate("MainRegion", nameof(Views.FolderListPage));
+						if (NavigationService.Journal.CanGoBack)
+						{
+							NavigationService.Journal.GoBack();
+						}
+						else
+						{
+							this.NavigationToFolderListPage();
+						}
 					}));
 			}
 		}
