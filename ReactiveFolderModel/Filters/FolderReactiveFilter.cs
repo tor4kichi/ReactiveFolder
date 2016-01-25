@@ -36,9 +36,9 @@ namespace ReactiveFolder.Model.Filters
 
 
 
-		public FolderReactiveFilter()
+		public FolderReactiveFilter(string folderFilterPattern = "*")
 		{
-			FolderFilterPattern = "*";
+			FolderFilterPattern = folderFilterPattern;
 		}
 
 
@@ -68,7 +68,7 @@ namespace ReactiveFolder.Model.Filters
 			return result;
 		}
 
-		protected override IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir)
+		public override IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir)
 		{
 			return workDir.EnumerateDirectories(FolderFilterPattern, SearchOption.TopDirectoryOnly);
 		}

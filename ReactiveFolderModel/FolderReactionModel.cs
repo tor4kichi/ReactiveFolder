@@ -228,6 +228,8 @@ namespace ReactiveFolder.Model
 			IsReactionParameterChanged = true;
 		}
 
+
+
 		/// <summary>
 		/// <para>このモデルの妥当性を検証します。</para>
 		/// <para>検証対象のプロパティは Filter/Timing/Actions/Destination です。</para>
@@ -519,4 +521,8 @@ namespace ReactiveFolder.Model
 			_Disposer = null;
 		}
 	}
+
+
+
+	
 }

@@ -42,7 +42,7 @@ namespace ReactiveFolder.Model
 			}
 		}
 
-		protected virtual IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir) { return null; }
-		protected virtual IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir) { return null; }
+		public virtual IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir) { return null; }
+		public virtual IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir) { return null; }
 	}
 }

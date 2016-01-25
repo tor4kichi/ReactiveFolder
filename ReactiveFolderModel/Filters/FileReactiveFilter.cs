@@ -70,7 +70,7 @@ namespace ReactiveFolder.Model.Filters
 		}
 
 		// TODO: ファイル名のフィルタ実装
-		protected override IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir)
+		public override IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir)
 		{
 			return workDir.EnumerateFiles(FileFilterPattern, SearchOption.TopDirectoryOnly);
 		}
