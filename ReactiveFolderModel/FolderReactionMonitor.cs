@@ -28,7 +28,7 @@ namespace ReactiveFolder.Model
 	{
 
 		
-		public static FolderReactionMonitorModel LoadOrCreate(DirectoryInfo saveFolder)
+		public static FolderReactionMonitorModel LoadOrCreate(DirectoryInfo saveFolder, Func<string, bool> skipReactionFolder = null)
 		{
 			var model = new FolderReactionMonitorModel(saveFolder);
 

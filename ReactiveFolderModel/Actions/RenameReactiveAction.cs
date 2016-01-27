@@ -150,7 +150,7 @@ namespace ReactiveFolder.Model.Actions
 
 		public override ValidationResult Validate()
 		{
-			var dummyContext = new ReactiveStreamContext(new DirectoryInfo(""), "/filename.ext");
+			var dummyContext = GenerateTempStreamContext();
 			var formatString = FormatedString(dummyContext);
 
 			var result = new ValidationResult();

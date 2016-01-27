@@ -3,23 +3,35 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Practices.Prism.Mvvm;
+using static System.Environment;
 
 namespace ReactiveFolder.Model
 {
 	public abstract class ReactiveStreamBase : BindableBase
 	{
-		public virtual void Initialize(DirectoryInfo workDir)
+		virtual public void Initialize(DirectoryInfo workDir)
 		{
 		}
 
-		public abstract ValidationResult Validate();
 
-		public abstract IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev);
+		abstract public ValidationResult Validate();
+
+		abstract public IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev);
+
+
+
+
+		protected ReactiveStreamContext GenerateTempStreamContext()
+		{
+			var tempFolder = Path.GetTempPath();
+			return new ReactiveStreamContext(new DirectoryInfo(tempFolder), "filename.png");
+		}
+
 	}
 
 
 
-	
+
 
 	public class ValidationResult
 	{

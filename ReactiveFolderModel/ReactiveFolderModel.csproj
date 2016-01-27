@@ -94,6 +94,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actions\AppExecuteParam.cs" />
+    <Compile Include="Actions\AppExecuteSandbox.cs" />
+    <Compile Include="Actions\AppLaunchReactiveAction.cs" />
+    <Compile Include="Actions\ApplicationPolicy.cs" />
     <Compile Include="Actions\ReactiveActionBase.cs" />
     <Compile Include="Actions\RenameReactiveAction.cs" />
     <Compile Include="Destinations\AbsolutePathReactiveDestination.cs" />
@@ -115,7 +119,7 @@
     <Compile Include="Timings\FileUpdateReactiveTiming.cs" />
     <Compile Include="Timings\ReactiveTimingBase.cs" />
     <Compile Include="Timings\TimerReactiveTiming.cs" />
-    <Compile Include="Util\ExternalObejct.cs" />
+    <Compile Include="Util\FileSerializeHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

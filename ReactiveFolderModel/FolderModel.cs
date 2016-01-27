@@ -10,6 +10,7 @@ namespace ReactiveFolder.Model
 {
 	public class FolderModel
 	{
+
 		public DirectoryInfo Folder { get; private set; }
 
 		private ObservableCollection<FolderReactionModel> _Models { get; set; }

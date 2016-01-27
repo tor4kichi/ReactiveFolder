@@ -260,7 +260,7 @@
 
                     </Grid>
                     <Grid x:Name="ActionsContainer" DataContext="{Binding ActionsEditVM.Value}">
-                        <TextBlock Text="Actions" />
+                        
 
                     </Grid>
                     <Grid x:Name="DestinationContainer" DataContext="{Binding DestinationEditVM.Value}">
