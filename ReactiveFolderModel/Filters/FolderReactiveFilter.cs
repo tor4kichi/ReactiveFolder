@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace ReactiveFolder.Model.Filters
 {
 	[DataContract]
-	public class FolderReactiveFilter : ReactionFilterBase
+	public class FolderReactiveFilter : ReactiveFilterBase
 	{
 		/// <summary>
 		/// DirecotrySearchPattern
@@ -15,6 +15,11 @@ namespace ReactiveFolder.Model.Filters
 		/// </summary>
 		private static readonly IEnumerable<char> InvalidChars = Path.GetInvalidPathChars().AsEnumerable().Where(x => x == '*' || x == '?');
 
+
+
+
+		[DataMember]
+		private string _FolderFilterPattern;
 
 		/// <summary>
 		/// <para>Default is *</para>
@@ -30,8 +35,18 @@ namespace ReactiveFolder.Model.Filters
 		/// 複数のパターンを指定する場合は新しくFileReactiveFilterを作成してください。
 		/// </para>
 		/// </summary>
-		[DataMember]
-		public string FolderFilterPattern { get; set; }
+		public string FolderFilterPattern
+		{
+			get
+			{
+				return _FolderFilterPattern;
+			}
+			set
+			{
+				SetProperty(ref _FolderFilterPattern, value);
+			}
+
+		}
 
 
 

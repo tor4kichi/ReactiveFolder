@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 
 namespace ReactiveFolder.Model.Timings
@@ -15,6 +16,7 @@ namespace ReactiveFolder.Model.Timings
 			Files = new List<PreservedFileInfo>();
 
 		}
+
 
 		public override IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev)
 		{

@@ -8,18 +8,11 @@ namespace ReactiveFolder.Model.Filters
 {
 	public static class ReactiveFilterHelper
 	{
-		public static IEnumerable<string> GetCandidateFilters(FolderReactionModel reaction)
-		{
-			var buildinItems = new string[]
-			{
-				"*.*",
-				"/*"
-			};
 
-			foreach (var buildInText in buildinItems)
-			{
-				yield return buildInText;
-			}
+
+		public static IEnumerable<string> GetFileCandidateFilterPatterns(this FolderReactionModel reaction)
+		{
+			yield return "*.*";
 
 			// 拡張子
 			var extentions = reaction.WorkFolder.EnumerateFiles()
@@ -30,7 +23,12 @@ namespace ReactiveFolder.Model.Filters
 			{
 				yield return "*" + ext; // ex) *.jpg
 			}
+		}
 
+
+		public static IEnumerable<string> GetFolderCandidateFilterPatterns(this FolderReactionModel reaction)
+		{			
+			yield return "/*";
 
 			// フォルダ名
 			var folders = reaction.WorkFolder.EnumerateDirectories()

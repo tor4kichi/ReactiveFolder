@@ -1,27 +1,31 @@
 ﻿<UserControl x:Class="Modules.Main.Views.ReactionEditerPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Modules.Main.Views"
+             xmlns:vm="clr-namespace:Modules.Main.ViewModels"
              xmlns:prism="http://prismlibrary.com/"             
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              prism:ViewModelLocator.AutoWireViewModel="True">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition/>
+            <RowDefinition Height="40" />
             <RowDefinition Height="14*"/>
         </Grid.RowDefinitions>
 
 
         <!-- Top Buttons -->
-        <Grid>
-            <StackPanel HorizontalAlignment="Left">
+        <Grid HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+            >
+            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Stretch">
                 <Button Content="Back" Command="{Binding BackCommand}"/>
             </StackPanel>
 
-            <StackPanel HorizontalAlignment="Center">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" Height="40">
                 <StackPanel.Resources>
                     <Style x:Key="{x:Type TextBox}" TargetType="TextBox">
                         <Setter Property="Template">
@@ -42,7 +46,7 @@
                     </Style>
                 </StackPanel.Resources>
 
-                <TextBox Text="{Binding Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <TextBox Text="{Binding ReactionWorkName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                 </TextBox>
             </StackPanel>
             <!-- 
@@ -55,28 +59,215 @@
         </Grid>
 
         <Grid x:Name="ReactionContent" Grid.Row="1">
-            <TextBlock Text="{Binding Name.Value}" Grid.RowSpan="2" />
 
-            <ScrollViewer HorizontalScrollBarVisibility="Hidden">
-                <StackPanel Orientation="Vertical">
+            <ScrollViewer HorizontalAlignment="Stretch"
+                HorizontalScrollBarVisibility="Hidden" 
+                          VerticalScrollBarVisibility="Auto"
+                          >
+
+                <ItemsControl HorizontalContentAlignment="Stretch"
+                          Margin="20, 0"
+                          >
+                    <Grid x:Name="WorkFolderContainer" Height="60">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <!-- Folderの選択 -->
+                        <!-- D&Dによる受付 -->
+                        <!-- Folderをエクスプローラで開く -->
+                        <TextBlock Grid.Row="0"
+                            Text="Target Folder"  />
+                        <Grid Grid.Row="1" Height="30">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="60"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding WorkFolderPath.Value}" 
+                                    Margin="0,0, 10, 0"
+                                     />
+
+                            <Button Grid.Column="1"
+                                Content="Select Folder" Command="{Binding FolderSelectCommand}" Grid.RowSpan="2">
+                            </Button>
+                        </Grid>
+                    </Grid>
+
+                    <Grid x:Name="FilterContainer" DataContext="{Binding FilterEditVM.Value}">
+
+                        <Grid.Resources>
+
+
+                            <!-- edit File Filter Patterns  -->
+                            <DataTemplate x:Key="FileFilterContentTemplate" DataType="{x:Type vm:FileFilterViewModel}">
+                                <TextBlock Text="FileFilterContent" />
+                            </DataTemplate>
+
+
+                            <!-- edit Folder Filter Pattern  -->
+                            <DataTemplate x:Key="FolderFilterContentTemplate" DataType="{x:Type vm:FolderFilterViewModel}">
+                                <StackPanel Orientation="Vertical">
+                                    
+                                    
+                                    
+                                    <TextBox Height="20" Text="{Binding FolderFilterPattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBlock Grid.Column="0" 
+                                           Text="Candidate word:" />
+                                        
+                                        <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Visible"
+                                              VerticalScrollBarVisibility="Hidden"
+                                              HorizontalAlignment="Stretch"
+                                              >
+                                            <ItemsControl
+                                            ItemsSource="{Binding CandidateFilterItems}" 
+                                            MaxHeight="100"
+                                            >
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel Orientation="Vertical" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Content="{Binding}"
+                                                    Command="{Binding Path=DataContext.SelectCandidateWordCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                                    CommandParameter="{Binding}"
+                                                    />
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+
+                                    </Grid>
+
+
+                                    <ItemsControl ItemsSource="{Binding SampleItems}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" Foreground="Gray" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                </StackPanel>
+                            </DataTemplate>
+                            <DataTemplate x:Key="EmptyTemplate" >
+                                <TextBlock Text="Empty" />
+                            </DataTemplate>
+
+                            
+                            
+                            <!-- FilterViewModelSelector -->
+                            <local:FilterContentDataTemplateSelector x:Key="FilterTemplateSelector"
+                                FileTemplate="{StaticResource FileFilterContentTemplate}"
+                                FolderTemplate="{StaticResource FolderFilterContentTemplate}"
+                                EmptyTemplate="{StaticResource EmptyTemplate}"
+                                                                     />
+                        </Grid.Resources>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="3*"/>
+                        </Grid.ColumnDefinitions>
+
+
+
+                        <!-- FileかFolderの選択を行うラジオボタン -->
+                        <StackPanel Grid.Column="0"
+                            Orientation="Vertical">
+                            <RadioButton GroupName="FilterTypeSelectorGroup" 
+                                     IsChecked="{Binding IsFileFilterSelected.Value, Mode=TwoWay}" Grid.ColumnSpan="2">
+                                <TextBlock Text="File"></TextBlock>
+                            </RadioButton>
+
+                            <RadioButton GroupName="FilterTypeSelectorGroup" 
+                                     IsChecked="{Binding IsFolderFilterSelected.Value, Mode=TwoWay}" Grid.ColumnSpan="2">
+                                <TextBlock Text="Folder"></TextBlock>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <!-- FileとFolderのVMによって表示を切り替えるContentControl -->
+                        <Grid Grid.Column="1">
+                            <ContentControl Content="{Binding FilterVM.Value}"
+                                        ContentTemplateSelector="{StaticResource FilterTemplateSelector}" Grid.ColumnSpan="2"
+                                            HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Stretch"
+                                            >
+
+                            </ContentControl>
+                        </Grid>
+                        <!--
+                        <TextBlock Grid.Row="0"
+                            Text="Filter File/Folder Name"  />
+                        
+                        -->
+                    </Grid>
                     
-                    <Grid x:Name="FilterContainer">
-                        <TextBlock Text="Filter" />
+                    
+                    
+                    
+                    
+                    <Grid x:Name="TimingContainer" DataContext="{Binding TimingEditVM.Value}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0"
+                            Text="Timing"  />
+                        
+                        
+                        <ItemsControl Grid.Row="1"
+                                        ItemsSource="{Binding TimingVMs}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox IsChecked="{Binding IsEnable.Value, Mode=TwoWay}" />
+
+                                        <ContentControl Content="{Binding}" 
+                                                        HorizontalContentAlignment="Stretch"
+                                                        VerticalContentAlignment="Stretch">
+                                            <ContentControl.Resources>
+                                                    
+                                                <!-- FileUpdate Timing -->
+                                                <DataTemplate DataType="{x:Type vm:FileUpdateTimingViewModel}">
+                                                    <TextBlock Text="FileUpdate"></TextBlock>
+                                                </DataTemplate>
+                                                    
+                                                <!-- Timer Timing -->
+                                                <DataTemplate DataType="{x:Type vm:TimerTimingViewModel}">
+                                                    <TextBlock Text="Timer"></TextBlock>
+                                                </DataTemplate>
+
+                                            </ContentControl.Resources>
+                                                
+                                        </ContentControl>
+                                    </StackPanel>
+
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                            
 
                     </Grid>
-                    <Grid x:Name="TimingContainer">
-                        <TextBlock Text="Timing" />
-
-                    </Grid>
-                    <Grid x:Name="ActionsContainer">
+                    <Grid x:Name="ActionsContainer" DataContext="{Binding ActionsEditVM.Value}">
                         <TextBlock Text="Actions" />
 
                     </Grid>
-                    <Grid x:Name="DestinationContainer">
+                    <Grid x:Name="DestinationContainer" DataContext="{Binding DestinationEditVM.Value}">
                         <TextBlock Text="Destination" />
 
                     </Grid>
-                </StackPanel>
+                </ItemsControl>
 
             </ScrollViewer>
         </Grid>

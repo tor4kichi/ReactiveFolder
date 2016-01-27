@@ -25,4 +25,29 @@ namespace Modules.Main.Views
 			InitializeComponent();
 		}
 	}
+
+
+	public class FilterContentDataTemplateSelector : DataTemplateSelector
+	{
+		public DataTemplate FileTemplate { get; set; }
+		public DataTemplate FolderTemplate { get; set; }
+		public DataTemplate EmptyTemplate { get; set; }
+
+
+		public override DataTemplate SelectTemplate(object item, DependencyObject container)
+		{
+			if (item is ViewModels.FileFilterViewModel)
+			{
+				return FileTemplate;
+			}
+			else if (item is ViewModels.FolderFilterViewModel)
+			{
+				return FolderTemplate;
+			}
+			else
+			{
+				return EmptyTemplate;
+			}
+		}
+	}
 }

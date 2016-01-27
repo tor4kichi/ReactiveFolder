@@ -128,7 +128,7 @@ namespace Modules.Main.ViewModels
 						reaction.Name = "something reaction";
 
 						reaction.Destination = new SameInputReactiveDestination();
-						reaction.Timing = new FileUpdateReactiveTiming();
+						reaction.AddTiming(new FileUpdateReactiveTiming());
 						reaction.Filter = new FileReactiveFilter();
 
 						reaction.AddAction(new RenameReactiveAction("#{name}"));
@@ -177,6 +177,7 @@ namespace Modules.Main.ViewModels
 
 		public string Name { get; private set; }
 
+		public string FilePath { get; private set; }
 
 
 		public ReactionListItemViewModel(PageViewModelBase pageVM, FolderReactionModel reactionModel)
@@ -184,7 +185,20 @@ namespace Modules.Main.ViewModels
 			PageVM = pageVM;
 			ReactionModel = reactionModel;
 
-			Name = ReactionModel.Guid.ToString();
+			Name = ReactionModel.Name.ToString();
+
+			var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+			var isUnderUserFolder = ReactionModel.WorkFolder.FullName.IndexOf(userFolder) == 0;
+			if (isUnderUserFolder)
+			{
+				FilePath = "<user>" + ReactionModel.WorkFolder.FullName.Substring(userFolder.Length);
+			}
+			else
+			{
+				FilePath = ReactionModel.WorkFolder.FullName;
+			}
+			
 		}
 
 		

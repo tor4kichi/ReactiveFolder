@@ -30,7 +30,6 @@ namespace ReactiveFolder
 		/// </summary>
 		private NotifyIconWrapper _NotifyIcon;
 
-
 		/// <summary>
 		/// System.Windows.Application.Startup イベント を発生させます。
 		/// </summary>

@@ -18,6 +18,15 @@ namespace ReactiveFolder.Model.Timings
 		[DataMember]
 		public TimeSpan Span { get; set; }
 
+
+
+
+		public TimerReactiveTiming()
+		{
+			Time = DateTime.Now;
+			Span = TimeSpan.FromHours(1);
+		}
+
 		public TimerReactiveTiming(DateTime nextTime, TimeSpan span)
 		{
 			Time = nextTime;

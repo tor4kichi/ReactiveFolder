@@ -2,10 +2,11 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Practices.Prism.Mvvm;
 
 namespace ReactiveFolder.Model
 {
-	public abstract class ReactiveStreamBase
+	public abstract class ReactiveStreamBase : BindableBase
 	{
 		public virtual void Initialize(DirectoryInfo workDir)
 		{
@@ -15,6 +16,9 @@ namespace ReactiveFolder.Model
 
 		public abstract IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev);
 	}
+
+
+
 	
 
 	public class ValidationResult

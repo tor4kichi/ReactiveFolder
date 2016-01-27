@@ -14,7 +14,7 @@ namespace ReactiveFolder.Model
 		public IEnumerable<DirectoryInfo> Direcotories { get; set; }
 	}
 
-	public abstract class ReactionFilterBase : ReactiveStreamBase
+	public abstract class ReactiveFilterBase : ReactiveStreamBase
 	{
 		public override IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev)
 		{

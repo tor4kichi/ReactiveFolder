@@ -21,9 +21,11 @@
         </Grid.RowDefinitions>
 
         <!-- Top Buttons -->
-        <Grid>
+        <Grid HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              >
             <StackPanel HorizontalAlignment="Left">
-                <Button Content="Back" Command="{Binding BackCommand}"/>
+                <Button Content="Back" Command="{Binding BackCommand}" Height="40"/>
             </StackPanel>
 
             <StackPanel HorizontalAlignment="Center">
@@ -52,24 +54,58 @@
             </StackPanel>
             <StackPanel HorizontalAlignment="Right">
                 <Button Content="Create New" 
-                        Command="{Binding AddReactionCommand}">
+                        Command="{Binding AddReactionCommand}"
+                        Height="40"
+                        >
                 </Button>
             </StackPanel>
         </Grid>
 
 
         <StackPanel Orientation="Vertical" Grid.Row="1">
-            <ListBox ItemsSource="{Binding ReactionListItems}">
+            <ListBox ItemsSource="{Binding ReactionListItems}" HorizontalContentAlignment="Stretch">
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel >
-                            <Button Content="{Binding Name}"
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="60" />
+                                
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0"
+                                Orientation="Vertical">
+                                <TextBlock Text="{Binding Name}" />
+                                <TextBlock Text="{Binding FilePath}"  FontSize="10" Foreground="Gray"/>
+                            </StackPanel>
+
+                            <Grid Grid.Column="1">
+                                <ToggleButton 
+                                IsChecked="True" 
+                                    Content="Enable"
+                                    />
+                            </Grid>
+
+                            <Grid Grid.Column="2"
+                                  Margin="5, 0"
+                                  >
+                                <Button 
+                                Content="Edit"
                                 Command="{Binding OpenReactionCommand}"
                                 >
+                                </Button>
+                            </Grid>
 
-                            </Button>
-                        </StackPanel>
+                            <Grid Grid.Column="3">
+                                <Button 
+                                    Content="Delete">
+
+                                </Button>
+                            </Grid>
+                        </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

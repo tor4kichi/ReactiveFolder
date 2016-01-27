@@ -63,8 +63,8 @@ namespace ReactiveFolder.Model
 
 		// What 対象ファイルやフォルダのフィルター方法
 		[DataMember]
-		private ReactionFilterBase _Filter;
-		public ReactionFilterBase Filter
+		private ReactiveFilterBase _Filter;
+		public ReactiveFilterBase Filter
 		{
 			get
 			{
@@ -82,23 +82,16 @@ namespace ReactiveFolder.Model
 
 
 
+		
+		
 		[DataMember]
-		private ReactiveTimingBase _Timing;
-		public ReactiveTimingBase Timing
-		{
-			get
-			{
-				return _Timing;
-			}
-			set
-			{
-				if (SetProperty(ref _Timing, value))
-				{
-					IsReactionParameterChanged = true;
-				}
-			}
-		}
+		private ObservableCollection<ReactiveTimingBase> _Timings;
 
+		/// <summary>
+		/// Actionsの読み取り専用のコレクション。
+		/// コレクションの操作はAddAction() または RemoveAction()を利用してください。
+		/// </summary>
+		public ReadOnlyObservableCollection<ReactiveTimingBase> Timings { get; private set; }
 
 
 
@@ -197,7 +190,49 @@ namespace ReactiveFolder.Model
 			_Actions = new ObservableCollection<ReactiveActionBase>();
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
 
+			_Timings = new ObservableCollection<ReactiveTimingBase>();
+			Timings = new ReadOnlyObservableCollection<ReactiveTimingBase>(_Timings);
 		}
+
+
+
+		[OnSerialized]
+		private void SetValuesOnSerialized(StreamingContext context)
+		{
+			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
+			Timings = new ReadOnlyObservableCollection<ReactiveTimingBase>(_Timings);
+		}
+
+		/// <summary>
+		/// タイミングを追加します。
+		/// いずれかのタイミングが条件を満たすと後続のAction等が実行されます。
+		/// <para>このメソッドは最初にExit()を呼び出します。</para>
+		/// </summary>
+		/// <param name="timing"></param>
+		public void AddTiming(ReactiveTimingBase timing)
+		{
+			Exit();
+
+			_Timings.Add(timing);
+
+			IsReactionParameterChanged = true;
+		}
+
+
+		/// <summary>
+		/// タイミングを削除します。
+		/// <para>このメソッドは最初にExit()を呼び出します。</para>
+		/// </summary>
+		/// <param name="timing"></param>
+		public void RemoveTiming(ReactiveTimingBase timing)
+		{
+			Exit();
+
+			_Timings.Remove(timing);
+
+			IsReactionParameterChanged = true;
+		}
+
 
 		/// <summary>
 		/// アクションを追加します。
@@ -279,27 +314,31 @@ namespace ReactiveFolder.Model
 			}
 
 
-
-			if (Timing != null)
+			if (Timings.Count > 0)
 			{
-				var result = Timing.Validate();
-
-				if (result.HasValidationError)
+				foreach (var timing in Timings)
 				{
-					// Timing validate failed.
-					validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Timing))} has validation error."));
-					validationResult.AddMessages(result.Messages);
+					var result = timing.Validate();
+
+					if (result.HasValidationError)
+					{
+						// Timing validate failed.
+						validationResult.AddMessage(makeValidationErrorMessage($"Timing has validation error."));
+						validationResult.AddMessages(result.Messages);
+					}
 				}
 			}
 			else
 			{
-				// Timing not exist.
-				validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Timing))} is must set to Reaction."));
+				// タイミングがないと後続のActionを実行できない
+				// （ロジック的には、常にActionが実行されてしまうことになる）
+				validationResult.AddMessage(makeValidationErrorMessage($"not contain execute timing in Timings."));
 			}
 
 
 
-			if (Actions.Count == 0)
+
+			if (Actions.Count > 0)
 			{
 				foreach (var action in Actions)
 				{
@@ -308,7 +347,7 @@ namespace ReactiveFolder.Model
 					if (result.HasValidationError)
 					{
 						// Action validate failed.
-						validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Timing))} has validation error."));
+						validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Actions))} has validation error."));
 						validationResult.AddMessages(result.Messages);
 					}
 				}
@@ -319,7 +358,7 @@ namespace ReactiveFolder.Model
 				// （出力先はDestinationの設定に依存する）
 				// この暗黙のデフォルト動作は想定されたものとして扱うべきか否か…。
 				// しかしながら、ユーザーが単純なコピー操作を組み上げたい場合に備えて、
-				// コピー用のアクションを追加するか、デフォルト動作についての説明を用意するか、
+				// TODO: コピー用のアクションを追加するか、デフォルト動作についての説明を用意するか、
 				// 判断しないといけない。
 			}
 
@@ -358,8 +397,11 @@ namespace ReactiveFolder.Model
 		private void ResetWorkingFolder()
 		{
 			Filter?.Initialize(WorkFolder);
-			Timing?.Initialize(WorkFolder);
-			foreach(var action in Actions)
+			foreach (var timing in Timings)
+			{
+				timing.Initialize(WorkFolder);
+			}
+			foreach (var action in Actions)
 			{
 				action.Initialize(WorkFolder);
 			}
@@ -385,23 +427,43 @@ namespace ReactiveFolder.Model
 				throw new Exception();
 			}
 
+			
 
 			ResetWorkingFolder();
 
-			var reactionChains = new List<ReactiveStreamBase>();
-			reactionChains.Add(Filter);
-			reactionChains.Add(Timing);
-			reactionChains.AddRange(Actions);
-			reactionChains.Add(Destination);
+
+			// Note: なんでTimingsより先にFilterを実行するの？
+			// それはね、Timingsにはファイルの更新日時を読んでトリガーするものがあるからさ
+			// see@ FileUpdateReactiveTiming.cs
+
+
+			// Filter
+			var filterdTrigger = Filter.Chain(trigger);
 
 
 
-			IObservable<ReactiveStreamContext> chainObserver = trigger;
-			foreach (var reaction in reactionChains)
+
+			// Timings
+			var timingTriggers = new List<IObservable<ReactiveStreamContext>>();
+			foreach (var timing in Timings)
+			{
+				var timingTrigger = timing.Chain(filterdTrigger);
+
+				timingTriggers.Add(timingTrigger);
+			}
+
+			// トリガーストリームを束ねる
+			var mergedTimingTrigger = timingTriggers.Merge().Publish();
+			mergedTimingTrigger.Connect();
+
+
+			// Actions
+			IObservable<ReactiveStreamContext> actionChainObserver = mergedTimingTrigger;
+			foreach (var action in Actions)
 			{
 				try
 				{
-					chainObserver = reaction.Chain(chainObserver);
+					actionChainObserver = action.Chain(actionChainObserver);
 				}
 				catch (Exception e)
 				{
@@ -409,7 +471,12 @@ namespace ReactiveFolder.Model
 				}
 			}
 
-			return chainObserver;
+
+			// Destinations
+			var finalizedChainObserver = Destination.Chain(actionChainObserver);
+
+
+			return finalizedChainObserver;
 		}
 
 

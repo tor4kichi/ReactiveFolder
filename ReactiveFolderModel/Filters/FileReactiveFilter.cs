@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -7,7 +8,7 @@ using System.Runtime.Serialization;
 namespace ReactiveFolder.Model.Filters
 {
 	[DataContract]
-	public class FileReactiveFilter : ReactionFilterBase
+	public class FileReactiveFilter : ReactiveFilterBase
 	{
 		/// <summary>
 		/// File Search Pattern
@@ -31,7 +32,7 @@ namespace ReactiveFolder.Model.Filters
 		/// </para>
 		/// </summary>
 		[DataMember]
-		public string FileFilterPattern { get; set; }
+		public ObservableCollection<string> FileFilterPatterns { get; set; }
 
 
 
@@ -40,9 +41,13 @@ namespace ReactiveFolder.Model.Filters
 
 		// *と?のみ許可される
 		// その他のPath.GetInvalidPathCharsはNG
-		public FileReactiveFilter(string pattern = "*.*")
+		public FileReactiveFilter(params string[] defaultFilterpatters)
 		{
-			FileFilterPattern = pattern;
+			if (defaultFilterpatters == null)
+			{
+				defaultFilterpatters = new string[] { };
+			}
+			FileFilterPatterns = new ObservableCollection<string>(defaultFilterpatters);
 		}
 
 		public override ValidationResult Validate()
@@ -50,29 +55,42 @@ namespace ReactiveFolder.Model.Filters
 			
 			var result = new ValidationResult();
 
-			if (String.IsNullOrWhiteSpace(FileFilterPattern))
+			foreach(var fileFilterParttern in FileFilterPatterns)
 			{
-				result.AddMessage($"{nameof(FileReactiveFilter)}: need file filter pattern. ex) '*.png|*.jpg'");
-				return result;
-			}
-
-			var invalidChars = InvalidChars;
-
-			foreach (var invalidChar in invalidChars)
-			{
-				if (FileFilterPattern.Contains(invalidChar))
+				if (String.IsNullOrWhiteSpace(fileFilterParttern))
 				{
-					result.AddMessage($"{nameof(FileReactiveFilter)}: contain invalid char '{invalidChar}'");
+					result.AddMessage($"{nameof(FileReactiveFilter)}: need file filter pattern. ex) '*.png|*.jpg'");
+					return result;
+				}
+
+				foreach (var invalidChar in InvalidChars)
+				{
+					if (fileFilterParttern.Contains(invalidChar))
+					{
+						result.AddMessage($"{nameof(FileReactiveFilter)}: contain invalid char '{invalidChar}'");
+					}
 				}
 			}
+			
 
 			return result;
 		}
 
-		// TODO: ファイル名のフィルタ実装
+		/// <summary>
+		/// FileFilterPatternsを使ってworkDirのトップレベルに存在するファイルをフィルタリングします。
+		/// </summary>
+		/// <param name="workDir"></param>
+		/// <returns></returns>
 		public override IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir)
 		{
-			return workDir.EnumerateFiles(FileFilterPattern, SearchOption.TopDirectoryOnly);
+			foreach(var pattern in FileFilterPatterns)
+			{
+				var files = workDir.EnumerateFiles(pattern, SearchOption.TopDirectoryOnly);
+				foreach (var file in files)
+				{
+					yield return file;
+				}
+			}
 		}
 
 		
