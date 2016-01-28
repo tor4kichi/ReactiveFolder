@@ -6,6 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Modules.Main.Views"
              xmlns:vm="clr-namespace:Modules.Main.ViewModels"
+             xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
              xmlns:prism="http://prismlibrary.com/"             
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
@@ -108,7 +109,7 @@
 
 
                             <!-- edit File Filter Patterns  -->
-                            <DataTemplate x:Key="FileFilterContentTemplate" DataType="{x:Type vm:FileFilterViewModel}">
+                            <DataTemplate x:Key="FileFilterContentTemplate" DataType="{x:Type editervm:FileFilterViewModel}">
                                 <!-- Selected File Filter patterns -->
                                 <StackPanel Orientation="Vertical">
                                     <TextBlock Text="Added Filters" />
@@ -153,7 +154,7 @@
 
 
                             <!-- edit Folder Filter Pattern  -->
-                            <DataTemplate x:Key="FolderFilterContentTemplate" DataType="{x:Type vm:FolderFilterViewModel}">
+                            <DataTemplate x:Key="FolderFilterContentTemplate" DataType="{x:Type editervm:FolderFilterViewModel}">
                                 <StackPanel Orientation="Vertical">
                                     
                                     
@@ -284,12 +285,12 @@
                                             <ContentControl.Resources>
                                                     
                                                 <!-- FileUpdate Timing -->
-                                                <DataTemplate DataType="{x:Type vm:FileUpdateTimingViewModel}">
+                                                <DataTemplate DataType="{x:Type editervm:FileUpdateTimingViewModel}">
                                                     <TextBlock Text="FileUpdate"></TextBlock>
                                                 </DataTemplate>
                                                     
                                                 <!-- Timer Timing -->
-                                                <DataTemplate DataType="{x:Type vm:TimerTimingViewModel}">
+                                                <DataTemplate DataType="{x:Type editervm:TimerTimingViewModel}">
                                                     <TextBlock Text="Timer"></TextBlock>
                                                 </DataTemplate>
 
@@ -346,7 +347,7 @@
                             <ContentControl.Resources>
 
                                 <!-- SameInputDestinationViewModel -->
-                                <DataTemplate DataType="{x:Type vm:SameInputDestinationViewModel}">
+                                <DataTemplate DataType="{x:Type editervm:SameInputDestinationViewModel}">
                                     <StackPanel Orientation="Vertical">
                                         <TextBlock Text="SameInput Content"></TextBlock>
                                         <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
@@ -354,7 +355,7 @@
                                 </DataTemplate>
 
                                 <!-- InputChildFolderDestinationViewModel -->
-                                <DataTemplate DataType="{x:Type vm:InputChildFolderDestinationViewModel}">
+                                <DataTemplate DataType="{x:Type editervm:InputChildFolderDestinationViewModel}">
                                     <StackPanel Orientation="Vertical">
                                         <TextBlock Text="InputChildFolder Content"></TextBlock>
                                         <TextBox Text="{Binding ChildFolderName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -363,7 +364,7 @@
                                 </DataTemplate>
 
                                 <!-- AbsolutePathDestinationViewModel -->
-                                <DataTemplate DataType="{x:Type vm:AbsolutePathDestinationViewModel}">
+                                <DataTemplate DataType="{x:Type editervm:AbsolutePathDestinationViewModel}">
                                     <StackPanel Orientation="Vertical">
                                         <TextBlock Text="Absolute Path Content"></TextBlock>
                                         <Button Content="Select Folder" Command="{Binding SelectOutputFolderCommand}" />

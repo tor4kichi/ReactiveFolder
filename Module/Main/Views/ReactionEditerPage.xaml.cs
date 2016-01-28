@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Modules.Main.ViewModels.ReactionEditer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,11 +37,11 @@ namespace Modules.Main.Views
 
 		public override DataTemplate SelectTemplate(object item, DependencyObject container)
 		{
-			if (item is ViewModels.FileFilterViewModel)
+			if (item is FileFilterViewModel)
 			{
 				return FileTemplate;
 			}
-			else if (item is ViewModels.FolderFilterViewModel)
+			else if (item is FolderFilterViewModel)
 			{
 				return FolderTemplate;
 			}

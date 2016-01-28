@@ -109,6 +109,10 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WPFFolderBrowser, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\WPFFolderBrowser.1.0.2\lib\WPFFolderBrowser.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainModule.cs" />
@@ -129,6 +133,23 @@
     <Compile Include="ViewModels\FolderListPageViewModel.cs" />
     <Compile Include="ViewModels\PageViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditerPageViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\AbsolutePathDestinationViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\ActionsEditViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\ActionViewModelBase.cs" />
+    <Compile Include="ViewModels\ReactionEidter\AppLaunchActionViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\DestinationEditViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\DestinationViewModelBase.cs" />
+    <Compile Include="ViewModels\ReactionEidter\FileFilterViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\FileUpdateTimingViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\FilterEditViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\FilterViewModelBase.cs" />
+    <Compile Include="ViewModels\ReactionEidter\FolderFilterViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\InputChildFolderDestinationViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\SameInputDestinationViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\TimerTimingViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\TimingEditViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEidter\TimingViewModelBase.cs" />
+    <Compile Include="ViewModels\ReactionEidter\TimingViewModelTemplate.cs" />
     <Compile Include="ViewModels\ReactionListPageViewModel.cs" />
     <Compile Include="Views\FolderListPage.xaml.cs">
       <DependentUpon>FolderListPage.xaml</DependentUpon>
@@ -173,9 +194,7 @@
       <Name>ReactiveFolderModel</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModels\ReactionEidter\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
