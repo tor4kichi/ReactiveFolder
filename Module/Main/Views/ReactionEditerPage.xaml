@@ -260,7 +260,44 @@
 
                     </Grid>
                     <Grid x:Name="ActionsContainer" DataContext="{Binding ActionsEditVM.Value}">
-                        
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0"
+                            Text="Actions"  />
+
+
+                        <ItemsControl Grid.Row="1"
+                                        ItemsSource="{Binding TimingVMs}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox IsChecked="{Binding IsEnable.Value, Mode=TwoWay}" />
+
+                                        <ContentControl Content="{Binding}" 
+                                                        HorizontalContentAlignment="Stretch"
+                                                        VerticalContentAlignment="Stretch">
+                                            <ContentControl.Resources>
+
+                                                <!-- FileUpdate Timing -->
+                                                <DataTemplate DataType="{x:Type vm:FileUpdateTimingViewModel}">
+                                                    <TextBlock Text="FileUpdate"></TextBlock>
+                                                </DataTemplate>
+
+                                                <!-- Timer Timing -->
+                                                <DataTemplate DataType="{x:Type vm:TimerTimingViewModel}">
+                                                    <TextBlock Text="Timer"></TextBlock>
+                                                </DataTemplate>
+
+                                            </ContentControl.Resources>
+
+                                        </ContentControl>
+                                    </StackPanel>
+
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
                     </Grid>
                     <Grid x:Name="DestinationContainer" DataContext="{Binding DestinationEditVM.Value}">
