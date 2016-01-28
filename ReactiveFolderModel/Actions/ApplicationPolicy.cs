@@ -14,7 +14,9 @@ namespace ReactiveFolder.Model.Actions
 		FolderPath,
 	}
 
-
+	// TODO: InputとOutputのPathを含めたAppOptionをC# Scriptingで処理したい
+	// -file {inputFile} -o {outputFolder} 
+	// みたいな指定をしたら解釈してオプションを入れ替えてくれる感じで
 
 	[DataContract]
 	public class ApplicationPolicy
@@ -56,7 +58,10 @@ namespace ReactiveFolder.Model.Actions
 		public Dictionary<string, string> DefaultParameters { get; private set; }
 
 		[DataMember]
-		public List<AppOption> AppParams { get; private set; }
+		public List<AppArgument> AppParams { get; private set; }
+
+		[DataMember]
+		public string ArgumentSplitter { get; set; } = " "; // or ","
 
 		[DataMember]
 		public string KeyPrefix { get; set; } = "-";
@@ -99,7 +104,7 @@ namespace ReactiveFolder.Model.Actions
 			MaxProcessTime = TimeSpan.FromMinutes(1);
 
 			DefaultParameters = new Dictionary<string, string>();
-			AppParams = new List<AppOption>();
+			AppParams = new List<AppArgument>();
 			PathFilterPartterns = new List<string>();
 		}
 
@@ -120,27 +125,27 @@ namespace ReactiveFolder.Model.Actions
 
 		
 
-		public string MakeArgumentsText(string inputPath, DirectoryInfo outputDir, string name, AppOption param)
+		public string MakeArgumentsText(string inputPath, DirectoryInfo outputDir, AppArgument param)
 		{
 			// 入力パスと出力パスの指定
-			var inputText = $"-{InputPathKey}";
+			var inputText = $"-{InputPathKey} {inputPath}";
 
+			var optionArguments = String.Join(ArgumentSplitter, param.Options);
 			// 他のパラメータ
-			var otherParamsText = MakeCommandLineParam(param.Arguments);
+			var keyValueArgumetns = String.Join(ArgumentSplitter, MakeKeyValueArguments(param.KeyValueOptions));
 
-			var appArguments = $"{inputText} {otherParamsText}";
+			var appArguments = String.Join(ArgumentSplitter,
+				inputText, optionArguments, keyValueArgumetns);
 
-			return $"{inputText} {otherParamsText}";
+			return appArguments;
 		}
 
-		private string MakeCommandLineParam(Dictionary<string, string> parameters)
+		private IEnumerable<string> MakeKeyValueArguments(Dictionary<string, string> parameters)
 		{
-			StringBuilder sb = new StringBuilder();
-
 			// DefaultParameters < parameters
 			foreach (var pair in parameters)
 			{
-				sb.Append(MakePartOfCommandLineParam(pair));
+				yield return MakePartOfCommandLineParam(pair);
 			}
 
 			foreach (var pair in DefaultParameters)
@@ -150,10 +155,8 @@ namespace ReactiveFolder.Model.Actions
 					continue;
 				}
 
-				sb.Append(MakePartOfCommandLineParam(pair));
+				yield return MakePartOfCommandLineParam(pair);
 			}
-
-			return sb.ToString();
 		}
 
 
@@ -164,11 +167,11 @@ namespace ReactiveFolder.Model.Actions
 			decimal temp;
 			if (decimal.TryParse(value, out temp))
 			{
-				return $"-{key} {value}";
+				return $"{KeyPrefix}{key} {value}";
 			}
 			else
 			{
-				return $"-{key} \"{value}\"";
+				return $"{KeyPrefix}{key} \"{value}\"";
 			}
 		}
 
@@ -178,7 +181,7 @@ namespace ReactiveFolder.Model.Actions
 		}
 
 
-		public ApplicationExecuteSandbox CreateExecuteSandbox(AppOption param)
+		public ApplicationExecuteSandbox CreateExecuteSandbox(AppArgument param)
 		{
 			if (false == this.AppParams.Contains(param))
 			{
@@ -193,7 +196,7 @@ namespace ReactiveFolder.Model.Actions
 
 	public static class ApplicationPolicyHelper
 	{
-		public static AppOption GetOption(this ApplicationPolicy policy, string optionName)
+		public static AppArgument GetOption(this ApplicationPolicy policy, string optionName)
 		{
 			return policy.AppParams.SingleOrDefault(x => x.Name == optionName);
 		}

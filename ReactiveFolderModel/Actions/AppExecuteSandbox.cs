@@ -11,7 +11,7 @@ namespace ReactiveFolder.Model.Actions
 	public class ApplicationExecuteSandbox : BindableBase
 	{
 		public ApplicationPolicy Policy { get; private set; }
-		public AppOption Param { get; private set; }
+		public AppArgument Param { get; private set; }
 
 
 		/// <summary>
@@ -20,7 +20,7 @@ namespace ReactiveFolder.Model.Actions
 		/// <param name="policy"></param>
 		/// <param name="param"></param>
 		/// <param name="context"></param>
-		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppOption param)
+		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppArgument param)
 		{
 		}
 
@@ -32,7 +32,7 @@ namespace ReactiveFolder.Model.Actions
 
 		public string Execute(ReactiveStreamContext context)
 		{
-			var argumentText = Policy.MakeArgumentsText(context.SourcePath, context.WorkFolder, context.Name, Param);
+			var argumentText = Policy.MakeArgumentsText(context.SourcePath, context.WorkFolder, Param);
 
 			var processStartInfo = new ProcessStartInfo(Policy.ApplicationPath, argumentText);
 

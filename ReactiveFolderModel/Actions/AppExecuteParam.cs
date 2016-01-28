@@ -8,18 +8,22 @@ using System.Threading.Tasks;
 namespace ReactiveFolder.Model.Actions
 {
 	[DataContract]
-	public class AppOption
+	public class AppArgument
 	{
 		[DataMember]
 		public string Name { get; set; }
 
 		[DataMember]
-		public Dictionary<string, string> Arguments { get; private set; }
+		public List<string> Options { get; private set; }
 
-		public AppOption(string name)
+		[DataMember]
+		public Dictionary<string, string> KeyValueOptions { get; private set; }
+
+		public AppArgument(string name)
 		{
 			Name = name;
-			Arguments = new Dictionary<string, string>();
+			Options = new List<string>();
+			KeyValueOptions = new Dictionary<string, string>();
 		}
 
 	}
