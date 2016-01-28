@@ -21,8 +21,10 @@
         <Grid HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch"
             >
-            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Stretch">
-                <Button Content="Back" Command="{Binding BackCommand}"/>
+            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal"
+                        >
+                <Button Content="Back" Width="50" Height="28"
+                        Command="{Binding BackCommand}"/>
             </StackPanel>
 
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" Height="40">
@@ -49,13 +51,17 @@
                 <TextBox Text="{Binding ReactionWorkName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                 </TextBox>
             </StackPanel>
-            <!-- 
-            <StackPanel HorizontalAlignment="Right">
-                <Button Content="Create New" 
-                        Command="{Binding AddReactionCommand}">
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Test" Width="50" Height="28"
+                        Command="{Binding TestCommand}">
+                </Button>
+                <Button Content="Save" Width="50" Height="28"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsEnableSave.Value}">
                 </Button>
             </StackPanel>
-            -->
+            
         </Grid>
 
         <Grid x:Name="ReactionContent" Grid.Row="1">
@@ -103,7 +109,46 @@
 
                             <!-- edit File Filter Patterns  -->
                             <DataTemplate x:Key="FileFilterContentTemplate" DataType="{x:Type vm:FileFilterViewModel}">
-                                <TextBlock Text="FileFilterContent" />
+                                <!-- Selected File Filter patterns -->
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="Added Filters" />
+                                    <ItemsControl ItemsSource="{Binding FileFilterPatterns}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding}" />
+                                                    <Button Content="×" 
+                                                        Command="{Binding Path=DataContext.RemoveFiterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}"
+                                                        />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <TextBlock Text="Candidate Filters" />
+                                    <ItemsControl ItemsSource="{Binding CandidateFilterItems}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button Content="{Binding}" 
+                                                        Command="{Binding Path=DataContext.AddFiterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}"
+                                                        />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <TextBlock Text="Sample Files" />
+                                    <ItemsControl ItemsSource="{Binding SampleItems}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" Foreground="Gray" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                             </DataTemplate>
 
 

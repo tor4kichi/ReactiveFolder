@@ -154,6 +154,19 @@ namespace ReactiveFolder.Model
 		#endregion
 
 
+		public void SaveReaction(FolderReactionModel reaction)
+		{
+			var folder = FindReactionParentFolder(reaction);
+			if (folder != null)
+			{
+				folder.SaveReaction(reaction);
+			}
+			else
+			{
+				// 削除されたリアクション、またはフォルダが削除されている
+			}
+		}
+
 
 		public FolderReactionModel FindReaction(Guid guid)
 		{

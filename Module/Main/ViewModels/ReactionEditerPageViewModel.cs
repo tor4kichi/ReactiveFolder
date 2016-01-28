@@ -17,6 +17,7 @@ using System.Reactive.Disposables;
 using ReactiveFolder.Model.Timings;
 using ReactiveFolder.Model.Actions;
 using ReactiveFolder.Model.Destinations;
+using System.Threading.Tasks;
 
 namespace Modules.Main.ViewModels
 {
@@ -46,8 +47,9 @@ namespace Modules.Main.ViewModels
 		public ReactiveProperty<ActionsEditViewModel> ActionsEditVM { get; private set; }
 		public ReactiveProperty<DestinationEditViewModel> DestinationEditVM { get; private set; }
 
+		public ReactiveProperty<bool> IsEnableSave { get; private set; }
 
-		
+
 		public ReactionEditerPageViewModel(IRegionManager regionManager, IRegionNavigationService navService, FolderReactionMonitorModel monitor)
 			: base(regionManager, monitor)
 		{
@@ -61,14 +63,14 @@ namespace Modules.Main.ViewModels
 			ActionsEditVM = new ReactiveProperty<ActionsEditViewModel>();
 			DestinationEditVM = new ReactiveProperty<DestinationEditViewModel>();
 
-			
+			IsEnableSave = new ReactiveProperty<bool>(true);
 		}
 
 
 		private void Initialize()
 		{
-			
-			// TODO: initialize with this.Reaction
+			// initialize with this.Reaction
+
 			ReactionWorkName.Value = Reaction.Name;
 			WorkFolderPath.Value = Reaction.WorkFolder.FullName;
 
@@ -83,6 +85,7 @@ namespace Modules.Main.ViewModels
 					DestinationEditVM.Value = new DestinationEditViewModel(Reaction);
 				});
 
+			IsEnableSave.Value = true;
 		}
 
 
@@ -125,6 +128,49 @@ namespace Modules.Main.ViewModels
 					}));
 			}
 		}
+
+
+		
+		private DelegateCommand _SaveCommand;
+		public DelegateCommand SaveCommand
+		{
+			get
+			{
+				return _SaveCommand
+					?? (_SaveCommand = new DelegateCommand(() =>
+					{
+						IsEnableSave.Value = false;
+
+						try
+						{
+							Task.Run(async () =>
+							{
+								_MonitorModel.SaveReaction(Reaction);
+								await Task.Delay(500);
+							})
+							.ContinueWith(_ => { IsEnableSave.Value = true; });
+						}
+						finally
+						{
+							
+						}
+					}));
+			}
+		}
+
+		private DelegateCommand _TestCommand;
+		public DelegateCommand TestCommand
+		{
+			get
+			{
+				return _TestCommand
+					?? (_TestCommand = new DelegateCommand(() =>
+					{
+						// TODO:
+					}));
+			}
+		}
+
 
 
 		private DelegateCommand _FolderSelectCommand;
@@ -420,8 +466,9 @@ namespace Modules.Main.ViewModels
 		/// 候補ワード
 		/// FilterPartternsが変更される都度、更新される。
 		/// </summary>
-		public ReadOnlyReactiveCollection<string> CandidateFilterItems { get; private set; }
+		public ObservableCollection<string> CandidateFilterItems { get; private set; }
 
+		private ReadOnlyReactiveCollection<string> _CachedCandidateFilterItems;
 
 		/// <summary>
 		/// FilterPatternsの検証結果
@@ -433,14 +480,11 @@ namespace Modules.Main.ViewModels
 		/// FilterPartternsをもとにFolderReactionModel.WorkFolder内の
 		/// ファイルをフィルタリングした結果のファイル名（拡張子含む）
 		/// </summary>
-		public ReadOnlyReactiveCollection<string> SampleItems { get; private set; }
+		public ObservableCollection<string> SampleItems { get; private set; }
 
 
 
 		private FileReactiveFilter _FileFilterModel;
-
-
-
 
 		public FileFilterViewModel()
 			: base(null)
@@ -449,8 +493,8 @@ namespace Modules.Main.ViewModels
 
 			var temp = new ObservableCollection<string>();
 			FileFilterPatterns = temp.ToReadOnlyReactiveCollection();
-			CandidateFilterItems = temp.ToReadOnlyReactiveCollection();
-			SampleItems = temp.ToReadOnlyReactiveCollection();
+			CandidateFilterItems = new ObservableCollection<string>();
+			SampleItems = new ObservableCollection<string>();
 		}
 
 
@@ -464,13 +508,21 @@ namespace Modules.Main.ViewModels
 				.ToReadOnlyReactiveCollection()
 				.AddTo(_CompositeDisposable);
 
+			CandidateFilterItems = new ObservableCollection<string>();
 
 			// FileFilterPatternの候補ワード
 			// 
-			CandidateFilterItems = ReactionModel.ObserveProperty(x => x.WorkFolder)
-				.SelectMany(x => ReactiveFilterHelper.GetFileCandidateFilterPatterns(ReactionModel))
+			_CachedCandidateFilterItems = ReactionModel.ObserveProperty(x => x.WorkFolder)
+				.Select(_ => ReactiveFilterHelper.GetFileCandidateFilterPatterns(ReactionModel))
+				.Do(x =>
+				{
+					CandidateFilterItems.Clear();
+					CandidateFilterItems.AddRange(x);
+				})
+				.SelectMany(x => x)
 				.ToReadOnlyReactiveCollection()
 				.AddTo(_CompositeDisposable);
+				
 
 
 
@@ -486,10 +538,18 @@ namespace Modules.Main.ViewModels
 
 
 
-			SampleItems = FileFilterPatterns.PropertyChangedAsObservable()
-				.SelectMany(x => _FileFilterModel.FileFilter(ReactionModel.WorkFolder))
-				.Select(x => x.Name)
-				.ToReadOnlyReactiveCollection();
+			SampleItems = new ObservableCollection<string>(_FileFilterModel.FileFilter(ReactionModel.WorkFolder).Select(x => x.Name));
+
+			_FileFilterModel.FileFilterPatterns
+				.CollectionChangedAsObservable()
+				.Subscribe(_ =>
+				{
+					SampleItems.Clear();
+					SampleItems.AddRange(
+						_FileFilterModel.FileFilter(ReactionModel.WorkFolder).Select(x => x.Name)
+						);
+				})
+				.AddTo(_CompositeDisposable);
 		}
 
 
@@ -505,6 +565,11 @@ namespace Modules.Main.ViewModels
 					?? (_AddFiterTextCommand = new DelegateCommand<string>(word =>
 					{
 						_FileFilterModel.FileFilterPatterns.Add(word);
+
+						if (CandidateFilterItems.Contains(word))
+						{
+							CandidateFilterItems.Remove(word);
+						}
 					}));
 			}
 		}
@@ -519,8 +584,12 @@ namespace Modules.Main.ViewModels
 				return _RemoveFiterTextCommand
 					?? (_RemoveFiterTextCommand = new DelegateCommand<string>(word =>
 					{
-						
 						_FileFilterModel.FileFilterPatterns.Remove(word);
+
+						if (_CachedCandidateFilterItems.Contains(word))
+						{
+							CandidateFilterItems.Add(word);
+						}
 					}));
 			}
 		}
@@ -720,9 +789,11 @@ namespace Modules.Main.ViewModels
 			: base(reactionModel)
 		{
 
-			var hasFileUpdateTiming = ReactionModel.Timings.Any(x => x is TIMING_MODEL);
+			var timingModel = ReactionModel.Timings.SingleOrDefault(x => x is TIMING_MODEL);
+			var hasTypedTimingModel = timingModel != null;
+			IsEnable = new ReactiveProperty<bool>(hasTypedTimingModel);
 
-			IsEnable = new ReactiveProperty<bool>(hasFileUpdateTiming);
+			_CachedModel = timingModel as TIMING_MODEL; 
 
 			IsEnable.Subscribe(x =>
 			{
@@ -1076,7 +1147,6 @@ namespace Modules.Main.ViewModels
 		{
 			Destination = reactionModel.Destination as AbsolutePathReactiveDestination;
 
-
 			AbsoluteFolderPath = Destination.AbsoluteFolderPath;
 
 			OutputPathSample = Observable.CombineLatest(
@@ -1100,7 +1170,7 @@ namespace Modules.Main.ViewModels
 				return _SelectOutputFolderCommand
 					?? (_SelectOutputFolderCommand = new DelegateCommand(() => 
 					{
-						// TODO: 出力先の絶対パスをFolder選択ダイアログを使って取得する
+						// 出力先の絶対パスをFolder選択ダイアログを使って取得する
 						OpenFileDialog ofp = new OpenFileDialog();
 						ofp.FileName = "The file will be ignored";
 						ofp.CheckFileExists = false;

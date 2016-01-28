@@ -196,8 +196,8 @@ namespace ReactiveFolder.Model
 
 
 
-		[OnSerialized]
-		private void SetValuesOnSerialized(StreamingContext context)
+		[OnDeserialized]
+		public void SetValuesOnDeserialized(StreamingContext context)
 		{
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
 			Timings = new ReadOnlyObservableCollection<ReactiveTimingBase>(_Timings);
@@ -211,6 +211,11 @@ namespace ReactiveFolder.Model
 		/// <param name="timing"></param>
 		public void AddTiming(ReactiveTimingBase timing)
 		{
+			if (_Timings.Contains(timing))
+			{
+				return;
+			}
+
 			Exit();
 
 			_Timings.Add(timing);
@@ -429,8 +434,7 @@ namespace ReactiveFolder.Model
 
 			
 
-			ResetWorkingFolder();
-
+			
 
 			// Note: なんでTimingsより先にFilterを実行するの？
 			// それはね、Timingsにはファイルの更新日時を読んでトリガーするものがあるからさ
@@ -493,7 +497,9 @@ namespace ReactiveFolder.Model
 		public bool Start(Action<ReactiveStreamContext> subscriber = null)
 		{
 			Exit();
-			
+
+			ResetWorkingFolder();
+
 			if (false == IsValid)
 			{
 				return false;

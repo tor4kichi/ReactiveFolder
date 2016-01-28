@@ -135,7 +135,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actions\AppExecuteParam.cs" />
+    <Compile Include="Actions\AppArgument.cs" />
     <Compile Include="Actions\AppExecuteSandbox.cs" />
     <Compile Include="Actions\AppLaunchReactiveAction.cs" />
     <Compile Include="Actions\ApplicationPolicy.cs" />
