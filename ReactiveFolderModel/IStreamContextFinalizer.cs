@@ -9,6 +9,7 @@ namespace ReactiveFolder.Model
 {
 	public interface IStreamContextFinalizer
 	{
+		string OutputName { get; }
 		DirectoryInfo GetDestinationFolder();
 	}
 }

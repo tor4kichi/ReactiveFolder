@@ -18,15 +18,6 @@ namespace ReactiveFolder.Model
 		/// </summary>
 		public bool IsProtectOriginal { get; set; }
 
-		/// <summary>
-		/// <para>Default is Path.GetFileNameWithoutExtension(OriginalPath)</para>
-		/// <para>出力時のファイル名です。</para>
-		/// <para>Finalizeメソッドで利用されます。</para>
-		/// <para>Nameにパス文字列として扱えない文字列を設定すると例外が発生します。</para>
-		/// <para>最初に現れる"."以降は削除されます。</para>
-		/// </summary>
-		public string Name { get; set; }
-
 
 		/// <summary>
 		/// <para>作業元となるフォルダ情報です。</para>
@@ -66,9 +57,18 @@ namespace ReactiveFolder.Model
 
 			TempOutputFolder = GenerateTempOutputFolder();
 
-			Name = Path.GetFileNameWithoutExtension(SourcePath);
-
 			Status = ReactiveStreamStatus.Running;
+		}
+
+
+
+
+		public string Name
+		{
+			get
+			{
+				return Path.GetFileNameWithoutExtension(OriginalPath);
+			}
 		}
 
 		public void Update(IStreamContextUpdater updater)
@@ -191,13 +191,21 @@ namespace ReactiveFolder.Model
 					// OutputPathで指定されたファイルをfinalizer.DestinationFolderにコピーする
 					// コピーする前にファイル名をNameに変更する（拡張子はOutputPathのものを引き継ぐ）
 
+					string outputName = Path.GetFileNameWithoutExtension(OriginalPath);
+					if (false == String.IsNullOrWhiteSpace(finalizer.OutputName))
+					{
+						outputName = finalizer.OutputName;
+					}
+
+
+
 					if (IsFile)
 					{
-						outputPath = FinalizeFile(destFolder);
+						outputPath = FinalizeFile(outputName, destFolder);
 					}
 					else
 					{
-						outputPath = FinalizeFolder(destFolder);
+						outputPath = FinalizeFolder(outputName, destFolder);
 					}
 
 				}
@@ -226,8 +234,9 @@ namespace ReactiveFolder.Model
 		}
 
 
-		private string FinalizeFile(DirectoryInfo destFolder)
+		private string FinalizeFile(string outputName, DirectoryInfo destFolder)
 		{
+			
 			var outputFileInfo = new FileInfo(SourcePath);
 			if (false == outputFileInfo.Exists)
 			{
@@ -239,7 +248,7 @@ namespace ReactiveFolder.Model
 			var finalizeFilePath = Path.Combine(
 				destFolder.FullName,
 				Path.ChangeExtension(
-					Path.GetFileNameWithoutExtension(Name),
+					outputName,
 					extention
 				)
 			);
@@ -257,7 +266,7 @@ namespace ReactiveFolder.Model
 			return null;
 		}
 
-		private string FinalizeFolder(DirectoryInfo destFolder)
+		private string FinalizeFolder(string outputName, DirectoryInfo destFolder)
 		{
 			var outputFolderInfo = new DirectoryInfo(SourcePath);
 			if (false == outputFolderInfo.Exists)
@@ -268,7 +277,7 @@ namespace ReactiveFolder.Model
 
 			var finalizeFolderPath = Path.Combine(
 				destFolder.FullName,
-				Path.GetFileName(Name)
+				outputName
 			);
 
 			var finalizeFolderInfo = new DirectoryInfo(finalizeFolderPath);
