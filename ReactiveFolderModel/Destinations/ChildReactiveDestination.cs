@@ -17,6 +17,13 @@ namespace ReactiveFolder.Model.Destinations
 		[DataMember]
 		public string ChildFolderName { get; set; }
 
+
+
+		public ChildReactiveDestination()
+		{
+			ChildFolderName = "output";
+		}
+
 		public override DirectoryInfo GetDestinationFolder()
 		{
 			return new DirectoryInfo(

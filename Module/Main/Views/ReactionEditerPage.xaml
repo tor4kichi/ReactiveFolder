@@ -268,40 +268,66 @@
                             Text="Actions"  />
 
 
-                        <ItemsControl Grid.Row="1"
-                                        ItemsSource="{Binding TimingVMs}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <CheckBox IsChecked="{Binding IsEnable.Value, Mode=TwoWay}" />
-
-                                        <ContentControl Content="{Binding}" 
-                                                        HorizontalContentAlignment="Stretch"
-                                                        VerticalContentAlignment="Stretch">
-                                            <ContentControl.Resources>
-
-                                                <!-- FileUpdate Timing -->
-                                                <DataTemplate DataType="{x:Type vm:FileUpdateTimingViewModel}">
-                                                    <TextBlock Text="FileUpdate"></TextBlock>
-                                                </DataTemplate>
-
-                                                <!-- Timer Timing -->
-                                                <DataTemplate DataType="{x:Type vm:TimerTimingViewModel}">
-                                                    <TextBlock Text="Timer"></TextBlock>
-                                                </DataTemplate>
-
-                                            </ContentControl.Resources>
-
-                                        </ContentControl>
-                                    </StackPanel>
-
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBlock Grid.Row="1"
+                            Text="TODO " />
 
                     </Grid>
+                    
+                    
                     <Grid x:Name="DestinationContainer" DataContext="{Binding DestinationEditVM.Value}">
-                        <TextBlock Text="Destination" />
+                        
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0"
+                            Orientation="Vertical">
+                            <RadioButton Content="input/" GroupName="DestinationFolderGroup" 
+                                         IsChecked="{Binding IsSameInputFolderChecked.Value, Mode=TwoWay}" />
+                            <RadioButton Content="input/child" GroupName="DestinationFolderGroup"
+                                         IsChecked="{Binding IsInputChildFolderChecked.Value, Mode=TwoWay}" />
+
+                            <RadioButton Content="absolute" GroupName="DestinationFolderGroup"
+                                         IsChecked="{Binding IsAbsoluteFolderChecked.Value, Mode=TwoWay}" />
+                        </StackPanel>
+
+
+                        <ContentControl Grid.Column="1"
+                            Content="{Binding DestinationVM.Value}"
+                                        HorizontalContentAlignment="Stretch"
+                                        VerticalContentAlignment="Stretch"
+                                        >
+                            <ContentControl.Resources>
+
+                                <!-- SameInputDestinationViewModel -->
+                                <DataTemplate DataType="{x:Type vm:SameInputDestinationViewModel}">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="SameInput Content"></TextBlock>
+                                        <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
+                                    </StackPanel> 
+                                </DataTemplate>
+
+                                <!-- InputChildFolderDestinationViewModel -->
+                                <DataTemplate DataType="{x:Type vm:InputChildFolderDestinationViewModel}">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="InputChildFolder Content"></TextBlock>
+                                        <TextBox Text="{Binding ChildFolderName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <!-- AbsolutePathDestinationViewModel -->
+                                <DataTemplate DataType="{x:Type vm:AbsolutePathDestinationViewModel}">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="Absolute Path Content"></TextBlock>
+                                        <Button Content="Select Folder" Command="{Binding SelectOutputFolderCommand}" />
+                                        <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                                
+                            </ContentControl.Resources>
+                        </ContentControl>
 
                     </Grid>
                 </ItemsControl>

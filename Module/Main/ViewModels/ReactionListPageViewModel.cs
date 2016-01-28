@@ -131,7 +131,7 @@ namespace Modules.Main.ViewModels
 						reaction.AddTiming(new FileUpdateReactiveTiming());
 						reaction.Filter = new FileReactiveFilter();
 
-						reaction.AddAction(new RenameReactiveAction("#{name}"));
+//						reaction.AddAction(new RenameReactiveAction("#{name}"));
 
 						// save
 						FolderModel.SaveReaction(reaction);

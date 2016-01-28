@@ -12,7 +12,24 @@ namespace ReactiveFolder.Model.Destinations
 	public class AbsolutePathReactiveDestination : ReactiveDestinationBase
 	{
 		[DataMember]
-		public string AbsoluteFolderPath { get; set; }
+		private string _AbsoluteFolderPath;
+		public string AbsoluteFolderPath
+		{
+			get
+			{
+				return _AbsoluteFolderPath;
+			}
+			set
+			{
+				SetProperty(ref _AbsoluteFolderPath, value);
+			}
+		}
+
+
+		public AbsolutePathReactiveDestination()
+		{
+			AbsoluteFolderPath = "";
+		}
 
 		public override DirectoryInfo GetDestinationFolder()
 		{

@@ -15,6 +15,8 @@ using System.IO;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using ReactiveFolder.Model.Timings;
+using ReactiveFolder.Model.Actions;
+using ReactiveFolder.Model.Destinations;
 
 namespace Modules.Main.ViewModels
 {
@@ -764,6 +766,7 @@ namespace Modules.Main.ViewModels
 
 	public class ActionsEditViewModel : BindableBase
 	{
+
 		public FolderReactionModel ReactionModel;
 		public ActionsEditViewModel(FolderReactionModel reactionModel)
 		{
@@ -771,12 +774,367 @@ namespace Modules.Main.ViewModels
 		}
 	}
 
-	public class DestinationEditViewModel : BindableBase
+	public class ActionViewModelBase : BindableBase, IDisposable
+	{
+		public FolderReactionModel ReactionModel { get; private set; }
+
+		protected CompositeDisposable _CompositeDisposable { get; private set; }
+
+		public ActionViewModelBase(FolderReactionModel reactionModel)
+		{
+			ReactionModel = reactionModel;
+			_CompositeDisposable = new CompositeDisposable();
+		}
+
+		public void Dispose()
+		{
+			_CompositeDisposable?.Dispose();
+			_CompositeDisposable = null;
+		}
+	}
+
+
+	public class AppLaunchActionViewModel : ActionViewModelBase
+	{
+		public static List<string> AppList;
+
+		static AppLaunchActionViewModel()
+		{
+			AppList = AppLaunchReactiveAction.AppPolicyFactory.GetPolicies()
+				.Select(x => x.AppName)
+				.ToList();
+		}
+
+		// アプリの選択とアプリ内のAppOptionの選択
+
+		public AppLaunchActionViewModel(FolderReactionModel reactionModel)
+			 : base(reactionModel)
+		{
+
+		}
+
+		private DelegateCommand<string> _SelectAppCommand;
+		public DelegateCommand<string> SelectAppCommand
+		{
+			get
+			{
+				return _SelectAppCommand
+					?? (_SelectAppCommand = new DelegateCommand<string>((x) =>
+					{
+					}));
+			}
+		}
+
+		private DelegateCommand<string> _SelectAppOptionCommand;
+		public DelegateCommand<string> SelectAppOptionCommand
+		{
+			get
+			{
+				return _SelectAppOptionCommand
+					?? (_SelectAppOptionCommand = new DelegateCommand<string>((x) => 
+					{
+					}));
+			}
+		}
+
+	}
+
+
+
+	public class DestinationEditViewModel : BindableBase, IDisposable
 	{
 		public FolderReactionModel ReactionModel;
+
+		protected CompositeDisposable _CompositeDisposable { get; private set; }
+
+		public ReadOnlyReactiveProperty<DestinationViewModelBase> DestinationVM { get; private set; }
+
+		public ReactiveProperty<bool> IsSameInputFolderChecked { get; set; }
+		public ReactiveProperty<bool> IsInputChildFolderChecked { get; set; }
+		public ReactiveProperty<bool> IsAbsoluteFolderChecked { get; set; }
+
+
+		SameInputReactiveDestination _CachedSameInputDest;
+		ChildReactiveDestination _CachedInputChildFolderDest;
+		AbsolutePathReactiveDestination _CachedAbsoluteDest;
+
 		public DestinationEditViewModel(FolderReactionModel reactionModel)
 		{
 			ReactionModel = reactionModel;
+			_CompositeDisposable = new CompositeDisposable();
+
+			CacheDestinationModel();
+
+			// 1. Checked系が変化すると
+			IsSameInputFolderChecked = new ReactiveProperty<bool>(ReactionModel.Destination is SameInputReactiveDestination)
+				.AddTo(_CompositeDisposable); 
+			IsInputChildFolderChecked = new ReactiveProperty<bool>(ReactionModel.Destination is ChildReactiveDestination)
+				.AddTo(_CompositeDisposable);
+			IsAbsoluteFolderChecked = new ReactiveProperty<bool>(ReactionModel.Destination is AbsolutePathReactiveDestination)
+				.AddTo(_CompositeDisposable);
+
+
+			// 2. CheckedのSubscriberによってReactionModel.Destinationが更新されて
+			IsSameInputFolderChecked.Where(x => x)
+				.Subscribe(_ =>
+				{
+					CacheDestinationModel();
+
+					if (_CachedSameInputDest == null)
+					{
+						_CachedSameInputDest = new SameInputReactiveDestination();
+					}
+
+					ReactionModel.Destination = _CachedSameInputDest;
+				})
+				.AddTo(_CompositeDisposable);
+
+			IsInputChildFolderChecked.Where(x => x)
+				.Subscribe(_ =>
+				{
+					CacheDestinationModel();
+
+					if (_CachedInputChildFolderDest == null)
+					{
+						_CachedInputChildFolderDest = new ChildReactiveDestination();
+					}
+
+					ReactionModel.Destination = _CachedInputChildFolderDest;
+				})
+				.AddTo(_CompositeDisposable);
+
+			IsAbsoluteFolderChecked.Where(x => x)
+				.Subscribe(_ =>
+				{
+					CacheDestinationModel();
+
+					if (_CachedAbsoluteDest == null)
+					{
+						_CachedAbsoluteDest = new AbsolutePathReactiveDestination();
+					}
+
+					ReactionModel.Destination = _CachedAbsoluteDest;
+				})
+				.AddTo(_CompositeDisposable);
+
+
+			// 3. ReactionModel.Destinationの更新に合わせてVMに変換
+			DestinationVM = ReactionModel.ObserveProperty(x => x.Destination)
+				.Select(ModelToVM)
+				.ToReadOnlyReactiveProperty()
+				.AddTo(_CompositeDisposable);
+
+			
+		}
+
+
+
+		private void CacheDestinationModel()
+		{
+			if (ReactionModel.Destination is SameInputReactiveDestination)
+			{
+				_CachedSameInputDest = ReactionModel.Destination as SameInputReactiveDestination;
+			}
+			else if (ReactionModel.Destination is ChildReactiveDestination)
+			{
+				_CachedInputChildFolderDest = ReactionModel.Destination as ChildReactiveDestination;
+			}
+			else if (ReactionModel.Destination is AbsolutePathReactiveDestination)
+			{
+				_CachedAbsoluteDest = ReactionModel.Destination as AbsolutePathReactiveDestination;
+			}
+			else
+			{
+				throw new Exception();
+			}
+		}
+
+		private DestinationViewModelBase ModelToVM(ReactiveDestinationBase destModel)
+		{
+			if (destModel is SameInputReactiveDestination)
+			{
+				return new SameInputDestinationViewModel(ReactionModel);
+			} 
+			else if (destModel is ChildReactiveDestination)
+			{
+				return new InputChildFolderDestinationViewModel(ReactionModel);
+			}
+			else if (destModel is AbsolutePathReactiveDestination)
+			{
+				return new AbsolutePathDestinationViewModel(ReactionModel);
+			}
+			else
+			{
+				throw new Exception();
+			}
+		}
+
+		public void Dispose()
+		{
+			_CompositeDisposable?.Dispose();
+			_CompositeDisposable = null;
+		}
+	}
+
+	public class DestinationViewModelBase : BindableBase, IDisposable
+	{
+		public FolderReactionModel ReactionModel { get; private set; }
+
+		protected CompositeDisposable _CompositeDisposable { get; private set; }
+
+
+
+
+		public ReactiveProperty<string> OutputNamePattern { get; private set; }
+
+
+
+		public DestinationViewModelBase(FolderReactionModel reactionModel)
+		{
+			ReactionModel = reactionModel;
+			_CompositeDisposable = new CompositeDisposable();
+
+			OutputNamePattern = reactionModel.Destination.ToReactivePropertyAsSynchronized(x => x.OutputNamePattern)
+				.AddTo(_CompositeDisposable);
+
+			
+		}
+
+		public void Dispose()
+		{
+			_CompositeDisposable?.Dispose();
+			_CompositeDisposable = null;
+		}
+	}
+
+	
+
+	public class SameInputDestinationViewModel : DestinationViewModelBase
+	{
+		SameInputReactiveDestination Destination;
+
+		public ReadOnlyReactiveProperty<string> OutputPathSample { get; private set; }
+
+
+		public SameInputDestinationViewModel(FolderReactionModel reactionModel)
+			: base(reactionModel)
+		{
+			Destination = reactionModel.Destination as SameInputReactiveDestination;
+
+
+			OutputPathSample = Observable.CombineLatest(
+					ReactionModel.ObserveProperty(x => x.WorkFolder).Select(x => x.FullName)
+					, OutputNamePattern
+				)
+				.Select(x => {
+					return Path.Combine(x[0], x[1]);
+				})
+				.ToReadOnlyReactiveProperty()
+				.AddTo(_CompositeDisposable);
+		}
+	}
+	public class InputChildFolderDestinationViewModel : DestinationViewModelBase
+	{
+		ChildReactiveDestination Destination;
+
+		public ReactiveProperty<string> ChildFolderName { get; private set; }
+
+		public ReadOnlyReactiveProperty<string> OutputPathSample { get; private set; }
+
+
+		public InputChildFolderDestinationViewModel(FolderReactionModel reactionModel)
+			: base(reactionModel)
+		{
+			Destination = reactionModel.Destination as ChildReactiveDestination;
+
+			ChildFolderName = Destination.ToReactivePropertyAsSynchronized(x => x.ChildFolderName)
+				.AddTo(_CompositeDisposable);
+
+			OutputPathSample = Observable.CombineLatest(
+					ReactionModel.ObserveProperty(x => x.WorkFolder).Select(x => x.FullName)
+					, ChildFolderName
+					, OutputNamePattern
+				)
+				.Select(x => {
+					return Path.Combine(x[0], x[1], x[2]);
+				})
+				.ToReadOnlyReactiveProperty()
+				.AddTo(_CompositeDisposable);
+		}
+	}
+
+	public class AbsolutePathDestinationViewModel : DestinationViewModelBase
+	{
+		AbsolutePathReactiveDestination Destination;
+
+		public string AbsoluteFolderPath { get; private set; }
+
+		public ReadOnlyReactiveProperty<string> OutputPathSample { get; private set; }
+
+		public AbsolutePathDestinationViewModel(FolderReactionModel reactionModel)
+			: base(reactionModel)
+		{
+			Destination = reactionModel.Destination as AbsolutePathReactiveDestination;
+
+
+			AbsoluteFolderPath = Destination.AbsoluteFolderPath;
+
+			OutputPathSample = Observable.CombineLatest(
+					Destination.ObserveProperty(x => x.AbsoluteFolderPath)
+						.Where(x => false == String.IsNullOrWhiteSpace(x))
+					, OutputNamePattern
+				)
+				.Select(x => {
+					return Path.Combine(x[0], x[1]);
+				})
+				.ToReadOnlyReactiveProperty()
+				.AddTo(_CompositeDisposable);
+		}
+
+
+		private DelegateCommand _SelectOutputFolderCommand;
+		public DelegateCommand SelectOutputFolderCommand
+		{
+			get
+			{
+				return _SelectOutputFolderCommand
+					?? (_SelectOutputFolderCommand = new DelegateCommand(() => 
+					{
+						// TODO: 出力先の絶対パスをFolder選択ダイアログを使って取得する
+						OpenFileDialog ofp = new OpenFileDialog();
+						ofp.FileName = "The file will be ignored";
+						ofp.CheckFileExists = false;
+						ofp.CheckPathExists = true;
+						ofp.ValidateNames = false;
+
+						try
+						{
+							var result = ofp.ShowDialog();
+							if (result == DialogResult.OK &&
+								false == String.IsNullOrWhiteSpace(ofp.FileName))
+							{
+								var folderPath = Path.GetDirectoryName(ofp.FileName);
+								var folderInfo = new DirectoryInfo(folderPath);
+
+								if (false == folderInfo.Exists)
+								{
+									return;
+								}
+
+								Destination.AbsoluteFolderPath = folderInfo.FullName;
+								AbsoluteFolderPath = folderInfo.FullName;
+								OnPropertyChanged(nameof(AbsoluteFolderPath));
+							}
+						}
+						finally
+						{
+							ofp.Dispose();
+						}
+
+
+						
+					}));
+			}
 		}
 	}
 }
