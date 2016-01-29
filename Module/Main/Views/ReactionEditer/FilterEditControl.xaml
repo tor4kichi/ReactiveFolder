@@ -1,0 +1,171 @@
+﻿<UserControl x:Class="Modules.Main.Views.ReactionEditer.FilterEditControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Modules.Main.Views"
+             xmlns:vm="clr-namespace:Modules.Main.ViewModels"
+             xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
+             xmlns:prism="http://prismlibrary.com/"             
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    
+    <Grid x:Name="FilterContainer" >
+
+        <Grid.Resources>
+
+
+            <!-- edit File Filter Patterns  -->
+            <DataTemplate x:Key="FileFilterContentTemplate" DataType="{x:Type editervm:FileFilterViewModel}">
+                <!-- Selected File Filter patterns -->
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Added Filters" />
+                    <ItemsControl ItemsSource="{Binding FileFilterPatterns}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding}" />
+                                    <Button Content="×" 
+                                                        Command="{Binding Path=DataContext.RemoveFiterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}"
+                                                        />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="Candidate Filters" />
+                    <ItemsControl ItemsSource="{Binding CandidateFilterItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="{Binding}" 
+                                                        Command="{Binding Path=DataContext.AddFiterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}"
+                                                        />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="Sample Files" />
+                    <ItemsControl ItemsSource="{Binding SampleItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Foreground="Gray" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </DataTemplate>
+
+
+            <!-- edit Folder Filter Pattern  -->
+            <DataTemplate x:Key="FolderFilterContentTemplate" DataType="{x:Type editervm:FolderFilterViewModel}">
+                <StackPanel Orientation="Vertical">
+
+
+
+                    <TextBox Height="20" Text="{Binding FolderFilterPattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" 
+                                           Text="Candidate word:" />
+
+                        <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Visible"
+                                              VerticalScrollBarVisibility="Hidden"
+                                              HorizontalAlignment="Stretch"
+                                              >
+                            <ItemsControl
+                                            ItemsSource="{Binding CandidateFilterItems}" 
+                                            MaxHeight="100"
+                                            >
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Content="{Binding}"
+                                                    Command="{Binding Path=DataContext.SelectCandidateWordCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                                    CommandParameter="{Binding}"
+                                                    />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                    </Grid>
+
+
+                    <ItemsControl ItemsSource="{Binding SampleItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Foreground="Gray" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate x:Key="EmptyTemplate" >
+                <TextBlock Text="Empty" />
+            </DataTemplate>
+
+
+
+            <!-- FilterViewModelSelector -->
+            <local:FilterContentDataTemplateSelector x:Key="FilterTemplateSelector"
+                                FileTemplate="{StaticResource FileFilterContentTemplate}"
+                                FolderTemplate="{StaticResource FolderFilterContentTemplate}"
+                                EmptyTemplate="{StaticResource EmptyTemplate}"
+                                                                     />
+        </Grid.Resources>
+        
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+
+
+        <!-- FileかFolderの選択を行うラジオボタン -->
+        <StackPanel Grid.Column="0"
+                            Orientation="Vertical">
+            <RadioButton GroupName="FilterTypeSelectorGroup" 
+                                     IsChecked="{Binding IsFileFilterSelected.Value, Mode=TwoWay}" Grid.ColumnSpan="2">
+                <TextBlock Text="File"></TextBlock>
+            </RadioButton>
+
+            <RadioButton GroupName="FilterTypeSelectorGroup" 
+                                     IsChecked="{Binding IsFolderFilterSelected.Value, Mode=TwoWay}" Grid.ColumnSpan="2">
+                <TextBlock Text="Folder"></TextBlock>
+            </RadioButton>
+        </StackPanel>
+
+        <!-- FileとFolderのVMによって表示を切り替えるContentControl -->
+        <Grid Grid.Column="1">
+            <ContentControl Content="{Binding FilterVM.Value}"
+                                        ContentTemplateSelector="{StaticResource FilterTemplateSelector}" Grid.ColumnSpan="2"
+                                            HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Stretch"
+                                            >
+
+            </ContentControl>
+        </Grid>
+        <!--
+        <TextBlock Grid.Row="0"
+            Text="Filter File/Folder Name"  />
+                        
+        -->
+    </Grid>
+</UserControl>

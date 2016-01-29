@@ -41,9 +41,8 @@ namespace Modules.Main.ViewModels
 		public ReactiveProperty<bool> IsReactionValid { get; private set; }
 
 		public ReactiveProperty<string> ReactionWorkName { get; private set; }
-		public ReactiveProperty<string> WorkFolderPath { get; private set; }
 
-
+		public ReactiveProperty<WorkFolderEditViewModel> WorkFolderEditVM { get; private set; }
 		public ReactiveProperty<FilterEditViewModel> FilterEditVM { get; private set; }
 		public ReactiveProperty<TimingEditViewModel> TimingEditVM { get; private set; }
 		public ReactiveProperty<ActionsEditViewModel> ActionsEditVM { get; private set; }
@@ -58,8 +57,8 @@ namespace Modules.Main.ViewModels
 			IsReactionValid = new ReactiveProperty<bool>(false);
 
 			ReactionWorkName = new ReactiveProperty<string>("");
-			WorkFolderPath = new ReactiveProperty<string>("");
 
+			WorkFolderEditVM = new ReactiveProperty<WorkFolderEditViewModel>();
 			FilterEditVM = new ReactiveProperty<FilterEditViewModel>();
 			TimingEditVM = new ReactiveProperty<TimingEditViewModel>();
 			ActionsEditVM = new ReactiveProperty<ActionsEditViewModel>();
@@ -74,13 +73,13 @@ namespace Modules.Main.ViewModels
 			// initialize with this.Reaction
 
 			ReactionWorkName.Value = Reaction.Name;
-			WorkFolderPath.Value = Reaction.WorkFolder.FullName;
 
 			Reaction.ObserveProperty(x => x.WorkFolder)
 				.Subscribe(x =>
 				{
 					FilterEditVM.Value?.Dispose();
 
+					WorkFolderEditVM.Value = new WorkFolderEditViewModel(Reaction);
 					FilterEditVM.Value = new FilterEditViewModel(Reaction);
 					TimingEditVM.Value = new TimingEditViewModel(Reaction);
 					ActionsEditVM.Value = new ActionsEditViewModel(Reaction);
@@ -175,46 +174,7 @@ namespace Modules.Main.ViewModels
 
 
 
-		private DelegateCommand _FolderSelectCommand;
-		public DelegateCommand FolderSelectCommand
-		{
-			get
-			{
-				return _FolderSelectCommand
-					?? (_FolderSelectCommand = new DelegateCommand(() =>
-					{
-						// モニター対象となるフォルダを取得する
-						var dialog = new WPFFolderBrowser.WPFFolderBrowserDialog("Select monitor target folder.");
-
-						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
-
-						try
-						{
-							var result = dialog.ShowDialog();
-							if (result.HasValue && result.Value
-								&& false == String.IsNullOrWhiteSpace(dialog.FileName))
-							{
-								var folderInfo = new DirectoryInfo(dialog.FileName);
-
-								if (false == folderInfo.Exists)
-								{
-									return;
-								}
-								Reaction.WorkFolder = folderInfo;
-								WorkFolderPath.Value = folderInfo.FullName;
-								
-							}
-						}
-						finally
-						{
-//							dialog.Dispose();						
-						}
-						
-
-					}));
-			}
-		}
+		
 
 
 

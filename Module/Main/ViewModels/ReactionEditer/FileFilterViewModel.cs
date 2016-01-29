@@ -21,10 +21,18 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public static readonly FileFilterViewModel Empty = new FileFilterViewModel();
 
 
-		// 足りないもの
-		// 追加ようテキストボックスのテキスト
-		// Word追加コマンド
-		// Word削除コマンド
+
+
+
+
+		// **************************
+
+		// TODO: FileFilterを手動追加するためのテキストボックスを追加
+
+		// **************************
+
+
+
 
 
 
@@ -43,12 +51,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		private ReadOnlyReactiveCollection<string> _CachedCandidateFilterItems;
 
-		/// <summary>
-		/// FilterPatternsの検証結果
-		/// </summary>
-		public ReactiveProperty<bool> IsValid { get; private set; }
-
-
+	
 		/// <summary>
 		/// FilterPartternsをもとにFolderReactionModel.WorkFolder内の
 		/// ファイルをフィルタリングした結果のファイル名（拡張子含む）
@@ -62,8 +65,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public FileFilterViewModel()
 			: base(null)
 		{
-			IsValid = new ReactiveProperty<bool>(false);
-
 			var temp = new ObservableCollection<string>();
 			FileFilterPatterns = temp.ToReadOnlyReactiveCollection();
 			CandidateFilterItems = new ObservableCollection<string>();
@@ -99,17 +100,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-			IsValid = FileFilterPatterns.PropertyChangedAsObservable()
-				.Select(_ =>
-				{
-					if (_FileFilterModel.Validate().HasValidationError) { return false; }
-
-					return true;
-				})
-				.ToReactiveProperty()
-				.AddTo(_CompositeDisposable);
-
-
 
 			SampleItems = new ObservableCollection<string>(_FileFilterModel.FileFilter(ReactionModel.WorkFolder).Select(x => x.Name));
 
@@ -137,7 +127,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				return _AddFiterTextCommand
 					?? (_AddFiterTextCommand = new DelegateCommand<string>(word =>
 					{
-						_FileFilterModel.FileFilterPatterns.Add(word);
+						_FileFilterModel.AddFilterPattern(word);
 
 						if (CandidateFilterItems.Contains(word))
 						{
@@ -157,7 +147,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				return _RemoveFiterTextCommand
 					?? (_RemoveFiterTextCommand = new DelegateCommand<string>(word =>
 					{
-						_FileFilterModel.FileFilterPatterns.Remove(word);
+						_FileFilterModel.RemoveFilterPattern(word);
 
 						if (_CachedCandidateFilterItems.Contains(word))
 						{

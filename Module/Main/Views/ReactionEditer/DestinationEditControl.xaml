@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="Modules.Main.Views.ReactionEditer.DestinationEditControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Modules.Main.Views"
+             xmlns:vm="clr-namespace:Modules.Main.ViewModels"
+             xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
+             xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
+             xmlns:prism="http://prismlibrary.com/"             
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid x:Name="DestinationContainer" >
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0"
+                            Orientation="Vertical">
+            <RadioButton Content="input/" GroupName="DestinationFolderGroup" 
+                                         IsChecked="{Binding IsSameInputFolderChecked.Value, Mode=TwoWay}" />
+            <RadioButton Content="input/child" GroupName="DestinationFolderGroup"
+                                         IsChecked="{Binding IsInputChildFolderChecked.Value, Mode=TwoWay}" />
+
+            <RadioButton Content="absolute" GroupName="DestinationFolderGroup"
+                                         IsChecked="{Binding IsAbsoluteFolderChecked.Value, Mode=TwoWay}" />
+        </StackPanel>
+
+
+        <ContentControl Grid.Column="1"
+                            Content="{Binding DestinationVM.Value}"
+                                        HorizontalContentAlignment="Stretch"
+                                        VerticalContentAlignment="Stretch"
+                                        >
+            <ContentControl.Resources>
+
+                <!-- SameInputDestinationViewModel -->
+                <DataTemplate DataType="{x:Type editervm:SameInputDestinationViewModel}">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="SameInput Content"></TextBlock>
+                        <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+
+                <!-- InputChildFolderDestinationViewModel -->
+                <DataTemplate DataType="{x:Type editervm:InputChildFolderDestinationViewModel}">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="InputChildFolder Content"></TextBlock>
+                        <TextBox Text="{Binding ChildFolderName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+
+                <!-- AbsolutePathDestinationViewModel -->
+                <DataTemplate DataType="{x:Type editervm:AbsolutePathDestinationViewModel}">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Absolute Path Content"></TextBlock>
+                        <Button Content="Select Folder" Command="{Binding SelectOutputFolderCommand}" />
+                        <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+
+            </ContentControl.Resources>
+        </ContentControl>
+
+    </Grid>
+</UserControl>

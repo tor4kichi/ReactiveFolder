@@ -10,7 +10,7 @@ using ReactiveFolder.Model.Destinations;
 
 namespace Modules.Main.ViewModels.ReactionEditer
 {
-	public class DestinationEditViewModel : BindableBase, IDisposable
+	public class DestinationEditViewModel : ReactionEditViewModelBase, IDisposable
 	{
 		public FolderReactionModel ReactionModel;
 
@@ -28,6 +28,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		AbsolutePathReactiveDestination _CachedAbsoluteDest;
 
 		public DestinationEditViewModel(FolderReactionModel reactionModel)
+			: base(reactionModel)
 		{
 			ReactionModel = reactionModel;
 			_CompositeDisposable = new CompositeDisposable();
@@ -142,6 +143,11 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		{
 			_CompositeDisposable?.Dispose();
 			_CompositeDisposable = null;
+		}
+
+		protected override bool IsValidateModel()
+		{
+			return Reaction.ValidateDestination().IsValid;
 		}
 	}
 }

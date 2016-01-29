@@ -9,10 +9,8 @@ using System.Threading.Tasks;
 
 namespace Modules.Main.ViewModels.ReactionEditer
 {
-	public class TimingEditViewModel : BindableBase, IDisposable
+	public class TimingEditViewModel : ReactionEditViewModelBase, IDisposable
 	{
-		public FolderReactionModel ReactionModel;
-
 		protected CompositeDisposable _CompositeDisposable { get; private set; }
 
 
@@ -20,15 +18,15 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public List<TimingViewModelBase> TimingVMs { get; private set; }
 
 		public TimingEditViewModel(FolderReactionModel reactionModel)
+			: base(reactionModel)
 		{
-			ReactionModel = reactionModel;
 			_CompositeDisposable = new CompositeDisposable();
 
 
 			TimingVMs = new List<TimingViewModelBase>();
 
-			TimingVMs.Add(new FileUpdateTimingViewModel(ReactionModel));
-			TimingVMs.Add(new TimerTimingViewModel(ReactionModel));
+			TimingVMs.Add(new FileUpdateTimingViewModel(Reaction));
+			TimingVMs.Add(new TimerTimingViewModel(Reaction));
 		}
 
 
@@ -36,6 +34,11 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		{
 			_CompositeDisposable?.Dispose();
 			_CompositeDisposable = null;
+		}
+
+		protected override bool IsValidateModel()
+		{
+			return Reaction.ValidateTimings().IsValid;
 		}
 	}
 

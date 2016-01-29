@@ -41,12 +41,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		/// <see cref="FolderReactiveFilter"/>
 		public ReactiveProperty<string> FolderFilterPattern { get; private set; }
 
-
-		/// <summary>
-		/// FolderFilterPatternの検証結果
-		/// </summary>
-		public ReactiveProperty<bool> IsValid { get; private set; }
-
 		/// <summary>
 		/// FolderFilterPatternに自動入力できる候補ワード
 		/// </summary>
@@ -68,7 +62,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public FolderFilterViewModel()
 			: base(null)
 		{
-			IsValid = new ReactiveProperty<bool>(false);
 			FolderFilterPattern = new ReactiveProperty<string>("");
 
 			var temp = new ObservableCollection<string>();
@@ -99,14 +92,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					return x;
 				}
 				)
-				.AddTo(_CompositeDisposable);
-
-			IsValid = _FolderFilter.ObserveProperty(x => x.FolderFilterPattern)
-				.Select(x =>
-				{
-					return false == _FolderFilter.Validate().HasValidationError;
-				})
-				.ToReactiveProperty()
 				.AddTo(_CompositeDisposable);
 
 

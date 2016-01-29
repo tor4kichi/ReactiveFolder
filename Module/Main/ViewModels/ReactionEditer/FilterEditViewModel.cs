@@ -21,10 +21,8 @@ using System.Threading.Tasks;
 
 namespace Modules.Main.ViewModels.ReactionEditer
 {
-	public class FilterEditViewModel : BindableBase, IDisposable
+	public class FilterEditViewModel : ReactionEditViewModelBase, IDisposable
 	{
-
-		public FolderReactionModel Reaction { get; private set; }
 
 
 		/// <summary>
@@ -86,9 +84,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 		public FilterEditViewModel(FolderReactionModel reactionModel)
+			: base(reactionModel)
 		{
-			Reaction = reactionModel;
-
 			_CompositeDisposable = new CompositeDisposable();
 
 
@@ -197,6 +194,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			}
 		}
 
+		protected override bool IsValidateModel()
+		{
+			return Reaction.ValidateFilter().IsValid;
+		}
+
+
 		public void Dispose()
 		{
 			_CompositeDisposable?.Dispose();
@@ -205,6 +208,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			_FilterVMDisposer?.Dispose();
 			_FilterVMDisposer = null;
 		}
+
+		
 	}
 
 
