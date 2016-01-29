@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReactiveFolder.Util;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -75,7 +76,7 @@ namespace ReactiveFolder.Model
 
 			var models = files.Select(fileInfo =>
 			{
-				return Util.FileSerializeHelper.LoadAsync<FolderReactionModel>(fileInfo);
+				return FileSerializeHelper.LoadAsync<FolderReactionModel>(fileInfo);
 			})
 			.ToArray();
 
@@ -276,7 +277,7 @@ namespace ReactiveFolder.Model
 				reactionFileInfo.Delete();
 			}
 
-			Util.FileSerializeHelper.Save(reactionFileInfo, reaction);
+			FileSerializeHelper.Save(reactionFileInfo, reaction);
 		}
 
 

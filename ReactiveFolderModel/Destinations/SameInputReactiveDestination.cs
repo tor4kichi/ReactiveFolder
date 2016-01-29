@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReactiveFolder.Model.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,9 +27,9 @@ namespace ReactiveFolder.Model.Destinations
 			base.Initialize(workDir);
 		}
 
-		public override ValidationResult Validate()
+		protected override ValidationResult InnerValidate()
 		{
-			return ValidationResult.Valid;
+			return ValidationResult.ValidResult;
 		}
 
 	}

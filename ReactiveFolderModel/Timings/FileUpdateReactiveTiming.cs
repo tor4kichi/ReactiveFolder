@@ -1,12 +1,15 @@
-﻿using System;
+﻿using ReactiveFolder.Model.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.Serialization;
 
 namespace ReactiveFolder.Model.Timings
 {
+	[DataContract]
 	public class FileUpdateReactiveTiming : ReactiveTimingBase
 	{
 		private List<PreservedFileInfo> Files;
@@ -26,9 +29,9 @@ namespace ReactiveFolder.Model.Timings
 
 
 
-		public override ValidationResult Validate()
+		protected override ValidationResult InnerValidate()
 		{
-			return ValidationResult.Valid;
+			return ValidationResult.ValidResult;
 		}
 
 

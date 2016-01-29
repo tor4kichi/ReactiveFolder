@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReactiveFolder.Model.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace ReactiveFolder.Model.Destinations
 	{
 		[DataMember]
 		private string _AbsoluteFolderPath;
+
 		public string AbsoluteFolderPath
 		{
 			get
@@ -36,9 +38,10 @@ namespace ReactiveFolder.Model.Destinations
 			return new DirectoryInfo(AbsoluteFolderPath);
 		}
 
-		public override ValidationResult Validate()
+		protected override ValidationResult InnerValidate()
 		{
 			var result = new ValidationResult();
+
 			if (String.IsNullOrWhiteSpace(AbsoluteFolderPath))
 			{
 				result.AddMessage($"{(nameof(AbsolutePathReactiveDestination))}: Need path string.");
@@ -47,6 +50,11 @@ namespace ReactiveFolder.Model.Destinations
 			if (false == Path.IsPathRooted(AbsoluteFolderPath))
 			{
 				result.AddMessage($"{(nameof(AbsolutePathReactiveDestination))}: Path is not absolute path.");
+			}
+
+			if (false == Directory.Exists(AbsoluteFolderPath))
+				{
+				result.AddMessage("NOT_EXIST_DIRECTORY");
 			}
 
 			return result;

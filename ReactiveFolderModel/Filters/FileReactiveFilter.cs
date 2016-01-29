@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReactiveFolder.Model.Util;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -32,7 +33,10 @@ namespace ReactiveFolder.Model.Filters
 		/// </para>
 		/// </summary>
 		[DataMember]
-		public ObservableCollection<string> FileFilterPatterns { get; set; }
+		private ObservableCollection<string> _FileFilterPatterns { get; set; }
+
+
+		public ReadOnlyObservableCollection<string> FileFilterPatterns { get; set; }
 
 
 
@@ -47,12 +51,43 @@ namespace ReactiveFolder.Model.Filters
 			{
 				defaultFilterpatters = new string[] { };
 			}
-			FileFilterPatterns = new ObservableCollection<string>(defaultFilterpatters);
+			_FileFilterPatterns = new ObservableCollection<string>(defaultFilterpatters);
+			FileFilterPatterns = new ReadOnlyObservableCollection<string>(_FileFilterPatterns);
 		}
 
-		public override ValidationResult Validate()
+
+
+		public void AddFilterPattern(string pattern)
 		{
-			
+			if (_FileFilterPatterns.Contains(pattern))
+			{
+				return;
+			}
+
+			_FileFilterPatterns.Add(pattern);
+
+			ValidatePropertyChanged();
+		}
+
+		public void RemoveFilterPattern(string pattern)
+		{
+			if (_FileFilterPatterns.Remove(pattern))
+			{
+				ValidatePropertyChanged();
+			}
+		}
+
+
+		[OnDeserialized]
+		public void SetValuesOnDeserialized(StreamingContext context)
+		{
+			FileFilterPatterns = new ReadOnlyObservableCollection<string>(_FileFilterPatterns);
+		}
+
+
+
+		protected override ValidationResult InnerValidate()
+		{
 			var result = new ValidationResult();
 
 			foreach(var fileFilterParttern in FileFilterPatterns)

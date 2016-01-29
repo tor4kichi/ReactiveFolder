@@ -1,5 +1,6 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
 using ReactiveFolder.Model.Filters;
+using ReactiveFolder.Model.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -109,12 +110,9 @@ namespace ReactiveFolder.Model.Actions
 		}
 
 
-		public override ValidationResult Validate()
+		protected override ValidationResult InnerValidate()
 		{
 			var result = new ValidationResult();
-
-			var app = Sandbox.Policy;
-
 
 			if (false == Sandbox.Validate(GenerateTempStreamContext()))
 			{

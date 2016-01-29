@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReactiveFolder.Model.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,10 +14,36 @@ namespace ReactiveFolder.Model.Timings
 	public class TimerReactiveTiming : ReactiveTimingBase
 	{
 		[DataMember]
-		public DateTime Time { get; set; }
+		private DateTime _Time;
+
+		public DateTime Time
+		{
+			get
+			{
+				return _Time;
+			}
+			set
+			{
+				SetProperty(ref _Time, value);
+			}
+		}
+
+
 
 		[DataMember]
-		public TimeSpan Span { get; set; }
+		private TimeSpan _Span;
+
+		public TimeSpan Span
+		{
+			get
+			{
+				return _Span;
+			}
+			set
+			{
+				SetProperty(ref _Span, value);
+			}
+		}
 
 
 
@@ -36,9 +63,9 @@ namespace ReactiveFolder.Model.Timings
 
 
 
-		public override ValidationResult Validate()
+		protected override ValidationResult InnerValidate()
 		{
-			return ValidationResult.Valid;
+			return ValidationResult.ValidResult;
 		}
 
 

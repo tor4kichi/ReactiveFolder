@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using ReactiveFolder.Model.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -123,7 +124,7 @@ namespace ReactiveFolder.Model.Destinations
 		}
 
 
-		public override ValidationResult Validate()
+		protected override ValidationResult InnerValidate()
 		{
 			var result = new ValidationResult();
 

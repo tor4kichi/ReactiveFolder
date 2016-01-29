@@ -1,5 +1,6 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
 using Reactive.Bindings.Extensions;
+using ReactiveFolder.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -115,7 +116,7 @@ namespace ReactiveFolder.Model
 
 			if (settingSaveFileInfo.Exists)
 			{
-				var settings = Util.FileSerializeHelper.LoadAsync<MonitorSettings>(settingSaveFileInfo);
+				var settings = FileSerializeHelper.LoadAsync<MonitorSettings>(settingSaveFileInfo);
 
 				if (settings == null)
 				{
@@ -146,7 +147,7 @@ namespace ReactiveFolder.Model
 
 			var settingSaveFileInfo = MakeSettingFileInfo();
 
-			Util.FileSerializeHelper.Save(settingSaveFileInfo, settings);
+			FileSerializeHelper.Save(settingSaveFileInfo, settings);
 		}
 
 

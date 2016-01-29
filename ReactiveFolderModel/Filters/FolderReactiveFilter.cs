@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReactiveFolder.Model.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -59,9 +60,8 @@ namespace ReactiveFolder.Model.Filters
 
 
 
-		public override ValidationResult Validate()
+		protected override ValidationResult InnerValidate()
 		{
-
 			var result = new ValidationResult();
 
 			if (String.IsNullOrWhiteSpace(FolderFilterPattern))

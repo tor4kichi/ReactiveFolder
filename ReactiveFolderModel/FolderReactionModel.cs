@@ -15,6 +15,7 @@ using ReactiveFolder.Model.Timings;
 using ReactiveFolder.Model.Actions;
 using ReactiveFolder.Model.Destinations;
 using Microsoft.Practices.Prism;
+using ReactiveFolder.Model.Util;
 
 namespace ReactiveFolder.Model
 {
@@ -32,13 +33,15 @@ namespace ReactiveFolder.Model
 		public bool IsDisable { get; set; }
 
 		[DataMember]
-		private DirectoryInfo _WorkFolder;
+		public string WorkFolderPath { get; private set; }
 
 		/// <summary>
 		/// ワークフォルダが変更されると直ちに
 		/// Generate()で作成したストリームを停止させます。
 		/// 変更後は再度ストリームを構築してください。
 		/// </summary>
+
+		private DirectoryInfo _WorkFolder;
 		public DirectoryInfo WorkFolder
 		{
 			get
@@ -51,7 +54,9 @@ namespace ReactiveFolder.Model
 				{
 					Exit();
 
-					IsReactionParameterChanged = true;
+					WorkFolderPath = _WorkFolder.FullName;
+
+					IsNeedValidation = true;
 				}
 			}
 		}
@@ -72,9 +77,16 @@ namespace ReactiveFolder.Model
 			}
 			set
 			{
+				var old = _Filter;
 				if (SetProperty(ref _Filter, value))
 				{
-					IsReactionParameterChanged = true;
+					if (old != null)
+					{
+						old.ClearParentReactionModel();
+					}
+
+					_Filter.SetParentReactionModel(this);
+					IsNeedValidation = true;
 				}
 			}
 		}
@@ -117,9 +129,17 @@ namespace ReactiveFolder.Model
 			}
 			set
 			{
+				var old = _Destination;
 				if (SetProperty(ref _Destination, value))
 				{
-					IsReactionParameterChanged = true;
+					if (old != null)
+					{
+						old.ClearParentReactionModel();
+					}
+
+					_Destination.SetParentReactionModel(this);
+
+					IsNeedValidation = true;
 				}
 			}
 		}
@@ -139,8 +159,7 @@ namespace ReactiveFolder.Model
 		private BehaviorSubject<ReactiveStreamContext> RemoteTrigger;
 
 
-		[DataMember]
-		private bool IsReactionParameterChanged;
+		private bool IsNeedValidation;
 
 
 		
@@ -156,9 +175,62 @@ namespace ReactiveFolder.Model
 					OnPropertyChanged(nameof(IsValid));
 				}
 
-				return !ValidationResult.HasValidationError;
+				return ValidationResult.IsValid;
 			}
 		}
+
+		private bool _IsActionsValid;
+		public bool IsActionsValid
+		{
+			get
+			{
+				return _IsActionsValid;
+			}
+			set
+			{
+				SetProperty(ref _IsActionsValid, value);
+			}
+		}
+
+		private bool _IsFilterValid;
+		public bool IsFilterValid
+		{
+			get
+			{
+				return _IsFilterValid;
+			}
+			set
+			{
+				SetProperty(ref _IsFilterValid, value);
+			}
+		}
+
+		private bool _IsTimingsValid;
+		public bool IsTimingsValid
+		{
+			get
+			{
+				return _IsTimingsValid;
+			}
+			set
+			{
+				SetProperty(ref _IsTimingsValid, value);
+			}
+		}
+
+		private bool _IsDestinationValid;
+		public bool IsDestinationValid
+		{
+			get
+			{
+				return _IsDestinationValid;
+			}
+			set
+			{
+				SetProperty(ref _IsDestinationValid, value);
+			}
+		}
+
 
 		public ValidationResult ValidationResult { get; private set; }
 		
@@ -167,7 +239,7 @@ namespace ReactiveFolder.Model
 		{
 			get
 			{
-				return IsReactionParameterChanged ||
+				return IsNeedValidation ||
 					ValidationResult == null;
 			}
 		}
@@ -185,7 +257,7 @@ namespace ReactiveFolder.Model
 			Name = "";
 			IsDisable = false;
 
-			IsReactionParameterChanged = true;
+			IsNeedValidation = true;
 
 			_Actions = new ObservableCollection<ReactiveActionBase>();
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
@@ -201,6 +273,8 @@ namespace ReactiveFolder.Model
 		{
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
 			Timings = new ReadOnlyObservableCollection<ReactiveTimingBase>(_Timings);
+
+			WorkFolder = new DirectoryInfo(WorkFolderPath);
 		}
 
 		/// <summary>
@@ -220,7 +294,11 @@ namespace ReactiveFolder.Model
 
 			_Timings.Add(timing);
 
-			IsReactionParameterChanged = true;
+			timing.SetParentReactionModel(this);
+
+			IsNeedValidation = true;
+
+			IsTimingsValid = false;
 		}
 
 
@@ -233,9 +311,14 @@ namespace ReactiveFolder.Model
 		{
 			Exit();
 
-			_Timings.Remove(timing);
+			if (_Timings.Remove(timing))
+			{
+				timing.ClearParentReactionModel();
 
-			IsReactionParameterChanged = true;
+				IsNeedValidation = true;
+
+				IsTimingsValid = false;
+			}
 		}
 
 
@@ -250,7 +333,11 @@ namespace ReactiveFolder.Model
 
 			_Actions.Add(action);
 
-			IsReactionParameterChanged = true;
+			action.SetParentReactionModel(this);
+
+			IsNeedValidation = true;
+
+			IsActionsValid = false;
 		}
 
 
@@ -263,11 +350,209 @@ namespace ReactiveFolder.Model
 		{
 			Exit();
 
-			_Actions.Remove(action);
+			if (_Actions.Remove(action))
+			{
+				action.ClearParentReactionModel();
 
-			IsReactionParameterChanged = true;
+				IsNeedValidation = true;
+
+				IsActionsValid = false;
+			}
 		}
 
+
+
+
+
+		internal void RaisePropertyChangedOnReactiveStream<STREAM_MODEL>(STREAM_MODEL model)
+			where STREAM_MODEL: ReactiveStreamBase
+		{
+			IsNeedValidation = true;
+
+			if (model is ReactiveFilterBase)
+			{
+				IsFilterValid = false;
+			}
+			else if (model is ReactiveActionBase)
+			{
+				IsActionsValid = false;
+			}
+			else if (model is ReactiveTimingBase)
+			{
+				IsTimingsValid = false;
+			}
+			else if (model is ReactiveDestinationBase)
+			{
+				IsDestinationValid = false;
+			}
+			else
+			{
+				throw new Exception("Unknown ReactiveStreamBase derived class. class name: " + nameof(STREAM_MODEL));
+			}
+		}
+
+
+		public ValidationResult ValidateWorkFolder(ValidationResult outResult = null)
+		{
+			outResult = outResult ?? new ValidationResult();
+
+			if (false == WorkFolder.Exists)
+			{
+				outResult.AddMessage("NOT_EXIST_WORKFODLER");
+			}
+
+			return outResult;
+		}
+		
+
+		public ValidationResult ValidateFilter(ValidationResult outResult = null)
+		{
+			outResult = outResult ?? new ValidationResult();
+
+			if (Filter != null)
+			{
+				try
+				{
+					var isValid = Filter.Validate();
+
+					if (false == isValid)
+					{
+						// Filter validate failed.
+						outResult.AddMessage(($"{(nameof(Filter))} has validation error."));
+						outResult.AddMessages(Filter.ValidateResult.Messages);
+					}
+				}
+				catch (Exception e)
+				{
+					outResult.AddMessage(($"{(nameof(Filter))} validation has failed with exception."));
+					outResult.AddMessage($"that {(nameof(Filter))} code contains bug or error.");
+					outResult.AddMessage($"[Exception Message]:{e.Message}");
+				}
+			}
+			else
+			{
+				// Filter not exist.
+				outResult.AddMessage(($"{(nameof(Filter))} is must set to Reaction."));
+			}
+
+
+			IsFilterValid = Filter.IsValid;
+
+
+
+			return outResult;
+		}
+
+
+
+
+		public ValidationResult ValidateActions(ValidationResult outResult = null)
+		{
+			outResult = outResult ?? new ValidationResult();
+
+			if (Actions.Count > 0)
+			{
+				foreach (var action in Actions)
+				{
+					var isValid = action.Validate();
+
+					if (false == isValid)
+					{
+						// Action validate failed.
+						outResult.AddMessage(($"{(nameof(Actions))} has validation error."));
+						outResult.AddMessages(action.ValidateResult.Messages);
+					}
+
+
+				}
+			}
+			else
+			{
+				// Note: アクションが設定されていなければ、ただのコピー動作になる。
+				// （出力先はDestinationの設定に依存する）
+				// この暗黙のデフォルト動作は想定されたものとして扱うべきか否か…。
+				// しかしながら、ユーザーが単純なコピー操作を組み上げたい場合に備えて、
+				// TODO: コピー用のアクションを追加するか、デフォルト動作についての説明を用意するか、
+				// 判断しないといけない。
+			}
+
+
+
+
+
+			// *************************
+
+			// TODO: Filterで出力したファイルをアクションが処理できるか検証する
+
+			// *************************
+
+
+			IsActionsValid = Actions.All(x => x.IsValid);
+
+
+			return outResult;
+		}
+
+
+
+		public ValidationResult ValidateTimings(ValidationResult outResult = null)
+		{
+			outResult = outResult ?? new ValidationResult();
+
+			if (Timings.Count > 0)
+			{
+				foreach (var timing in Timings)
+				{
+					var isValid = timing.Validate();
+
+					if (false == isValid)
+					{
+						// Timing validate failed.
+						outResult.AddMessage(($"Timing has validation error."));
+						outResult.AddMessages(timing.ValidateResult.Messages);
+					}
+				}
+			}
+			else
+			{
+				// タイミングがないと後続のActionを実行できない
+				// （ロジック的には、常にActionが実行されてしまうことになる）
+				outResult.AddMessage(($"not contain execute timing in Timings."));
+			}
+
+			IsTimingsValid = Timings.All(x => x.IsValid);
+
+			return outResult;
+		}
+
+
+		public ValidationResult ValidateDestination(ValidationResult outResult = null)
+		{
+			outResult = outResult ?? new ValidationResult();
+
+			if (Destination != null)
+			{
+				var isValid = Destination.Validate();
+
+				if (isValid)
+				{
+					// Destination validate failed.
+					outResult.AddMessage(($"{(nameof(Destination))} has validation error."));
+					outResult.AddMessages(Destination.ValidateResult.Messages);
+				}
+			}
+			else
+			{
+				// Destination not exist
+				outResult.AddMessage(($"{(nameof(Destination))} is must set to Reaction."));
+			}
+
+
+			IsDestinationValid = Destination.IsValid;
+
+
+			return outResult;
+		}
 
 
 		/// <summary>
@@ -285,109 +570,24 @@ namespace ReactiveFolder.Model
 			ValidationResult validationResult = new ValidationResult();
 
 
-			Func<string, string> makeValidationErrorMessage = (message) =>
-			{
-				return $"{Name}:{message}";
+			// WorkFolder/Filter/Actions/Timings/Destinationの検証をまとめて行う
+
+			var Validaters = new Func<ValidationResult, ValidationResult>[] {
+				ValidateWorkFolder
+				, ValidateFilter
+				, ValidateActions
+				, ValidateTimings
+				, ValidateDestination
 			};
 
-
-
-			if (Filter != null)
+			foreach (var validater in Validaters)
 			{
-				try
-				{
-					var result = Filter.Validate();
-
-					if (result.HasValidationError)
-					{
-						// Filter validate failed.
-						validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Filter))} has validation error."));
-						validationResult.AddMessages(result.Messages);
-					}
-				}
-				catch(Exception e)
-				{
-					validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Filter))} validation has failed with exception."));
-					validationResult.AddMessage($"that {(nameof(Filter))} code contains bug or error.");
-					validationResult.AddMessage($"[Exception Message]:{e.Message}");
-				}
-			}
-			else
-			{
-				// Filter not exist.
-				validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Filter))} is must set to Reaction."));
+				validater(validationResult);
 			}
 
 
-			if (Timings.Count > 0)
-			{
-				foreach (var timing in Timings)
-				{
-					var result = timing.Validate();
-
-					if (result.HasValidationError)
-					{
-						// Timing validate failed.
-						validationResult.AddMessage(makeValidationErrorMessage($"Timing has validation error."));
-						validationResult.AddMessages(result.Messages);
-					}
-				}
-			}
-			else
-			{
-				// タイミングがないと後続のActionを実行できない
-				// （ロジック的には、常にActionが実行されてしまうことになる）
-				validationResult.AddMessage(makeValidationErrorMessage($"not contain execute timing in Timings."));
-			}
-
-
-
-
-			if (Actions.Count > 0)
-			{
-				foreach (var action in Actions)
-				{
-					var result = action.Validate();
-
-					if (result.HasValidationError)
-					{
-						// Action validate failed.
-						validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Actions))} has validation error."));
-						validationResult.AddMessages(result.Messages);
-					}
-				}
-			}
-			else
-			{
-				// Note: アクションが設定されていなければ、ただのコピー動作になる。
-				// （出力先はDestinationの設定に依存する）
-				// この暗黙のデフォルト動作は想定されたものとして扱うべきか否か…。
-				// しかしながら、ユーザーが単純なコピー操作を組み上げたい場合に備えて、
-				// TODO: コピー用のアクションを追加するか、デフォルト動作についての説明を用意するか、
-				// 判断しないといけない。
-			}
-
-
-
-			if (Destination != null)
-			{
-				var result = Destination.Validate();
-
-				if (result.HasValidationError)
-				{
-					// Destination validate failed.
-					validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Destination))} has validation error."));
-					validationResult.AddMessages(result.Messages);
-				}
-			}
-			else
-			{
-				// Destination not exist
-				validationResult.AddMessage(makeValidationErrorMessage($"{(nameof(Destination))} is must set to Reaction."));
-			}
-
-
-			IsReactionParameterChanged = false;
+			// モデルを検証実行済みにマーク
+			IsNeedValidation = false;
 
 
 			return validationResult;

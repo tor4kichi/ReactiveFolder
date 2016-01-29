@@ -133,29 +133,46 @@
     <Compile Include="ViewModels\FolderListPageViewModel.cs" />
     <Compile Include="ViewModels\PageViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditerPageViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\AbsolutePathDestinationViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\ActionsEditViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\ActionViewModelBase.cs" />
-    <Compile Include="ViewModels\ReactionEidter\AppLaunchActionViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\DestinationEditViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\DestinationViewModelBase.cs" />
-    <Compile Include="ViewModels\ReactionEidter\FileFilterViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\FileUpdateTimingViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\FilterEditViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\FilterViewModelBase.cs" />
-    <Compile Include="ViewModels\ReactionEidter\FolderFilterViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\InputChildFolderDestinationViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\SameInputDestinationViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\TimerTimingViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\TimingEditViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEidter\TimingViewModelBase.cs" />
-    <Compile Include="ViewModels\ReactionEidter\TimingViewModelTemplate.cs" />
+    <Compile Include="ViewModels\ReactionEditer\AbsolutePathDestinationViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\ActionsEditViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\ActionViewModelBase.cs" />
+    <Compile Include="ViewModels\ReactionEditer\AppLaunchActionViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\DestinationEditViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\DestinationViewModelBase.cs" />
+    <Compile Include="ViewModels\ReactionEditer\FileFilterViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\FileUpdateTimingViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\FilterEditViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\FilterViewModelBase.cs" />
+    <Compile Include="ViewModels\ReactionEditer\FolderFilterViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\InputChildFolderDestinationViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\ReactionEditViewModelBase.cs" />
+    <Compile Include="ViewModels\ReactionEditer\SameInputDestinationViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\TimerTimingViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\TimingEditViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditer\TimingViewModelBase.cs" />
+    <Compile Include="ViewModels\ReactionEditer\TimingViewModelTemplate.cs" />
+    <Compile Include="ViewModels\ReactionEditer\WorkFolderEditViewModel.cs" />
     <Compile Include="ViewModels\ReactionListPageViewModel.cs" />
+    <Compile Include="Views\ReactionEditer\ActionEditControl.xaml.cs">
+      <DependentUpon>ActionEditControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ReactionEditer\DestinationEditControl.xaml.cs">
+      <DependentUpon>DestinationEditControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ReactionEditer\FilterEditControl.xaml.cs">
+      <DependentUpon>FilterEditControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\FolderListPage.xaml.cs">
       <DependentUpon>FolderListPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ReactionEditerPage.xaml.cs">
       <DependentUpon>ReactionEditerPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ReactionEditer\TimingEditControl.xaml.cs">
+      <DependentUpon>TimingEditControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ReactionEditer\WorkFolderEditControl.xaml.cs">
+      <DependentUpon>WorkFolderEditControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ReactionListPage.xaml.cs">
       <DependentUpon>ReactionListPage.xaml</DependentUpon>
@@ -175,11 +192,31 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\ReactionEditer\ActionEditControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ReactionEditer\DestinationEditControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ReactionEditer\FilterEditControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\FolderListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ReactionEditerPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ReactionEditer\TimingEditControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ReactionEditer\WorkFolderEditControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

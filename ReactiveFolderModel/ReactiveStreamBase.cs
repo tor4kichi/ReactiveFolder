@@ -4,17 +4,123 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Practices.Prism.Mvvm;
 using static System.Environment;
+using System.Runtime.CompilerServices;
 
 namespace ReactiveFolder.Model
 {
-	public abstract class ReactiveStreamBase : BindableBase
+	public abstract class ReactiveStreamBase : BindableBase, Util.IValidatable
 	{
+
+		/// <summary>
+		/// このストリームを利用する親リアクションモデル
+		/// ストリーム上のプロパティ変更を伝えるために利用します。
+		/// </summary>
+		public FolderReactionModel ParentReactionModel { get; private set; }
+
+
+
+		private Util.ValidationResult _ValidateResult;
+		public Util.ValidationResult ValidateResult
+		{
+			get
+			{
+				return _ValidateResult;
+			}
+			private set
+			{
+				SetProperty(ref _ValidateResult, value);
+			}
+		}
+
+		private bool _IsUpdated;
+
+		private bool _IsValid;
+		public bool IsValid
+		{
+			get
+			{
+				return _IsValid;
+			}
+			private set
+			{
+				SetProperty(ref _IsValid, value);
+			}
+		}
+
+		
+
+
+
+
+
+		public ReactiveStreamBase()
+		{
+			
+		}
+
+
+
+
 		virtual public void Initialize(DirectoryInfo workDir)
 		{
 		}
 
 
-		abstract public ValidationResult Validate();
+
+
+		abstract protected Util.ValidationResult InnerValidate();
+
+		public bool Validate()
+		{
+			ValidateResult = InnerValidate();
+
+			_IsUpdated = false;
+
+			IsValid = _ValidateResult.IsValid;
+
+			return IsValid;
+		}
+
+
+
+
+		internal void SetParentReactionModel(FolderReactionModel reaction)
+		{
+			ParentReactionModel = reaction;
+		}
+
+		internal void ClearParentReactionModel()
+		{
+			ParentReactionModel = null;
+		}
+
+		
+		
+		protected override bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+		{
+			if (base.SetProperty<T>(ref storage, value, propertyName))
+			{
+				ValidatePropertyChanged();
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+
+		protected void ValidatePropertyChanged()
+		{
+			IsValid = false;
+			_IsUpdated = true;
+
+			// リアクションモデルへ変更を伝える
+			ParentReactionModel?.RaisePropertyChangedOnReactiveStream(this);
+		}
+
+
+
 
 		abstract public IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev);
 
@@ -33,67 +139,5 @@ namespace ReactiveFolder.Model
 
 
 
-	public class ValidationResult
-	{
-		public static ValidationResult Valid
-		{
-			get
-			{
-				return new ValidationResult();
-			}
-		}
-
-
-
-		private List<string> _Messages;
-
-
-		public ValidationResult(params string[] messages)
-		{
-			_Messages = messages.ToList();
-		}
-
-
-		public IEnumerable<string> Messages
-		{
-			get
-			{
-				return _Messages;
-			}
-		}
-
-		public bool HasValidationError
-		{
-			get
-			{
-				return _Messages?.Count > 0;
-			}
-		}
-
-		public void AddMessage(string message)
-		{
-			if (_Messages == null)
-			{
-				_Messages = new List<string>();
-			}
-
-			_Messages.Add(message);
-		}
-
-		public void AddMessages(params string[] messages)
-		{
-			foreach(var message in messages)
-			{
-				AddMessage(message);
-			}
-		}
-
-		public void AddMessages(IEnumerable<string> messages)
-		{
-			foreach (var message in messages)
-			{
-				AddMessage(message);
-			}
-		}
-	}
+	
 }

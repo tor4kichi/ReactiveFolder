@@ -160,6 +160,8 @@
     <Compile Include="Timings\ReactiveTimingBase.cs" />
     <Compile Include="Timings\TimerReactiveTiming.cs" />
     <Compile Include="Util\FileSerializeHelper.cs" />
+    <Compile Include="Util\IValidatable.cs" />
+    <Compile Include="Util\ValidationResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

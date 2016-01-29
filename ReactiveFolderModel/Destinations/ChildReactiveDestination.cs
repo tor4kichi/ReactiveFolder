@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReactiveFolder.Model.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,7 +16,20 @@ namespace ReactiveFolder.Model.Destinations
 
 
 		[DataMember]
-		public string ChildFolderName { get; set; }
+		private string _ChildFolderName;
+
+
+		public string ChildFolderName
+		{
+			get
+			{
+				return _ChildFolderName;
+			}
+			set
+			{
+				SetProperty(ref _ChildFolderName, value);
+			}
+		}
 
 
 
@@ -38,7 +52,7 @@ namespace ReactiveFolder.Model.Destinations
 			base.Initialize(workDir);
 		}
 
-		public override ValidationResult Validate()
+		protected override ValidationResult InnerValidate()
 		{
 			var result = new ValidationResult();
 
