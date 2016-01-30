@@ -1,4 +1,5 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
+using ReactiveFolder.Model.AppPolicy;
 using ReactiveFolder.Model.Filters;
 using ReactiveFolder.Model.Util;
 using System;

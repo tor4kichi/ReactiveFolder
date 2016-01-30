@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReactiveFolder.Model.Actions
+namespace ReactiveFolder.Model.AppPolicy
 {
 	[DataContract]
 	public class AppArgument

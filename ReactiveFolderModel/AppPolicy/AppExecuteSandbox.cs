@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReactiveFolder.Model.Actions
+namespace ReactiveFolder.Model.AppPolicy
 {
 	public class ApplicationExecuteSandbox : BindableBase
 	{
