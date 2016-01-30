@@ -28,7 +28,7 @@ namespace ReactiveFolder.Model
 			}
 			private set
 			{
-				SetProperty(ref _ValidateResult, value);
+				base.SetProperty(ref _ValidateResult, value);
 			}
 		}
 
@@ -90,11 +90,16 @@ namespace ReactiveFolder.Model
 		internal void SetParentReactionModel(FolderReactionModel reaction)
 		{
 			ParentReactionModel = reaction;
+
+			Initialize(ParentReactionModel.WorkFolder);
 		}
 
 		internal void ClearParentReactionModel()
 		{
 			ParentReactionModel = null;
+
+			// TODO: ReactiveStreamBaseからリアクションモデルに依存するパラメータを消去する
+//			Initialize(null);
 		}
 
 		

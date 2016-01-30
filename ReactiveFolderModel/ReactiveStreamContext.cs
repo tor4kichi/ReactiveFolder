@@ -255,7 +255,7 @@ namespace ReactiveFolder.Model
 
 			try
 			{
-				outputFileInfo.MoveTo(finalizeFilePath);
+				outputFileInfo.CopyTo(finalizeFilePath);
 				return finalizeFilePath;
 			}
 			catch (Exception e)

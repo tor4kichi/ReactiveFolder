@@ -56,7 +56,8 @@
             
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Test" Width="50" Height="28"
-                        Command="{Binding TestCommand}">
+                        Command="{Binding TestCommand}"
+                        IsEnabled="{Binding IsReactionValid.Value}">
                 </Button>
                 <Button Content="Save" Width="50" Height="28"
                         Command="{Binding SaveCommand}"

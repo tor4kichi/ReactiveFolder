@@ -28,7 +28,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			: base(reactionModel)
 		{
 			_IsValid = Reaction.ObserveProperty(x => x.IsActionsValid)
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 
 		}
 

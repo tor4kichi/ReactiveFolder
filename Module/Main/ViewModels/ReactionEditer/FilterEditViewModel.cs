@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace Modules.Main.ViewModels.ReactionEditer
 {
-	public class FilterEditViewModel : ReactionEditViewModelBase, IDisposable
+	public class FilterEditViewModel : ReactionEditViewModelBase
 	{
 
 
@@ -74,9 +74,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		private IDisposable _FilterVMDisposer;
 
 
-		private CompositeDisposable _CompositeDisposable;
-
-
 		/// <summary>
 		/// FileModelのキャッシュ
 		/// 切り替え後も前回入力した状態を保持する
@@ -97,12 +94,9 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public FilterEditViewModel(FolderReactionModel reactionModel)
 			: base(reactionModel)
 		{
-			_CompositeDisposable = new CompositeDisposable();
-
-
-
 			_IsValid = Reaction.ObserveProperty(x => x.IsDestinationValid)
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 
 
 
@@ -211,13 +205,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			}
 		}
 
-		public void Dispose()
+		public override void Dispose()
 		{
-			_CompositeDisposable?.Dispose();
-			_CompositeDisposable = null;
-
 			_FilterVMDisposer?.Dispose();
 			_FilterVMDisposer = null;
+
+			base.Dispose();
 		}
 
 		

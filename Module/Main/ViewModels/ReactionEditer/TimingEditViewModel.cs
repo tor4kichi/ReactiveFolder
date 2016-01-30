@@ -11,10 +11,8 @@ using System.Threading.Tasks;
 
 namespace Modules.Main.ViewModels.ReactionEditer
 {
-	public class TimingEditViewModel : ReactionEditViewModelBase, IDisposable
+	public class TimingEditViewModel : ReactionEditViewModelBase
 	{
-		protected CompositeDisposable _CompositeDisposable { get; private set; }
-
 		public List<TimingViewModelBase> TimingVMs { get; private set; }
 
 
@@ -53,14 +51,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 		}
-
-
-		public void Dispose()
-		{
-			_CompositeDisposable?.Dispose();
-			_CompositeDisposable = null;
-		}
-
 
 	}
 

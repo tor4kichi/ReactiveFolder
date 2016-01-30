@@ -12,11 +12,16 @@ namespace ReactiveFolder.Model.Timings
 	[DataContract]
 	public class FileUpdateReactiveTiming : ReactiveTimingBase
 	{
-		private List<PreservedFileInfo> Files;
+		// TODO: ソースファイルの更新にフックする
+
+
+
+		[DataMember]
+		public List<PreservedFileInfo> SourceFiles { get; private set; }
 
 		public FileUpdateReactiveTiming()
 		{
-			Files = new List<PreservedFileInfo>();
+			SourceFiles = new List<PreservedFileInfo>();
 
 		}
 
@@ -24,7 +29,9 @@ namespace ReactiveFolder.Model.Timings
 		public override IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev)
 		{
 			// ファイルやフォルダが更新された作成されていた場合にObservableシーケンスを後続に流す
-			return prev.Where(payload => FileIsNeedUpdate(payload));
+			return prev
+				.Where(payload => FileIsNeedUpdate(payload))
+				.Do(payload => UpdateTargetFile(payload));
 		}
 
 
@@ -39,17 +46,30 @@ namespace ReactiveFolder.Model.Timings
 
 		public override void Initialize(DirectoryInfo workDir)
 		{
-			Files.AddRange(workDir.GetFiles().Select(x => new PreservedFileInfo(x.FullName)));
-			Files.AddRange(workDir.GetDirectories().Select(x => new PreservedFileInfo(x.FullName)));
+			// TODO: SourceFilesに追加したファイルが削除されていないかチェック
+			var removedItems = new List<PreservedFileInfo>();
+			foreach(var file in SourceFiles)
+			{
+				if (false == File.Exists(file.Path) && 
+					false == Directory.Exists(file.Path))
+				{
+					removedItems.Add(file);
+				}
+			}
+
+			foreach(var removeItem in removedItems)
+			{
+				SourceFiles.Remove(removeItem);
+			}
+//			SourceFiles.AddRange(workDir.GetFiles().Select(x => new PreservedFileInfo(x.FullName)));
+//			SourceFiles.AddRange(workDir.GetDirectories().Select(x => new PreservedFileInfo(x.FullName)));
 		}
-
-
 
 
 
 		public bool FileIsNeedUpdate(ReactiveStreamContext payload)
 		{
-			var fileAlreadyExist = Files.Any(x =>
+			var fileAlreadyExist = SourceFiles.Any(x =>
 			{
 				return x.Path == payload.SourcePath;
 			});
@@ -58,7 +78,7 @@ namespace ReactiveFolder.Model.Timings
 			{
 				// すでに同一のPathが登録されていれば
 				// 更新時間をチェックして更新が必要か判断する
-				var needUpdate = Files.Any(x =>
+				var needUpdate = SourceFiles.Any(x =>
 				{
 					if (payload.SourcePath == x.Path)
 					{
@@ -72,18 +92,28 @@ namespace ReactiveFolder.Model.Timings
 			}
 			else
 			{
-				// まだPathが登録されていない場合は
-				// 新しく作成して、更新するよう返す
-				Files.Add(new PreservedFileInfo(payload.SourcePath));
-
+				// まだPathが登録されていない場合は更新が必要
 				return true;
+			}
+		}
+
+		void UpdateTargetFile(ReactiveStreamContext payload)
+		{
+			var fileAlreadyExist = SourceFiles.Any(x =>
+			{
+				return x.Path == payload.SourcePath;
+			});
+
+			if (false == fileAlreadyExist)
+			{
+				SourceFiles.Add(new PreservedFileInfo(payload.SourcePath));
 			}
 		}
 
 		
 	}
 
-	struct PreservedFileInfo
+	public struct PreservedFileInfo
 	{
 		public string Path { get; set; }
 		public DateTime UpdateTime { get; set; }

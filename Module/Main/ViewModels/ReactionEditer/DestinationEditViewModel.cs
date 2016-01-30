@@ -10,10 +10,8 @@ using ReactiveFolder.Model.Destinations;
 
 namespace Modules.Main.ViewModels.ReactionEditer
 {
-	public class DestinationEditViewModel : ReactionEditViewModelBase, IDisposable
+	public class DestinationEditViewModel : ReactionEditViewModelBase
 	{
-		protected CompositeDisposable _CompositeDisposable { get; private set; }
-
 		public ReadOnlyReactiveProperty<DestinationViewModelBase> DestinationVM { get; private set; }
 
 
@@ -152,12 +150,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			{
 				throw new Exception();
 			}
-		}
-
-		public void Dispose()
-		{
-			_CompositeDisposable?.Dispose();
-			_CompositeDisposable = null;
 		}
 	}
 }

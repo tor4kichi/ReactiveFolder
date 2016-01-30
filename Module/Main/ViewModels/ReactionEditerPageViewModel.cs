@@ -32,13 +32,15 @@ namespace Modules.Main.ViewModels
 		Unknown
 	}
 
-	public class ReactionEditerPageViewModel : PageViewModelBase, INavigationAware
+	public class ReactionEditerPageViewModel : PageViewModelBase, INavigationAware, IDisposable
 	{
 		private FolderReactionModel Reaction;
 
+		private CompositeDisposable _CompositeDisposable;
+
 		public IRegionNavigationService NavigationService;
 
-		public ReactiveProperty<bool> IsReactionValid { get; private set; }
+		public bool IsReactionValid { get; private set; }
 
 		public ReactiveProperty<string> ReactionWorkName { get; private set; }
 
@@ -54,7 +56,7 @@ namespace Modules.Main.ViewModels
 		public ReactionEditerPageViewModel(IRegionManager regionManager, IRegionNavigationService navService, FolderReactionMonitorModel monitor)
 			: base(regionManager, monitor)
 		{
-			IsReactionValid = new ReactiveProperty<bool>(false);
+			IsReactionValid = false;
 
 			ReactionWorkName = new ReactiveProperty<string>("");
 
@@ -71,20 +73,37 @@ namespace Modules.Main.ViewModels
 		private void Initialize()
 		{
 			// initialize with this.Reaction
+			CleanUpReactionSubscribe();
+
+			_CompositeDisposable = new CompositeDisposable();
 
 			ReactionWorkName.Value = Reaction.Name;
 
 			Reaction.ObserveProperty(x => x.WorkFolder)
 				.Subscribe(x =>
 				{
+					WorkFolderEditVM.Value?.Dispose();
 					FilterEditVM.Value?.Dispose();
+					TimingEditVM.Value?.Dispose();
+					ActionsEditVM.Value?.Dispose();
+					DestinationEditVM.Value?.Dispose();
 
 					WorkFolderEditVM.Value = new WorkFolderEditViewModel(Reaction);
 					FilterEditVM.Value = new FilterEditViewModel(Reaction);
 					TimingEditVM.Value = new TimingEditViewModel(Reaction);
 					ActionsEditVM.Value = new ActionsEditViewModel(Reaction);
 					DestinationEditVM.Value = new DestinationEditViewModel(Reaction);
-				});
+				})
+				.AddTo(_CompositeDisposable);
+
+			Reaction.ObserveProperty(x => x.IsValid)
+				.Subscribe(x =>
+				{
+					IsReactionValid = x;
+					OnPropertyChanged(nameof(IsReactionValid));
+				})
+				.AddTo(_CompositeDisposable);
+			
 
 			IsEnableSave.Value = true;
 		}
@@ -109,6 +128,25 @@ namespace Modules.Main.ViewModels
 		}
 
 
+		private void CleanUpReactionSubscribe()
+		{
+			_CompositeDisposable?.Dispose();
+			_CompositeDisposable = null;
+		}
+
+		public void Dispose()
+		{
+			CleanUpReactionSubscribe();
+
+			ReactionWorkName?.Dispose();
+			IsEnableSave?.Dispose();
+
+			WorkFolderEditVM.Value?.Dispose();
+			FilterEditVM.Value?.Dispose();
+			TimingEditVM.Value?.Dispose();
+			ActionsEditVM.Value?.Dispose();
+			DestinationEditVM.Value?.Dispose();
+		}
 
 		private DelegateCommand _BackCommand;
 		public DelegateCommand BackCommand
@@ -167,15 +205,18 @@ namespace Modules.Main.ViewModels
 				return _TestCommand
 					?? (_TestCommand = new DelegateCommand(() =>
 					{
-						// TODO:
-					}));
+						Reaction.Test();
+//						Reaction.Start();
+//						Reaction.CheckNow();
+					}
+					));
 			}
 		}
 
 
 
 		
-
+		
 
 
 

@@ -69,6 +69,8 @@ namespace ReactiveFolder.Model
 
 					WorkFolderPath = _WorkFolder.FullName;
 
+					ResetWorkingFolder();
+
 					ValidateWorkFolder();
 				}
 			}
@@ -99,7 +101,8 @@ namespace ReactiveFolder.Model
 					}
 
 					_Filter.SetParentReactionModel(this);
-					IsNeedValidation = true;
+
+					ValidateFilter();
 				}
 			}
 		}
@@ -150,9 +153,9 @@ namespace ReactiveFolder.Model
 						old.ClearParentReactionModel();
 					}
 
-					_Destination.SetParentReactionModel(this);
+					_Destination?.SetParentReactionModel(this);
 
-					IsNeedValidation = true;
+					ValidateDestination();
 				}
 			}
 		}
@@ -325,9 +328,7 @@ namespace ReactiveFolder.Model
 
 			timing.SetParentReactionModel(this);
 
-			IsNeedValidation = true;
-
-			IsTimingsValid = false;
+			ValidateTimings();
 		}
 
 
@@ -344,9 +345,7 @@ namespace ReactiveFolder.Model
 			{
 				timing.ClearParentReactionModel();
 
-				IsNeedValidation = true;
-
-				IsTimingsValid = false;
+				ValidateTimings();
 			}
 		}
 
@@ -364,9 +363,7 @@ namespace ReactiveFolder.Model
 
 			action.SetParentReactionModel(this);
 
-			IsNeedValidation = true;
-
-			IsActionsValid = false;
+			ValidateActions();
 		}
 
 
@@ -383,9 +380,7 @@ namespace ReactiveFolder.Model
 			{
 				action.ClearParentReactionModel();
 
-				IsNeedValidation = true;
-
-				IsActionsValid = false;
+				ValidateActions();
 			}
 		}
 
@@ -575,7 +570,7 @@ namespace ReactiveFolder.Model
 			{
 				var isValid = Destination.Validate();
 
-				if (isValid)
+				if (false == isValid)
 				{
 					// Destination validate failed.
 					outResult.AddMessage(($"{(nameof(Destination))} has validation error."));
@@ -698,9 +693,9 @@ namespace ReactiveFolder.Model
 			}
 
 			// トリガーストリームを束ねる
-			var mergedTimingTrigger = timingTriggers.Merge().Publish();
-			mergedTimingTrigger.Connect();
-
+			var mergedTimingTrigger = timingTriggers.Merge()
+				.Publish()
+				.RefCount(); 
 
 			// Actions
 			IObservable<ReactiveStreamContext> actionChainObserver = mergedTimingTrigger;
@@ -794,6 +789,7 @@ namespace ReactiveFolder.Model
 		{
 			Exit();
 
+			ResetWorkingFolder();
 
 
 			if (false == IsValid)
@@ -817,6 +813,8 @@ namespace ReactiveFolder.Model
 			// ストリームにtestContextのアイテムを流す
 			var disposer = observer.Publish()
 				.Connect();
+
+			trigger.OnNext(CreatePayload());
 
 			// ストリームを閉じる
 			disposer.Dispose();

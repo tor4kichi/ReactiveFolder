@@ -33,13 +33,15 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		{
 
 			_IsValid = Reaction.ObserveProperty(x => x.IsWorkFolderValid)
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 
 
 
 			WorkFolderPath = Reaction.ObserveProperty(x => x.WorkFolder)
 				.Select(x => x.FullName)
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 		}
 
 
