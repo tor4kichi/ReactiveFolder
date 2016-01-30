@@ -1,4 +1,6 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
+using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 using ReactiveFolder.Model;
 using System;
 using System.Collections.Generic;
@@ -13,9 +15,22 @@ namespace Modules.Main.ViewModels.ReactionEditer
 	{
 		protected CompositeDisposable _CompositeDisposable { get; private set; }
 
-
-
 		public List<TimingViewModelBase> TimingVMs { get; private set; }
+
+
+
+		private ReactiveProperty<bool> _IsValid;
+		public override ReactiveProperty<bool> IsValid
+		{
+			get
+			{
+				return _IsValid;
+			}
+		}
+
+
+
+
 
 		public TimingEditViewModel(FolderReactionModel reactionModel)
 			: base(reactionModel)
@@ -23,10 +38,20 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			_CompositeDisposable = new CompositeDisposable();
 
 
+
+			_IsValid = Reaction.ObserveProperty(x => x.IsTimingsValid)
+				.ToReactiveProperty();
+
+
+
+
 			TimingVMs = new List<TimingViewModelBase>();
 
 			TimingVMs.Add(new FileUpdateTimingViewModel(Reaction));
 			TimingVMs.Add(new TimerTimingViewModel(Reaction));
+
+
+
 		}
 
 
@@ -36,10 +61,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			_CompositeDisposable = null;
 		}
 
-		protected override bool IsValidateModel()
-		{
-			return Reaction.ValidateTimings().IsValid;
-		}
+
 	}
 
 }

@@ -23,6 +23,19 @@ namespace ReactiveFolder.Model
 	public class FolderReactionModel : BindableBase
 	{
 
+
+		// ***************************
+
+		// TODO: 各Validate系メソッドのリファクタリング
+
+
+
+		// ***************************
+
+
+
+
+
 		[DataMember]
 		public Guid Guid { get; private set; }
 
@@ -56,7 +69,7 @@ namespace ReactiveFolder.Model
 
 					WorkFolderPath = _WorkFolder.FullName;
 
-					IsNeedValidation = true;
+					ValidateWorkFolder();
 				}
 			}
 		}
@@ -179,6 +192,20 @@ namespace ReactiveFolder.Model
 			}
 		}
 
+
+		private bool _IsWorkFolderValid;
+		public bool IsWorkFolderValid
+		{
+			get
+			{
+				return _IsWorkFolderValid;
+			}
+			set
+			{
+				SetProperty(ref _IsWorkFolderValid, value);
+			}
+		}
+
 		private bool _IsActionsValid;
 		public bool IsActionsValid
 		{
@@ -275,6 +302,8 @@ namespace ReactiveFolder.Model
 			Timings = new ReadOnlyObservableCollection<ReactiveTimingBase>(_Timings);
 
 			WorkFolder = new DirectoryInfo(WorkFolderPath);
+
+			ResetWorkingFolder();
 		}
 
 		/// <summary>
@@ -372,18 +401,22 @@ namespace ReactiveFolder.Model
 			if (model is ReactiveFilterBase)
 			{
 				IsFilterValid = false;
+				ValidateFilter();
 			}
 			else if (model is ReactiveActionBase)
 			{
 				IsActionsValid = false;
+				ValidateActions();
 			}
 			else if (model is ReactiveTimingBase)
 			{
 				IsTimingsValid = false;
+				ValidateTimings();
 			}
 			else if (model is ReactiveDestinationBase)
 			{
 				IsDestinationValid = false;
+				ValidateDestination();
 			}
 			else
 			{
@@ -396,10 +429,14 @@ namespace ReactiveFolder.Model
 		{
 			outResult = outResult ?? new ValidationResult();
 
-			if (false == WorkFolder.Exists)
+
+			var isWorkFolderValid = WorkFolder.Exists;
+			if (false == isWorkFolderValid)
 			{
 				outResult.AddMessage("NOT_EXIST_WORKFODLER");
 			}
+
+			IsWorkFolderValid = isWorkFolderValid;
 
 			return outResult;
 		}
@@ -465,6 +502,8 @@ namespace ReactiveFolder.Model
 
 
 				}
+
+				IsActionsValid = Actions.All(x => x.IsValid);
 			}
 			else
 			{
@@ -474,6 +513,8 @@ namespace ReactiveFolder.Model
 				// しかしながら、ユーザーが単純なコピー操作を組み上げたい場合に備えて、
 				// TODO: コピー用のアクションを追加するか、デフォルト動作についての説明を用意するか、
 				// 判断しないといけない。
+
+				IsActionsValid = true;
 			}
 
 
@@ -487,7 +528,7 @@ namespace ReactiveFolder.Model
 			// *************************
 
 
-			IsActionsValid = Actions.All(x => x.IsValid);
+			
 
 
 			return outResult;

@@ -43,7 +43,10 @@ namespace ReactiveFolder.Model
 			}
 			private set
 			{
-				SetProperty(ref _IsValid, value);
+				// Note: SetPropertyを上書きしてValidateチェックをある程度自動化しているが、
+				// 上書きしたSetProperty内でIsValidをfalseに設定する都合上、
+				// IsValid自体の設定は上書き前の素のSetPropertyを利用する。
+				base.SetProperty(ref _IsValid, value);
 			}
 		}
 

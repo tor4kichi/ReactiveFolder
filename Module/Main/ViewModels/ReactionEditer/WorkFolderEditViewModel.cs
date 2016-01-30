@@ -18,19 +18,32 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
+		private ReactiveProperty<bool> _IsValid;
+		public override ReactiveProperty<bool> IsValid
+		{
+			get
+			{
+				return _IsValid;
+			}
+		}
+
+
 		public WorkFolderEditViewModel(FolderReactionModel reactionModel)
 			: base(reactionModel)
 		{
+
+			_IsValid = Reaction.ObserveProperty(x => x.IsWorkFolderValid)
+				.ToReactiveProperty();
+
+
+
 			WorkFolderPath = Reaction.ObserveProperty(x => x.WorkFolder)
 				.Select(x => x.FullName)
 				.ToReactiveProperty();
 		}
 
 
-		protected override bool IsValidateModel()
-		{
-			return Reaction.ValidateWorkFolder().IsValid;
-		}
+
 
 		private DelegateCommand _FolderSelectCommand;
 		public DelegateCommand FolderSelectCommand
@@ -59,7 +72,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 									return;
 								}
 								Reaction.WorkFolder = folderInfo;
-								WorkFolderPath.Value = folderInfo.FullName;
 
 							}
 						}

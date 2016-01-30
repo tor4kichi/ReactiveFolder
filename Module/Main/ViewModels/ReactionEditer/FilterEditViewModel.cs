@@ -38,6 +38,17 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public ReactiveProperty<FilterViewModelBase> FilterVM { get; private set; }
 
 
+		private ReactiveProperty<bool> _IsValid;
+		public override ReactiveProperty<bool> IsValid
+		{
+			get
+			{
+				return _IsValid;
+			}
+		}
+
+
+
 		// Note: IsFileFilterSelectedとIsFolderFilterSelectedはコマンドでよくね？
 		// という意見もあるが、ラジオボタンを初期化する際にVM側からFileかFolderを伝えるために
 		// わかりやすさを重視して二つとものフラグを持つ形にしている
@@ -87,6 +98,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			: base(reactionModel)
 		{
 			_CompositeDisposable = new CompositeDisposable();
+
+
+
+			_IsValid = Reaction.ObserveProperty(x => x.IsDestinationValid)
+				.ToReactiveProperty();
+
 
 
 			// 現在のフィルターの状態からFile用VMかFolder用VMを選択
@@ -193,12 +210,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					throw new Exception("");
 			}
 		}
-
-		protected override bool IsValidateModel()
-		{
-			return Reaction.ValidateFilter().IsValid;
-		}
-
 
 		public void Dispose()
 		{

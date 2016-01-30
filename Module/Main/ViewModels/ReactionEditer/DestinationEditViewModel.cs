@@ -12,11 +12,20 @@ namespace Modules.Main.ViewModels.ReactionEditer
 {
 	public class DestinationEditViewModel : ReactionEditViewModelBase, IDisposable
 	{
-		public FolderReactionModel ReactionModel;
-
 		protected CompositeDisposable _CompositeDisposable { get; private set; }
 
 		public ReadOnlyReactiveProperty<DestinationViewModelBase> DestinationVM { get; private set; }
+
+
+		private ReactiveProperty<bool> _IsValid;
+		public override ReactiveProperty<bool> IsValid
+		{
+			get
+			{
+				return _IsValid;
+			}
+		}
+
 
 		public ReactiveProperty<bool> IsSameInputFolderChecked { get; set; }
 		public ReactiveProperty<bool> IsInputChildFolderChecked { get; set; }
@@ -30,17 +39,23 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public DestinationEditViewModel(FolderReactionModel reactionModel)
 			: base(reactionModel)
 		{
-			ReactionModel = reactionModel;
 			_CompositeDisposable = new CompositeDisposable();
+
+
+
+			_IsValid = Reaction.ObserveProperty(x => x.IsDestinationValid)
+				.ToReactiveProperty();
+
+
 
 			CacheDestinationModel();
 
 			// 1. Checked系が変化すると
-			IsSameInputFolderChecked = new ReactiveProperty<bool>(ReactionModel.Destination is SameInputReactiveDestination)
+			IsSameInputFolderChecked = new ReactiveProperty<bool>(Reaction.Destination is SameInputReactiveDestination)
 				.AddTo(_CompositeDisposable);
-			IsInputChildFolderChecked = new ReactiveProperty<bool>(ReactionModel.Destination is ChildReactiveDestination)
+			IsInputChildFolderChecked = new ReactiveProperty<bool>(Reaction.Destination is ChildReactiveDestination)
 				.AddTo(_CompositeDisposable);
-			IsAbsoluteFolderChecked = new ReactiveProperty<bool>(ReactionModel.Destination is AbsolutePathReactiveDestination)
+			IsAbsoluteFolderChecked = new ReactiveProperty<bool>(Reaction.Destination is AbsolutePathReactiveDestination)
 				.AddTo(_CompositeDisposable);
 
 
@@ -55,7 +70,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 						_CachedSameInputDest = new SameInputReactiveDestination();
 					}
 
-					ReactionModel.Destination = _CachedSameInputDest;
+					Reaction.Destination = _CachedSameInputDest;
 				})
 				.AddTo(_CompositeDisposable);
 
@@ -69,7 +84,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 						_CachedInputChildFolderDest = new ChildReactiveDestination();
 					}
 
-					ReactionModel.Destination = _CachedInputChildFolderDest;
+					Reaction.Destination = _CachedInputChildFolderDest;
 				})
 				.AddTo(_CompositeDisposable);
 
@@ -83,13 +98,13 @@ namespace Modules.Main.ViewModels.ReactionEditer
 						_CachedAbsoluteDest = new AbsolutePathReactiveDestination();
 					}
 
-					ReactionModel.Destination = _CachedAbsoluteDest;
+					Reaction.Destination = _CachedAbsoluteDest;
 				})
 				.AddTo(_CompositeDisposable);
 
 
 			// 3. ReactionModel.Destinationの更新に合わせてVMに変換
-			DestinationVM = ReactionModel.ObserveProperty(x => x.Destination)
+			DestinationVM = Reaction.ObserveProperty(x => x.Destination)
 				.Select(ModelToVM)
 				.ToReadOnlyReactiveProperty()
 				.AddTo(_CompositeDisposable);
@@ -101,17 +116,17 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		private void CacheDestinationModel()
 		{
-			if (ReactionModel.Destination is SameInputReactiveDestination)
+			if (Reaction.Destination is SameInputReactiveDestination)
 			{
-				_CachedSameInputDest = ReactionModel.Destination as SameInputReactiveDestination;
+				_CachedSameInputDest = Reaction.Destination as SameInputReactiveDestination;
 			}
-			else if (ReactionModel.Destination is ChildReactiveDestination)
+			else if (Reaction.Destination is ChildReactiveDestination)
 			{
-				_CachedInputChildFolderDest = ReactionModel.Destination as ChildReactiveDestination;
+				_CachedInputChildFolderDest = Reaction.Destination as ChildReactiveDestination;
 			}
-			else if (ReactionModel.Destination is AbsolutePathReactiveDestination)
+			else if (Reaction.Destination is AbsolutePathReactiveDestination)
 			{
-				_CachedAbsoluteDest = ReactionModel.Destination as AbsolutePathReactiveDestination;
+				_CachedAbsoluteDest = Reaction.Destination as AbsolutePathReactiveDestination;
 			}
 			else
 			{
@@ -123,15 +138,15 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		{
 			if (destModel is SameInputReactiveDestination)
 			{
-				return new SameInputDestinationViewModel(ReactionModel);
+				return new SameInputDestinationViewModel(Reaction);
 			}
 			else if (destModel is ChildReactiveDestination)
 			{
-				return new InputChildFolderDestinationViewModel(ReactionModel);
+				return new InputChildFolderDestinationViewModel(Reaction);
 			}
 			else if (destModel is AbsolutePathReactiveDestination)
 			{
-				return new AbsolutePathDestinationViewModel(ReactionModel);
+				return new AbsolutePathDestinationViewModel(Reaction);
 			}
 			else
 			{
@@ -143,11 +158,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		{
 			_CompositeDisposable?.Dispose();
 			_CompositeDisposable = null;
-		}
-
-		protected override bool IsValidateModel()
-		{
-			return Reaction.ValidateDestination().IsValid;
 		}
 	}
 }

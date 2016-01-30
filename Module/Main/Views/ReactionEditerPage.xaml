@@ -76,6 +76,46 @@
                 <ItemsControl HorizontalContentAlignment="Stretch"
                           Margin="20, 0"
                           >
+                    <ItemsControl.Resources>
+                        <ControlTemplate x:Key="EditTemplate" TargetType="{x:Type ContentControl}">
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Orientation="Vertical" Grid.Column="0">
+                                    <ToggleButton Width="20"  Height="20" IsChecked="{Binding IsValid.Value}" IsHitTestVisible="False"/>
+                                </StackPanel>
+                                
+                                <ContentPresenter Grid.Column="1"/>
+
+                            </Grid>
+                        </ControlTemplate>
+
+
+                        <Style TargetType="{x:Type editerView:WorkFolderEditControl}" >
+                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
+                        </Style>
+
+                        <Style TargetType="{x:Type editerView:FilterEditControl}" >
+                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
+                        </Style>
+                        <Style TargetType="{x:Type editerView:TimingEditControl}" >
+                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
+                        </Style>
+
+                        <Style TargetType="{x:Type editerView:ActionEditControl}" >
+                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
+                        </Style>
+
+                        <Style TargetType="{x:Type editerView:DestinationEditControl}" >
+                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
+                        </Style>
+
+
+                    </ItemsControl.Resources>
+                    
                     <editerView:WorkFolderEditControl DataContext="{Binding WorkFolderEditVM.Value}" />
 
                     <editerView:FilterEditControl DataContext="{Binding FilterEditVM.Value}" />

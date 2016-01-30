@@ -133,6 +133,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 						{
 							CandidateFilterItems.Remove(word);
 						}
+
+						_FileFilterModel.Validate();
 					}));
 			}
 		}
@@ -153,6 +155,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 						{
 							CandidateFilterItems.Add(word);
 						}
+
+						_FileFilterModel.Validate();
 					}));
 			}
 		}

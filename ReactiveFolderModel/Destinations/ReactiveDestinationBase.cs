@@ -11,6 +11,15 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Model.Destinations
 {
+	// * * * * * * * * * * * * 
+
+		
+	// TODO: Initializeで渡されるworkDirが無効な場合に対応する
+
+
+	// * * * * * * * * * * * * 
+
+
 	public abstract class ReactiveDestinationBase : ReactiveStreamBase, IStreamContextFinalizer
 	{
 		static Dictionary<string, Func<ReactiveStreamContext, string>> FormatMap;
@@ -94,7 +103,7 @@ namespace ReactiveFolder.Model.Destinations
 				{
 					var tolower = _OutputNamePattern;
 
-					_RenameScriptCode = $"return $\"{_OutputNamePattern};\"";
+					_RenameScriptCode = $"return $\"{_OutputNamePattern}\";";
 				}
 			}
 		}
@@ -108,15 +117,44 @@ namespace ReactiveFolder.Model.Destinations
 			OutputNamePattern = outputNamePattern;
 		}
 
-		
 
-		abstract public DirectoryInfo GetDestinationFolder();
+
+		abstract public string GetDistinationFolderPath();
+		public DirectoryInfo GetDestinationFolder()
+		{
+			var path = GetDistinationFolderPath();
+
+			// check
+			if (path == null)
+			{
+				return null;
+			}
+
+			if (String.IsNullOrEmpty(path))
+			{
+				return null;
+			}
+
+			if (false == Path.IsPathRooted(path))
+			{
+				return null;
+			}
+
+			return new DirectoryInfo(path);
+		}
 
 		override public void Initialize(DirectoryInfo workDir)
 		{
 			var destFolder = GetDestinationFolder();
+
+			if(destFolder == null)
+			{
+				return;
+			}
+
 			if (false == destFolder.Exists)
 			{
+				// Note: 勝手につくちゃっていいの？
 				destFolder.Create();
 			}
 
@@ -127,6 +165,18 @@ namespace ReactiveFolder.Model.Destinations
 		protected override ValidationResult InnerValidate()
 		{
 			var result = new ValidationResult();
+
+			var destFolder = GetDestinationFolder();
+			if (destFolder == null)
+			{
+				result.AddMessage("出力先のフォルダの指定に問題があります。");
+			}
+
+			if (destFolder != null && false == destFolder.Exists)
+			{
+				result.AddMessage("出力先のフォルダが存在しません。");
+			}
+
 
 			try
 			{
@@ -180,10 +230,15 @@ namespace ReactiveFolder.Model.Destinations
 		private async Task<string> FormatedString(ReactiveStreamContext context)
 		{
 			// scriptingによる名前解決を行う
-			var script = CSharpScript.Create<string>(_RenameScriptCode);
+			var script = CSharpScript.Create<string>(_RenameScriptCode,
+				globalsType: typeof(RenameGlobalObject));
+
 
 			globalObject.__Context = context;
 
+			
+			var messages = script.Compile();
+			
 			var state = await script.RunAsync(globalObject);			
 
 			return state.ReturnValue;

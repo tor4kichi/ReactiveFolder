@@ -33,31 +33,9 @@ namespace ReactiveFolder.Model.Destinations
 			AbsoluteFolderPath = "";
 		}
 
-		public override DirectoryInfo GetDestinationFolder()
+		public override string GetDistinationFolderPath()
 		{
-			return new DirectoryInfo(AbsoluteFolderPath);
-		}
-
-		protected override ValidationResult InnerValidate()
-		{
-			var result = new ValidationResult();
-
-			if (String.IsNullOrWhiteSpace(AbsoluteFolderPath))
-			{
-				result.AddMessage($"{(nameof(AbsolutePathReactiveDestination))}: Need path string.");
-            }
-
-			if (false == Path.IsPathRooted(AbsoluteFolderPath))
-			{
-				result.AddMessage($"{(nameof(AbsolutePathReactiveDestination))}: Path is not absolute path.");
-			}
-
-			if (false == Directory.Exists(AbsoluteFolderPath))
-				{
-				result.AddMessage("NOT_EXIST_DIRECTORY");
-			}
-
-			return result;
+			return AbsoluteFolderPath;
 		}
 	}
 }

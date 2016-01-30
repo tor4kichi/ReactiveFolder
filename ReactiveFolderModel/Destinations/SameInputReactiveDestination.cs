@@ -15,9 +15,9 @@ namespace ReactiveFolder.Model.Destinations
 
 		private DirectoryInfo InputFolderInfo;
 
-		public override DirectoryInfo GetDestinationFolder()
+		public override string GetDistinationFolderPath()
 		{
-			return InputFolderInfo;
+			return InputFolderInfo?.FullName;
 		}
 
 		public override void Initialize(DirectoryInfo workDir)
@@ -26,11 +26,5 @@ namespace ReactiveFolder.Model.Destinations
 
 			base.Initialize(workDir);
 		}
-
-		protected override ValidationResult InnerValidate()
-		{
-			return ValidationResult.ValidResult;
-		}
-
 	}
 }

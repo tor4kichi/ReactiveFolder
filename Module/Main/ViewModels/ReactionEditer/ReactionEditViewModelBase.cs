@@ -13,28 +13,14 @@ namespace Modules.Main.ViewModels.ReactionEditer
 	{
 		public FolderReactionModel Reaction { get; private set; }
 
-		public ReactiveProperty<bool> IsValid { get; private set; }
+		abstract public ReactiveProperty<bool> IsValid { get; }
 
 
 
 		public ReactionEditViewModelBase(FolderReactionModel reactionModel)
 		{
 			Reaction = reactionModel;
-
-			IsValid = new ReactiveProperty<bool>();
-
-			// モデルへの問い合わせだけでVMの構築を必要としない操作のため
-			// 例外的にbaseコンストラクタ内から子クラスへの抽象メソッドを呼び出す
-			CheckValidation();
 		}
-
-		public void CheckValidation()
-		{
-			IsValid.Value = IsValidateModel();
-		}
-
-		abstract protected bool IsValidateModel();
-
 
 
 	}
