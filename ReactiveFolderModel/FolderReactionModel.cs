@@ -108,18 +108,8 @@ namespace ReactiveFolder.Model
 		}
 
 
-
-
-		
-		
 		[DataMember]
-		private ObservableCollection<ReactiveTimingBase> _Timings;
-
-		/// <summary>
-		/// Actionsの読み取り専用のコレクション。
-		/// コレクションの操作はAddAction() または RemoveAction()を利用してください。
-		/// </summary>
-		public ReadOnlyObservableCollection<ReactiveTimingBase> Timings { get; private set; }
+		public FileUpdateReactiveTiming FileUpdateTiming { get; private set; }
 
 
 
@@ -282,7 +272,6 @@ namespace ReactiveFolder.Model
 		/// <param name="id"></param>
 		public FolderReactionModel(DirectoryInfo targetFolder)
 		{
-			WorkFolder = targetFolder;
 			Guid = Guid.NewGuid();
 			Name = "";
 			IsDisable = false;
@@ -292,8 +281,9 @@ namespace ReactiveFolder.Model
 			_Actions = new ObservableCollection<ReactiveActionBase>();
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
 
-			_Timings = new ObservableCollection<ReactiveTimingBase>();
-			Timings = new ReadOnlyObservableCollection<ReactiveTimingBase>(_Timings);
+			FileUpdateTiming = new FileUpdateReactiveTiming();
+
+			WorkFolder = targetFolder;
 		}
 
 
@@ -302,51 +292,10 @@ namespace ReactiveFolder.Model
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
-			Timings = new ReadOnlyObservableCollection<ReactiveTimingBase>(_Timings);
-
+			
 			WorkFolder = new DirectoryInfo(WorkFolderPath);
 
 			ResetWorkingFolder();
-		}
-
-		/// <summary>
-		/// タイミングを追加します。
-		/// いずれかのタイミングが条件を満たすと後続のAction等が実行されます。
-		/// <para>このメソッドは最初にExit()を呼び出します。</para>
-		/// </summary>
-		/// <param name="timing"></param>
-		public void AddTiming(ReactiveTimingBase timing)
-		{
-			if (_Timings.Contains(timing))
-			{
-				return;
-			}
-
-			Exit();
-
-			_Timings.Add(timing);
-
-			timing.SetParentReactionModel(this);
-
-			ValidateTimings();
-		}
-
-
-		/// <summary>
-		/// タイミングを削除します。
-		/// <para>このメソッドは最初にExit()を呼び出します。</para>
-		/// </summary>
-		/// <param name="timing"></param>
-		public void RemoveTiming(ReactiveTimingBase timing)
-		{
-			Exit();
-
-			if (_Timings.Remove(timing))
-			{
-				timing.ClearParentReactionModel();
-
-				ValidateTimings();
-			}
 		}
 
 
@@ -535,28 +484,16 @@ namespace ReactiveFolder.Model
 		{
 			outResult = outResult ?? new ValidationResult();
 
-			if (Timings.Count > 0)
-			{
-				foreach (var timing in Timings)
-				{
-					var isValid = timing.Validate();
 
-					if (false == isValid)
-					{
-						// Timing validate failed.
-						outResult.AddMessage(($"Timing has validation error."));
-						outResult.AddMessages(timing.ValidateResult.Messages);
-					}
-				}
-			}
-			else
+			if (false == FileUpdateTiming.Validate())
 			{
-				// タイミングがないと後続のActionを実行できない
-				// （ロジック的には、常にActionが実行されてしまうことになる）
-				outResult.AddMessage(($"not contain execute timing in Timings."));
+				// Timing validate failed.
+				outResult.AddMessage(($"Timing has validation error."));
+				outResult.AddMessages(FileUpdateTiming.ValidateResult.Messages);
 			}
+		
 
-			IsTimingsValid = Timings.All(x => x.IsValid);
+			IsTimingsValid = FileUpdateTiming.IsValid;
 
 			return outResult;
 		}
@@ -638,10 +575,9 @@ namespace ReactiveFolder.Model
 		private void ResetWorkingFolder()
 		{
 			Filter?.Initialize(WorkFolder);
-			foreach (var timing in Timings)
-			{
-				timing.Initialize(WorkFolder);
-			}
+
+			FileUpdateTiming.Initialize(WorkFolder);
+
 			foreach (var action in Actions)
 			{
 				action.Initialize(WorkFolder);
@@ -683,22 +619,12 @@ namespace ReactiveFolder.Model
 
 
 
-			// Timings
-			var timingTriggers = new List<IObservable<ReactiveStreamContext>>();
-			foreach (var timing in Timings)
-			{
-				var timingTrigger = timing.Chain(filterdTrigger);
-
-				timingTriggers.Add(timingTrigger);
-			}
-
-			// トリガーストリームを束ねる
-			var mergedTimingTrigger = timingTriggers.Merge()
-				.Publish()
-				.RefCount(); 
+			// Timing
+			var timingTrigger = FileUpdateTiming.Chain(filterdTrigger);
+			
 
 			// Actions
-			IObservable<ReactiveStreamContext> actionChainObserver = mergedTimingTrigger;
+			IObservable<ReactiveStreamContext> actionChainObserver = timingTrigger;
 			foreach (var action in Actions)
 			{
 				try
@@ -749,7 +675,7 @@ namespace ReactiveFolder.Model
 
 
 			// タイマーによるトリガーを作成
-			var timerTrigger = Observable.Timer(CheckInterval)
+			var timerTrigger = Observable.Interval(CheckInterval)
 				.Select(_ => CreatePayload());
 
 			var remoteTrigger = new BehaviorSubject<ReactiveStreamContext>(CreatePayload());

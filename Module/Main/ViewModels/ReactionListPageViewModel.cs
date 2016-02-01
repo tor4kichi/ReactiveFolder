@@ -8,10 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ReactiveFolder.Model.Actions;
-using ReactiveFolder.Model.Destinations;
-using ReactiveFolder.Model.Filters;
-using ReactiveFolder.Model.Timings;
 using System.Reactive.Linq;
 
 namespace Modules.Main.ViewModels
@@ -127,9 +123,8 @@ namespace Modules.Main.ViewModels
 						var reaction = FolderModel.AddReaction(targetDir);
 						reaction.Name = "something reaction";
 
-						reaction.Destination = new SameInputReactiveDestination();
-						reaction.AddTiming(new FileUpdateReactiveTiming());
-						reaction.Filter = new FileReactiveFilter();
+						reaction.Destination = new ReactiveFolder.Model.Destinations.SameInputReactiveDestination();
+						reaction.Filter = new ReactiveFolder.Model.Filters.FileReactiveFilter();
 
 //						reaction.AddAction(new RenameReactiveAction("#{name}"));
 

@@ -7,6 +7,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Modules.Main.Views"
              xmlns:prism="http://prismlibrary.com/"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              prism:ViewModelLocator.AutoWireViewModel="True"
@@ -49,8 +50,8 @@
                     </Style>
                 </StackPanel.Resources>
 
-                <TextBox Text="{Binding FolderName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
-                </TextBox>
+                <TextBlock Text="{Binding FolderName.Value}">
+                </TextBlock>
             </StackPanel>
             <StackPanel HorizontalAlignment="Right">
                 <Button Content="Create New" 

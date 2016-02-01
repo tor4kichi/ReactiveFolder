@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ReactiveFolder.Model.Filters;
 using System.IO;
 using ReactiveFolder.Util;
+using ReactiveFolder.Model.AppPolicy;
 
 namespace ReactiveFolder
 {

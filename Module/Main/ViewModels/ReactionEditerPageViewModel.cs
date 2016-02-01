@@ -1,25 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Modules.Main.ViewModels.ReactionEditer;
+using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
-using Prism.Commands;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Model;
-using Modules.Main.Views;
-using ReactiveFolder.Model.Filters;
-using System.Reactive.Linq;
-using System.Windows.Forms;
-using System.IO;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 using System.Reactive.Disposables;
-using ReactiveFolder.Model.Timings;
-using ReactiveFolder.Model.Actions;
-using ReactiveFolder.Model.Destinations;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
-
-using Modules.Main.ViewModels.ReactionEditer;
+using System.Windows.Forms;
 
 namespace Modules.Main.ViewModels
 {
@@ -46,7 +40,6 @@ namespace Modules.Main.ViewModels
 
 		public ReactiveProperty<WorkFolderEditViewModel> WorkFolderEditVM { get; private set; }
 		public ReactiveProperty<FilterEditViewModel> FilterEditVM { get; private set; }
-		public ReactiveProperty<TimingEditViewModel> TimingEditVM { get; private set; }
 		public ReactiveProperty<ActionsEditViewModel> ActionsEditVM { get; private set; }
 		public ReactiveProperty<DestinationEditViewModel> DestinationEditVM { get; private set; }
 
@@ -62,7 +55,6 @@ namespace Modules.Main.ViewModels
 
 			WorkFolderEditVM = new ReactiveProperty<WorkFolderEditViewModel>();
 			FilterEditVM = new ReactiveProperty<FilterEditViewModel>();
-			TimingEditVM = new ReactiveProperty<TimingEditViewModel>();
 			ActionsEditVM = new ReactiveProperty<ActionsEditViewModel>();
 			DestinationEditVM = new ReactiveProperty<DestinationEditViewModel>();
 
@@ -84,13 +76,11 @@ namespace Modules.Main.ViewModels
 				{
 					WorkFolderEditVM.Value?.Dispose();
 					FilterEditVM.Value?.Dispose();
-					TimingEditVM.Value?.Dispose();
 					ActionsEditVM.Value?.Dispose();
 					DestinationEditVM.Value?.Dispose();
 
 					WorkFolderEditVM.Value = new WorkFolderEditViewModel(Reaction);
 					FilterEditVM.Value = new FilterEditViewModel(Reaction);
-					TimingEditVM.Value = new TimingEditViewModel(Reaction);
 					ActionsEditVM.Value = new ActionsEditViewModel(Reaction);
 					DestinationEditVM.Value = new DestinationEditViewModel(Reaction);
 				})
@@ -143,7 +133,6 @@ namespace Modules.Main.ViewModels
 
 			WorkFolderEditVM.Value?.Dispose();
 			FilterEditVM.Value?.Dispose();
-			TimingEditVM.Value?.Dispose();
 			ActionsEditVM.Value?.Dispose();
 			DestinationEditVM.Value?.Dispose();
 		}

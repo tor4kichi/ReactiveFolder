@@ -110,7 +110,6 @@ namespace ReactiveFolder.Model
 		{
 			var reaction = new FolderReactionModel(targetDir);
 
-
 			_Models.Add(reaction);
 
 			SaveReaction(reaction);

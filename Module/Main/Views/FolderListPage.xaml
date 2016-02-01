@@ -8,6 +8,7 @@
       xmlns:prism="http://prismlibrary.com/"
       xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
       xmlns:vm="clr-namespace:Modules.Main.ViewModels"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
       d:DesignHeight="300" d:DesignWidth="300"
       prism:ViewModelLocator.AutoWireViewModel="True"
@@ -205,39 +206,50 @@
               VerticalAlignment="Stretch"
               >
             <StackPanel HorizontalAlignment="Left" Height="40">
-                <Button Content="Settings?" Height="40"/>
+                <Button Content="Settings?" 
+                        
+                        Height="40"/>
             </StackPanel>
             <StackPanel HorizontalAlignment="Right" Height="40">
-                <Button Content="Add Folder" 
-                        Command="{Binding AddFolderCommand}"
-                        Height="40"
-                        >
-                </Button>
             </StackPanel>
         </Grid>
 
 
-        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="6">
+        <Grid Grid.Row="1">
+            <StackPanel Orientation="Vertical" Grid.Row="1" Margin="6">
 
-            <ItemsControl ItemsSource="{Binding FolderRootListItem.ChildrenFolderListItems}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button Command="{Binding OpenFolderReactionListCommand}"
+                <ItemsControl ItemsSource="{Binding FolderRootListItem.ChildrenFolderListItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding OpenFolderReactionListCommand}"
                                         >
-                            <Button.Content>
-                                <TextBlock Text="{Binding FolderName}" />
-                            </Button.Content>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="{x:Type ContentPresenter}">
-                        <Setter Property="Height" Value="36" />
-                        <Setter Property="Margin" Value="0, 1" />
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-            </ItemsControl>
-        </StackPanel>
+                                <Button.Content>
+                                    <TextBlock Text="{Binding FolderName}" />
+                                </Button.Content>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="{x:Type ContentPresenter}">
+                            <Setter Property="Height" Value="36" />
+                            <Setter Property="Margin" Value="0, 1" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
+            </StackPanel>
+
+            <Button 
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Command="{Binding AddFolderCommand}"
+                Style="{DynamicResource MaterialDesignFloatingActionLightButton}"
+                >
+                <materialDesign:PackIcon Kind="Plus"></materialDesign:PackIcon>
+            </Button>
+
+        </Grid>
+              
+        
     </Grid>
 
 </UserControl>

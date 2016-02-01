@@ -7,15 +7,11 @@ using Prism.Commands;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Model;
-using Modules.Main.Views;
-using ReactiveFolder.Model.Filters;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using System.IO;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
-using ReactiveFolder.Model.Timings;
-using ReactiveFolder.Model.Actions;
 using ReactiveFolder.Model.Destinations;
 using System.Threading.Tasks;
 

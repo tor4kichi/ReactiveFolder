@@ -102,9 +102,6 @@
                         <Style TargetType="{x:Type editerView:FilterEditControl}" >
                             <Setter Property="Template" Value="{StaticResource EditTemplate}" />
                         </Style>
-                        <Style TargetType="{x:Type editerView:TimingEditControl}" >
-                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
-                        </Style>
 
                         <Style TargetType="{x:Type editerView:ActionEditControl}" >
                             <Setter Property="Template" Value="{StaticResource EditTemplate}" />
@@ -120,8 +117,6 @@
                     <editerView:WorkFolderEditControl DataContext="{Binding WorkFolderEditVM.Value}" />
 
                     <editerView:FilterEditControl DataContext="{Binding FilterEditVM.Value}" />
-
-                    <editerView:TimingEditControl DataContext="{Binding TimingEditVM.Value}" />
 
                     <editerView:ActionEditControl DataContext="{Binding ActionsEditVM.Value}" />
 

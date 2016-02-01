@@ -39,6 +39,14 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MaterialDesignColors, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MaterialDesignColors.1.1.2\lib\net45\MaterialDesignColors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MaterialDesignThemes.Wpf, Version=1.4.0.473, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MaterialDesignThemes.1.4.0.473\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Practices.Prism.Mvvm, Version=1.1.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Prism.Mvvm.1.1.1\lib\net45\Microsoft.Practices.Prism.Mvvm.dll</HintPath>
       <Private>True</Private>
@@ -140,17 +148,12 @@
     <Compile Include="ViewModels\ReactionEditer\DestinationEditViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\DestinationViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditer\FileFilterViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEditer\FileUpdateTimingViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\FilterEditViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\FilterViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditer\FolderFilterViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\InputChildFolderDestinationViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\ReactionEditViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditer\SameInputDestinationViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEditer\TimerTimingViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEditer\TimingEditViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEditer\TimingViewModelBase.cs" />
-    <Compile Include="ViewModels\ReactionEditer\TimingViewModelTemplate.cs" />
     <Compile Include="ViewModels\ReactionEditer\WorkFolderEditViewModel.cs" />
     <Compile Include="ViewModels\ReactionListPageViewModel.cs" />
     <Compile Include="Views\ReactionEditer\ActionEditControl.xaml.cs">
@@ -167,9 +170,6 @@
     </Compile>
     <Compile Include="Views\ReactionEditerPage.xaml.cs">
       <DependentUpon>ReactionEditerPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ReactionEditer\TimingEditControl.xaml.cs">
-      <DependentUpon>TimingEditControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ReactionEditer\WorkFolderEditControl.xaml.cs">
       <DependentUpon>WorkFolderEditControl.xaml</DependentUpon>
@@ -213,10 +213,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ReactionEditerPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ReactionEditer\TimingEditControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
