@@ -10,6 +10,8 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
+        MinWidth="800"
+        MinHeight="600"
         >
     <Grid>
         <ContentControl prism:RegionManager.RegionName="MainRegion" />
