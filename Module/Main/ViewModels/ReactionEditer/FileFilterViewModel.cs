@@ -33,6 +33,10 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
+		
+		public ReactiveProperty<string> IncludeFilterText { get; private set; }
+
+		public ReactiveProperty<string> ExcludeFilterText { get; private set; }
 
 
 
@@ -41,15 +45,15 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		/// Model -> ViewModelへの一方通行
 		/// FilterParttersを変更する場合はFileReactiveFilterに追加削除を行う。
 		/// </summary>
-		public ReadOnlyReactiveCollection<string> FileFilterPatterns { get; private set; }
+		public ReadOnlyReactiveCollection<string> IncludeFilterPatterns { get; private set; }
+
 
 		/// <summary>
-		/// 候補ワード
-		/// FilterPartternsが変更される都度、更新される。
+		/// 現在追加されているFileのフィルターパターン
+		/// Model -> ViewModelへの一方通行
+		/// FilterParttersを変更する場合はFileReactiveFilterに追加削除を行う。
 		/// </summary>
-		public ObservableCollection<string> CandidateFilterItems { get; private set; }
-
-		private ReadOnlyReactiveCollection<string> _CachedCandidateFilterItems;
+		public ReadOnlyReactiveCollection<string> ExcludeFilterPatterns { get; private set; }
 
 	
 		/// <summary>
@@ -60,56 +64,48 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-		private FileReactiveFilter _FileFilterModel;
+		public FileReactiveFilter FileFilterModel { get; private set; }
+			
 
 		public FileFilterViewModel()
 			: base(null)
 		{
 			var temp = new ObservableCollection<string>();
-			FileFilterPatterns = temp.ToReadOnlyReactiveCollection();
-			CandidateFilterItems = new ObservableCollection<string>();
+			IncludeFilterPatterns = temp.ToReadOnlyReactiveCollection();
 			SampleItems = new ObservableCollection<string>();
 		}
 
 
-		public FileFilterViewModel(FolderReactionModel reactionModel)
+		public FileFilterViewModel(FolderReactionModel reactionModel, FileReactiveFilter filter)
 			: base(reactionModel)
 		{
-			_FileFilterModel = ReactionModel.Filter as FileReactiveFilter;
+			FileFilterModel = filter;
 
+			IncludeFilterText = new ReactiveProperty<string>("");
 
-			FileFilterPatterns = _FileFilterModel.FileFilterPatterns
-				.ToReadOnlyReactiveCollection()
-				.AddTo(_CompositeDisposable);
-
-			CandidateFilterItems = new ObservableCollection<string>();
-
-			// FileFilterPatternの候補ワード
-			// 
-			_CachedCandidateFilterItems = ReactionModel.ObserveProperty(x => x.WorkFolder)
-				.Select(_ => ReactiveFilterHelper.GetFileCandidateFilterPatterns(ReactionModel))
-				.Do(x =>
-				{
-					CandidateFilterItems.Clear();
-					CandidateFilterItems.AddRange(x);
-				})
-				.SelectMany(x => x)
+			IncludeFilterPatterns = FileFilterModel.IncludeFilter
 				.ToReadOnlyReactiveCollection()
 				.AddTo(_CompositeDisposable);
 
 
 
+			ExcludeFilterText = new ReactiveProperty<string>("");
+
+			ExcludeFilterPatterns = FileFilterModel.ExcludeFilter
+				.ToReadOnlyReactiveCollection()
+				.AddTo(_CompositeDisposable);
 
 
-			SampleItems = new ObservableCollection<string>(_FileFilterModel.FileFilter(ReactionModel.WorkFolder).Select(x => x.Name));
 
-			_FileFilterModel.FileFilterPatterns
+			SampleItems = new ObservableCollection<string>(FileFilterModel.FileFilter(ReactionModel.WorkFolder).Select(x => x.Name));
+
+			FileFilterModel.IncludeFilter
 				.CollectionChangedAsObservable()
 				.Subscribe(_ =>
 				{
 					SampleItems.Clear();
 					SampleItems.AddRange(
-						_FileFilterModel.FileFilter(ReactionModel.WorkFolder).Select(x => x.Name)
+						FileFilterModel.FileFilter(ReactionModel.WorkFolder).Select(x => x.Name)
 						);
 				})
 				.AddTo(_CompositeDisposable);
@@ -119,44 +115,78 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		// FiterText AddCommand
 
-		private DelegateCommand<string> _AddFiterTextCommand;
-		public DelegateCommand<string> AddFiterTextCommand
+		private DelegateCommand<string> _AddIncludeFilterTextCommand;
+		public DelegateCommand<string> AddIncludeFilterTextCommand
 		{
 			get
 			{
-				return _AddFiterTextCommand
-					?? (_AddFiterTextCommand = new DelegateCommand<string>(word =>
+				return _AddIncludeFilterTextCommand
+					?? (_AddIncludeFilterTextCommand = new DelegateCommand<string>(word =>
 					{
-						_FileFilterModel.AddFilterPattern(word);
+						FileFilterModel.AddIncludeFilter(word);
 
-						if (CandidateFilterItems.Contains(word))
-						{
-							CandidateFilterItems.Remove(word);
-						}
+						FileFilterModel.Validate();
 
-						_FileFilterModel.Validate();
+						IncludeFilterText.Value = "";
 					}));
 			}
 		}
 
 
 
-		private DelegateCommand<string> _RemoveFiterTextCommand;
-		public DelegateCommand<string> RemoveFiterTextCommand
+		private DelegateCommand<string> _RemoveIncludeFilterTextCommand;
+		public DelegateCommand<string> RemoveIncludeFilterTextCommand
 		{
 			get
 			{
-				return _RemoveFiterTextCommand
-					?? (_RemoveFiterTextCommand = new DelegateCommand<string>(word =>
+				return _RemoveIncludeFilterTextCommand
+					?? (_RemoveIncludeFilterTextCommand = new DelegateCommand<string>(word =>
 					{
-						_FileFilterModel.RemoveFilterPattern(word);
+						FileFilterModel.RemoveInlcudeFilter(word);
 
-						if (_CachedCandidateFilterItems.Contains(word))
-						{
-							CandidateFilterItems.Add(word);
-						}
+						FileFilterModel.Validate();
 
-						_FileFilterModel.Validate();
+						
+					}));
+			}
+		}
+
+
+
+
+
+
+
+		private DelegateCommand<string> _AddExcludeFilterTextCommand;
+		public DelegateCommand<string> AddExcludeFilterTextCommand
+		{
+			get
+			{
+				return _AddExcludeFilterTextCommand
+					?? (_AddExcludeFilterTextCommand = new DelegateCommand<string>(word =>
+					{
+						FileFilterModel.AddExcludeFilter(word);
+
+						FileFilterModel.Validate();
+
+						ExcludeFilterText.Value = "";
+					}));
+			}
+		}
+
+
+
+		private DelegateCommand<string> _RemoveExcludeFilterTextCommand;
+		public DelegateCommand<string> RemoveExcludeFilterTextCommand
+		{
+			get
+			{
+				return _RemoveExcludeFilterTextCommand
+					?? (_RemoveExcludeFilterTextCommand = new DelegateCommand<string>(word =>
+					{
+						FileFilterModel.RemoveExcludeFilter(word);
+
+						FileFilterModel.Validate();
 					}));
 			}
 		}

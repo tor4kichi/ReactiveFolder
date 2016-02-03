@@ -15,16 +15,37 @@ namespace Modules.Main.ViewModels
 {
 	public class FolderListPageViewModel : PageViewModelBase, INavigationAware
 	{
-		public FolderListItemViewModel FolderRootListItem { get; private set; }
+		public IRegionNavigationService NavigationService;
+
+		public FolderModel CurrentFolder { get; private set; }
+
+		public ReadOnlyReactiveCollection<ReactionListItemViewModel> ReactionItems { get; private set; }
+
+		public ReadOnlyReactiveCollection<FolderListItemViewModel> FolderItems { get; private set; }
+
+		public string PreviousFolderName { get; private set; }
+
+		public ReactiveProperty<string> FolderName { get; private set; }
 
 
 		public FolderListPageViewModel(IRegionManager regionManager, FolderReactionMonitorModel monitor)
 			: base(regionManager, monitor)
 		{
-			FolderRootListItem = new FolderListItemViewModel(this, _MonitorModel.RootFolder);
+			FolderName = new ReactiveProperty<string>("");
+			/*
+			CurrentFolder = _MonitorModel.RootFolder;
+
+			ReactionListItems = CurrentFolder.Models
+				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(this, x));
+
+			ChildrenFolderListItems = CurrentFolder.Children
+				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(this, x));
+				*/
+			PreviousFolderName = "";
+
 		}
 
-		
+
 		public bool IsNavigationTarget(NavigationContext navigationContext)
 		{
 			return true;
@@ -37,7 +58,76 @@ namespace Modules.Main.ViewModels
 
 		public void OnNavigatedTo(NavigationContext navigationContext)
 		{
-			// nothing to do.
+			NavigationService = navigationContext.NavigationService;
+
+			if (navigationContext.Parameters.Count() == 0)
+			{
+				Initialize(_MonitorModel.RootFolder);
+			}
+			else
+			{
+				var folderModel = FolderModelFromNavigationParameters(navigationContext.Parameters);
+				Initialize(folderModel);
+			}
+
+
+
+			BackCommand.RaiseCanExecuteChanged();
+		}
+
+
+
+		private void Initialize(FolderModel folder)
+		{
+			CurrentFolder = folder;
+
+			FolderName.Value = CurrentFolder.Folder.Name;
+
+			ReactionItems = CurrentFolder.Models
+				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(this, x));
+			OnPropertyChanged(nameof(ReactionItems));
+
+			FolderItems = CurrentFolder.Children
+				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(this, x));
+			OnPropertyChanged(nameof(FolderItems));
+
+			if (folder == _MonitorModel.RootFolder)
+			{
+				// ルートは戻る無効
+				PreviousFolderName = "";
+				OnPropertyChanged(nameof(PreviousFolderName));
+			}
+			else
+			{
+				var parentFolder = Path.GetDirectoryName(folder.Folder.FullName);
+				PreviousFolderName = Path.GetFileName(parentFolder);
+				OnPropertyChanged(nameof(PreviousFolderName));
+			}
+			
+		}
+
+
+		private DelegateCommand _BackCommand;
+		public DelegateCommand BackCommand
+		{
+			get
+			{
+				return _BackCommand
+					?? (_BackCommand = new DelegateCommand(() =>
+					{
+						if (NavigationService.Journal.CanGoBack)
+						{
+							NavigationService.Journal.GoBack();
+						}
+						else
+						{
+							this.NavigationToFolderListPage(_MonitorModel.RootFolder);
+							NavigationService.Journal.Clear();
+						}
+					}
+					, () => NavigationService?.Journal.CanGoBack ?? false					
+					));
+			}
 		}
 
 
@@ -51,21 +141,69 @@ namespace Modules.Main.ViewModels
 					{
 						var newFolderName = "NewFolder-" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
 
-						var folderModel = _MonitorModel.RootFolder.AddFolder(newFolderName);
+						var folderModel = CurrentFolder.AddFolder(newFolderName);
 
-						this.NavigationToFolderReactionListPage(folderModel);
+						this.NavigationToFolderListPage(folderModel);
 					}));
 			}
 		}
-		
 
 		
 
-		
+		private DelegateCommand _AddReactionCommand;
+		public DelegateCommand AddReactionCommand
+		{
+			get
+			{
+				return _AddReactionCommand
+					?? (_AddReactionCommand = new DelegateCommand(() =>
+					{
+						var desktop = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+						var targetDir = new System.IO.DirectoryInfo(desktop);
+
+						var reaction = CurrentFolder.AddReaction(targetDir);
+						reaction.Name = "something reaction";
+
+						reaction.Filter = new ReactiveFolder.Model.Filters.FileReactiveFilter();
+
+						//						reaction.AddAction(new RenameReactiveAction("#{name}"));
+
+						// save
+						CurrentFolder.SaveReaction(reaction);
+
+						// move to Reaction editer page.
+						NavigationToReactionEditerPage(reaction);
+					}));
+			}
+		}
+
+		private DelegateCommand _RemoveThisFolderCommand;
+		public DelegateCommand RemoveThisFolderCommand
+		{
+			get
+			{
+				return _RemoveThisFolderCommand
+					?? (_RemoveThisFolderCommand = new DelegateCommand(() =>
+					{
+						if (CurrentFolder.Children.Count > 0)
+						{
+							// confirm delete dialog.
+						}
+
+						_MonitorModel.RootFolder.RemoveFolder(CurrentFolder);
+
+						// move to Reaction editer page.
+						NavigationService.Journal.GoBack();
+						NavigationService.Journal.Clear();
+					}));
+			}
+		}
+
 	}
 
 
-	
 
-	
+
+
 }

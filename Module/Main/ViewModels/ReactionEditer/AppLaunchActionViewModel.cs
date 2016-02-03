@@ -1,6 +1,7 @@
 ﻿using Microsoft.Practices.Prism.Commands;
 using ReactiveFolder.Model;
 using ReactiveFolder.Model.Actions;
+using ReactiveFolder.Model.AppPolicy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,11 @@ namespace Modules.Main.ViewModels.ReactionEditer
 	{
 		public static List<string> AppList;
 
+
+		public string AppName { get; private set; }
+
+		public string AppArgumentName { get; private set; }
+
 		static AppLaunchActionViewModel()
 		{
 			AppList = AppLaunchReactiveAction.AppPolicyFactory.GetPolicies()
@@ -22,10 +28,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		// アプリの選択とアプリ内のAppOptionの選択
 
-		public AppLaunchActionViewModel(FolderReactionModel reactionModel)
+		public AppLaunchActionViewModel(FolderReactionModel reactionModel, AppLaunchReactiveAction appAction)
 			 : base(reactionModel)
 		{
+			AppName = appAction.ApplicationName;
 
+			AppArgumentName = appAction.ParamterSetName;
 		}
 
 		private DelegateCommand<string> _SelectAppCommand;

@@ -151,7 +151,7 @@ namespace Modules.Main.ViewModels
 						}
 						else
 						{
-							this.NavigationToFolderListPage();
+							this.NavigationToFolderListPage(_MonitorModel.RootFolder);
 						}
 					}));
 			}

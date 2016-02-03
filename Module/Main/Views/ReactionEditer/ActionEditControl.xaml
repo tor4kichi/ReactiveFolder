@@ -9,19 +9,27 @@
              xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
              xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
              xmlns:prism="http://prismlibrary.com/"             
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Styles.xaml" />
+    </UserControl.Resources>
+    
     <Grid x:Name="ActionsContainer" >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0"
-                            Text="Actions"  />
+        <StackPanel Orientation="Vertical">
 
+            <TextBlock Text="Actions" 
+                       Style="{StaticResource ListSubheaderText}"
+                       >
 
-        <TextBlock Grid.Row="1"
-                            Text="TODO " />
+            </TextBlock>
+            <TextBlock Text="TODO: ApplicationPolicyを作成したら実装する" 
+                       >
+
+            </TextBlock>
+            
+        </StackPanel>
 
     </Grid>
 

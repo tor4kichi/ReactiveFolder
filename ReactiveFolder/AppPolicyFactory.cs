@@ -145,7 +145,7 @@ namespace ReactiveFolder
 			// filterのFileFilterPatternsを全て保持しているに対してpolicyを返す
 			return Policies.Values.Where(x =>
 			{
-				return filter.FileFilterPatterns.All(y => x.PathFilterPartterns.Contains(y));
+				return filter.IncludeFilter.All(y => x.PathFilterPartterns.Contains(y));
 			});
 		}
 

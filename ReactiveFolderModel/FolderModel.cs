@@ -138,6 +138,33 @@ namespace ReactiveFolder.Model
 			throw new NotImplementedException("ReactionCopyTo is still implement.");
 		}
 
+
+
+
+
+		public FolderModel FindFolder(string path)
+		{
+			FolderModel folder = null;
+			if (this.Folder.FullName == path)
+			{
+				folder = this;
+			}
+			else
+			{
+				foreach (var child in Children)
+				{
+					folder = child.FindFolder(path);
+					if (folder != null)
+					{
+						break;
+					}
+				}
+			}
+
+			return folder;
+		}
+
+
 		public bool CanAddFolder(string name)
 		{
 			return Folder.EnumerateDirectories().All(x => x.Name != name);
@@ -170,7 +197,14 @@ namespace ReactiveFolder.Model
 			return newFolder;
 		}
 
-		public void RemoveFolder(FolderModel folder)
+
+		/// <summary>
+		/// フォルダーを削除します。
+		/// 引数で渡されたfolderのフォルダツリー全てを対象に探査します。
+		/// </summary>
+		/// <param name="folder"></param>
+		/// <returns></returns>
+		public bool RemoveFolder(FolderModel folder)
 		{
 			if (_Children.Contains(folder))
 			{
@@ -179,7 +213,19 @@ namespace ReactiveFolder.Model
 				_Children.Remove(folder);
 
 				folder.Folder.Delete(true);
+
+				return true;
 			}
+
+			foreach(var child in _Children)
+			{
+				if (child.RemoveFolder(child))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		public FolderReactionModel FindReaction(Guid guid)

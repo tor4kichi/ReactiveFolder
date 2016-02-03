@@ -9,62 +9,51 @@
              xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
              xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
              xmlns:prism="http://prismlibrary.com/"             
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Styles.xaml" />
+    </UserControl.Resources>
+    
     <Grid x:Name="DestinationContainer" >
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="1*"/>
-        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Vertical">
 
-        <StackPanel Grid.Column="0"
-                            Orientation="Vertical">
-            <RadioButton Content="input/" GroupName="DestinationFolderGroup" 
-                                         IsChecked="{Binding IsSameInputFolderChecked.Value, Mode=TwoWay}" />
-            <RadioButton Content="input/child" GroupName="DestinationFolderGroup"
-                                         IsChecked="{Binding IsInputChildFolderChecked.Value, Mode=TwoWay}" />
+            <TextBlock Text="Output Folder" 
+                       Style="{StaticResource ListSubheaderText}"
+                       />
 
-            <RadioButton Content="absolute" GroupName="DestinationFolderGroup"
-                                         IsChecked="{Binding IsAbsoluteFolderChecked.Value, Mode=TwoWay}" />
+
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+
+                <TextBlock Text="{Binding OutputFolderPath}"
+                           Margin="8 0"
+                           />
+
+                <Button Content="Select Folder" Command="{Binding SelectOutputFolderCommand}" />
+                
+                
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <TextBox Text="{Binding RenamePattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Width="200"
+                         materialDesign:TextFieldAssist.Hint="Rename"
+                         />
+            </StackPanel>
+
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Output Sample" />
+                <TextBlock Text="{Binding OutputPathSample.Value}"
+                           Margin="8 0"
+                           />
+            </StackPanel>
         </StackPanel>
 
-
-        <ContentControl Grid.Column="1"
-                            Content="{Binding DestinationVM.Value}"
-                                        HorizontalContentAlignment="Stretch"
-                                        VerticalContentAlignment="Stretch"
-                                        >
-            <ContentControl.Resources>
-
-                <!-- SameInputDestinationViewModel -->
-                <DataTemplate DataType="{x:Type editervm:SameInputDestinationViewModel}">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="SameInput Content"></TextBlock>
-                        <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
-                    </StackPanel>
-                </DataTemplate>
-
-                <!-- InputChildFolderDestinationViewModel -->
-                <DataTemplate DataType="{x:Type editervm:InputChildFolderDestinationViewModel}">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="InputChildFolder Content"></TextBlock>
-                        <TextBox Text="{Binding ChildFolderName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
-                    </StackPanel>
-                </DataTemplate>
-
-                <!-- AbsolutePathDestinationViewModel -->
-                <DataTemplate DataType="{x:Type editervm:AbsolutePathDestinationViewModel}">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Absolute Path Content"></TextBlock>
-                        <Button Content="Select Folder" Command="{Binding SelectOutputFolderCommand}" />
-                        <TextBlock Text="{Binding OutputPathSample.Value}"></TextBlock>
-                    </StackPanel>
-                </DataTemplate>
-
-            </ContentControl.Resources>
-        </ContentControl>
+       
 
     </Grid>
 </UserControl>

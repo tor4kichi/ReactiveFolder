@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace Modules.Main.ViewModels
 {
-
 	// Note: Support page to page moving.
 
 	public class PageViewModelBase : BindableBase
@@ -28,22 +27,14 @@ namespace Modules.Main.ViewModels
 
 
 
-		public void NavigationToFolderListPage()
-		{
-			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.FolderListPage));
-		}
-
-
-
-
-
-
-		public void NavigationToFolderReactionListPage(FolderModel folderModel)
+		public void NavigationToFolderListPage(FolderModel folderModel)
 		{
 			var param = new NavigationParameters();
 			param.Add("path", folderModel.Folder.FullName);
-			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.ReactionListPage), param);
+			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.FolderListPage), param);
 		}
+
+
 
 		protected FolderModel FolderModelFromNavigationParameters(NavigationParameters param)
 		{
@@ -54,7 +45,7 @@ namespace Modules.Main.ViewModels
 			}
 
 			// FolderModelを検索
-			var folderModel = _MonitorModel.RootFolder.Children.SingleOrDefault(x => x.Folder.FullName == folderPath);
+			var folderModel = _MonitorModel.FindFolder(folderPath);
 			if (folderModel == null)
 			{
 				throw new Exception("not exists FolderModel. path is " + folderPath);

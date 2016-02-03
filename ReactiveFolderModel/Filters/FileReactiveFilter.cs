@@ -33,12 +33,31 @@ namespace ReactiveFolder.Model.Filters
 		/// </para>
 		/// </summary>
 		[DataMember]
-		private ObservableCollection<string> _FileFilterPatterns { get; set; }
+		private ObservableCollection<string> _FileIncludeFilters { get; set; }
 
 
-		public ReadOnlyObservableCollection<string> FileFilterPatterns { get; set; }
+		public ReadOnlyObservableCollection<string> IncludeFilter { get; private set; }
 
 
+		/// <summary>
+		/// <para>Default is *.*</para>
+		/// <para>
+		/// *と?のみ特殊文字として扱われます。
+		/// * は0文字以上の文字列、
+		/// ? は0また1個の文字として扱われます。
+		/// ex) *.jpg
+		/// </para>
+		/// <para>
+		/// 正規表現ではありません。
+		/// | による複数のパターンの連結は利用できません。
+		/// 複数のパターンを指定する場合は新しくFileReactiveFilterを作成してください。
+		/// </para>
+		/// </summary>
+		[DataMember]
+		private ObservableCollection<string> _FileExcludeFilters { get; set; }
+
+
+		public ReadOnlyObservableCollection<string> ExcludeFilter { get; private set; }
 
 		// DirectoryInfo.EnumerateFilesの詳細
 		// see@ https://msdn.microsoft.com/ja-jp/library/dd383571(v=vs.110).aspx
@@ -51,37 +70,63 @@ namespace ReactiveFolder.Model.Filters
 			{
 				defaultFilterpatters = new string[] { };
 			}
-			_FileFilterPatterns = new ObservableCollection<string>(defaultFilterpatters);
-			FileFilterPatterns = new ReadOnlyObservableCollection<string>(_FileFilterPatterns);
+			_FileIncludeFilters = new ObservableCollection<string>(defaultFilterpatters);
+			IncludeFilter = new ReadOnlyObservableCollection<string>(_FileIncludeFilters);
+			_FileExcludeFilters = new ObservableCollection<string>();
+			ExcludeFilter = new ReadOnlyObservableCollection<string>(_FileExcludeFilters);
 		}
 
 
 
-		public void AddFilterPattern(string pattern)
+		public void AddIncludeFilter(string pattern)
 		{
-			if (_FileFilterPatterns.Contains(pattern))
+			if (_FileIncludeFilters.Contains(pattern))
 			{
 				return;
 			}
 
-			_FileFilterPatterns.Add(pattern);
+			_FileIncludeFilters.Add(pattern);
 
 			ValidatePropertyChanged();
 		}
 
-		public void RemoveFilterPattern(string pattern)
+		public void RemoveInlcudeFilter(string pattern)
 		{
-			if (_FileFilterPatterns.Remove(pattern))
+			if (_FileIncludeFilters.Remove(pattern))
 			{
 				ValidatePropertyChanged();
 			}
 		}
 
 
+		public void AddExcludeFilter(string pattern)
+		{
+			if (_FileExcludeFilters.Contains(pattern))
+			{
+				return;
+			}
+
+			_FileExcludeFilters.Add(pattern);
+
+			ValidatePropertyChanged();
+		}
+
+		public void RemoveExcludeFilter(string pattern)
+		{
+			if (_FileExcludeFilters.Remove(pattern))
+			{
+				ValidatePropertyChanged();
+			}
+		}
+
+
+
+
 		[OnDeserialized]
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
-			FileFilterPatterns = new ReadOnlyObservableCollection<string>(_FileFilterPatterns);
+			IncludeFilter = new ReadOnlyObservableCollection<string>(_FileIncludeFilters);
+			ExcludeFilter = new ReadOnlyObservableCollection<string>(_FileExcludeFilters);
 		}
 
 
@@ -90,7 +135,7 @@ namespace ReactiveFolder.Model.Filters
 		{
 			var result = new ValidationResult();
 
-			foreach(var fileFilterParttern in FileFilterPatterns)
+			foreach(var fileFilterParttern in IncludeFilter)
 			{
 				if (String.IsNullOrWhiteSpace(fileFilterParttern))
 				{
@@ -106,6 +151,9 @@ namespace ReactiveFolder.Model.Filters
 					}
 				}
 			}
+
+
+			// TODO: 除外フィルターのValidate
 			
 
 			return result;
@@ -118,7 +166,9 @@ namespace ReactiveFolder.Model.Filters
 		/// <returns></returns>
 		public override IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir)
 		{
-			foreach(var pattern in FileFilterPatterns)
+			// TODO: ポジティブリストとネガティブリストによるフィルタリング
+
+			foreach(var pattern in IncludeFilter)
 			{
 				var files = workDir.EnumerateFiles(pattern, SearchOption.TopDirectoryOnly);
 				foreach (var file in files)

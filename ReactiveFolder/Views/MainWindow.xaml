@@ -6,15 +6,23 @@
         xmlns:local="clr-namespace:ReactiveFolder"
         xmlns:prism="http://prismlibrary.com/"
         mc:Ignorable="d"
-        Title="ReactiveFolder" Height="350" Width="525"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
-        MinWidth="800"
+        Title="ReactiveFolder" 
+        MinWidth="600"
         MinHeight="600"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{StaticResource MaterialDesignFont}"
         >
+    <Window.Resources>
+       
+    </Window.Resources>
     <Grid>
-        <ContentControl prism:RegionManager.RegionName="MainRegion" />
+        <ContentControl
+            prism:RegionManager.RegionName="MainRegion" />
         <ContentControl prism:RegionManager.RegionName="DebugRegion" />
     </Grid>
 </Window>

@@ -24,6 +24,10 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		}
 
 
+
+		public ReadOnlyReactiveCollection<AppLaunchActionViewModel> Actions { get; private set; }
+
+
 		public ActionsEditViewModel(FolderReactionModel reactionModel)
 			: base(reactionModel)
 		{
@@ -31,6 +35,9 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.ToReactiveProperty()
 				.AddTo(_CompositeDisposable);
 
+			Actions = Reaction.Actions.ToReadOnlyReactiveCollection(x => 
+				new AppLaunchActionViewModel(Reaction, x as AppLaunchReactiveAction)
+				);
 		}
 
 

@@ -133,7 +133,7 @@ namespace ReactiveFolder.Model
 			{
 				return _Destination;
 			}
-			set
+			private set
 			{
 				var old = _Destination;
 				if (SetProperty(ref _Destination, value))
@@ -282,6 +282,15 @@ namespace ReactiveFolder.Model
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
 
 			FileUpdateTiming = new FileUpdateReactiveTiming();
+
+			var asbDestination = new AbsolutePathReactiveDestination();
+			if (targetFolder != null)
+			{
+				asbDestination.AbsoluteFolderPath = targetFolder.FullName;
+			}
+			Destination = asbDestination;
+
+
 
 			WorkFolder = targetFolder;
 		}

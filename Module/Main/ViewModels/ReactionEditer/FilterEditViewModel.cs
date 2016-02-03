@@ -28,11 +28,11 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public ReactiveProperty<ReactionFilterType> FilterType { get; private set; }
 
 
-		/// <summary>
-		/// FileまたはFolderのフィルターViewModel
-		/// FilterTypeに反応してVMを更新する
-		/// </summary>
-		public ReactiveProperty<FilterViewModelBase> FilterVM { get; private set; }
+
+		public FileFilterViewModel FileFilterVM { get; private set; }
+
+		public FolderFilterViewModel FolderFilterVM { get; private set; }
+
 
 
 		private ReactiveProperty<bool> _IsValid;
@@ -62,75 +62,64 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-		// TODO: FilterVMをキャッシュして使いまわせるようにしたい
-
-		/// <summary>
-		/// FilterVMをちゃんと消すために使うDisposer
-		/// FilterVMを使いまわさずに切り替えの都度生成しているため必要
-		/// </summary>
-		private IDisposable _FilterVMDisposer;
-
-
-		/// <summary>
-		/// FileModelのキャッシュ
-		/// 切り替え後も前回入力した状態を保持する
-		/// </summary>
-		private FileReactiveFilter _CachedFileModel;
-
-
-		/// <summary>
-		/// FolderModelのキャッシュ
-		/// 切り替え後も前回入力した状態を保持する
-		/// </summary>
-		private FolderReactiveFilter _CachedFolderModel;
-
-
-
-
 
 		public FilterEditViewModel(FolderReactionModel reactionModel)
 			: base(reactionModel)
 		{
-			_IsValid = Reaction.ObserveProperty(x => x.IsDestinationValid)
+			_IsValid = Reaction.ObserveProperty(x => x.IsFilterValid)
 				.ToReactiveProperty()
 				.AddTo(_CompositeDisposable);
 
 
 
-			// 現在のフィルターの状態からFile用VMかFolder用VMを選択
 			var currentFilterType = FilterModelToVMType(Reaction.Filter);
 
 			FilterType = new ReactiveProperty<ReactionFilterType>(currentFilterType)
 				.AddTo(_CompositeDisposable);
 
-			FilterVM = FilterType.Select(FilterTypeToFilterVM)
-				.ToReactiveProperty()
-				.AddTo(_CompositeDisposable);
+		
 
 
-			// FilterEdit内でフィルタータイプ切り替えによって生成されるVMのDispose管理
-			_FilterVMDisposer = null;
-			FilterVM.Subscribe(x =>
+			if (currentFilterType == ReactionFilterType.Files)
 			{
-				_FilterVMDisposer?.Dispose();
-				_FilterVMDisposer = x;
-			})
-			.AddTo(_CompositeDisposable);
+				FileFilterVM = new FileFilterViewModel(Reaction, Reaction.Filter as FileReactiveFilter);
+				FolderFilterVM = new FolderFilterViewModel(Reaction, new FolderReactiveFilter());
+			}
+			else if (currentFilterType == ReactionFilterType.Folder)
+			{
+				FileFilterVM = new FileFilterViewModel(Reaction, new FileReactiveFilter());
+				FolderFilterVM = new FolderFilterViewModel(Reaction, Reaction.Filter as FolderReactiveFilter);
+			}
+			else
+			{
+				throw new Exception();
+			}
 
 
+			
 
 			IsFileFilterSelected = new ReactiveProperty<bool>(currentFilterType == ReactionFilterType.Files)
 				.AddTo(_CompositeDisposable);
 			IsFileFilterSelected
 				.Where(x => x)
-				.Subscribe(_ => FilterType.Value = ReactionFilterType.Files)
+				.Subscribe(_ =>
+				{
+					FilterType.Value = ReactionFilterType.Files;
+
+					Reaction.Filter = FileFilterVM.FileFilterModel;
+				})
 				.AddTo(_CompositeDisposable);
 
 			IsFolderFilterSelected = new ReactiveProperty<bool>(currentFilterType == ReactionFilterType.Folder)
 				.AddTo(_CompositeDisposable);
 			IsFolderFilterSelected
 				.Where(x => x)
-				.Subscribe(_ => FilterType.Value = ReactionFilterType.Folder)
+				.Subscribe(_ =>
+				{
+					FilterType.Value = ReactionFilterType.Folder;
+
+					Reaction.Filter = FolderFilterVM.FolderFilter;
+				})
 				.AddTo(_CompositeDisposable);
 		}
 
@@ -150,63 +139,9 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				return ReactionFilterType.Unknown;
 			}
 		}
-
-		FilterViewModelBase FilterTypeToFilterVM(ReactionFilterType filterType)
-		{
-
-
-			// FileとFolderのModelをそれぞれ一つだけ作成するようキャッシュを通して
-			// Reaction.Filterを再設定する
-
-			// その上でFileとFolderのFilterViewModelBaseを作成して返すようにする
-
-
-
-			var currentType = FilterModelToVMType(Reaction.Filter);
-
-			switch (currentType)
-			{
-				case ReactionFilterType.Files:
-					_CachedFileModel = Reaction.Filter as FileReactiveFilter;
-					break;
-				case ReactionFilterType.Folder:
-					_CachedFolderModel = Reaction.Filter as FolderReactiveFilter;
-					break;
-				case ReactionFilterType.Unknown:
-					break;
-				default:
-					break;
-			}
-
-
-			switch (filterType)
-			{
-				case ReactionFilterType.Files:
-					if (_CachedFileModel == null)
-					{
-						_CachedFileModel = new FileReactiveFilter();
-					}
-					Reaction.Filter = _CachedFileModel;
-					return new FileFilterViewModel(Reaction);
-				case ReactionFilterType.Folder:
-					if (_CachedFolderModel == null)
-					{
-						_CachedFolderModel = new FolderReactiveFilter();
-					}
-					Reaction.Filter = _CachedFolderModel;
-					return new FolderFilterViewModel(Reaction);
-				case ReactionFilterType.Unknown:
-					return null;
-				default:
-					throw new Exception("");
-			}
-		}
-
+		
 		public override void Dispose()
 		{
-			_FilterVMDisposer?.Dispose();
-			_FilterVMDisposer = null;
-
 			base.Dispose();
 		}
 

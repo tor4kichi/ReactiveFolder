@@ -7,12 +7,14 @@ using ReactiveFolder.Model;
 using System.Reactive.Linq;
 using System.Reactive.Disposables;
 using ReactiveFolder.Model.Destinations;
+using System.IO;
+using Microsoft.Practices.Prism.Commands;
 
 namespace Modules.Main.ViewModels.ReactionEditer
 {
 	public class DestinationEditViewModel : ReactionEditViewModelBase
 	{
-		public ReadOnlyReactiveProperty<DestinationViewModelBase> DestinationVM { get; private set; }
+		AbsolutePathReactiveDestination Destination;
 
 
 		private ReactiveProperty<bool> _IsValid;
@@ -25,130 +27,106 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		}
 
 
-		public ReactiveProperty<bool> IsSameInputFolderChecked { get; set; }
-		public ReactiveProperty<bool> IsInputChildFolderChecked { get; set; }
-		public ReactiveProperty<bool> IsAbsoluteFolderChecked { get; set; }
+		public string OutputFolderPath { get; private set; }
+
+		public ReactiveProperty<string> OutputNamePattern { get; private set; }
+
+		public ReadOnlyReactiveProperty<string> OutputPathSample { get; private set; }
 
 
-		SameInputReactiveDestination _CachedSameInputDest;
-		ChildReactiveDestination _CachedInputChildFolderDest;
-		AbsolutePathReactiveDestination _CachedAbsoluteDest;
+		public ReactiveProperty<string> RenamePattern { get; private set; }
 
 		public DestinationEditViewModel(FolderReactionModel reactionModel)
 			: base(reactionModel)
 		{
 			_CompositeDisposable = new CompositeDisposable();
 
+			Destination = reactionModel.Destination as AbsolutePathReactiveDestination;
 
 
 			_IsValid = Reaction.ObserveProperty(x => x.IsDestinationValid)
 				.ToReactiveProperty();
 
-
-
-			CacheDestinationModel();
-
-			// 1. Checked系が変化すると
-			IsSameInputFolderChecked = new ReactiveProperty<bool>(Reaction.Destination is SameInputReactiveDestination)
-				.AddTo(_CompositeDisposable);
-			IsInputChildFolderChecked = new ReactiveProperty<bool>(Reaction.Destination is ChildReactiveDestination)
-				.AddTo(_CompositeDisposable);
-			IsAbsoluteFolderChecked = new ReactiveProperty<bool>(Reaction.Destination is AbsolutePathReactiveDestination)
+			OutputNamePattern = reactionModel.Destination.ToReactivePropertyAsSynchronized(x => x.OutputNamePattern)
 				.AddTo(_CompositeDisposable);
 
 
-			// 2. CheckedのSubscriberによってReactionModel.Destinationが更新されて
-			IsSameInputFolderChecked.Where(x => x)
-				.Subscribe(_ =>
+			OutputFolderPath = Destination.AbsoluteFolderPath;
+
+			OutputPathSample = Observable.CombineLatest(
+					Destination.ObserveProperty(x => x.AbsoluteFolderPath)
+						.Where(x => false == String.IsNullOrWhiteSpace(x))
+					, OutputNamePattern
+				)
+				.Select(x =>
 				{
-					CacheDestinationModel();
-
-					if (_CachedSameInputDest == null)
-					{
-						_CachedSameInputDest = new SameInputReactiveDestination();
-					}
-
-					Reaction.Destination = _CachedSameInputDest;
+					return Path.Combine(x[0], x[1]);
 				})
-				.AddTo(_CompositeDisposable);
-
-			IsInputChildFolderChecked.Where(x => x)
-				.Subscribe(_ =>
-				{
-					CacheDestinationModel();
-
-					if (_CachedInputChildFolderDest == null)
-					{
-						_CachedInputChildFolderDest = new ChildReactiveDestination();
-					}
-
-					Reaction.Destination = _CachedInputChildFolderDest;
-				})
-				.AddTo(_CompositeDisposable);
-
-			IsAbsoluteFolderChecked.Where(x => x)
-				.Subscribe(_ =>
-				{
-					CacheDestinationModel();
-
-					if (_CachedAbsoluteDest == null)
-					{
-						_CachedAbsoluteDest = new AbsolutePathReactiveDestination();
-					}
-
-					Reaction.Destination = _CachedAbsoluteDest;
-				})
-				.AddTo(_CompositeDisposable);
-
-
-			// 3. ReactionModel.Destinationの更新に合わせてVMに変換
-			DestinationVM = Reaction.ObserveProperty(x => x.Destination)
-				.Select(ModelToVM)
 				.ToReadOnlyReactiveProperty()
 				.AddTo(_CompositeDisposable);
 
 
+
+		}
+
+		private DelegateCommand _SelectOutputFolderCommand;
+		public DelegateCommand SelectOutputFolderCommand
+		{
+			get
+			{
+				return _SelectOutputFolderCommand
+					?? (_SelectOutputFolderCommand = new DelegateCommand(() =>
+					{
+						// 出力先の絶対パスをFolder選択ダイアログを使って取得する
+						var dialog = new WPFFolderBrowser.WPFFolderBrowserDialog("Select output folder.");
+
+						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+
+						try
+						{
+							var result = dialog.ShowDialog();
+							if (result.HasValue && result.Value
+								&& false == String.IsNullOrWhiteSpace(dialog.FileName))
+							{
+								var folderInfo = new DirectoryInfo(dialog.FileName);
+
+								if (false == folderInfo.Exists)
+								{
+									return;
+								}
+
+								Destination.AbsoluteFolderPath = folderInfo.FullName;
+								OutputFolderPath = folderInfo.FullName;
+								OnPropertyChanged(nameof(OutputFolderPath));
+							}
+						}
+						finally
+						{
+							//							dialog.Dispose();
+							//							ofp.Dispose();
+						}
+
+
+
+					}));
+			}
 		}
 
 
 
-		private void CacheDestinationModel()
+		private DelegateCommand _ResetRenamePartternCommand;
+		public DelegateCommand ResetRenamePartternCommand
 		{
-			if (Reaction.Destination is SameInputReactiveDestination)
+			get
 			{
-				_CachedSameInputDest = Reaction.Destination as SameInputReactiveDestination;
-			}
-			else if (Reaction.Destination is ChildReactiveDestination)
-			{
-				_CachedInputChildFolderDest = Reaction.Destination as ChildReactiveDestination;
-			}
-			else if (Reaction.Destination is AbsolutePathReactiveDestination)
-			{
-				_CachedAbsoluteDest = Reaction.Destination as AbsolutePathReactiveDestination;
-			}
-			else
-			{
-				throw new Exception();
-			}
-		}
+				return _ResetRenamePartternCommand
+					?? (_ResetRenamePartternCommand = new DelegateCommand(() =>
+					{
+						// TODO: use const
+						RenamePattern.Value = "{name}";
 
-		private DestinationViewModelBase ModelToVM(ReactiveDestinationBase destModel)
-		{
-			if (destModel is SameInputReactiveDestination)
-			{
-				return new SameInputDestinationViewModel(Reaction);
-			}
-			else if (destModel is ChildReactiveDestination)
-			{
-				return new InputChildFolderDestinationViewModel(Reaction);
-			}
-			else if (destModel is AbsolutePathReactiveDestination)
-			{
-				return new AbsolutePathDestinationViewModel(Reaction);
-			}
-			else
-			{
-				throw new Exception();
+					}));
 			}
 		}
 	}

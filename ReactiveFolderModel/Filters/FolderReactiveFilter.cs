@@ -1,6 +1,7 @@
 ﻿using ReactiveFolder.Model.Util;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -19,11 +20,8 @@ namespace ReactiveFolder.Model.Filters
 
 
 
-		[DataMember]
-		private string _FolderFilterPattern;
-
 		/// <summary>
-		/// <para>Default is *</para>
+		/// <para>Default is *.*</para>
 		/// <para>
 		/// *と?のみ特殊文字として扱われます。
 		/// * は0文字以上の文字列、
@@ -36,56 +34,112 @@ namespace ReactiveFolder.Model.Filters
 		/// 複数のパターンを指定する場合は新しくFileReactiveFilterを作成してください。
 		/// </para>
 		/// </summary>
-		public string FolderFilterPattern
+		[DataMember]
+		private ObservableCollection<string> _IncludeFilters { get; set; }
+
+
+		public ReadOnlyObservableCollection<string> IncludeFilter { get; private set; }
+
+
+		/// <summary>
+		/// <para>Default is *.*</para>
+		/// <para>
+		/// *と?のみ特殊文字として扱われます。
+		/// * は0文字以上の文字列、
+		/// ? は0また1個の文字として扱われます。
+		/// ex) *.jpg
+		/// </para>
+		/// <para>
+		/// 正規表現ではありません。
+		/// | による複数のパターンの連結は利用できません。
+		/// 複数のパターンを指定する場合は新しくFileReactiveFilterを作成してください。
+		/// </para>
+		/// </summary>
+		[DataMember]
+		private ObservableCollection<string> _ExcludeFilters { get; set; }
+
+
+		public ReadOnlyObservableCollection<string> ExcludeFilter { get; private set; }
+
+
+		public FolderReactiveFilter()
 		{
-			get
+			_IncludeFilters = new ObservableCollection<string>();
+			IncludeFilter = new ReadOnlyObservableCollection<string>(_IncludeFilters);
+			_ExcludeFilters = new ObservableCollection<string>();
+			ExcludeFilter = new ReadOnlyObservableCollection<string>(_ExcludeFilters);
+		}
+
+
+		public void AddIncludeFilter(string pattern)
+		{
+			if (_IncludeFilters.Contains(pattern))
 			{
-				return _FolderFilterPattern;
-			}
-			set
-			{
-				SetProperty(ref _FolderFilterPattern, value);
+				return;
 			}
 
+			_IncludeFilters.Add(pattern);
+
+			ValidatePropertyChanged();
+		}
+
+		public void RemoveInlcudeFilter(string pattern)
+		{
+			if (_IncludeFilters.Remove(pattern))
+			{
+				ValidatePropertyChanged();
+			}
+		}
+
+
+		public void AddExcludeFilter(string pattern)
+		{
+			if (_ExcludeFilters.Contains(pattern))
+			{
+				return;
+			}
+
+			_ExcludeFilters.Add(pattern);
+
+			ValidatePropertyChanged();
+		}
+
+		public void RemoveExcludeFilter(string pattern)
+		{
+			if (_ExcludeFilters.Remove(pattern))
+			{
+				ValidatePropertyChanged();
+			}
 		}
 
 
 
 
-		public FolderReactiveFilter(string folderFilterPattern = "*")
+		[OnDeserialized]
+		public void SetValuesOnDeserialized(StreamingContext context)
 		{
-			FolderFilterPattern = folderFilterPattern;
+			IncludeFilter = new ReadOnlyObservableCollection<string>(_IncludeFilters);
+			ExcludeFilter = new ReadOnlyObservableCollection<string>(_ExcludeFilters);
 		}
-
-
 
 
 		protected override ValidationResult InnerValidate()
 		{
 			var result = new ValidationResult();
 
-			if (String.IsNullOrWhiteSpace(FolderFilterPattern))
-			{
-				result.AddMessage($"{nameof(FileReactiveFilter)}: need file filter pattern. ex) '*.png|*.jpg'");
-				return result;
-			}
-
-			var invalidChars = InvalidChars;
-
-			foreach (var invalidChar in InvalidChars)
-			{
-				if (FolderFilterPattern.Contains(invalidChar))
-				{
-					result.AddMessage($"{nameof(FileReactiveFilter)}: contain invalid char '{invalidChar}'");
-				}
-			}
+			// TODO: 
+			result.AddMessage("not implement");
 
 			return result;
 		}
 
 		public override IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir)
 		{
-			return workDir.EnumerateDirectories(FolderFilterPattern, SearchOption.TopDirectoryOnly);
+			var allDir = workDir.EnumerateDirectories("*.*", SearchOption.TopDirectoryOnly);
+
+			// TODO: 
+
+			return allDir;
 		}
 	}
 }

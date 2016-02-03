@@ -141,21 +141,17 @@
     <Compile Include="ViewModels\FolderListPageViewModel.cs" />
     <Compile Include="ViewModels\PageViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditerPageViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEditer\AbsolutePathDestinationViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\ActionsEditViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\ActionViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditer\AppLaunchActionViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\DestinationEditViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEditer\DestinationViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditer\FileFilterViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\FilterEditViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\FilterViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditer\FolderFilterViewModel.cs" />
-    <Compile Include="ViewModels\ReactionEditer\InputChildFolderDestinationViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\ReactionEditViewModelBase.cs" />
-    <Compile Include="ViewModels\ReactionEditer\SameInputDestinationViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\WorkFolderEditViewModel.cs" />
-    <Compile Include="ViewModels\ReactionListPageViewModel.cs" />
+    <Compile Include="ViewModels\ReactionListItemViewModel.cs" />
     <Compile Include="Views\ReactionEditer\ActionEditControl.xaml.cs">
       <DependentUpon>ActionEditControl.xaml</DependentUpon>
     </Compile>
@@ -173,9 +169,6 @@
     </Compile>
     <Compile Include="Views\ReactionEditer\WorkFolderEditControl.xaml.cs">
       <DependentUpon>WorkFolderEditControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ReactionListPage.xaml.cs">
-      <DependentUpon>ReactionListPage.xaml</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -220,9 +213,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ReactionListPage.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Views\Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

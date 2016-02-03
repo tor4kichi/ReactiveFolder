@@ -184,6 +184,14 @@ namespace ReactiveFolder.Model
 			return RootFolder.FindReactionParent(model);
 		}
 
+
+
+
+		public FolderModel FindFolder(string path)
+		{
+			return RootFolder.FindFolder(path);
+		}
+
 		// TODO: 再帰的にフォルダをめぐってFolderModelを構築する
 
 		private void InitializeReactions()

@@ -9,65 +9,75 @@
              xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
              xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
              xmlns:prism="http://prismlibrary.com/"             
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              prism:ViewModelLocator.AutoWireViewModel="True">
+    <UserControl.Resources>
+        <ResourceDictionary Source="Styles.xaml" />
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="14*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="1*"/>
+
         </Grid.RowDefinitions>
 
 
         <!-- Top Buttons -->
         <Grid HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch"
-            >
-            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal"
-                        >
-                <Button Content="Back" Width="50" Height="28"
-                        Command="{Binding BackCommand}"/>
+              Style="{StaticResource Appbar}"
+              >
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Button Command="{Binding BackCommand}" >
+                    <materialDesign:PackIcon Kind="ArrowLeft" ToolTip="Back" />
+                </Button>
+                <TextBlock Text="Edit Reaction" />
             </StackPanel>
 
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" Height="40">
-                <StackPanel.Resources>
-                    <Style x:Key="{x:Type TextBox}" TargetType="TextBox">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type TextBoxBase}">
-                                    <Border Name="TextBoxBorder" Height="{TemplateBinding Height}" Width="{TemplateBinding Width}" BorderThickness="1" BorderBrush="Transparent">
-                                        <ScrollViewer Margin="0" x:Name="PART_ContentHost" />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                            <Setter TargetName="TextBoxBorder" Property="BorderBrush" Value="LightGray" />
-                                            <Setter TargetName="TextBoxBorder" Property="Background" Value="White" />
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </StackPanel.Resources>
-
-                <TextBox Text="{Binding ReactionWorkName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
-                </TextBox>
-            </StackPanel>
-            
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Test" Width="50" Height="28"
-                        Command="{Binding TestCommand}"
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Command="{Binding TestCommand}"
                         IsEnabled="{Binding IsReactionValid.Value}">
+                    <materialDesign:PackIcon Kind="Leaf" ToolTip="Test" />
                 </Button>
-                <Button Content="Save" Width="50" Height="28"
-                        Command="{Binding SaveCommand}"
+                <Button Command="{Binding SaveCommand}"
                         IsEnabled="{Binding IsEnableSave.Value}">
+                    <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save"/>
                 </Button>
+                <!--
+                <Button>
+                    <materialDesign:PackIcon Kind="DotsVertical" />
+                </Button>
+                -->
             </StackPanel>
-            
         </Grid>
 
-        <Grid x:Name="ReactionContent" Grid.Row="1">
+        <Grid Grid.Row="1" 
+              Background="{StaticResource PrimaryHueMidBrush}"
+              >
+            <Border MaxWidth="800" Margin="16 16">
+                
+                <!-- TODO: Validation -->
+                <TextBox Text="{Binding ReactionWorkName.Value}"
+                         Style="{StaticResource MaterialDesignTextBox}"
+                         FontSize="36"
+                         Foreground="White"
+                       HorizontalAlignment="Left"
+                         materialDesign:TextFieldAssist.Hint="File name"
+                       >
+                    <TextBox.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
+                        </Style>
+                    </TextBox.Resources>
+                </TextBox>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="ReactionContent" Grid.Row="2">
 
             <ScrollViewer HorizontalAlignment="Stretch"
                 HorizontalScrollBarVisibility="Hidden" 
@@ -75,44 +85,9 @@
                           >
 
                 <ItemsControl HorizontalContentAlignment="Stretch"
-                          Margin="20, 0"
+                          Margin="16 0 16 8"
                           >
-                    <ItemsControl.Resources>
-                        <ControlTemplate x:Key="EditTemplate" TargetType="{x:Type ContentControl}">
-                            <Grid >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="60" />
-                                    <ColumnDefinition Width="1*" />
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Orientation="Vertical" Grid.Column="0">
-                                    <ToggleButton Width="20"  Height="20" IsChecked="{Binding IsValid.Value}" IsHitTestVisible="False"/>
-                                </StackPanel>
-                                
-                                <ContentPresenter Grid.Column="1"/>
-
-                            </Grid>
-                        </ControlTemplate>
-
-
-                        <Style TargetType="{x:Type editerView:WorkFolderEditControl}" >
-                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
-                        </Style>
-
-                        <Style TargetType="{x:Type editerView:FilterEditControl}" >
-                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
-                        </Style>
-
-                        <Style TargetType="{x:Type editerView:ActionEditControl}" >
-                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
-                        </Style>
-
-                        <Style TargetType="{x:Type editerView:DestinationEditControl}" >
-                            <Setter Property="Template" Value="{StaticResource EditTemplate}" />
-                        </Style>
-
-
-                    </ItemsControl.Resources>
+                    
                     
                     <editerView:WorkFolderEditControl DataContext="{Binding WorkFolderEditVM.Value}" />
 

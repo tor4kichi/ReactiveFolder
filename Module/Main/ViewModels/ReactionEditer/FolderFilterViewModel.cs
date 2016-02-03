@@ -32,16 +32,35 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		// Note: Folderは選択できるのは一つだけ
 
 
-		/// <summary>
-		/// フォルダのフィルターパターン
-		/// </summary>
-		/// <see cref="FolderReactiveFilter"/>
-		public ReactiveProperty<string> FolderFilterPattern { get; private set; }
+		// **************************
+
+		// TODO: FileFilterを手動追加するためのテキストボックスを追加
+
+		// **************************
+
+
+
+
+		public ReactiveProperty<string> IncludeFilterText { get; private set; }
+
+		public ReactiveProperty<string> ExcludeFilterText { get; private set; }
+
+
 
 		/// <summary>
-		/// FolderFilterPatternに自動入力できる候補ワード
+		/// 現在追加されているFileのフィルターパターン
+		/// Model -> ViewModelへの一方通行
+		/// FilterParttersを変更する場合はFileReactiveFilterに追加削除を行う。
 		/// </summary>
-		public ReadOnlyReactiveCollection<string> CandidateFilterItems { get; private set; }
+		public ReadOnlyReactiveCollection<string> IncludeFilterPatterns { get; private set; }
+
+
+		/// <summary>
+		/// 現在追加されているFileのフィルターパターン
+		/// Model -> ViewModelへの一方通行
+		/// FilterParttersを変更する場合はFileReactiveFilterに追加削除を行う。
+		/// </summary>
+		public ReadOnlyReactiveCollection<string> ExcludeFilterPatterns { get; private set; }
 
 
 		/// <summary>
@@ -53,57 +72,51 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-		private FolderReactiveFilter _FolderFilter;
+		public FolderReactiveFilter FolderFilter { get; private set; }
 
 
 		public FolderFilterViewModel()
 			: base(null)
 		{
-			FolderFilterPattern = new ReactiveProperty<string>("");
+			IncludeFilterText = new ReactiveProperty<string>("");
+			ExcludeFilterText = new ReactiveProperty<string>("");
 
 			var temp = new ObservableCollection<string>();
-			CandidateFilterItems = temp.ToReadOnlyReactiveCollection();
+			IncludeFilterPatterns = temp.ToReadOnlyReactiveCollection();
+			ExcludeFilterPatterns = temp.ToReadOnlyReactiveCollection();
 			SampleItems = temp.ToReadOnlyReactiveCollection();
 		}
 
 
-		public FolderFilterViewModel(FolderReactionModel reactionModel)
+		public FolderFilterViewModel(FolderReactionModel reactionModel, FolderReactiveFilter filter)
 			: base(reactionModel)
 		{
-			_FolderFilter = ReactionModel.Filter as FolderReactiveFilter;
+			FolderFilter = filter;
 
-			FolderFilterPattern = _FolderFilter
-				.ToReactivePropertyAsSynchronized(x => x.FolderFilterPattern,
-				convert: x =>
-				{
-					// Model -> VM
-					return $"/{x}";
-				},
-				convertBack: x =>
-				{
-					// VM -> M
-					if (x.StartsWith("/"))
-					{
-						x = x.Substring(1);
-					}
-					return x;
-				}
-				)
-				.AddTo(_CompositeDisposable);
+			IncludeFilterText = new ReactiveProperty<string>("");
 
-
-			CandidateFilterItems = ReactionModel.ObserveProperty(x => x.WorkFolder)
-				.SelectMany(x => ReactiveFilterHelper.GetFolderCandidateFilterPatterns(ReactionModel))
+			IncludeFilterPatterns = FolderFilter.IncludeFilter
 				.ToReadOnlyReactiveCollection()
 				.AddTo(_CompositeDisposable);
 
 
-			SampleItems = _FolderFilter.ObserveProperty(x => x.FolderFilterPattern)
-				.Throttle(TimeSpan.FromSeconds(0.25))
-				.SelectMany(x => _FolderFilter.DirectoryFilter(ReactionModel.WorkFolder))
-				.Select(x => $"/{x.Name}")
-				.ToReadOnlyReactiveCollection(FolderFilterPattern.ToUnit())
+
+			ExcludeFilterText = new ReactiveProperty<string>("");
+
+			ExcludeFilterPatterns = FolderFilter.ExcludeFilter
+				.ToReadOnlyReactiveCollection()
 				.AddTo(_CompositeDisposable);
+
+
+
+			/*
+			SampleItems = FolderFilter.ObserveProperty(x => x.FolderFilterPattern)
+				.Throttle(TimeSpan.FromSeconds(0.25))
+				.SelectMany(x => FolderFilter.DirectoryFilter(ReactionModel.WorkFolder))
+				.Select(x => $"/{x.Name}")
+				.ToReadOnlyReactiveCollection()
+				.AddTo(_CompositeDisposable);
+				*/
 		}
 
 
@@ -113,15 +126,80 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-		private DelegateCommand<string> _SelectCandidateWordCommand;
-		public DelegateCommand<string> SelectCandidateWordCommand
+		// FiterText AddCommand
+
+		private DelegateCommand<string> _AddIncludeFilterTextCommand;
+		public DelegateCommand<string> AddIncludeFilterTextCommand
 		{
 			get
 			{
-				return _SelectCandidateWordCommand
-					?? (_SelectCandidateWordCommand = new DelegateCommand<string>(word =>
+				return _AddIncludeFilterTextCommand
+					?? (_AddIncludeFilterTextCommand = new DelegateCommand<string>(word =>
 					{
-						FolderFilterPattern.Value = word;
+						FolderFilter.AddIncludeFilter(word);
+
+						FolderFilter.Validate();
+
+						IncludeFilterText.Value = "";
+					}));
+			}
+		}
+
+
+
+		private DelegateCommand<string> _RemoveIncludeFilterTextCommand;
+		public DelegateCommand<string> RemoveIncludeFilterTextCommand
+		{
+			get
+			{
+				return _RemoveIncludeFilterTextCommand
+					?? (_RemoveIncludeFilterTextCommand = new DelegateCommand<string>(word =>
+					{
+						FolderFilter.RemoveInlcudeFilter(word);
+
+						FolderFilter.Validate();
+
+
+					}));
+			}
+		}
+
+
+
+
+
+
+
+		private DelegateCommand<string> _AddExcludeFilterTextCommand;
+		public DelegateCommand<string> AddExcludeFilterTextCommand
+		{
+			get
+			{
+				return _AddExcludeFilterTextCommand
+					?? (_AddExcludeFilterTextCommand = new DelegateCommand<string>(word =>
+					{
+						FolderFilter.AddExcludeFilter(word);
+
+						FolderFilter.Validate();
+
+						ExcludeFilterText.Value = "";
+					}));
+			}
+		}
+
+
+
+		private DelegateCommand<string> _RemoveExcludeFilterTextCommand;
+		public DelegateCommand<string> RemoveExcludeFilterTextCommand
+		{
+			get
+			{
+				return _RemoveExcludeFilterTextCommand
+					?? (_RemoveExcludeFilterTextCommand = new DelegateCommand<string>(word =>
+					{
+						FolderFilter.RemoveExcludeFilter(word);
+
+						FolderFilter.Validate();
 					}));
 			}
 		}

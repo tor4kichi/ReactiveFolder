@@ -18,23 +18,15 @@ namespace Modules.Main.ViewModels
 
 		public string FolderName { get; private set; }
 
-		public ReadOnlyReactiveCollection<ReactionListItemViewModel> ReactionListItems { get; private set; }
-
-		public ReadOnlyReactiveCollection<FolderListItemViewModel> ChildrenFolderListItems { get; private set; }
 
 		public FolderListItemViewModel(PageViewModelBase pageVM, FolderModel folderModel)
 		{
 			PageVM = pageVM;
 			FolderModel = folderModel;
 
-
 			FolderName = folderModel.Folder.Name;
 
-			ReactionListItems = FolderModel.Models
-				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(PageVM, x));
-
-			ChildrenFolderListItems = FolderModel.Children
-				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(PageVM, x));
+			
 		}
 
 		// TODO: Rename Folder
@@ -46,9 +38,9 @@ namespace Modules.Main.ViewModels
 		// TODO: Remove Reaction
 
 
-		
 
-		
+
+
 
 		private DelegateCommand _OpenFolderReactionListCommand;
 		public DelegateCommand OpenFolderReactionListCommand
@@ -58,9 +50,10 @@ namespace Modules.Main.ViewModels
 				return _OpenFolderReactionListCommand
 					?? (_OpenFolderReactionListCommand = new DelegateCommand(() =>
 					{
-						PageVM.NavigationToFolderReactionListPage(FolderModel);
+						PageVM.NavigationToFolderListPage(FolderModel);
 					}));
 			}
 		}
+
 	}
 }

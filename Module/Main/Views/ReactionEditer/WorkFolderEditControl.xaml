@@ -8,36 +8,45 @@
              xmlns:vm="clr-namespace:Modules.Main.ViewModels"
              xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
              xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
-             xmlns:prism="http://prismlibrary.com/"             
+             xmlns:prism="http://prismlibrary.com/"       
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Styles.xaml" />
+    </UserControl.Resources>
     
-    <Grid x:Name="WorkFolderContainer" Height="60">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid x:Name="WorkFolderContainer" >
+        <StackPanel Orientation="Vertical">
+
+            <TextBlock Text="Target Folder" 
+                       Style="{StaticResource ListSubheaderText}"
+                       >
+
+            </TextBlock>
+
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding WorkFolderPath.Value}" 
+                               Margin="8, 8"
+                               />
+
+                    <Button 
+                        Command="{Binding FolderSelectCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        >
+                        <TextBlock Text="Select Folder" />
+                    </Button>
+                </StackPanel>
+
+            </Grid>
+            
+        </StackPanel>
         <!-- Folderの選択 -->
         <!-- D&Dによる受付 -->
         <!-- Folderをエクスプローラで開く -->
-        <TextBlock Grid.Row="0"
-                            Text="Target Folder"  />
-        <Grid Grid.Row="1" Height="30">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="60"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Column="0"
-                                    HorizontalAlignment="Right"
-                                    Text="{Binding WorkFolderPath.Value}" 
-                                    Margin="0,0, 10, 0"
-                                     />
-
-            <Button Grid.Column="1"
-                                Content="Select Folder" Command="{Binding FolderSelectCommand}" Grid.RowSpan="2">
-            </Button>
-        </Grid>
+        
     </Grid>
 
 </UserControl>
