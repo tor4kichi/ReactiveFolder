@@ -15,6 +15,7 @@ using Prism.Modularity;
 using ReactiveFolder.Properties;
 using System.IO;
 using ReactiveFolder.Model.Actions;
+using ReactiveFolder.Model.AppPolicy;
 
 namespace ReactiveFolder
 {
@@ -67,7 +68,7 @@ namespace ReactiveFolder
 		/// <summary>
 		/// 外部アプリの使用ポリシーのファイルを読み込んでAppPolicyFactoryを初期化する
 		/// </summary>
-		private void InitializeAppLaunchAction()
+		private IAppPolicyManager InitializeAppLaunchAction()
 		{
 			// Note: 使用ポリシーはアプリローカル空間に保存する
 			var policySaveFolderPath = ActionAppPolicyFolderPath;
@@ -88,7 +89,7 @@ namespace ReactiveFolder
 				// Note: デフォルトで配置するPolicyの準備
 			}
 
-			AppLaunchReactiveAction.SetAppPolicyFactory(factory);
+			return factory;
 		}
 
 		protected override void ConfigureContainer()
@@ -96,13 +97,12 @@ namespace ReactiveFolder
 			base.ConfigureContainer();
 
 
-
-
+			// リアクションモニターのインスタンスを生成＆DIコンテナに登録
 			this.Container.RegisterInstance(InitializeMonitorModel());
 
+			// アプリ起動ポリシー管理のインスタンスを生成＆DIコンテナに登録
+			this.Container.RegisterInstance(InitializeAppLaunchAction());
 
-
-			InitializeAppLaunchAction();
 		}
 
 		protected override void InitializeShell()
@@ -125,6 +125,7 @@ namespace ReactiveFolder
 
 			moduleCatalog.AddModule(typeof(Modules.Monitor.MonitorModule));
 			moduleCatalog.AddModule(typeof(Modules.Main.MainModule));
+			moduleCatalog.AddModule(typeof(Modules.AppPolicy.AppPolicyModule));
 		}
 	}
 }

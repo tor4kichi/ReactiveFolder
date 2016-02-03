@@ -13,10 +13,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 
-    <UserControl.Resources>
-        <ResourceDictionary Source="../Styles.xaml" />
-    </UserControl.Resources>
-    
     <Grid x:Name="WorkFolderContainer" >
         <StackPanel Orientation="Vertical">
 

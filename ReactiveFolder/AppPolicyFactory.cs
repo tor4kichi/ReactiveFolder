@@ -8,17 +8,18 @@ using ReactiveFolder.Model.Filters;
 using System.IO;
 using ReactiveFolder.Util;
 using ReactiveFolder.Model.AppPolicy;
+using System.Collections.ObjectModel;
 
 namespace ReactiveFolder
 {
 	// Note: Policy のリネームは基本的にサポートされない。
 	// 
 
-	public class AppPolicyFactory : IAppPolicyFactory
+	public class AppPolicyFactory : IAppPolicyManager
 	{
 		public const string APP_POLICY_EXTENTION = ".rfpolicy.json";
 
-
+		
 
 
 		public static AppPolicyFactory CreateNew(DirectoryInfo saveFolderInfo)
@@ -38,7 +39,7 @@ namespace ReactiveFolder
 			foreach (var fileInfo in saveFolderInfo.EnumerateFiles($"*{APP_POLICY_EXTENTION}"))
 			{
 				var policy = FileSerializeHelper.LoadAsync<ApplicationPolicy>(fileInfo);
-				factory.Policies.Add(policy.AppName, policy);
+				factory._Policies.Add(policy);
 			}
 
 			return factory;
@@ -46,10 +47,8 @@ namespace ReactiveFolder
 
 
 
-
-
-
-		public Dictionary<string, ApplicationPolicy> Policies { get; private set; }
+		private ObservableCollection<ApplicationPolicy> _Policies { get; set; }
+		public ReadOnlyObservableCollection<ApplicationPolicy> Policies { get; private set; }
 
 		public DirectoryInfo SaveFolderInfo { get; private set; }
 
@@ -60,7 +59,8 @@ namespace ReactiveFolder
 		public AppPolicyFactory(DirectoryInfo saveFolderInfo)
 		{
 			SaveFolderInfo = saveFolderInfo;
-			Policies = new Dictionary<string, ApplicationPolicy>();
+			_Policies = new ObservableCollection<ApplicationPolicy>();
+			Policies = new ReadOnlyObservableCollection<ApplicationPolicy>(_Policies);
 		}
 
 
@@ -87,11 +87,9 @@ namespace ReactiveFolder
 		}
 
 
-
-
 		public void AddAppPolicy(ApplicationPolicy policy)
 		{
-			Policies.Add(policy.AppName, policy);
+			_Policies.Add(policy);
 
 			SavePolicyFile(policy);
 		}
@@ -102,9 +100,10 @@ namespace ReactiveFolder
 
 		public void RemoveAppPolicy(ApplicationPolicy policy)
 		{
-			Policies.Remove(policy.AppName);
-
-			DeletePolicyFile(policy);
+			if (_Policies.Remove(policy))
+			{
+				DeletePolicyFile(policy);
+			}
 		}
 
 
@@ -118,37 +117,6 @@ namespace ReactiveFolder
 			{
 				fileInfo.Delete();
 			}
-		}
-
-
-
-
-
-		public ApplicationPolicy FromAppName(string name)
-		{
-			ApplicationPolicy policy;
-			if (Policies.TryGetValue(name, out policy))
-			{
-				System.Diagnostics.Debug.WriteLine("not exist ApplicationPolicy. name = " + name);
-			}
-
-			return policy;
-		}
-
-		public IEnumerable<ApplicationPolicy> GetPolicies()
-		{
-			return Policies.Values;
-		}
-
-		public IEnumerable<ApplicationPolicy> GetPoliciesWithFilter(FileReactiveFilter filter)
-		{
-			// filterのFileFilterPatternsを全て保持しているに対してpolicyを返す
-			return Policies.Values.Where(x =>
-			{
-				return filter.IncludeFilter.All(y => x.PathFilterPartterns.Contains(y));
-			});
-		}
-
-		
+		}		
 	}
 }

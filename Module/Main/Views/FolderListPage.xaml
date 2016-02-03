@@ -10,14 +10,11 @@
       xmlns:vm="clr-namespace:Modules.Main.ViewModels"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
-      d:DesignHeight="300" d:DesignWidth="1200"
+      d:DesignHeight="300" d:DesignWidth="600"
       prism:ViewModelLocator.AutoWireViewModel="True"
       >
 
-    <UserControl.Resources>
-        <ResourceDictionary Source="Styles.xaml" />
-    </UserControl.Resources>
-
+   
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>

@@ -9,6 +9,8 @@
         Title="ReactiveFolder" 
         MinWidth="600"
         MinHeight="600"
+        Width="600"
+        Height="800"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"

@@ -173,10 +173,6 @@
     </ApplicationDefinition>
     <Compile Include="AppPolicyFactory.cs" />
     <Compile Include="BootStrapper.cs" />
-    <Page Include="Styles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -240,6 +236,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Module\AppPolicy\AppPolicy.csproj">
+      <Project>{98736a13-f8cd-4b8d-8ad1-be8e8d8e631f}</Project>
+      <Name>AppPolicy</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Module\Main\Main.csproj">
       <Project>{6d937b5e-c4a4-4dd8-949d-54c6dae8f30a}</Project>
       <Name>Main</Name>
@@ -251,6 +251,10 @@
     <ProjectReference Include="..\ReactiveFolderModel\ReactiveFolderModel.csproj">
       <Project>{57facb71-d678-4b87-a7b5-4acafd16c7f2}</Project>
       <Name>ReactiveFolderModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReactiveFolderStyles\ReactiveFolderStyles.csproj">
+      <Project>{a1b67616-550a-4f84-a4c6-50e0a0979afd}</Project>
+      <Name>ReactiveFolderStyles</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

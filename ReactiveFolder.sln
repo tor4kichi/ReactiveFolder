@@ -18,6 +18,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppPolicy", "Module\AppPolicy\AppPolicy.csproj", "{98736A13-F8CD-4B8D-8AD1-BE8E8D8E631F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveFolderStyles", "ReactiveFolderStyles\ReactiveFolderStyles.csproj", "{A1B67616-550A-4F84-A4C6-50E0A0979AFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +44,14 @@ Global
 		{44C5F8D7-918C-43E9-88AD-D874D2254885}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44C5F8D7-918C-43E9-88AD-D874D2254885}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44C5F8D7-918C-43E9-88AD-D874D2254885}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98736A13-F8CD-4B8D-8AD1-BE8E8D8E631F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98736A13-F8CD-4B8D-8AD1-BE8E8D8E631F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98736A13-F8CD-4B8D-8AD1-BE8E8D8E631F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98736A13-F8CD-4B8D-8AD1-BE8E8D8E631F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B67616-550A-4F84-A4C6-50E0A0979AFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B67616-550A-4F84-A4C6-50E0A0979AFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B67616-550A-4F84-A4C6-50E0A0979AFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B67616-550A-4F84-A4C6-50E0A0979AFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -47,5 +59,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{6D937B5E-C4A4-4DD8-949D-54C6DAE8F30A} = {DE8EE2A5-CF66-4BB5-85C3-9F2B8364A4D5}
 		{44C5F8D7-918C-43E9-88AD-D874D2254885} = {DE8EE2A5-CF66-4BB5-85C3-9F2B8364A4D5}
+		{98736A13-F8CD-4B8D-8AD1-BE8E8D8E631F} = {DE8EE2A5-CF66-4BB5-85C3-9F2B8364A4D5}
 	EndGlobalSection
 EndGlobal
