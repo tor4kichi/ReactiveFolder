@@ -140,6 +140,7 @@
     <Compile Include="Actions\AppLaunchReactiveAction.cs" />
     <Compile Include="AppPolicy\ApplicationPolicy.cs" />
     <Compile Include="Actions\ReactiveActionBase.cs" />
+    <Compile Include="AppPolicy\IAppPolicyManager.cs" />
     <Compile Include="Destinations\AbsolutePathReactiveDestination.cs" />
     <Compile Include="Destinations\ChildReactiveDestination.cs" />
     <Compile Include="Destinations\SameInputReactiveDestination.cs" />

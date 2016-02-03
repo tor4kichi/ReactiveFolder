@@ -178,6 +178,37 @@ namespace ReactiveFolder.Model.Filters
 			}
 		}
 
+		public bool HasFilter
+		{
+			get
+			{
+				return IncludeFilter.Count == 0 && ExcludeFilter.Count == 0;
+			}
+		}
+
+		public IEnumerable<string> FilterWithExtention(IEnumerable<string> extentions)
+		{
+			if (HasFilter)
+			{
+				var includeExtentions = IncludeFilter
+					.Select(x => x.Substring(x.LastIndexOf(@".")))
+					.Distinct();
+
+				var excludeExtentions = ExcludeFilter
+					.Select(x => x.Substring(x.LastIndexOf(@".")))
+					.Distinct();
+
+
+				// (extentions * include) - exclude
+				return extentions
+					.Intersect(includeExtentions)
+					.Except(excludeExtentions);
+			}
+			else
+			{
+				return Enumerable.Empty<string>();
+			}
+		}
 		
 	}
 }

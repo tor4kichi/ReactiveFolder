@@ -14,25 +14,14 @@ using System.Threading.Tasks;
 namespace ReactiveFolder.Model.Actions
 {
 
-	public interface IAppPolicyFactory
-	{
-		IEnumerable<ApplicationPolicy> GetPolicies();
-
-		IEnumerable<ApplicationPolicy> GetPoliciesWithFilter(FileReactiveFilter filter);
-
-		ApplicationPolicy FromAppName(string name);
-
-		void AddAppPolicy(ApplicationPolicy policy);
-		void RemoveAppPolicy(ApplicationPolicy policy);
-
-	}
+	
 
 
 	[DataContract]
 	public class AppLaunchReactiveAction : ReactiveActionBase
 	{
-		private static IAppPolicyFactory _AppPolicyFactory;
-		public static IAppPolicyFactory AppPolicyFactory
+		private static IAppPolicyManager _AppPolicyFactory;
+		public static IAppPolicyManager AppPolicyFactory
 		{
 			get
 			{
@@ -45,7 +34,7 @@ namespace ReactiveFolder.Model.Actions
 			}
 		}
 
-		public static void SetAppPolicyFactory(IAppPolicyFactory factory)
+		public static void SetAppPolicyFactory(IAppPolicyManager factory)
 		{
 			_AppPolicyFactory = factory;
 		}
