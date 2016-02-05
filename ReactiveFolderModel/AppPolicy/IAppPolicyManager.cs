@@ -27,7 +27,7 @@ namespace ReactiveFolder.Model.AppPolicy
 			// Filterから出力予定の拡張子集合に対して部分一致するアプリポリシーを取得する
 			return appPolicyManager.Policies.Where(x =>
 			{
-				return filter.FilterWithExtention(x.PathFilterPartterns).Count() > 0;
+				return filter.FilterWithExtention(x.AcceptExtentions).Count() > 0;
 			});
 			
 

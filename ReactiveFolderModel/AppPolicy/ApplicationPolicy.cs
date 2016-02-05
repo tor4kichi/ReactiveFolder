@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Microsoft.Practices.Prism.Mvvm;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ReactiveFolder.Model.AppPolicy
@@ -19,7 +22,7 @@ namespace ReactiveFolder.Model.AppPolicy
 	// みたいな指定をしたら解釈してオプションを入れ替えてくれる感じで
 
 	[DataContract]
-	public class ApplicationPolicy
+	public class ApplicationPolicy : BindableBase
 	{
 		public static ApplicationPolicy Create(string applicationPath)
 		{
@@ -49,36 +52,86 @@ namespace ReactiveFolder.Model.AppPolicy
 
 
 		[DataMember]
-		public string ApplicationPath { get; private set; }
+		private string _ApplicationPath;
+		public string ApplicationPath
+		{
+			get
+			{
+				return _ApplicationPath;
+			}
+			set
+			{
+				if (SetProperty(ref _ApplicationPath, value))
+				{
+					_AppName = null;
+					OnPropertyChanged(nameof(AppName));
+				}
+			}
+		}
 
 		[DataMember]
-		public TimeSpan MaxProcessTime { get; set; }
+		private TimeSpan _MaxProcessTime;
+		public TimeSpan MaxProcessTime
+		{
+			get
+			{
+				return _MaxProcessTime;
+			}
+			set
+			{
+				SetProperty(ref _MaxProcessTime, value);
+			}
+		}
 
 		[DataMember]
-		public Dictionary<string, string> DefaultParameters { get; private set; }
+		private string _DefaultOptionText;
+		public string DefaultOptionText
+		{
+			get
+			{
+				return _DefaultOptionText;
+			}
+			set
+			{
+				SetProperty(ref _DefaultOptionText, value);
+			}
+		}
 
 		[DataMember]
-		public List<AppArgument> AppParams { get; private set; }
+		private PathType _InputPathType;
+		public PathType InputPathType
+		{
+			get
+			{
+				return _InputPathType;
+			}
+			set
+			{
+				SetProperty(ref _InputPathType, value);
+			}
+		}
 
 		[DataMember]
-		public string ArgumentSplitter { get; set; } = " "; // or ","
+		private PathType _OutputPathType;
+		public PathType OutputPathType
+		{
+			get
+			{
+				return _OutputPathType;
+			}
+			set
+			{
+				SetProperty(ref _OutputPathType, value);
+			}
+		}
 
 		[DataMember]
-		public string KeyPrefix { get; set; } = "-";
+		private ObservableCollection<AppArgument> _AppParams { get; set; }
+		public ReadOnlyObservableCollection<AppArgument> AppParams { get; private set; }
 
 		[DataMember]
-		public PathType InputPathType { get; set; }
-		[DataMember]
-		public string InputPathKey { get; set; }
-
-		[DataMember]
-		public PathType OutputPathType { get; set; }
-		[DataMember]
-		public string OutputPathKey { get; set; }
-
-
-		[DataMember]
-		public List<string> PathFilterPartterns { get; private set; }
+		private ObservableCollection<string> _AcceptExtentions { get; set; }
+		public ReadOnlyObservableCollection<string> AcceptExtentions { get; private set; }
 
 
 		private string _AppName;
@@ -103,10 +156,22 @@ namespace ReactiveFolder.Model.AppPolicy
 
 			MaxProcessTime = TimeSpan.FromMinutes(1);
 
-			DefaultParameters = new Dictionary<string, string>();
-			AppParams = new List<AppArgument>();
-			PathFilterPartterns = new List<string>();
+			DefaultOptionText = "";
+			_AppParams = new ObservableCollection<AppArgument>();
+			AppParams = new ReadOnlyObservableCollection<AppArgument>(_AppParams);
+			_AcceptExtentions = new ObservableCollection<string>();
+			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
 		}
+
+
+
+		[OnDeserialized]
+		public void SetValuesOnDeserialized(StreamingContext context)
+		{
+			AppParams = new ReadOnlyObservableCollection<AppArgument>(_AppParams);
+			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
+		}
+
 
 
 		public bool IsExistApplicationFile
@@ -123,63 +188,51 @@ namespace ReactiveFolder.Model.AppPolicy
 		}
 
 
+
+		public AppArgument AddNewArgument()
+		{
+			var newArg = new AppArgument();
+			newArg.Name = $"{this.AppName} Option No.{(AppParams.Count.ToString())}";
+
+
+			_AppParams.Add(newArg);
+			return newArg;
+		}
+
+		public bool RemoveArgument(AppArgument arg)
+		{
+			return _AppParams.Remove(arg);
+		}
+
 		
 
 		public string MakeArgumentsText(string inputPath, DirectoryInfo outputDir, AppArgument param)
 		{
-			// 入力パスと出力パスの指定
-			var inputText = $"-{InputPathKey} {inputPath}";
+			var argumentText = $"{this.DefaultOptionText} {(param.OptionText)}";
 
-			var optionArguments = String.Join(ArgumentSplitter, param.Options);
-			// 他のパラメータ
-			var keyValueArgumetns = String.Join(ArgumentSplitter, MakeKeyValueArguments(param.KeyValueOptions));
+			string outputFilePath = null;
 
-			var appArguments = String.Join(ArgumentSplitter,
-				inputText, optionArguments, keyValueArgumetns);
-
-			return appArguments;
-		}
-
-		private IEnumerable<string> MakeKeyValueArguments(Dictionary<string, string> parameters)
-		{
-			// DefaultParameters < parameters
-			foreach (var pair in parameters)
+			// 出力パス名を作成する
+			// ファイルからフォルダに変換アプリの場合には、
+			// 拡張子を取り外す
+			if (InputPathType == PathType.FilePath && 
+				OutputPathType == PathType.FolderPath)
 			{
-				yield return MakePartOfCommandLineParam(pair);
-			}
-
-			foreach (var pair in DefaultParameters)
-			{
-				if (parameters.ContainsKey(pair.Key))
-				{
-					continue;
-				}
-
-				yield return MakePartOfCommandLineParam(pair);
-			}
-		}
-
-
-
-		private string MakePartOfCommandLineParam(string key, string value)
-		{
-			// valueが文字列の場合は""で囲む
-			decimal temp;
-			if (decimal.TryParse(value, out temp))
-			{
-				return $"{KeyPrefix}{key} {value}";
+				outputFilePath = Path.Combine(outputDir.FullName, Path.GetFileNameWithoutExtension(inputPath));
 			}
 			else
 			{
-				return $"{KeyPrefix}{key} \"{value}\"";
+				outputFilePath = Path.Combine(outputDir.FullName, Path.GetFileName(inputPath));
 			}
+
+			argumentText = Regex.Replace(argumentText, "%IN_FILE%", inputPath);
+			argumentText = Regex.Replace(argumentText, "%OUT_FILE%", outputFilePath);
+			argumentText = Regex.Replace(argumentText, "%OUT_FOLDER%", outputDir.FullName);
+
+			return argumentText;
 		}
 
-		private string MakePartOfCommandLineParam(KeyValuePair<string, string> pair)
-		{
-			return MakePartOfCommandLineParam(pair.Key, pair.Value);
-		}
-
+		
 
 		public ApplicationExecuteSandbox CreateExecuteSandbox(AppArgument param)
 		{
@@ -189,6 +242,25 @@ namespace ReactiveFolder.Model.AppPolicy
 			}
 
 			return new ApplicationExecuteSandbox(this, param);
+		}
+
+
+		public IEnumerable<string> GetOutputExtentions()
+		{
+			var outputExtentions = _AppParams.Where(x => false == x.SameInputExtention)
+				.Select(x => x.OutputExtention)
+				.Distinct();
+
+			// 入力と同一の出力をする機能がある場合には、
+			// 入力拡張子を出力拡張子に含める
+			if (_AppParams.Any(x => x.SameInputExtention))
+			{
+				return outputExtentions.Concat(AcceptExtentions);
+			}
+			else
+			{
+				return outputExtentions;
+			}
 		}
 	}
 

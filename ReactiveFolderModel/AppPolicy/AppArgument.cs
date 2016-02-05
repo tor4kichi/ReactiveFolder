@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Practices.Prism.Mvvm;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -8,28 +9,79 @@ using System.Threading.Tasks;
 namespace ReactiveFolder.Model.AppPolicy
 {
 	[DataContract]
-	public class AppArgument
+	public class AppArgument : BindableBase
 	{
 		[DataMember]
-		public string Name { get; set; }
+		private string _Name;
+		public string Name
+		{
+			get
+			{
+				return _Name;
+			}
+			set
+			{
+				SetProperty(ref _Name, value);
+			}
+		}
 
 		[DataMember]
-		public string Description { get; set; }
+		private string _Description;
+		public string Description
+		{
+			get
+			{
+				return _Description;
+			}
+			set
+			{
+				SetProperty(ref _Description, value);
+			}
+		}
 
-		// TODO: Optionsを削除してKeyValueOptions一本に絞る
 		[DataMember]
-		public List<string> Options { get; private set; }
+		private string _OptionText;
+		public string OptionText
+		{
+			get
+			{
+				return _OptionText;
+			}
+			set
+			{
+				SetProperty(ref _OptionText, value);
+			}
+		}
 
 		[DataMember]
-		public Dictionary<string, string> KeyValueOptions { get; private set; }
+		private string _OutputExtention;
+		public string OutputExtention
+		{
+			get
+			{
+				return _OutputExtention;
+			}
+			set
+			{
+				SetProperty(ref _OutputExtention, value);
+			}
+		}
 
 		public AppArgument()
 		{
 			Name = "";
 			Description = "";
-			Options = new List<string>();
-			KeyValueOptions = new Dictionary<string, string>();
+			OptionText = "";
+			OutputExtention = "";
 		}
 
+
+		public bool SameInputExtention
+		{
+			get
+			{
+				return String.IsNullOrEmpty(OutputExtention);
+			}
+		}
 	}
 }
