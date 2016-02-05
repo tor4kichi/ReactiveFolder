@@ -16,6 +16,7 @@ using ReactiveFolder.Properties;
 using System.IO;
 using ReactiveFolder.Model.Actions;
 using ReactiveFolder.Model.AppPolicy;
+using Microsoft.Practices.Prism.Regions;
 
 namespace ReactiveFolder
 {
@@ -75,16 +76,16 @@ namespace ReactiveFolder
 
 			var policySaveFolderInfo = new DirectoryInfo(policySaveFolderPath);
 
-			AppPolicyFactory factory = null;
+			AppPolicyManager factory = null;
 			if (policySaveFolderInfo.Exists)
 			{
-				factory = AppPolicyFactory.Load(policySaveFolderInfo);
+				factory = AppPolicyManager.Load(policySaveFolderInfo);
 			}
 			else
 			{
 				policySaveFolderInfo.Create();
 
-				factory = AppPolicyFactory.CreateNew(policySaveFolderInfo);
+				factory = AppPolicyManager.CreateNew(policySaveFolderInfo);
 
 				// Note: デフォルトで配置するPolicyの準備
 			}
@@ -126,6 +127,8 @@ namespace ReactiveFolder
 			moduleCatalog.AddModule(typeof(Modules.Monitor.MonitorModule));
 			moduleCatalog.AddModule(typeof(Modules.Main.MainModule));
 			moduleCatalog.AddModule(typeof(Modules.AppPolicy.AppPolicyModule));
+
+			
 		}
 	}
 }

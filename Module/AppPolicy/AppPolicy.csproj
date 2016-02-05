@@ -132,8 +132,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="ViewModels\AppPolicyEditPageViewModel.cs" />
     <Compile Include="ViewModels\AppPolicyListPageViewModel.cs" />
     <Compile Include="ViewModels\PageViewModelBase.cs" />
+    <Compile Include="Views\AppPolicyArgumentEditDialog.xaml.cs">
+      <DependentUpon>AppPolicyArgumentEditDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\AppPolicyEditPage .xaml.cs">
       <DependentUpon>AppPolicyEditPage .xaml</DependentUpon>
     </Compile>
@@ -156,6 +160,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Page Include="Views\AppPolicyArgumentEditDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AppPolicyEditPage .xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

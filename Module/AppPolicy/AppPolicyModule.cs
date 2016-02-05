@@ -22,7 +22,7 @@ namespace Modules.AppPolicy
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyListPage));
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyEditPage));
 
-//			_regionManager.RequestNavigate("MainRegion", nameof(FolderListPage));
+//			_regionManager.RequestNavigate("MainRegion", nameof(Views.AppPolicyListPage));
 		}
 	}
 

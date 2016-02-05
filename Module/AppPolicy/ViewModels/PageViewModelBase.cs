@@ -55,7 +55,7 @@ namespace Modules.AppPolicy.ViewModels
 			return appPolicy;
 		}
 
-		
+
 		
 	}
 }

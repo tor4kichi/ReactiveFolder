@@ -15,26 +15,26 @@ namespace ReactiveFolder
 	// Note: Policy のリネームは基本的にサポートされない。
 	// 
 
-	public class AppPolicyFactory : IAppPolicyManager
+	public class AppPolicyManager : IAppPolicyManager
 	{
 		public const string APP_POLICY_EXTENTION = ".rfpolicy.json";
 
 		
 
 
-		public static AppPolicyFactory CreateNew(DirectoryInfo saveFolderInfo)
+		public static AppPolicyManager CreateNew(DirectoryInfo saveFolderInfo)
 		{
 			if (!saveFolderInfo.Exists)
 			{
 				saveFolderInfo.Create();
 			}
 
-			return new AppPolicyFactory(saveFolderInfo);
+			return new AppPolicyManager(saveFolderInfo);
 		}
 
-		public static AppPolicyFactory Load(DirectoryInfo saveFolderInfo)
+		public static AppPolicyManager Load(DirectoryInfo saveFolderInfo)
 		{
-			var factory = new AppPolicyFactory(saveFolderInfo);
+			var factory = new AppPolicyManager(saveFolderInfo);
 
 			foreach (var fileInfo in saveFolderInfo.EnumerateFiles($"*{APP_POLICY_EXTENTION}"))
 			{
@@ -56,7 +56,7 @@ namespace ReactiveFolder
 		
 
 
-		public AppPolicyFactory(DirectoryInfo saveFolderInfo)
+		public AppPolicyManager(DirectoryInfo saveFolderInfo)
 		{
 			SaveFolderInfo = saveFolderInfo;
 			_Policies = new ObservableCollection<ApplicationPolicy>();

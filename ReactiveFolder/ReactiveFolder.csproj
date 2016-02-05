@@ -171,7 +171,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AppPolicyFactory.cs" />
+    <Compile Include="AppPolicyManager.cs" />
     <Compile Include="BootStrapper.cs" />
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
