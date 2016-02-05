@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ReactiveFolder"
+        xmlns:view="clr-namespace:ReactiveFolder.Views"
         xmlns:prism="http://prismlibrary.com/"
         mc:Ignorable="d"
+        prism:ViewModelLocator.AutoWireViewModel="True"
         Title="ReactiveFolder" 
         MinWidth="600"
         MinHeight="600"
@@ -20,11 +22,40 @@
         FontFamily="{StaticResource MaterialDesignFont}"
         >
     <Window.Resources>
-       
+            <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
     </Window.Resources>
     <Grid>
         <ContentControl
             prism:RegionManager.RegionName="MainRegion" />
-        <ContentControl prism:RegionManager.RegionName="DebugRegion" />
+        
+        <Grid x:Name="SideMenuContainer"
+              Visibility="{Binding IsOpenSideMenu.Value, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+              >
+
+            
+
+            <Border HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Stretch" 
+                    Background="Black"
+                    Opacity="0.5"
+                    >
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CloseSideMenuCommand}">
+                        
+                    </MouseBinding>
+                </Border.InputBindings>
+                
+            </Border>
+            
+            <ContentControl
+                        HorizontalAlignment="Left"
+                        MaxWidth="500"
+                            >
+                <view:SideMenu></view:SideMenu>
+            </ContentControl>
+        </Grid>
+        
+        
+        
     </Grid>
 </Window>

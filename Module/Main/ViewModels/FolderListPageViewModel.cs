@@ -10,12 +10,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Reactive.Bindings.Extensions;
 using System.IO;
+using Prism.Events;
+using ReactiveFolderStyles;
 
 namespace Modules.Main.ViewModels
 {
 	public class FolderListPageViewModel : PageViewModelBase, INavigationAware
 	{
 		public IRegionNavigationService NavigationService;
+
+		private IEventAggregator _EventAggregator;
 
 		public FolderModel CurrentFolder { get; private set; }
 
@@ -27,10 +31,13 @@ namespace Modules.Main.ViewModels
 
 		public ReactiveProperty<string> FolderName { get; private set; }
 
+		public ReactiveProperty<bool> CanGoBack { get; private set; }
 
-		public FolderListPageViewModel(IRegionManager regionManager, FolderReactionMonitorModel monitor)
+		public FolderListPageViewModel(IRegionManager regionManager, FolderReactionMonitorModel monitor, IEventAggregator ea)
 			: base(regionManager, monitor)
 		{
+			_EventAggregator = ea;
+
 			FolderName = new ReactiveProperty<string>("");
 			/*
 			CurrentFolder = _MonitorModel.RootFolder;
@@ -43,6 +50,7 @@ namespace Modules.Main.ViewModels
 				*/
 			PreviousFolderName = "";
 
+			CanGoBack = new ReactiveProperty<bool>(false);
 		}
 
 
@@ -69,10 +77,6 @@ namespace Modules.Main.ViewModels
 				var folderModel = FolderModelFromNavigationParameters(navigationContext.Parameters);
 				Initialize(folderModel);
 			}
-
-
-
-			BackCommand.RaiseCanExecuteChanged();
 		}
 
 
@@ -96,24 +100,30 @@ namespace Modules.Main.ViewModels
 				// ルートは戻る無効
 				PreviousFolderName = "";
 				OnPropertyChanged(nameof(PreviousFolderName));
+
+				CanGoBack.Value = false;
 			}
 			else
 			{
 				var parentFolder = Path.GetDirectoryName(folder.Folder.FullName);
 				PreviousFolderName = Path.GetFileName(parentFolder);
 				OnPropertyChanged(nameof(PreviousFolderName));
+
+				CanGoBack.Value = true;
 			}
-			
+
+
+
 		}
 
 
-		private DelegateCommand _BackCommand;
-		public DelegateCommand BackCommand
+		private DelegateCommand _BackOrOpenMenuCommand;
+		public DelegateCommand BackOrOpenMenuCommand
 		{
 			get
 			{
-				return _BackCommand
-					?? (_BackCommand = new DelegateCommand(() =>
+				return _BackOrOpenMenuCommand
+					?? (_BackOrOpenMenuCommand = new DelegateCommand(() =>
 					{
 						if (NavigationService.Journal.CanGoBack)
 						{
@@ -121,11 +131,14 @@ namespace Modules.Main.ViewModels
 						}
 						else
 						{
-							this.NavigationToFolderListPage(_MonitorModel.RootFolder);
-							NavigationService.Journal.Clear();
+							_EventAggregator.GetEvent<PubSubEvent<ReactiveFolderPageType>>()
+								.Publish(ReactiveFolderPageType.ReactiveFolder);
+							// TODO: OpenSideMenu
+							//							this.NavigationToFolderListPage(_MonitorModel.RootFolder);
+							//							NavigationService.Journal.Clear();
 						}
 					}
-					, () => NavigationService?.Journal.CanGoBack ?? false					
+					
 					));
 			}
 		}

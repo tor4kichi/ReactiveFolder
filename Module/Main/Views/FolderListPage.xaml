@@ -29,10 +29,13 @@
               Style="{StaticResource Appbar}"
               >
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                <Button Command="{Binding BackCommand}" >
-                    <materialDesign:PackIcon Kind="ArrowLeft"  />
+                <Button>
+                    <ToggleButton Command="{Binding BackOrOpenMenuCommand}"
+                                  Style="{DynamicResource MaterialDesignHamburgerToggleButton}"
+                                  IsChecked="{Binding CanGoBack.Value}"
+                            >
+                    </ToggleButton>
                 </Button>
-                <TextBlock Text="{Binding FolderName.Value}" />
             </StackPanel>
 
             <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -58,7 +61,7 @@
               >
 
             <ScrollViewer>
-                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="6">
+                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="8">
 
                     <TextBlock Text="Folder" 
                            Style="{StaticResource ListSubheaderText}"/>
@@ -74,11 +77,11 @@
                                         >
                                     
                                     <StackPanel Orientation="Horizontal">
-                                    
+                                        <!--
                                         <StackPanel.InputBindings>
                                             <MouseBinding MouseAction="LeftClick" Command="{Binding OpenFolderReactionListCommand}" />
                                         </StackPanel.InputBindings>
-                                    
+                                        -->
                                     
                                         <materialDesign:PackIcon Kind="Folder"
                                                                     Style="{StaticResource ListPrimaryIcon}"

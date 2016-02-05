@@ -17,6 +17,7 @@ using System.IO;
 using ReactiveFolder.Model.Actions;
 using ReactiveFolder.Model.AppPolicy;
 using Microsoft.Practices.Prism.Regions;
+using Prism.Events;
 
 namespace ReactiveFolder
 {
@@ -104,6 +105,8 @@ namespace ReactiveFolder
 			// アプリ起動ポリシー管理のインスタンスを生成＆DIコンテナに登録
 			this.Container.RegisterInstance(InitializeAppLaunchAction());
 
+			var ea = new EventAggregator();
+			this.Container.RegisterInstance<IEventAggregator>(ea);
 		}
 
 		protected override void InitializeShell()
@@ -127,6 +130,13 @@ namespace ReactiveFolder
 			moduleCatalog.AddModule(typeof(Modules.Monitor.MonitorModule));
 			moduleCatalog.AddModule(typeof(Modules.Main.MainModule));
 			moduleCatalog.AddModule(typeof(Modules.AppPolicy.AppPolicyModule));
+
+			
+		}
+
+		protected override void InitializeModules()
+		{
+			base.InitializeModules();
 
 			
 		}
