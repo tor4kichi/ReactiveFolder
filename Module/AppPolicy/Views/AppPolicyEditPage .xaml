@@ -4,9 +4,297 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Modules.AppPolicy.Views"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
+             xmlns:vm="clr-namespace:Modules.AppPolicy.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="600">
+             d:DesignHeight="600" d:DesignWidth="600"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             >
     <Grid>
+
+        <Grid.Resources>
+
+            <DataTemplate x:Key="AppPolicyTemplate">
+                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="8">
+
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Application Path" 
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock Text="{Binding ApplicationPath.Value}" 
+                                       Margin="8 0"
+                                                     />
+                            <Button Content="Change"
+                                    Command="{Binding ChangeApplicationPathCommand}"
+                                    />
+
+                        </StackPanel>
+                    </StackPanel>
+
+
+
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Default Option Text" 
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBox Text="{Binding DefaultOptionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                       Margin="8 0"
+                                     MinWidth="200"
+                                 
+                                                     />
+                        
+                        </StackPanel>
+                        
+                        <TextBlock x:Name="DefaultOptionTextDescription" 
+                                   Text="%IN_FILE% %OUT_FILE% %OUT_FOLDER%" />
+                    </StackPanel>
+
+
+                    <StackPanel Orientation="Vertical">
+
+                        <TextBlock Text="Accept Extentions"
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
+
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBox x:Name="ExtentionText"
+                                Text="{Binding ExtentionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="200"
+                                     Margin="8 0"
+                                     >
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" Command="{Binding AddAcceptExtentionCommand}" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            
+                            <Button Content="Add"
+                                    Command="{Binding AddAcceptExtentionCommand}"
+                                    />
+
+                        </StackPanel>
+
+                        <!-- TODO: Extentionが追加されたときにアニメーションを実行する -->
+                        
+                        <ItemsControl ItemsSource="{Binding AcceptExtentions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding}" 
+                                                   HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center"
+                                                   />
+                                        <Button Command="{Binding Path=DataContext.RemoveAcceptExtentionCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                            CommandParameter="{Binding}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                            >
+                                            <materialDesign:PackIcon Kind="Close" />
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                    </StackPanel>
+                    
+                    
+
+
+
+                    <Grid>
+                        <Button HorizontalAlignment="Right"
+                            ToolTip="Add Function" 
+                            Command="{Binding AddArgumentCommand}"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                            Margin="16 0"
+                            >
+                            <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
+                        </Button>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="App Options by Function"
+                                       Style="{StaticResource ListSubheaderText}"
+                               />
+                            <ItemsControl ItemsSource="{Binding AppArguments}"
+                                                  Style="{StaticResource List}"
+                                                  ItemContainerStyle="{StaticResource ListItem}"
+                                                 > 
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid HorizontalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="auto" />
+                                                <ColumnDefinition Width="48" />
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            
+                                            <Button Grid.Column="0"
+                                                Style="{StaticResource ListButton}"
+                                                Command="{Binding EditArgumentCommand}"
+                                                >
+
+                                                <StackPanel Orientation="Vertical">
+                                                    <TextBlock Text="{Binding ArgumentName.Value}"
+                                                    Style="{StaticResource ListPrimaryText}"
+                                                    />
+                                                </StackPanel>
+
+                                            </Button>
+
+                                            <!-- show only at mouseover -->
+                                            <Button Grid.Column="1"
+                                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                                    Command="{Binding RemoveArgumentCommand}"
+                                                    >
+                                                <materialDesign:PackIcon Kind="Delete" />
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                        </StackPanel>
+                    </Grid>
+
+
+                </StackPanel>
+
+            </DataTemplate>
+
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="1*"/>
+
+        </Grid.RowDefinitions>
+
+        <!-- Top Buttons -->
+        <Grid HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Style="{StaticResource Appbar}"
+                  >
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Button Command="{Binding BackCommand}" >
+                    <materialDesign:PackIcon Kind="ArrowLeft"  />
+                </Button>
+                <TextBlock Text="App Policy Edit" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Command="{Binding SaveCommand}">
+                    <materialDesign:PackIcon Kind="ContentSave" />
+                </Button>
+                
+                <Button Command="{Binding DeleteCommand}">
+                    <materialDesign:PackIcon Kind="Delete" />
+                </Button>
+            </StackPanel>
+
             
+        </Grid>
+        <!--
+            <Grid Grid.Row="1" 
+                  Background="{StaticResource PrimaryHueMidBrush}"
+                  >
+                <Border MaxWidth="800" Margin="16 16">
+                    <TextBlock Text=""
+                           Style="{StaticResource HeaderText}"
+                           HorizontalAlignment="Left"
+                           />
+                </Border>
+            </Grid>
+    -->
+
+        <Grid Grid.Row="2"
+                  >
+            
+            
+
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden">
+
+                <ContentControl Content="{Binding AppPolicyVM.Value}"
+                                ContentTemplate="{StaticResource AppPolicyTemplate}"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                >
+                </ContentControl>
+              
+
+
+               
+            </ScrollViewer>
+<!--
+            <materialDesign:PopupBox Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
+                                         PlacementMode="TopAndAlignCentres"                                 
+                                         HorizontalAlignment="Right"
+                                         VerticalAlignment="Bottom"
+                                         Margin="16"
+                                         ToolTip="">
+                <materialDesign:PopupBox.ToggleCheckedContent>
+                    <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
+                </materialDesign:PopupBox.ToggleCheckedContent>
+                <StackPanel>
+                    <Button
+                            ToolTip="New App Policy" Command="{Binding AddAppPolicyCommand}">
+                        <materialDesign:PackIcon Kind="Folder" Width="24" Height="24" />
+                    </Button>
+                    <Button ToolTip="Import" Command="{Binding ImportAppPolicyCommand}">
+                        <materialDesign:PackIcon Kind="File" Width="24" Height="24" />
+                    </Button>
+                </StackPanel>
+            </materialDesign:PopupBox>
+-->
+            <materialDesign:DialogHost Identifier="DeleteConfirmDialog"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Margin="8 40"
+                                       >
+
+                
+            </materialDesign:DialogHost>
+
+            <materialDesign:DialogHost Identifier="ArgumentEditDialog"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 
+                                 >
+               
+                <!-- 
+                <Border BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                            MinWidth="256" MinHeight="256" ClipToBounds="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ListBox x:Name="FruitListBox">
+                            <ListBoxItem>Apple</ListBoxItem>
+                            <ListBoxItem>Banana</ListBoxItem>
+                            <ListBoxItem>Pear</ListBoxItem>
+                        </ListBox>
+                        <materialDesign:ColorZone Mode="PrimaryMid" Grid.Row="1" Effect="{DynamicResource MaterialDesignShadowDepth5}">
+                            <TextBlock Margin="16">Fruit Bowl</TextBlock>
+                        </materialDesign:ColorZone>
+                        <Button Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"                                
+                                    Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                    VerticalAlignment="Bottom" HorizontalAlignment="Right" 
+                                    Grid.Row="0" Margin="0 0 28 -20">
+                            <Viewbox Width="22" Height="22">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Button}, Path=Foreground}" />
+                                </Canvas>
+                            </Viewbox>
+                        </Button>
+                    </Grid>
+                </Border>
+                -->
+            </materialDesign:DialogHost>
+        </Grid>
+        
+       
     </Grid>
 </UserControl>

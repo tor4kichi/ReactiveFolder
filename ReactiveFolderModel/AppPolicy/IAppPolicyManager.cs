@@ -13,6 +13,8 @@ namespace ReactiveFolder.Model.AppPolicy
 
 		void AddAppPolicy(ApplicationPolicy policy);
 		void RemoveAppPolicy(ApplicationPolicy policy);
+
+		void SavePolicyFile(ApplicationPolicy policy);
 	}
 
 	public static class AppPolicyManagerHelper

@@ -49,7 +49,8 @@ namespace ReactiveFolder.Model.AppPolicy
 		}
 
 
-
+		[DataMember]
+		public Guid Guid { get; private set; }
 
 		[DataMember]
 		private string _ApplicationPath;
@@ -161,6 +162,8 @@ namespace ReactiveFolder.Model.AppPolicy
 			AppParams = new ReadOnlyObservableCollection<AppArgument>(_AppParams);
 			_AcceptExtentions = new ObservableCollection<string>();
 			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
+
+			Guid = Guid.NewGuid();
 		}
 
 
@@ -187,6 +190,50 @@ namespace ReactiveFolder.Model.AppPolicy
 			}
 		}
 
+		public bool CanAddAcceptExtention(string extention)
+		{
+			if (String.IsNullOrWhiteSpace(extention))
+			{
+				return false;
+			}
+
+			// 終端に.はng
+			if(extention.EndsWith("."))
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+
+		public void AddAcceptExtention(string extention)
+		{
+			if (false == CanAddAcceptExtention(extention))
+			{
+				return;
+			}
+
+			var checkedExt = extention;
+
+			if (false == extention.StartsWith("."))
+			{
+				checkedExt = "." + extention;
+			}
+
+			if (_AcceptExtentions.Contains(checkedExt))
+			{
+				return;
+			}
+
+			_AcceptExtentions.Add(checkedExt);
+		}
+
+		public bool RemoveAcceptExtention(string extention)
+		{
+			return _AcceptExtentions.Remove(extention);
+		}
 
 
 		public AppArgument AddNewArgument()

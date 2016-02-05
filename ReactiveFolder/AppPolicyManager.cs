@@ -71,7 +71,7 @@ namespace ReactiveFolder
 		private string MakePolicyFilePath(ApplicationPolicy policy)
 		{
 			return Path.ChangeExtension(
-				Path.Combine(this.SaveFolderInfo.FullName, policy.AppName)
+				Path.Combine(this.SaveFolderInfo.FullName, policy.Guid.ToString())
 				, ".rfpolicy.json"
 				);
 		}
@@ -118,5 +118,6 @@ namespace ReactiveFolder
 				fileInfo.Delete();
 			}
 		}		
+
 	}
 }
