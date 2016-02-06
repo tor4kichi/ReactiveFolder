@@ -8,6 +8,7 @@ using ReactiveFolder.Model.Actions;
 using ReactiveFolder.Model.AppPolicy;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
@@ -32,8 +33,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		}
 
 
-
-		public ReadOnlyReactiveCollection<AppLaunchActionViewModel> Actions { get; private set; }
+		/// <summary>
+		/// アクションVMのコレクション
+		/// いつもはMをVに渡すだけなのでReadOnlyReactiveCollectionを利用するが
+		/// Actionsの入れ替えをView側で行うため、変更可能なObservableCollectionを利用している。
+		/// </summary>
+		public ObservableCollection<AppLaunchActionViewModel> Actions { get; private set; }
 
 
 		public ActionsEditViewModel(FolderReactionModel reactionModel, IAppPolicyManager appPolicyManager)
@@ -45,9 +50,27 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.ToReactiveProperty()
 				.AddTo(_CompositeDisposable);
 
-			Actions = Reaction.Actions.ToReadOnlyReactiveCollection(x => 
-				new AppLaunchActionViewModel(Reaction, x as AppLaunchReactiveAction, _AppPolicyManager)
+			// TODO: CollectionChangedをマージしてReactiveCollectionにする方法を使ってまとめる
+			Actions = new ObservableCollection<AppLaunchActionViewModel>(
+				Reaction.Actions.Select(
+					x => new AppLaunchActionViewModel(this, Reaction, x as AppLaunchReactiveAction, _AppPolicyManager)
+					)
 				);
+
+			Actions.CollectionChangedAsObservable()
+				.Subscribe(itemPair => 
+				{
+					var onceRemoveItems = Reaction.Actions.ToArray();
+					foreach (var onceRemoveItem in onceRemoveItems)
+					{
+						Reaction.RemoveAction(onceRemoveItem);
+					}
+					
+					foreach(var reAdditem in Actions)
+					{
+						Reaction.AddAction(reAdditem.Action);
+					}
+				});
 		}
 
 
@@ -72,11 +95,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					{
 						var appLaunchAction = new AppLaunchReactiveAction();
 						
-						using (var tempVM = new AppLaunchActionViewModel(Reaction, appLaunchAction, _AppPolicyManager))
+						using (var tempVM = new AppLaunchActionViewModel(this, Reaction, appLaunchAction, _AppPolicyManager))
 						{
 							var result = await OpenAppLaunchActionEditDialog(tempVM);
 							if (result != null && ((bool)result) == true)
 							{
+								Actions.Add(tempVM);
 								Reaction.AddAction(appLaunchAction);
 							}
 						}
@@ -85,8 +109,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			}
 		}
 
+		public void RemoveAction(AppLaunchActionViewModel actionVM)
+		{
+			Actions.Remove(actionVM);
+			Reaction.RemoveAction(actionVM.Action);
+		}
 
-		
 
 		// Note: AppLaunchActionViewModel以外を編集することになったときは
 		// ActionViewModelBaseをコマンドパラメータの型に直して

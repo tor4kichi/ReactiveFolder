@@ -10,8 +10,83 @@
              xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
              xmlns:prism="http://prismlibrary.com/"             
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:dd="clr-namespace:WPFBehaviorLibrary.DragDropBehavior;assembly=WPFBehaviorLibrary"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="ActionListItemDragingTemplate">
+            <StackPanel Orientation="Horizontal" Margin="32 0 0 0">
+                
+                <Button 
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    FontSize="20"
+                    >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding AppName.Value}" />
+                        <TextBlock Text="{Binding ArgumentName.Value}"
+                                               Margin="8 0"
+                                               />
+                    </StackPanel>
+                </Button>
+                <materialDesign:PackIcon Kind="SwapVertical"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             ></materialDesign:PackIcon>
+
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ActionListItemTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="48" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="48" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                            Background="Transparent" IsHitTestVisible="True"
+                            Width="48"
+                            Height="48"
+                        >
+                    <materialDesign:PackIcon Kind="SwapVertical"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             Background="Transparent" 
+                                             IsHitTestVisible="True"
+                                             ></materialDesign:PackIcon>
+                </Border>
+
+                <Button Grid.Column="1"
+                                    Command="{Binding Path=DataContext.EditAppLaunchActionCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding AppName.Value}" />
+                        <TextBlock Text="{Binding ArgumentName.Value}"
+                                               Margin="8 0"
+                                               FontSize="12"
+                                               />
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="2"
+                                    Command="{Binding RemoveActionCommand}"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Foreground="Red"
+                                    >
+                    <materialDesign:PackIcon Kind="Delete"></materialDesign:PackIcon>
+                </Button>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    
+    
+    
+    
+    
     
     <Grid x:Name="ActionsContainer" >
         <StackPanel Orientation="Vertical">
@@ -35,36 +110,12 @@
                 </Button>
             </Grid>
 
-            <ItemsControl ItemsSource="{Binding Actions}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="48" />
-                            </Grid.ColumnDefinitions>
-                            
-                            <Button Grid.Column="0"
-                                    Command="{Binding Path=DataContext.EditAppLaunchActionCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
-                                    CommandParameter="{Binding}"
-                                    >
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding AppName.Value}" />
-                                    <TextBlock Text="{Binding ArgumentName.Value}"
-                                               Margin="8 0"
-                                               FontSize="12"
-                                               />
-                                </StackPanel>
-                            </Button>
-
-                            <Button Grid.Column="1"
-                                    Command="{Binding RemoveActionCommand}"
-                                    >
-                                <materialDesign:PackIcon Kind="Delete"></materialDesign:PackIcon>
-                            </Button>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
+            <ItemsControl ItemsSource="{Binding Actions}" 
+                      ItemTemplate="{StaticResource ActionListItemTemplate}"
+                      >
+                <i:Interaction.Behaviors>
+                    <dd:DragDropBehavior ItemType="{x:Type editervm:AppLaunchActionViewModel}" DataTemplate="{StaticResource ActionListItemDragingTemplate}" />
+                </i:Interaction.Behaviors>
             </ItemsControl>
 
 

@@ -165,6 +165,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WPFBehaviorLibrary">
+      <HintPath>..\packages\WPFBehaviorLibrary 0.2\WPFBehaviorLibrary.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

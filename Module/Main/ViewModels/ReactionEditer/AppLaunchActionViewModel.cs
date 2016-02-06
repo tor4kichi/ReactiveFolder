@@ -16,8 +16,9 @@ namespace Modules.Main.ViewModels.ReactionEditer
 {
 	public class AppLaunchActionViewModel : ActionViewModelBase
 	{
+		public ActionsEditViewModel EditVM { get; private set; }
 		private IAppPolicyManager _AppPolicyManager;
-		private AppLaunchReactiveAction _Action;
+		public AppLaunchReactiveAction Action { get; private set; }
 
 		public ReadOnlyReactiveCollection<string> AppList { get; private set; }
 
@@ -27,11 +28,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		public ReactiveProperty<string> ArgumentName { get; private set; }
 
-		public AppLaunchActionViewModel(FolderReactionModel reactionModel, AppLaunchReactiveAction appAction, IAppPolicyManager appPolicyManager)
+		public AppLaunchActionViewModel(ActionsEditViewModel editVM, FolderReactionModel reactionModel, AppLaunchReactiveAction appAction, IAppPolicyManager appPolicyManager)
 			 : base(reactionModel)
 		{
+			EditVM = editVM;
 			_AppPolicyManager = appPolicyManager;
-			_Action = appAction;
+			Action = appAction;
 
 			AppList = appPolicyManager.Policies
 				.ToReadOnlyReactiveCollection(x => x.AppName);
@@ -85,7 +87,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					?? (_RemoveActionCommand = new DelegateCommand(() =>
 					{
 						// TODO: 確認ダイアログ
-						ReactionModel.RemoveAction(this._Action);
+						EditVM.RemoveAction(this);
 					}));
 			}
 		}
