@@ -16,17 +16,63 @@
     <Grid x:Name="ActionsContainer" >
         <StackPanel Orientation="Vertical">
 
-            <TextBlock Text="Actions" 
+            <Grid >
+                <TextBlock Text="Actions" 
                        Style="{StaticResource ListSubheaderText}"
                        >
 
-            </TextBlock>
-            <TextBlock Text="TODO: ApplicationPolicyを作成したら実装する" 
-                       >
+                </TextBlock>
 
-            </TextBlock>
-            
+                <Button Command="{Binding AddAppLaunchActionCommand}"
+                     ToolTip="Add AppLaunchAction" 
+                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                    HorizontalAlignment="Right"
+                    Margin="16 0"
+                    >
+                    <materialDesign:PackIcon Kind="Plus">
+
+                    </materialDesign:PackIcon>
+                </Button>
+            </Grid>
+
+            <ItemsControl ItemsSource="{Binding Actions}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="48" />
+                            </Grid.ColumnDefinitions>
+                            
+                            <Button Grid.Column="0"
+                                    Command="{Binding Path=DataContext.EditAppLaunchActionCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                    CommandParameter="{Binding}"
+                                    >
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding AppName.Value}" />
+                                    <TextBlock Text="{Binding ArgumentName.Value}"
+                                               Margin="8 0"
+                                               FontSize="12"
+                                               />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Grid.Column="1"
+                                    Command="{Binding RemoveActionCommand}"
+                                    >
+                                <materialDesign:PackIcon Kind="Delete"></materialDesign:PackIcon>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+
         </StackPanel>
+        <materialDesign:DialogHost Identifier="AppLuanchActionEditDialog"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Margin="8 40"
+                                       />
 
     </Grid>
 

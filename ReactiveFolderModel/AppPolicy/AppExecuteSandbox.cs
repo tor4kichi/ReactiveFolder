@@ -22,12 +22,24 @@ namespace ReactiveFolder.Model.AppPolicy
 		/// <param name="context"></param>
 		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppArgument param)
 		{
+			Policy = policy;
+			Param = param;
 		}
 
 		public bool Validate(ReactiveStreamContext context)
 		{
-			// TODO: 
-			throw new NotImplementedException();
+			// TODO: Policy.Validate();
+			if (Policy == null)
+			{
+				return false;
+			}
+
+			if (Param == null)
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 		public string Execute(ReactiveStreamContext context)

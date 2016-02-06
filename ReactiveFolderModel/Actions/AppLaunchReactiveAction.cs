@@ -13,10 +13,6 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Model.Actions
 {
-
-	
-
-
 	[DataContract]
 	public class AppLaunchReactiveAction : ReactiveActionBase
 	{
@@ -41,58 +37,38 @@ namespace ReactiveFolder.Model.Actions
 
 
 		[DataMember]
-		private string _ApplicationName;
-		public string ApplicationName
+		private string _AppName;
+		public string AppName
 		{
 			get
 			{
-				return _ApplicationName;
+				return _AppName;
 			}
 			set
 			{
-				if (SetProperty(ref _ApplicationName, value))
-				{
-					_Sandbox = null;
-				}
+				SetProperty(ref _AppName, value);
 			}
 		}
 
 
 		[DataMember]
-		private string _ParamterSetName;
-		public string ParamterSetName
+		private string _AppArgumentName;
+		public string AppArgumentName
 		{
 			get
 			{
-				return _ParamterSetName;
+				return _AppArgumentName;
 			}
 			set
 			{
-				if (SetProperty(ref _ParamterSetName, value))
-				{
-					_Sandbox = null;
-				}
+				SetProperty(ref _AppArgumentName, value);
 			}
 		}
 
 
-		private ApplicationExecuteSandbox _Sandbox;
-		public ApplicationExecuteSandbox Sandbox
-		{
-			get
-			{
-				if (_Sandbox == null)
-				{
-					var appPolicy = AppPolicyFactory.FromAppName(ApplicationName);
-					var appParam = appPolicy.GetOption(this.ParamterSetName);
+		
 
-					_Sandbox = appPolicy.CreateExecuteSandbox(appParam);
-				}
-
-				return _Sandbox;
-			}
-		}
-
+		
 
 		public AppLaunchReactiveAction()
 		{
@@ -104,7 +80,15 @@ namespace ReactiveFolder.Model.Actions
 		{
 			var result = new ValidationResult();
 
-			if (false == Sandbox.Validate(GenerateTempStreamContext()))
+			var sandbox = CreateSandbox();
+
+			if (sandbox == null)
+			{
+				result.AddMessage("AppLaunchReactiveAction:Invalid AppName or AppArgumentName");
+				return result;
+			}
+
+			if (false == sandbox.Validate(GenerateTempStreamContext()))
 			{
 				result.AddMessage("Invalid AppLaunchReactiveAction, due to diffarent IO file/folder type.");
 			}
@@ -114,11 +98,26 @@ namespace ReactiveFolder.Model.Actions
 
 		public override void Reaction(ReactiveStreamContext context)
 		{
-			var path = Sandbox.Execute(context);
+			var sandbox = CreateSandbox();
+			var path = sandbox.Execute(context);
 
 
 			// Note: contextへの書き込みはAction側の責任で行う
 
+		}
+
+
+		public ApplicationExecuteSandbox CreateSandbox()
+		{
+			var appPolicy = AppPolicyFactory.FromAppName(AppName);
+			var appParam = appPolicy.GetOption(this.AppArgumentName);
+
+			if (appPolicy == null || appParam == null)
+			{
+				return null;
+			}
+
+			return appPolicy.CreateExecuteSandbox(appParam);
 		}
 	}
 	

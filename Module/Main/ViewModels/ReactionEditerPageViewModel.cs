@@ -5,6 +5,7 @@ using Prism.Regions;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Model;
+using ReactiveFolder.Model.AppPolicy;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,7 +30,7 @@ namespace Modules.Main.ViewModels
 	public class ReactionEditerPageViewModel : PageViewModelBase, INavigationAware, IDisposable
 	{
 		private FolderReactionModel Reaction;
-
+		private IAppPolicyManager _AppPolicyManager;
 		private CompositeDisposable _CompositeDisposable;
 
 		public IRegionNavigationService NavigationService;
@@ -46,9 +47,11 @@ namespace Modules.Main.ViewModels
 		public ReactiveProperty<bool> IsEnableSave { get; private set; }
 
 
-		public ReactionEditerPageViewModel(IRegionManager regionManager, IRegionNavigationService navService, FolderReactionMonitorModel monitor)
+		public ReactionEditerPageViewModel(IRegionManager regionManager, FolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager)
 			: base(regionManager, monitor)
 		{
+			_AppPolicyManager = appPolicyManager;
+
 			IsReactionValid = false;
 
 			ReactionWorkName = new ReactiveProperty<string>("");
@@ -81,7 +84,7 @@ namespace Modules.Main.ViewModels
 
 					WorkFolderEditVM.Value = new WorkFolderEditViewModel(Reaction);
 					FilterEditVM.Value = new FilterEditViewModel(Reaction);
-					ActionsEditVM.Value = new ActionsEditViewModel(Reaction);
+					ActionsEditVM.Value = new ActionsEditViewModel(Reaction, _AppPolicyManager);
 					DestinationEditVM.Value = new DestinationEditViewModel(Reaction);
 				})
 				.AddTo(_CompositeDisposable);

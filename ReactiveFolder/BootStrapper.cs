@@ -103,7 +103,9 @@ namespace ReactiveFolder
 			this.Container.RegisterInstance(InitializeMonitorModel());
 
 			// アプリ起動ポリシー管理のインスタンスを生成＆DIコンテナに登録
-			this.Container.RegisterInstance(InitializeAppLaunchAction());
+			var appLaunchManager = InitializeAppLaunchAction();
+			AppLaunchReactiveAction.SetAppPolicyFactory(appLaunchManager);
+			this.Container.RegisterInstance<IAppPolicyManager>(appLaunchManager);
 
 			var ea = new EventAggregator();
 			this.Container.RegisterInstance<IEventAggregator>(ea);
