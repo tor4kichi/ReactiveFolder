@@ -47,8 +47,8 @@
 
                 <Border Grid.Column="0"
                             Background="Transparent" IsHitTestVisible="True"
-                            Width="48"
-                            Height="48"
+                            Width="32"
+                            Height="32"
                         >
                     <materialDesign:PackIcon Kind="SwapVertical"
                                              HorizontalAlignment="Center"
@@ -91,24 +91,6 @@
     <Grid x:Name="ActionsContainer" >
         <StackPanel Orientation="Vertical">
 
-            <Grid >
-                <TextBlock Text="Actions" 
-                       Style="{StaticResource ListSubheaderText}"
-                       >
-
-                </TextBlock>
-
-                <Button Command="{Binding AddAppLaunchActionCommand}"
-                     ToolTip="Add AppLaunchAction" 
-                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
-                    HorizontalAlignment="Right"
-                    Margin="16 0"
-                    >
-                    <materialDesign:PackIcon Kind="Plus">
-
-                    </materialDesign:PackIcon>
-                </Button>
-            </Grid>
 
             <ItemsControl ItemsSource="{Binding Actions}" 
                       ItemTemplate="{StaticResource ActionListItemTemplate}"
@@ -117,6 +99,29 @@
                     <dd:DragDropBehavior ItemType="{x:Type editervm:AppLaunchActionViewModel}" DataTemplate="{StaticResource ActionListItemDragingTemplate}" />
                 </i:Interaction.Behaviors>
             </ItemsControl>
+
+            <Grid >
+
+                <Button Command="{Binding AddAppLaunchActionCommand}"
+                    HorizontalAlignment="Stretch"
+                    Margin="16 0"
+                    >
+                    <StackPanel Orientation="Horizontal">
+                        <!--
+                        <materialDesign:PackIcon Kind="Plus" 
+                                                 Margin="8"
+                                                 VerticalAlignment="Center">
+
+                        </materialDesign:PackIcon>
+                        -->
+                        <TextBlock Text="Add Action"
+                                   VerticalAlignment="Center"
+                                   />
+                        
+                    </StackPanel>
+
+                </Button>
+            </Grid>
 
 
         </StackPanel>

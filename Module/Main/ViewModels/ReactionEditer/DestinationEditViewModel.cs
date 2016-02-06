@@ -17,16 +17,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		AbsolutePathReactiveDestination Destination;
 
 
-		private ReactiveProperty<bool> _IsValid;
-		public override ReactiveProperty<bool> IsValid
-		{
-			get
-			{
-				return _IsValid;
-			}
-		}
-
-
 		public string OutputFolderPath { get; private set; }
 
 		public ReactiveProperty<string> OutputNamePattern { get; private set; }
@@ -37,15 +27,15 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public ReactiveProperty<string> RenamePattern { get; private set; }
 
 		public DestinationEditViewModel(FolderReactionModel reactionModel)
-			: base(reactionModel)
+			: base(@"Destination", reactionModel)
 		{
 			_CompositeDisposable = new CompositeDisposable();
 
 			Destination = reactionModel.Destination as AbsolutePathReactiveDestination;
 
-
-			_IsValid = Reaction.ObserveProperty(x => x.IsDestinationValid)
-				.ToReactiveProperty();
+			Reaction.ObserveProperty(x => x.IsDestinationValid)
+				.Subscribe(x => IsValid.Value = x)
+				.AddTo(_CompositeDisposable);
 
 			OutputNamePattern = reactionModel.Destination.ToReactivePropertyAsSynchronized(x => x.OutputNamePattern)
 				.AddTo(_CompositeDisposable);

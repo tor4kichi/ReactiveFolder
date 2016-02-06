@@ -23,14 +23,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		private IAppPolicyManager _AppPolicyManager;
 
 
-		private ReactiveProperty<bool> _IsValid;
-		public override ReactiveProperty<bool> IsValid
-		{
-			get
-			{
-				return _IsValid;
-			}
-		}
+	
 
 
 		/// <summary>
@@ -42,13 +35,14 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 		public ActionsEditViewModel(FolderReactionModel reactionModel, IAppPolicyManager appPolicyManager)
-			: base(reactionModel)
+			: base(@"Actions", reactionModel)
 		{
 			_AppPolicyManager = appPolicyManager;
 
-			_IsValid = Reaction.ObserveProperty(x => x.IsActionsValid)
-				.ToReactiveProperty()
+			Reaction.ObserveProperty(x => x.IsActionsValid)
+				.Subscribe(x => IsValid.Value = x)
 				.AddTo(_CompositeDisposable);
+
 
 			// TODO: CollectionChangedをマージしてReactiveCollectionにする方法を使ってまとめる
 			Actions = new ObservableCollection<AppLaunchActionViewModel>(

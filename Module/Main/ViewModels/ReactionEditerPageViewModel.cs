@@ -27,6 +27,7 @@ namespace Modules.Main.ViewModels
 		Unknown
 	}
 
+	
 	public class ReactionEditerPageViewModel : PageViewModelBase, INavigationAware, IDisposable
 	{
 		private FolderReactionModel Reaction;
@@ -34,6 +35,7 @@ namespace Modules.Main.ViewModels
 		private CompositeDisposable _CompositeDisposable;
 
 		public IRegionNavigationService NavigationService;
+
 
 		public bool IsReactionValid { get; private set; }
 

@@ -18,11 +18,7 @@
         <!-- FileかFolderの選択を行うラジオボタン -->
         <StackPanel Orientation="Vertical">
 
-            <TextBlock Text="Filter Conditions" 
-                       Style="{StaticResource ListSubheaderText}"
-                       >
-
-            </TextBlock>
+            
 
             <RadioButton 
                 GroupName="FilterTypeSelectorGroup" 
@@ -35,7 +31,9 @@
 
                 <!-- Selected File Filter patterns -->
                 
-                <StackPanel DataContext="{Binding FileFilterVM}">
+                <StackPanel DataContext="{Binding FileFilterVM}"
+                            Margin="16 0 0 0"
+                            >
                     <TextBlock Text="Positive List" 
                                />
 
@@ -159,7 +157,9 @@
 
             <Grid IsEnabled="{Binding IsFolderFilterSelected.Value}">
 
-                <StackPanel DataContext="{Binding FolderFilterVM}">
+                <StackPanel DataContext="{Binding FolderFilterVM}"
+                            Margin="16 0 0 0"
+                            >
                     <TextBlock Text="Positive List" 
                                />
 

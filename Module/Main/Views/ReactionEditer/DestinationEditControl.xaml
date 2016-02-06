@@ -17,37 +17,35 @@
 
         <StackPanel Orientation="Vertical">
 
-            <TextBlock Text="Output Folder" 
-                       Style="{StaticResource ListSubheaderText}"
-                       />
 
-
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-
+            <Grid>
                 <TextBlock Text="{Binding OutputFolderPath}"
-                           Margin="8 0"
+                           VerticalAlignment="Center"
                            />
 
-                <Button Content="Select Folder" Command="{Binding SelectOutputFolderCommand}" />
-                
-                
-            </StackPanel>
+                <Button Content="Select Folder" 
+                        Command="{Binding SelectOutputFolderCommand}"
+                        HorizontalAlignment="Right"
+                        />
+            </Grid>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <TextBox Text="{Binding RenamePattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Width="200"
                          materialDesign:TextFieldAssist.Hint="Rename"
                          />
+                
+                <!-- Renameで扱える特殊文字列の説明 -->
             </StackPanel>
 
-
+             <!--
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Output Sample" />
                 <TextBlock Text="{Binding OutputPathSample.Value}"
                            Margin="8 0"
                            />
             </StackPanel>
+            -->
         </StackPanel>
 
        

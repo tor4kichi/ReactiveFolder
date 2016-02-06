@@ -18,24 +18,16 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-		private ReactiveProperty<bool> _IsValid;
-		public override ReactiveProperty<bool> IsValid
-		{
-			get
-			{
-				return _IsValid;
-			}
-		}
+	
 
 
 		public WorkFolderEditViewModel(FolderReactionModel reactionModel)
-			: base(reactionModel)
+			: base(@"Target Folder", reactionModel)
 		{
 
-			_IsValid = Reaction.ObserveProperty(x => x.IsWorkFolderValid)
-				.ToReactiveProperty()
+			Reaction.ObserveProperty(x => x.IsWorkFolderValid)
+				.Subscribe(x => IsValid.Value = x)
 				.AddTo(_CompositeDisposable);
-
 
 
 			WorkFolderPath = Reaction.ObserveProperty(x => x.WorkFolder)

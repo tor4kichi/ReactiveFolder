@@ -16,25 +16,18 @@
     <Grid x:Name="WorkFolderContainer" >
         <StackPanel Orientation="Vertical">
 
-            <TextBlock Text="Target Folder" 
-                       Style="{StaticResource ListSubheaderText}"
-                       >
-
-            </TextBlock>
-
             <Grid>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding WorkFolderPath.Value}" 
-                               Margin="8, 8"
+                <TextBlock Text="{Binding WorkFolderPath.Value}" 
+                               VerticalAlignment="Center"
                                />
 
                     <Button 
                         Command="{Binding FolderSelectCommand}"
                         Style="{StaticResource MaterialDesignRaisedButton}"
+                        HorizontalAlignment="Right"
                         >
                         <TextBlock Text="Select Folder" />
                     </Button>
-                </StackPanel>
 
             </Grid>
             

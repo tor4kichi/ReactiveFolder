@@ -35,15 +35,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-		private ReactiveProperty<bool> _IsValid;
-		public override ReactiveProperty<bool> IsValid
-		{
-			get
-			{
-				return _IsValid;
-			}
-		}
-
 
 
 		// Note: IsFileFilterSelectedとIsFolderFilterSelectedはコマンドでよくね？
@@ -64,10 +55,10 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 		public FilterEditViewModel(FolderReactionModel reactionModel)
-			: base(reactionModel)
+			: base(@"Filter", reactionModel)
 		{
-			_IsValid = Reaction.ObserveProperty(x => x.IsFilterValid)
-				.ToReactiveProperty()
+			Reaction.ObserveProperty(x => x.IsFilterValid)
+				.Subscribe(x => IsValid.Value = x)
 				.AddTo(_CompositeDisposable);
 
 
