@@ -145,8 +145,7 @@ namespace Modules.AppPolicy.ViewModels
 			ApplicationPath = AppPolicy.ObserveProperty(x => x.ApplicationPath)
 				.ToReactiveProperty();
 
-			AppName = AppPolicy.ObserveProperty(x => x.AppName)
-				.ToReactiveProperty();
+			AppName = AppPolicy.ToReactivePropertyAsSynchronized(x => x.AppName);
 
 
 			DefaultOptionText = AppPolicy
@@ -261,7 +260,7 @@ namespace Modules.AppPolicy.ViewModels
 		public async void OpenArgumentEditDialog(AppPolicyArgumentViewModel argumentVM)
 		{
 			var tempVM = new AppPolicyArgumentViewModel(this, AppPolicy, 
-				new AppArgument()
+				new AppArgument(-1)
 				{
 					Name = argumentVM.Argument.Name,
 					OptionText = argumentVM.Argument.OptionText,

@@ -94,8 +94,18 @@ namespace Modules.Main.ViewModels.ReactionEditer
 							var result = await OpenAppLaunchActionEditDialog(tempVM);
 							if (result != null && ((bool)result) == true)
 							{
-								Actions.Add(tempVM);
+								// Actions.CollectionChangedAsObservableでVM上のコレクション操作に反応してモデル側の
+								// Actionコレクションへの操作を行っている
+								// このため、先にモデル側を更新してからVM側を更新しないといけない。
+
+								// この順番を逆にしてしまうと、VM→モデルに同期した後、さらにモデル上に追加する形になってしまうので変更は注意。
+
+								// 1. 先にモデルを更新
 								Reaction.AddAction(appLaunchAction);
+
+								// 2. VM上のコレクション操作によってActions.CollectionChangedAsObservableが反応して、
+								// VM→モデルへとコレクションの状態が同期される
+								Actions.Add(tempVM);
 							}
 						}
 

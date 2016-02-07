@@ -53,6 +53,21 @@ namespace ReactiveFolder.Model.AppPolicy
 		public Guid Guid { get; private set; }
 
 		[DataMember]
+		private string _AppName;
+		public string AppName
+		{
+			get
+			{
+
+				return _AppName;
+			}
+			set
+			{
+				SetProperty(ref _AppName, value);
+			}
+		}
+
+		[DataMember]
 		private string _ApplicationPath;
 		public string ApplicationPath
 		{
@@ -131,20 +146,13 @@ namespace ReactiveFolder.Model.AppPolicy
 		public ReadOnlyObservableCollection<AppArgument> AppParams { get; private set; }
 
 		[DataMember]
+		public int ArgumentIdSeed { get; private set; }
+
+		[DataMember]
 		private ObservableCollection<string> _AcceptExtentions { get; set; }
 		public ReadOnlyObservableCollection<string> AcceptExtentions { get; private set; }
 
-
-		private string _AppName;
-		public string AppName
-		{
-			get
-			{
-
-				return _AppName
-					?? (_AppName = Path.GetFileNameWithoutExtension(ApplicationPath));
-			}
-		}
+		
 
 
 		/// <summary>
@@ -154,6 +162,7 @@ namespace ReactiveFolder.Model.AppPolicy
 		public ApplicationPolicy(string applicationPath)
 		{
 			ApplicationPath = applicationPath;
+			AppName = Path.GetFileNameWithoutExtension(ApplicationPath);
 
 			MaxProcessTime = TimeSpan.FromMinutes(1);
 
@@ -164,6 +173,8 @@ namespace ReactiveFolder.Model.AppPolicy
 			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
 
 			Guid = Guid.NewGuid();
+
+			ArgumentIdSeed = 1;
 		}
 
 
@@ -235,11 +246,16 @@ namespace ReactiveFolder.Model.AppPolicy
 			return _AcceptExtentions.Remove(extention);
 		}
 
+		public int GetNextArgumentId()
+		{
+			return ArgumentIdSeed++;
+		}
 
 		public AppArgument AddNewArgument()
 		{
-			var newArg = new AppArgument();
-			newArg.Name = $"{this.AppName} Option No.{(AppParams.Count.ToString())}";
+			var id = GetNextArgumentId();
+			var newArg = new AppArgument(id);
+			newArg.Name = $"Option {id}";
 
 
 			_AppParams.Add(newArg);
@@ -252,6 +268,11 @@ namespace ReactiveFolder.Model.AppPolicy
 		}
 
 		
+		public AppArgument FindArgument(int argId)
+		{
+			return _AppParams.SingleOrDefault(x => x.Id == argId);
+		}
+
 
 		public string MakeArgumentsText(string inputPath, DirectoryInfo outputDir, AppArgument param)
 		{
@@ -313,13 +334,5 @@ namespace ReactiveFolder.Model.AppPolicy
 
 
 
-	public static class ApplicationPolicyHelper
-	{
-		public static AppArgument GetOption(this ApplicationPolicy policy, string optionName)
-		{
-			return policy.AppParams.SingleOrDefault(x => x.Name == optionName);
-		}
-
-	}
 
 }

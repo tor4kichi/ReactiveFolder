@@ -15,27 +15,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
 
     <UserControl.Resources>
-        <DataTemplate x:Key="ActionListItemDragingTemplate">
-            <StackPanel Orientation="Horizontal" Margin="32 0 0 0">
-                
-                <Button 
-                    Style="{StaticResource MaterialDesignFlatButton}"
-                    FontSize="20"
-                    >
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding AppName.Value}" />
-                        <TextBlock Text="{Binding ArgumentName.Value}"
-                                               Margin="8 0"
-                                               />
-                    </StackPanel>
-                </Button>
-                <materialDesign:PackIcon Kind="SwapVertical"
-                                             HorizontalAlignment="Center"
-                                             VerticalAlignment="Center"
-                                             ></materialDesign:PackIcon>
-
-            </StackPanel>
-        </DataTemplate>
+        
 
         <DataTemplate x:Key="ActionListItemTemplate">
             <Grid>
@@ -81,6 +61,32 @@
                 </Button>
             </Grid>
         </DataTemplate>
+
+        
+        
+        
+        <DataTemplate x:Key="ActionListItemDragingTemplate">
+            <StackPanel Orientation="Horizontal" Margin="32 0 0 0">
+
+                <Button 
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    FontSize="20"
+                    >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding AppName.Value}" />
+                        <TextBlock Text="{Binding ArgumentName.Value}"
+                                               Margin="8 0"
+                                               />
+                    </StackPanel>
+                </Button>
+                <materialDesign:PackIcon Kind="SwapVertical"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             ></materialDesign:PackIcon>
+
+            </StackPanel>
+        </DataTemplate>
+        
     </UserControl.Resources>
     
     

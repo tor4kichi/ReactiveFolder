@@ -12,23 +12,45 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid Width="400">
         <StackPanel Orientation="Vertical" Margin="16">
-
+            
             <!-- Content -->
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Application"></TextBlock>
+            <StackPanel Orientation="Horizontal" 
+                        Margin="0 8"
+                        >
+                <TextBlock Text="Application"
+                           Margin="16 0"
+                           />
+                
                 <ComboBox ItemsSource="{Binding AppList}"
-                          SelectedItem="{Binding AppName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedItem="{Binding AppPolicyVM.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           >
-                    
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding AppName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+
                 </ComboBox>
             </StackPanel>
 
 
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Applicatoin"></TextBlock>
+            <StackPanel Orientation="Horizontal"
+                        Margin="0 8"
+                        >
+                <TextBlock Text="Applicatoin"
+                           Margin="16 0"                           
+                           />
+
                 <ComboBox ItemsSource="{Binding AppArgumentList}"
-                          SelectedItem="{Binding ArgumentName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          />
+                          SelectedItem="{Binding ArgumentVM.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          >
+
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding ArgumentName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
 
             <!-- Bottom Buttons -->

@@ -19,15 +19,30 @@
         <Grid.Resources>
 
             <DataTemplate x:Key="AppPolicyTemplate">
-                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="8">
+                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16">
 
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Display Name" 
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBox Text="{Binding AppName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                     MinWidth="200"
+                                     Margin="8 0"
+                                     />
+                        </StackPanel>
+                    </StackPanel>
+                    
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Application Path" 
                                    Style="{StaticResource ListSubheaderText}"
                                    />
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal" 
+                                    HorizontalAlignment="Right"
+                                    Margin="8 0"
+                                    >
                             <TextBlock Text="{Binding ApplicationPath.Value}" 
-                                       Margin="8 0"
+                                       VerticalAlignment="Center"
                                                      />
                             <Button Content="Change"
                                     Command="{Binding ChangeApplicationPathCommand}"
@@ -42,9 +57,11 @@
                         <TextBlock Text="Default Option Text" 
                                    Style="{StaticResource ListSubheaderText}"
                                    />
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Margin="8 0"
+                                    >
                             <TextBox Text="{Binding DefaultOptionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                       Margin="8 0"
                                      MinWidth="200"
                                  
                                                      />
@@ -63,7 +80,10 @@
                                    />
 
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Margin="8 0"
+                                    >
                             <TextBox x:Name="ExtentionText"
                                 Text="{Binding ExtentionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Width="200"

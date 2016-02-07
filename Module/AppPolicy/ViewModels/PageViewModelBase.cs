@@ -35,21 +35,21 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
-		public void NavigationToAppPolicyEditPage(string appName)
+		public void NavigationToAppPolicyEditPage(Guid appGuid)
 		{
-			_RegionManager.NavigateToAppPolicyEditPage(appName);
+			_RegionManager.NavigateToAppPolicyEditPage(appGuid);
 		}
 
 
 
 		protected ApplicationPolicy ApplicationPolicyFromNavigationParameters(NavigationParameters param)
 		{			
-			var appName = param.GetAppPolicyName();
+			var appGuid = param.GetAppPolicyName();
 
-			var appPolicy = _AppPolicyManager.FromAppName(appName);
+			var appPolicy = _AppPolicyManager.FromAppGuid(appGuid);
 			if (appPolicy == null)
 			{
-				throw new Exception("not exists ApplicationPolicy. app name is " + appName);
+				throw new Exception("not exists ApplicationPolicy. app name is " + appGuid);
 			}
 
 			return appPolicy;

@@ -11,6 +11,16 @@ namespace ReactiveFolder.Model.AppPolicy
 	[DataContract]
 	public class AppArgument : BindableBase
 	{
+		public const int IgnoreArgumentId = -1;
+
+
+		[DataMember]
+		private int _Id;
+		public int Id
+		{
+			get { return _Id; }
+		}
+
 		[DataMember]
 		private string _Name;
 		public string Name
@@ -67,8 +77,9 @@ namespace ReactiveFolder.Model.AppPolicy
 			}
 		}
 
-		public AppArgument()
+		public AppArgument(int id)
 		{
+			_Id = id;
 			Name = "";
 			Description = "";
 			OptionText = "";

@@ -35,25 +35,25 @@ namespace Modules.AppPolicy
 			regionManager.RequestNavigate("MainRegion", nameof(AppPolicy.Views.AppPolicyListPage));
 		}
 
-		public static void NavigateToAppPolicyEditPage(this IRegionManager regionManager, string appName)
+		public static void NavigateToAppPolicyEditPage(this IRegionManager regionManager, Guid appGuid)
 		{
 			var param = new NavigationParameters();
-			param.Add("app", appName);
+			param.Add("guid", appGuid);
 			regionManager.RequestNavigate("MainRegion", nameof(AppPolicy.Views.AppPolicyEditPage), param);
 		}
 	}
 
 	public static class AppPolicyNavigationParametersHelper
 	{
-		public static string GetAppPolicyName(this NavigationParameters param)
+		public static Guid GetAppPolicyName(this NavigationParameters param)
 		{
-			var appName = (string)param["app"];
-			if (appName == null)
+			var appGuid = (Guid)param["guid"];
+			if (appGuid == null)
 			{
 				throw new Exception("NavigationParameters not contains key <app>.");
 			}
 
-			return appName;
+			return appGuid;
 		}
 	}
 }

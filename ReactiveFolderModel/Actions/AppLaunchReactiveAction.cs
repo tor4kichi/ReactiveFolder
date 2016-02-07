@@ -37,31 +37,31 @@ namespace ReactiveFolder.Model.Actions
 
 
 		[DataMember]
-		private string _AppName;
-		public string AppName
+		private Guid _AppGuid;
+		public Guid AppGuid
 		{
 			get
 			{
-				return _AppName;
+				return _AppGuid;
 			}
 			set
 			{
-				SetProperty(ref _AppName, value);
+				SetProperty(ref _AppGuid, value);
 			}
 		}
 
 
 		[DataMember]
-		private string _AppArgumentName;
-		public string AppArgumentName
+		private int _AppArgumentId;
+		public int AppArgumentId
 		{
 			get
 			{
-				return _AppArgumentName;
+				return _AppArgumentId;
 			}
 			set
 			{
-				SetProperty(ref _AppArgumentName, value);
+				SetProperty(ref _AppArgumentId, value);
 			}
 		}
 
@@ -99,6 +99,12 @@ namespace ReactiveFolder.Model.Actions
 		public override void Reaction(ReactiveStreamContext context)
 		{
 			var sandbox = CreateSandbox();
+
+			if (sandbox == null)
+			{
+				throw new Exception("");
+			}
+			
 			var path = sandbox.Execute(context);
 
 
@@ -109,8 +115,13 @@ namespace ReactiveFolder.Model.Actions
 
 		public ApplicationExecuteSandbox CreateSandbox()
 		{
-			var appPolicy = AppPolicyFactory.FromAppName(AppName);
-			var appParam = appPolicy.GetOption(this.AppArgumentName);
+			var appPolicy = AppPolicyFactory.FromAppGuid(AppGuid);
+			if (appPolicy == null)
+			{
+				return null;
+			}
+
+			var appParam = appPolicy.FindArgument(this.AppArgumentId);
 
 			if (appPolicy == null || appParam == null)
 			{

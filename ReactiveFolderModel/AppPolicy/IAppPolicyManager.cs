@@ -19,9 +19,9 @@ namespace ReactiveFolder.Model.AppPolicy
 
 	public static class AppPolicyManagerHelper
 	{
-		public static ApplicationPolicy FromAppName(this IAppPolicyManager appPolicyManager, string appName)
+		public static ApplicationPolicy FromAppGuid(this IAppPolicyManager appPolicyManager, Guid appGuid)
 		{
-			return appPolicyManager.Policies.SingleOrDefault(x => x.AppName == appName);
+			return appPolicyManager.Policies.SingleOrDefault(x => x.Guid == appGuid);
 		}
 
 		public static IEnumerable<ApplicationPolicy> GetPoliciesWithFileFilter(this IAppPolicyManager appPolicyManager, ReactiveFolder.Model.Filters.FileReactiveFilter filter)

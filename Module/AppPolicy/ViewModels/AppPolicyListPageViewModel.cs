@@ -55,7 +55,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		public void ShowAppPolicyEditPage(ApplicationPolicy appPolicy)
 		{
-			base.NavigationToAppPolicyEditPage(appPolicy.AppName);
+			base.NavigationToAppPolicyEditPage(appPolicy.Guid);
 		}
 
 
@@ -167,7 +167,7 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
-		public string AppName { get; private set; }
+		public ReactiveProperty<string> AppName { get; private set; }
 
 		// TODO: 拡張子
 		// TODO: アイコン画像
@@ -177,7 +177,8 @@ namespace Modules.AppPolicy.ViewModels
 			PageVM = pageVM;
 			AppPolicy = appPolicy;
 
-			AppName = AppPolicy.AppName;
+			AppName = AppPolicy.ObserveProperty(x => x.AppName)
+				.ToReactiveProperty();
 		}
 
 

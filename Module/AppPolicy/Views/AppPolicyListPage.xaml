@@ -77,7 +77,7 @@
                                                                     Style="{StaticResource ListPrimaryIcon}"
                                                                     />
                                         <StackPanel Orientation="Vertical">
-                                            <TextBlock Text="{Binding AppName}"
+                                            <TextBlock Text="{Binding AppName.Value}"
                                                         Style="{StaticResource ListPrimaryText}"
                                                         />
                                         </StackPanel>
