@@ -77,18 +77,20 @@
     </Style>
 
     <Style x:Key="ListPrimaryIcon" TargetType="{x:Type materialDesign:PackIcon}">
-        <Setter Property="Margin" Value="0 0 16 0" />
+        <Setter Property="Margin" Value="16 0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <Style x:Key="ListSecondaryIcon" TargetType="{x:Type materialDesign:PackIcon}">
-        <Setter Property="Margin" Value="0 0 16 0" />
+        <Setter Property="Margin" Value="16 0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <Style x:Key="ListButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="Foreground" Value="Black" />
-        <Setter Property="Margin" Value="0" />
+        <Setter Property="Margin" Value="0 0 0 8" />
         <Setter Property="Padding" Value="0" />
     </Style>
 

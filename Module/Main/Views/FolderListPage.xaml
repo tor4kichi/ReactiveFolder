@@ -15,7 +15,8 @@
       >
 
    
-    <Grid>
+    <Grid
+        >
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
@@ -24,26 +25,26 @@
         </Grid.RowDefinitions>
 
         <!-- Top Buttons -->
-        <Grid HorizontalAlignment="Stretch"
+            <Grid HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch"
               Style="{StaticResource Appbar}"
               >
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                <Button>
-                    <ToggleButton Command="{Binding BackOrOpenMenuCommand}"
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Button>
+                        <ToggleButton Command="{Binding BackOrOpenMenuCommand}"
                                   Style="{DynamicResource MaterialDesignHamburgerToggleButton}"
                                   IsChecked="{Binding CanGoBack.Value}"
                             >
-                    </ToggleButton>
-                </Button>
-            </StackPanel>
+                        </ToggleButton>
+                    </Button>
+                </StackPanel>
 
-            <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button>
-                    <materialDesign:PackIcon Kind="DotsVertical" />
-                </Button>
-            </StackPanel>
-        </Grid>
+                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button>
+                        <materialDesign:PackIcon Kind="DotsVertical" />
+                    </Button>
+                </StackPanel>
+            </Grid>
 <!--
         <Grid Grid.Row="1" 
               Background="{StaticResource PrimaryHueMidBrush}"
@@ -58,10 +59,11 @@
 -->
 
         <Grid Grid.Row="2"
-              >
+              
+>
 
             <ScrollViewer>
-                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="8">
+                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16 0">
 
                     <TextBlock Text="Folder" 
                            Style="{StaticResource ListSubheaderText}"/>
@@ -74,9 +76,11 @@
                             <DataTemplate>
                                 <Button Style="{StaticResource ListButton}"
                                         Command="{Binding OpenFolderReactionListCommand}"
+                                        Margin="0 0 0 8"
                                         >
                                     
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal"
+                                                >
                                         <!--
                                         <StackPanel.InputBindings>
                                             <MouseBinding MouseAction="LeftClick" Command="{Binding OpenFolderReactionListCommand}" />
@@ -84,7 +88,8 @@
                                         -->
                                     
                                         <materialDesign:PackIcon Kind="Folder"
-                                                                    Style="{StaticResource ListPrimaryIcon}"
+                                                                 Style="{StaticResource ListPrimaryIcon}"
+                                                                 Margin="16 0"
                                                                     />
                                         <StackPanel Orientation="Vertical">
                                             <TextBlock Text="{Binding FolderName}"
@@ -114,7 +119,7 @@
                                     <StackPanel Orientation="Horizontal">
 
                                         <materialDesign:PackIcon Kind="File"
-                                                                Style="{StaticResource ListPrimaryIcon}"
+                                                                 Style="{StaticResource ListPrimaryIcon}"
                                                                 />
                                         <StackPanel Orientation="Vertical">
                                             <TextBlock Text="{Binding Name}"

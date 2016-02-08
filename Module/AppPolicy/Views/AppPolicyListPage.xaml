@@ -55,7 +55,7 @@
               >
 
             <ScrollViewer>
-                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="8">
+                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16 0">
 
                     <!--
                     <TextBlock Text="Folder" 
@@ -75,6 +75,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <materialDesign:PackIcon Kind="Apps"
                                                                     Style="{StaticResource ListPrimaryIcon}"
+                                                                 
                                                                     />
                                         <StackPanel Orientation="Vertical">
                                             <TextBlock Text="{Binding AppName.Value}"
