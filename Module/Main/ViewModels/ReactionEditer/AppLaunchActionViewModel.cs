@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,11 +25,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		public ReadOnlyReactiveCollection<AppPolicyViewModel> AppList { get; private set; }
 
-		public ObservableCollection<AppPolicyArgumentViewModel> AppArgumentList { get; private set; }
-
 		public ReactiveProperty<AppPolicyViewModel> AppPolicyVM { get; private set; }
-
-		public ReactiveProperty<AppPolicyArgumentViewModel> ArgumentVM { get; private set; }
 
 		public ReactiveProperty<string> AppName { get; private set; }
 		public ReactiveProperty<string> ArgumentName { get; private set; }
@@ -42,7 +39,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			Action = appAction;
 
 			AppList = appPolicyManager.Policies
-				.ToReadOnlyReactiveCollection(x => new AppPolicyViewModel(x));
+				.ToReadOnlyReactiveCollection(x => new AppPolicyViewModel(Action, x));
 
 
 
@@ -73,58 +70,30 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			});
 
 
-			// App変更時のArgumentリストの更新
-			AppArgumentList = new ObservableCollection<AppPolicyArgumentViewModel>();
-			AppPolicyVM.Subscribe(x =>
-			{
-				AppArgumentList.Clear();
+			
 
-				if (AppPolicyVM.Value != null)
-				{
-					var arguments = AppPolicyVM.Value.AppPolicy.AppParams;
-					foreach(var arg in arguments)
+
+
+
+
+
+
+			AppName = Action.ObserveProperty(x => x.AppGuid)
+				.Select(x => _AppPolicyManager.FromAppGuid(Action.AppGuid)?.AppName ?? "???")
+				.ToReactiveProperty();
+
+			ArgumentName =
+				Observable.CombineLatest(
+					Action.ObserveProperty(x => x.AppGuid),
+					Action.ObserveProperty(x => x.AppArgumentId),
+					(x, y) =>
 					{
-						AppArgumentList.Add(new AppPolicyArgumentViewModel(arg));
-					}
-				}
-			});
-
-
-
-
-			ArgumentVM = new ReactiveProperty<AppPolicyArgumentViewModel>();
-
-			if (currentAppPolicy != null)
-			{
-				var currentArg = currentAppPolicy.FindArgument(Action.AppArgumentId);
-				if (currentArg != null)
-				{
-					ArgumentVM.Value = AppArgumentList
-						.SingleOrDefault(x => x.AppArgument == currentArg);
-				}
-			}
-
-			ArgumentVM.Subscribe(x =>
-			{
-				Action.AppArgumentId = x?.AppArgument.Id ?? AppArgument.IgnoreArgumentId;
-			});
-
-
-
-
-
-
-
-			AppName = AppPolicyVM
-				.Select(x => x?.AppName ?? "???")
-				.ToReactiveProperty();
-
-			ArgumentName = ArgumentVM
-				.Select(x =>
-				{
-					return x?.ArgumentName ?? "-";
-				})
-				.ToReactiveProperty();
+						var appPolicy = _AppPolicyManager.FromAppGuid(x);
+						var arg = appPolicy?.FindArgument(y) ?? null;
+						return arg?.Name ?? "-";
+					})
+					.ToReactiveProperty();
+					
 		}
 
 
@@ -172,28 +141,64 @@ namespace Modules.Main.ViewModels.ReactionEditer
 	}
 
 
-	public class AppPolicyViewModel : BindableBase
+	public class AppPolicyViewModel : BindableBase, IDisposable
 	{
 		public static readonly AppPolicyViewModel InvalidAppPolicyVM = new AppPolicyViewModel();
 
-
+		public AppLaunchReactiveAction ActionModel { get; private set; }
 		public ApplicationPolicy AppPolicy { get; private set; }
 
 		public string AppName { get; private set; }
 
 		public Guid AppGuid { get; private set; }
 
+		public ReadOnlyReactiveCollection<AppPolicyArgumentViewModel> AppArgumentList { get; private set; }
+
+
+		public ReactiveProperty<AppPolicyArgumentViewModel> ArgumentVM { get; private set; }
+
+
+		public CompositeDisposable _CompositeDisposable;
 
 		internal AppPolicyViewModel()
 		{
 			AppName = "?????";
 		}
 
-		public AppPolicyViewModel(ApplicationPolicy appPolicy)
+		public AppPolicyViewModel(AppLaunchReactiveAction actionModel, ApplicationPolicy appPolicy)
 		{
+			this.ActionModel = actionModel;
 			this.AppPolicy = appPolicy;
 			AppName = AppPolicy.AppName;
 			AppGuid = AppPolicy.Guid;
+
+			_CompositeDisposable = new CompositeDisposable();
+
+
+			// App変更時のArgumentリストの更新
+			AppArgumentList = AppPolicy.AppParams.ToReadOnlyReactiveCollection(x =>
+				new AppPolicyArgumentViewModel(x)
+			)
+			.AddTo(_CompositeDisposable);
+
+
+			ArgumentVM = new ReactiveProperty<AppPolicyArgumentViewModel>(
+				AppArgumentList.SingleOrDefault(x => x.AppArgument.Id == ActionModel.AppArgumentId)
+				, ReactivePropertyMode.DistinctUntilChanged
+				);
+
+
+			ArgumentVM.Subscribe(x =>
+			{
+				ActionModel.AppArgumentId = x.AppArgument.Id;
+			});
+
+		}
+
+		public void Dispose()
+		{
+			_CompositeDisposable?.Dispose();
+			_CompositeDisposable = null;
 		}
 	}
 
@@ -217,7 +222,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		{
 			this.AppArgument = arg;
 
-			this.ArgumentName = this.AppArgument.Name;
+			this.ArgumentName = this.AppArgument?.Name ?? "???";
 		}
 	}
 }

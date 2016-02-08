@@ -21,7 +21,8 @@
                            Margin="16 0"
                            />
                 
-                <ComboBox ItemsSource="{Binding AppList}"
+                <ComboBox x:Name="AppList"
+                          ItemsSource="{Binding AppList}"
                           SelectedItem="{Binding AppPolicyVM.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           >
                     <ComboBox.ItemTemplate>
@@ -41,16 +42,23 @@
                            Margin="16 0"                           
                            />
 
-                <ComboBox ItemsSource="{Binding AppArgumentList}"
-                          SelectedItem="{Binding ArgumentVM.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          >
-
-                    <ComboBox.ItemTemplate>
+                <ContentControl Content="{Binding ElementName=AppList, Path=SelectedItem}"
+                                >
+                    <ContentControl.ContentTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding ArgumentName}" />
+                            <ComboBox ItemsSource="{Binding AppArgumentList}"
+                                  SelectedItem="{Binding ArgumentVM.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  >
+
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ArgumentName}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                    </ContentControl.ContentTemplate>
+                </ContentControl>
             </StackPanel>
 
             <!-- Bottom Buttons -->
