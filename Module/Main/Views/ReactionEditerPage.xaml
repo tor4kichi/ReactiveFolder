@@ -13,67 +13,71 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              prism:ViewModelLocator.AutoWireViewModel="True">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="1*"/>
-
-        </Grid.RowDefinitions>
-
-
+    <DockPanel>
+        
         <!-- Top Buttons -->
-        <Grid HorizontalAlignment="Stretch"
-              VerticalAlignment="Stretch"
-              Style="{StaticResource Appbar}"
-              >
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                <Button Command="{Binding BackCommand}" >
-                    <materialDesign:PackIcon Kind="ArrowLeft" ToolTip="Back" />
-                </Button>
-                <TextBlock Text="Edit Reaction" />
-            </StackPanel>
+        <DockPanel DockPanel.Dock="Top">
+            
+            <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                                          Mode="PrimaryMid" DockPanel.Dock="Top">
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Command="{Binding TestCommand}"
-                        IsEnabled="{Binding IsReactionValid.Value}">
-                    <materialDesign:PackIcon Kind="Leaf" ToolTip="Test" />
-                </Button>
-                <Button Command="{Binding SaveCommand}"
-                        IsEnabled="{Binding IsEnableSave.Value}">
-                    <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save"/>
-                </Button>
-                <!--
-                <Button>
-                    <materialDesign:PackIcon Kind="DotsVertical" />
-                </Button>
-                -->
-            </StackPanel>
-        </Grid>
+                <StackPanel>
+                    <DockPanel VerticalAlignment="Center" Margin="8" >
 
-        <Grid Grid.Row="1" 
-              Background="{StaticResource PrimaryHueMidBrush}"
-              >
-            <Border MaxWidth="800" Margin="16 16">
+                        <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
+                            Style="{StaticResource AppbarButton}"
+                            >
+                            <materialDesign:PackIcon Kind="ArrowLeft"  />
+                        </Button>
+
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Command="{Binding TestCommand}"
+                                    IsEnabled="{Binding IsReactionValid.Value}"
+                                    Style="{StaticResource AppbarButton}"
+                                    >
+                                <materialDesign:PackIcon Kind="Leaf" ToolTip="Test" />
+                            </Button>
+                            <Button Command="{Binding SaveCommand}"
+                                    IsEnabled="{Binding IsEnableSave.Value}"
+                                    Style="{StaticResource AppbarButton}"
+                                    >
+                                <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save"/>
+                            </Button>
+                        </StackPanel>
+
+                        <TextBlock Text="Edit Reaction"
+                               FontSize="22"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </DockPanel>
+                    
+                    
+                    <DockPanel MaxWidth="800" Margin="16 8">
+
+                        <Border Margin="0">
+                            <!-- TODO: Validation -->
+                            <TextBox Text="{Binding ReactionWorkName.Value}"
+                                 Style="{StaticResource MaterialDesignTextBox}"
+                                 FontSize="36"
+                                 Foreground="White"
+                                 HorizontalAlignment="Left"
+                                 materialDesign:TextFieldAssist.Hint="File name"
+                               >
+                                <TextBox.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
+                                    </Style>
+                                </TextBox.Resources>
+                            </TextBox>
+
+                        </Border>
+                    </DockPanel>
+                </StackPanel>
                 
-                <!-- TODO: Validation -->
-                <TextBox Text="{Binding ReactionWorkName.Value}"
-                         Style="{StaticResource MaterialDesignTextBox}"
-                         FontSize="36"
-                         Foreground="White"
-                       HorizontalAlignment="Left"
-                         materialDesign:TextFieldAssist.Hint="File name"
-                       >
-                    <TextBox.Resources>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
-                        </Style>
-                    </TextBox.Resources>
-                </TextBox>
-            </Border>
-        </Grid>
+            </materialDesign:ColorZone>
+        </DockPanel>
 
-        <Grid x:Name="ReactionContent" Grid.Row="2">
+        
+        <Grid x:Name="ReactionContent">
 
             <ScrollViewer HorizontalAlignment="Stretch"
                 HorizontalScrollBarVisibility="Hidden" 
@@ -178,5 +182,5 @@
 
             </ScrollViewer>
         </Grid>
-    </Grid>
+    </DockPanel>
 </UserControl>

@@ -14,9 +14,9 @@
              d:DesignHeight="600" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
-    <Grid>
+    <DockPanel>
 
-        <Grid.Resources>
+        <DockPanel.Resources>
 
             <DataTemplate x:Key="AppPolicyTemplate">
                 <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16">
@@ -37,18 +37,16 @@
                         <TextBlock Text="Application Path" 
                                    Style="{StaticResource ListSubheaderText}"
                                    />
-                        <StackPanel Orientation="Horizontal" 
-                                    HorizontalAlignment="Right"
-                                    Margin="8 0"
-                                    >
+                        <DockPanel Margin="8 0">
+                            <Button Content="Change"
+                                    Command="{Binding ChangeApplicationPathCommand}"
+                                    DockPanel.Dock="Right"
+                                    />
                             <TextBlock Text="{Binding ApplicationPath.Value}" 
                                        VerticalAlignment="Center"
                                                      />
-                            <Button Content="Change"
-                                    Command="{Binding ChangeApplicationPathCommand}"
-                                    />
 
-                        </StackPanel>
+                        </DockPanel>
                     </StackPanel>
 
 
@@ -57,19 +55,18 @@
                         <TextBlock Text="Default Option Text" 
                                    Style="{StaticResource ListSubheaderText}"
                                    />
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Right"
-                                    Margin="8 0"
-                                    >
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
                             <TextBox Text="{Binding DefaultOptionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                      MinWidth="200"
-                                 
+                                    DockPanel.Dock="Right"
                                                      />
-                        
+                            <TextBlock x:Name="DefaultOptionTextDescription" 
+                                   Text="%IN_FILE% %OUT_FILE% %OUT_FOLDER%"
+                                       Foreground="Gray"
+                                       />
+                            
                         </StackPanel>
                         
-                        <TextBlock x:Name="DefaultOptionTextDescription" 
-                                   Text="%IN_FILE% %OUT_FILE% %OUT_FOLDER%" />
                     </StackPanel>
 
 
@@ -81,11 +78,10 @@
 
 
                         <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Right"
-                                    Margin="8 0"
-                                    >
+                            HorizontalAlignment="Right" Margin="8 0">
+                            
                             <TextBox x:Name="ExtentionText"
-                                Text="{Binding ExtentionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Text="{Binding ExtentionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Width="200"
                                      Margin="8 0"
                                      >
@@ -96,7 +92,10 @@
                             
                             <Button Content="Add"
                                     Command="{Binding AddAcceptExtentionCommand}"
+                                    DockPanel.Dock="Right"
                                     />
+
+
 
                         </StackPanel>
 
@@ -186,53 +185,47 @@
 
             </DataTemplate>
 
-        </Grid.Resources>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="1*"/>
+        </DockPanel.Resources>
 
-        </Grid.RowDefinitions>
 
         <!-- Top Buttons -->
-        <Grid HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  Style="{StaticResource Appbar}"
-                  >
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                <Button Command="{Binding BackCommand}" >
-                    <materialDesign:PackIcon Kind="ArrowLeft"  />
-                </Button>
-                <TextBlock Text="App Policy Edit" />
-            </StackPanel>
+        <DockPanel DockPanel.Dock="Top">
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Command="{Binding SaveCommand}">
-                    <materialDesign:PackIcon Kind="ContentSave" />
-                </Button>
-                
-                <Button Command="{Binding DeleteCommand}">
-                    <materialDesign:PackIcon Kind="Delete" />
-                </Button>
-            </StackPanel>
+            <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                                          Mode="PrimaryMid" DockPanel.Dock="Top">
 
-            
-        </Grid>
-        <!--
-            <Grid Grid.Row="1" 
-                  Background="{StaticResource PrimaryHueMidBrush}"
-                  >
-                <Border MaxWidth="800" Margin="16 16">
-                    <TextBlock Text=""
-                           Style="{StaticResource HeaderText}"
-                           HorizontalAlignment="Left"
-                           />
-                </Border>
-            </Grid>
-    -->
+                <StackPanel>
+                    <DockPanel VerticalAlignment="Center" Margin="8" >
 
-        <Grid Grid.Row="2"
-                  >
+                        <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
+                            Style="{StaticResource AppbarButton}"
+                            >
+                            <materialDesign:PackIcon Kind="ArrowLeft"  />
+                        </Button>
+
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Command="{Binding SaveCommand}"
+                                    Style="{StaticResource AppbarButton}"
+                                    >
+                                <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save" />
+                            </Button>
+                            <Button Command="{Binding DeleteCommand}"
+                                    Style="{StaticResource AppbarButton}"
+                                    >
+                                <materialDesign:PackIcon Kind="Delete" ToolTip="Delete"/>
+                            </Button>
+                        </StackPanel>
+
+                        <TextBlock Text="Edit Application Policy"
+                               FontSize="22"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </DockPanel>
+                </StackPanel>
+
+            </materialDesign:ColorZone>
+        </DockPanel>
+        
+        <Grid>
             
             
 
@@ -316,5 +309,5 @@
         </Grid>
         
        
-    </Grid>
+    </DockPanel>
 </UserControl>

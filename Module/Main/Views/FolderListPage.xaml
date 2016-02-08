@@ -25,27 +25,34 @@
         </Grid.RowDefinitions>
 
         <!-- Top Buttons -->
-            <Grid HorizontalAlignment="Stretch"
-              VerticalAlignment="Stretch"
-              Style="{StaticResource Appbar}"
-              >
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <Button>
-                        <ToggleButton Command="{Binding BackOrOpenMenuCommand}"
-                                  Style="{DynamicResource MaterialDesignHamburgerToggleButton}"
-                                  IsChecked="{Binding CanGoBack.Value}"
-                            >
-                        </ToggleButton>
-                    </Button>
-                </StackPanel>
+        <DockPanel>
+            <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                                       Height="48"
+                                          Mode="PrimaryMid" DockPanel.Dock="Top">
 
-                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button>
-                        <materialDesign:PackIcon Kind="DotsVertical" />
-                    </Button>
-                </StackPanel>
-            </Grid>
-<!--
+                <DockPanel VerticalAlignment="Center" Margin="8" >
+                    <ToggleButton Command="{Binding BackOrOpenMenuCommand}"
+                                Style="{StaticResource MaterialDesignHamburgerToggleButton}"
+                                IsChecked="{Binding CanGoBack.Value}"
+                        >
+                    </ToggleButton>
+
+                    <materialDesign:PopupBox DockPanel.Dock="Right" 
+                                             PlacementMode="BottomAndAlignRightEdges">
+                        <StackPanel>
+                            <Button Content="Open in explorer" />
+                            <Button Content="Delete this folder" />
+                        </StackPanel>
+                    </materialDesign:PopupBox>
+
+                    <TextBlock Text="Folder"
+                               FontSize="22"
+                               
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </DockPanel>
+            </materialDesign:ColorZone>
+        </DockPanel>
+        <!--
         <Grid Grid.Row="1" 
               Background="{StaticResource PrimaryHueMidBrush}"
               >

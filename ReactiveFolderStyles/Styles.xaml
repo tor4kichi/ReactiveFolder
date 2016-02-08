@@ -40,7 +40,17 @@
 
         </Style.Resources>
     </Style>
+    <Style x:Key="AppMenubar" TargetType="Menu">
+        <Setter Property="Height" Value="64" />
+        <Setter Property="Margin" Value="0 0" />
+        <Setter Property="Background" Value="{StaticResource PrimaryHueMidBrush}" />
+        <Style.Resources>
+            <Style TargetType="Button" BasedOn="{StaticResource AppbarButton}" />
+            <Style TargetType="{x:Type materialDesign:PackIcon}" BasedOn="{StaticResource AppbarIcon}" />
+            <Style TargetType="TextBlock" BasedOn="{StaticResource AppbarText}" />
 
+        </Style.Resources>
+    </Style>
 
 
     <!-- ヘッダー -->

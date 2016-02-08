@@ -21,23 +21,35 @@
         </Grid.RowDefinitions>
 
         <!-- Top Buttons -->
-        <Grid HorizontalAlignment="Stretch"
-              VerticalAlignment="Stretch"
-              Style="{StaticResource Appbar}"
-              >
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                <Button Command="{Binding BackCommand}" >
-                    <materialDesign:PackIcon Kind="ArrowLeft"  />
-                </Button>
-                <TextBlock Text="App Policy" />
-            </StackPanel>
 
-            <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Command="{Binding ShowHelpCommand}">
-                    <materialDesign:PackIcon Kind="CommentQuestionOutline" />
-                </Button>
-            </StackPanel>
-        </Grid>
+        <DockPanel>
+            <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                                       Height="48"
+                                          Mode="PrimaryMid" DockPanel.Dock="Top">
+
+                <DockPanel VerticalAlignment="Center" Margin="8" >
+                    
+                    <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
+                            Style="{StaticResource AppbarButton}"
+                            >
+                        <materialDesign:PackIcon Kind="ArrowLeft"  />
+                    </Button>
+                    
+                    <Button Command="{Binding ShowHelpCommand}" 
+                            Style="{StaticResource AppbarButton}"
+                            DockPanel.Dock="Right">
+                        <materialDesign:PackIcon Kind="CommentQuestionOutline" />
+                    </Button>
+
+                    <TextBlock Text="App Policy"
+                               FontSize="22"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </DockPanel>
+            </materialDesign:ColorZone>
+        </DockPanel>
+        
+        
+      
         <!--
         <Grid Grid.Row="1" 
               Background="{StaticResource PrimaryHueMidBrush}"
