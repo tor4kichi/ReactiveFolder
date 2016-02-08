@@ -27,7 +27,6 @@ namespace ReactiveFolder.Views
 
 			Closing += Window_Closing;
 
-			IsOpenSideMenu = false;
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -39,37 +38,6 @@ namespace ReactiveFolder.Views
 		}
 
 
-
-		public static readonly DependencyProperty IsOpenSideMenuProperty =
-			DependencyProperty.Register("IsOpenSideMenu",
-										typeof(bool),
-										typeof(MainWindow),
-										new FrameworkPropertyMetadata(false, new PropertyChangedCallback(OnIsOpenSideMenuChanged)));
-
-		public bool IsOpenSideMenu
-		{
-			get { return (bool)GetValue(IsOpenSideMenuProperty); }
-			set { SetValue(IsOpenSideMenuProperty, value); }
-		}
-
-
-		// 3. 依存プロパティが変更されたとき呼ばれるコールバック関数の定義
-		private static void OnIsOpenSideMenuChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
-		{
-			// オブジェクトを取得して処理する
-			MainWindow window = obj as MainWindow;
-
-			if (window.IsOpenSideMenu)
-			{
-				window.SideMenuContainer.Visibility = Visibility.Visible;
-			}
-			else
-			{
-				window.SideMenuContainer.Visibility = Visibility.Collapsed;
-			}
-
-
-		}
 
 	}
 }

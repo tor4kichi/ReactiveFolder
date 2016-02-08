@@ -1,4 +1,5 @@
-﻿using Microsoft.Practices.Prism.Commands;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.Mvvm;
 using Prism.Regions;
 using System;
@@ -13,43 +14,86 @@ namespace ReactiveFolder.ViewModels
 	{
 		public IRegionManager _RegionManager;
 
-		public MainWindowViewModel OwnerWindowVM;
 
-
-		public SideMenuViewModel(IRegionManager regionManagar, MainWindowViewModel mainWindow)
+		public SideMenuViewModel(IRegionManager regionManagar)
 		{
 			_RegionManager = regionManagar;
-			OwnerWindowVM = mainWindow;
 		}
 
-		private DelegateCommand _OpenReactiveFolderListCommand;
-		public DelegateCommand OpenReactiveFolderListCommand
+
+		public static List<MenuItemViewModel> MenuItems { get; private set; }
+
+
+		static SideMenuViewModel()
+		{
+			MenuItems = new List<MenuItemViewModel>();
+
+			MenuItems.Add(new MenuItemViewModel()
+			{
+				Title = "Folder List",
+				Kind = PackIconKind.Home,
+				SelectedAction = (regionManager) =>
+				{
+					regionManager.RequestNavigate("MainRegion", nameof(Modules.Main.Views.FolderListPage));
+				}
+			});
+
+			MenuItems.Add(new MenuItemViewModel()
+			{
+				Title = "App Policy List",
+				Kind = PackIconKind.Home,
+				SelectedAction = (regionManager) =>
+				{
+					regionManager.RequestNavigate("MainRegion", nameof(Modules.AppPolicy.Views.AppPolicyListPage));
+				}
+			});
+
+			MenuItems.Add(new MenuItemViewModel()
+			{
+				Title = "Settings",
+				Kind = PackIconKind.Settings,
+				SelectedAction = (regionManager) =>
+				{
+					regionManager.RequestNavigate("MainRegion", nameof(Modules.Settings.Views.SettingsPage));
+				}
+			});
+
+			MenuItems.Add(new MenuItemViewModel()
+			{
+				Title = "About",
+				Kind = PackIconKind.CommentQuestionOutline,
+				SelectedAction = (regionManager) =>
+				{
+					regionManager.RequestNavigate("MainRegion", nameof(Modules.About.Views.AboutPage));
+				}
+			});
+		}
+
+
+
+		private DelegateCommand<string> _OpenReactiveFolderListCommand;
+		public DelegateCommand<string> MenuItemSelectedCommand
 		{
 			get
 			{
 				return _OpenReactiveFolderListCommand
-					?? (_OpenReactiveFolderListCommand = new DelegateCommand(() =>
+					?? (_OpenReactiveFolderListCommand = new DelegateCommand<string>((menuName) =>
 					{
-						_RegionManager.RequestNavigate("MainRegion", nameof(Modules.Main.Views.FolderListPage));
-
-						OwnerWindowVM.CloseSideMenu();
+						var menuItem = MenuItems.SingleOrDefault(x => x.Title == menuName);
+						menuItem.SelectedAction(_RegionManager);
 					}));
 			}
 		}
 
-		private DelegateCommand _OpenAppPolicyListCommand;
-		public DelegateCommand OpenAppPolicyListCommand
-		{
-			get
-			{
-				return _OpenAppPolicyListCommand
-					?? (_OpenAppPolicyListCommand = new DelegateCommand(() => 
-					{
-						_RegionManager.RequestNavigate("MainRegion", nameof(Modules.AppPolicy.Views.AppPolicyListPage));
+		
+	}
 
-						OwnerWindowVM.CloseSideMenu();
-					}));
-			}
-		}
+
+	public class MenuItemViewModel
+	{
+		public string Title { get; set; }
+		public PackIconKind Kind { get; set; }
+
+		public Action<IRegionManager> SelectedAction { get; set; }
 	}
 }

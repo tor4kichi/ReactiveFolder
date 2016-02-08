@@ -248,6 +248,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Module\About\About.csproj">
+      <Project>{fcd97016-d48f-4955-80d5-3954f3b2c9c8}</Project>
+      <Name>About</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Module\AppPolicy\AppPolicy.csproj">
       <Project>{98736a13-f8cd-4b8d-8ad1-be8e8d8e631f}</Project>
       <Name>AppPolicy</Name>
@@ -259,6 +263,10 @@
     <ProjectReference Include="..\Module\Monitor\Monitor.csproj">
       <Project>{44c5f8d7-918c-43e9-88ad-d874d2254885}</Project>
       <Name>Monitor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Module\Settings\Settings.csproj">
+      <Project>{98d51a0f-3bdd-4ea8-8c5a-86a7555eeb4c}</Project>
+      <Name>Settings</Name>
     </ProjectReference>
     <ProjectReference Include="..\ReactiveFolderModel\ReactiveFolderModel.csproj">
       <Project>{57facb71-d678-4b87-a7b5-4acafd16c7f2}</Project>

@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:local="clr-namespace:ReactiveFolder.Views"
+             xmlns:vm="clr-namespace:ReactiveFolder.ViewModels"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
-             xmlns:vm="clr-namespace:Modules.Main.ViewModels"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="600"
@@ -15,28 +16,46 @@
     <Grid Background="{StaticResource PrimaryHueDarkForegroundBrush}" 
           HorizontalAlignment="Stretch"
           VerticalAlignment="Stretch"
+         Width="300"
           >
         <StackPanel Orientation="Vertical">
 
-            <Grid Height="60">
+            <Grid Height="48">
                 <TextBlock 
                 HorizontalAlignment="Center" VerticalAlignment="Center">
                 ReactiveFolder
                 </TextBlock>
             </Grid>
 
-            <StackPanel Orientation="Vertical">
-                <Button Command="{Binding OpenReactiveFolderListCommand}"
-                    Style="{StaticResource MaterialDesignFlatButton}"
-                    >
-                    FolderList
-                </Button>
-                <Button Command="{Binding OpenAppPolicyListCommand}"
-                    Style="{StaticResource MaterialDesignFlatButton}"
-                    >
-                    AppPolicyList
-                </Button>
-            </StackPanel>
+            <Border Grid.Column="1" Grid.Row="2" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="0 0 0 0" />
+
+            <ItemsControl ItemsSource="{x:Static vm:SideMenuViewModel.MenuItems}"
+                           Margin="32 8"
+                          >
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            HorizontalAlignment="Left"
+                             >
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="PreviewMouseUp">
+                                    <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ItemsControl}, Path=DataContext.MenuItemSelectedCommand}"
+                                                           CommandParameter="{Binding Title}"
+                                                           />
+                                    <i:InvokeCommandAction Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Title}" />
+                            </StackPanel>
+
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            
         </StackPanel>
     </Grid>
 </UserControl>

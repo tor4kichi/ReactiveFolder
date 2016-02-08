@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:ReactiveFolder"
         xmlns:view="clr-namespace:ReactiveFolder.Views"
         xmlns:prism="http://prismlibrary.com/"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         prism:ViewModelLocator.AutoWireViewModel="True"
         Title="ReactiveFolder" 
@@ -25,37 +26,21 @@
             <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
     </Window.Resources>
     <Grid>
-        <ContentControl
-            prism:RegionManager.RegionName="MainRegion" />
-        
-        <Grid x:Name="SideMenuContainer"
-              Visibility="{Binding IsOpenSideMenu.Value, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-              >
+        <materialDesign:DrawerHost IsLeftDrawerOpen="{Binding IsOpenSideMenu.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
 
-            
-
-            <Border HorizontalAlignment="Stretch" 
-                    VerticalAlignment="Stretch" 
-                    Background="Black"
-                    Opacity="0.5"
-                    >
-                <Border.InputBindings>
-                    <MouseBinding MouseAction="LeftClick" Command="{Binding CloseSideMenuCommand}">
-                        
-                    </MouseBinding>
-                </Border.InputBindings>
-                
-            </Border>
-            
-            <ContentControl
+            <materialDesign:DrawerHost.LeftDrawerContent>
+                <ContentControl
                         HorizontalAlignment="Left"
                         MaxWidth="500"
                             >
-                <view:SideMenu></view:SideMenu>
-            </ContentControl>
-        </Grid>
+                    <view:SideMenu></view:SideMenu>
+                </ContentControl>
+            </materialDesign:DrawerHost.LeftDrawerContent>
         
-        
+            <ContentControl
+                prism:RegionManager.RegionName="MainRegion" />
+
+        </materialDesign:DrawerHost>
         
     </Grid>
 </Window>

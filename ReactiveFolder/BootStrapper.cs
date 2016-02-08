@@ -132,15 +132,15 @@ namespace ReactiveFolder
 			moduleCatalog.AddModule(typeof(Modules.Monitor.MonitorModule));
 			moduleCatalog.AddModule(typeof(Modules.Main.MainModule));
 			moduleCatalog.AddModule(typeof(Modules.AppPolicy.AppPolicyModule));
+			moduleCatalog.AddModule(typeof(Modules.Settings.SettingsModule));
+			moduleCatalog.AddModule(typeof(Modules.About.AboutModule));
 
-			
+
 		}
 
 		protected override void InitializeModules()
 		{
 			base.InitializeModules();
-
-			
 		}
 	}
 }

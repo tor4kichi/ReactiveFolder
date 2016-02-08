@@ -50,6 +50,7 @@ namespace ReactiveFolder.ViewModels
 					?? (_CloseSideMenuCommand = new DelegateCommand(() =>
 						CloseSideMenu()
 					));
+
 			}
 		}
 
