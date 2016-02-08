@@ -45,9 +45,16 @@ namespace Modules.AppPolicy.ViewModels
 		{
 			NavigationService = navigationContext.NavigationService;
 
-			var policy = base.ApplicationPolicyFromNavigationParameters(navigationContext.Parameters);
+			try
+			{
+				var policy = base.ApplicationPolicyFromNavigationParameters(navigationContext.Parameters);
 
-			AppPolicyVM.Value = new ApplicationPolicyViewModel(policy);
+				AppPolicyVM.Value = new ApplicationPolicyViewModel(policy);
+			}
+			catch
+			{
+				NavigationService.Journal.GoBack();
+			}
 		}
 
 
@@ -104,7 +111,7 @@ namespace Modules.AppPolicy.ViewModels
 						{
 							_AppPolicyManager.RemoveAppPolicy(this.AppPolicyVM.Value.AppPolicy);
 
-							this.NavigationToAppPolicyListPage();
+							NavigationService.Journal.GoBack();
 						}
 					}));
 			}

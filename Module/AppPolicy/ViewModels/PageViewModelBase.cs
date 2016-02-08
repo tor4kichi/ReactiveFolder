@@ -32,9 +32,6 @@ namespace Modules.AppPolicy.ViewModels
 			_RegionManager.NavigateToAppPolicyListPage();
 		}
 
-
-
-
 		public void NavigationToAppPolicyEditPage(Guid appGuid)
 		{
 			_RegionManager.NavigateToAppPolicyEditPage(appGuid);
