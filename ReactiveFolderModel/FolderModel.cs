@@ -60,7 +60,8 @@ namespace ReactiveFolder.Model
 
 			// 削除されたフォルダ
 			var removeFolders = _Children
-				.Where(x => folders.All(y => x.Folder.FullName != y.FullName));
+				.Where(x => folders.All(y => x.Folder.FullName != y.FullName))
+				.ToList();
 
 			foreach(var removeFolder in removeFolders)
 			{
@@ -98,7 +99,8 @@ namespace ReactiveFolder.Model
 
 			// 削除されたモデル
 			var removeTargetModels = _Models
-				.Where(x => loadedModels.All(y => x.Guid != y.Guid));
+				.Where(x => loadedModels.All(y => x.Guid != y.Guid))
+				.ToList();
 
 			foreach(var removeTarget in removeTargetModels)
 			{
