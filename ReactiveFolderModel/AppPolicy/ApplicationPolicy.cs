@@ -1,4 +1,5 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
+using ReactiveFolder.Model.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,11 +12,8 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Model.AppPolicy
 {
-	public enum PathType
-	{
-		FilePath,
-		FolderPath,
-	}
+	
+	// TODO: コマンドラインアプリのExitCodeの意味付けを設定できるようにしたい
 
 	// TODO: InputとOutputのPathを含めたAppOptionをC# Scriptingで処理したい
 	// -file {inputFile} -o {outputFolder} 
@@ -114,8 +112,8 @@ namespace ReactiveFolder.Model.AppPolicy
 		}
 
 		[DataMember]
-		private PathType _InputPathType;
-		public PathType InputPathType
+		private FolderItemType _InputPathType;
+		public FolderItemType InputPathType
 		{
 			get
 			{
@@ -128,8 +126,8 @@ namespace ReactiveFolder.Model.AppPolicy
 		}
 
 		[DataMember]
-		private PathType _OutputPathType;
-		public PathType OutputPathType
+		private FolderItemType _OutputPathType;
+		public FolderItemType OutputPathType
 		{
 			get
 			{
@@ -283,18 +281,27 @@ namespace ReactiveFolder.Model.AppPolicy
 			// 出力パス名を作成する
 			// ファイルからフォルダに変換アプリの場合には、
 			// 拡張子を取り外す
-			if (InputPathType == PathType.FilePath && 
-				OutputPathType == PathType.FolderPath)
+			if (InputPathType == FolderItemType.File && 
+				OutputPathType == FolderItemType.Folder)
 			{
 				outputFilePath = Path.Combine(outputDir.FullName, Path.GetFileNameWithoutExtension(inputPath));
 			}
 			else
 			{
 				outputFilePath = Path.Combine(outputDir.FullName, Path.GetFileName(inputPath));
+				if (false == String.IsNullOrWhiteSpace(param.OutputExtention))
+				{
+					outputFilePath = Path.ChangeExtension(outputFilePath, param.OutputExtention);
+				}
 			}
 
-			argumentText = Regex.Replace(argumentText, "%IN_FILE%", inputPath);
-			argumentText = Regex.Replace(argumentText, "%OUT_FILE%", outputFilePath);
+			inputPath = inputPath.Replace("\\", "/");
+			outputFilePath = outputFilePath.Replace("\\", "/");
+
+			argumentText = Regex.Replace(argumentText, "%IN_NAME%", Path.GetFileName(inputPath));
+			argumentText = Regex.Replace(argumentText, "%OUT_NAME%", Path.GetFileName(outputFilePath));
+			argumentText = Regex.Replace(argumentText, "%IN_PATH%", inputPath);
+			argumentText = Regex.Replace(argumentText, "%OUT_PATH%", outputFilePath);
 			argumentText = Regex.Replace(argumentText, "%OUT_FOLDER%", outputDir.FullName);
 
 			return argumentText;

@@ -290,7 +290,7 @@ namespace ReactiveFolder.Model
 			}
 			Destination = asbDestination;
 
-
+			CheckInterval = TimeSpan.FromMinutes(1);
 
 			WorkFolder = targetFolder;
 		}
@@ -683,6 +683,7 @@ namespace ReactiveFolder.Model
 			}
 
 
+
 			// タイマーによるトリガーを作成
 			var timerTrigger = Observable.Interval(CheckInterval)
 				.Select(_ => CreatePayload());
@@ -749,7 +750,7 @@ namespace ReactiveFolder.Model
 			var disposer = observer.Publish()
 				.Connect();
 
-			trigger.OnNext(CreatePayload());
+//			trigger.OnNext(CreatePayload());
 
 			// ストリームを閉じる
 			disposer.Dispose();

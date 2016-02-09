@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReactiveFolder.Model.Util;
+using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -55,13 +56,11 @@ namespace ReactiveFolder.Model
 
 			SourcePath = OriginalPath;
 
-			TempOutputFolder = GenerateTempOutputFolder();
-
 			Status = ReactiveStreamStatus.Running;
 		}
 
 
-
+		public Exception FailedCuaseException { get; private set; }
 
 		public string Name
 		{
@@ -81,17 +80,36 @@ namespace ReactiveFolder.Model
 				return;
 			}
 
-			// SourcePathのファイルが存在しなかったら
-			var outputType = updater.Update(SourcePath, TempOutputFolder);
+			// TODO: SourcePathのファイルが存在しなかったら終了
+
+			if (TempOutputFolder == null)
+			{
+				TempOutputFolder = GenerateTempOutputFolder();
+			}
+
+			try
+			{
+				updater.Update(SourcePath, TempOutputFolder);
+			}
+			catch(Exception e)
+			{
+				FailedCuaseException = new Exception("ReactiveStreamFailed on Update", e);
+
+				Status = ReactiveStreamStatus.Failed;
+			}
 
 			// ファイルまたはフォルダの名前部分だけを抽出
 			var sourceItemName = Path.GetFileNameWithoutExtension(SourcePath);
 
 
-			switch (outputType)
+			switch (updater.OutputItemType)
 			{
-				case OutputItemType.File:
-					var processedFileInfo = TempOutputFolder.EnumerateFiles().SingleOrDefault(x => sourceItemName == Path.GetFileNameWithoutExtension(x.Name));
+				case FolderItemType.File:
+					var outputFolderFiles = TempOutputFolder.EnumerateFiles();
+					var processedFileInfo = outputFolderFiles.SingleOrDefault(x =>
+					{
+						return sourceItemName == Path.GetFileNameWithoutExtension(x.Name);
+					});
 
 					// ouptutFolderに作成されたアイテムをチェックする
 					if (processedFileInfo != null && processedFileInfo.Exists)
@@ -109,7 +127,7 @@ namespace ReactiveFolder.Model
 //					}
 
 					break;
-				case OutputItemType.Folder:
+				case FolderItemType.Folder:
 					// TODO: フォルダの更新をチェック
 					var foldername = Path.GetFileName(SourcePath);
 					var processedFolderInfo = TempOutputFolder.EnumerateDirectories().SingleOrDefault(x => x.Name == foldername);
@@ -123,7 +141,7 @@ namespace ReactiveFolder.Model
 						// TODO: 出力先フォルダに作業後のフォルダが
 					}
 					break;
-				case OutputItemType.Failed:
+//				case FolderItemType.Failed:
 					// 正常系の失敗
 
 					// 失敗時の挙動を選択
@@ -133,8 +151,7 @@ namespace ReactiveFolder.Model
 					// 失敗したことがちゃんと伝わらないとユーザー側もアプリ側も改善するためのアクションを起こせない。
 					// よって 2 の誠実さ重視の方針でいく。
 
-					Status = ReactiveStreamStatus.Failed;
-					break;
+					//break;
 				default:
 					break;
 			}
@@ -144,39 +161,48 @@ namespace ReactiveFolder.Model
 		{
 			// TODO: アプリ空間のテンポラリフォルダに仮フォルダを作成して返す
 			// Context上に一つあれば十分かも
-			return new DirectoryInfo(
+			var tempFolderName = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
+			var dir = new DirectoryInfo(
 				Path.Combine(
-					Path.GetTempPath(),
-					"ReactiveFolder/")
+					this.WorkFolder.FullName,
+					tempFolderName)
 				);
+			if (false == dir.Exists)
+			{
+				dir.Create();
+			}
+
+			return dir;
 		}
 
 		public string Finalize(IStreamContextFinalizer finalizer)
 		{
-			if (false == IsRunnning)
-			{
-				return null;
-			}
-
-			// やること
-			// アウトプットしたいファイルまたはフォルダをNameに変更した上でDestinationFolderに移動させる
-
-			// 例外状況
-			// DestinationFolderとWorkFolderが同じ場合、かつ
-			// 拡張子を含むOriginalのファイル名とOutputPathのファイル名が同じ場合、かつ
-			// IsProtecteOriginalがtrueのときに
-			// Destinationへの配置が実行できない状況が生まれる
-
-
-
-			// 検証が必要：フォルダでも同様に配置不可な状況が検知できるか
-
-			Status = ReactiveStreamStatus.Finalizing;
-
 			string outputPath = null;
 
 			try
 			{
+				if (false == IsRunnning)
+				{
+					return null;
+				}
+
+				// やること
+				// アウトプットしたいファイルまたはフォルダをNameに変更した上でDestinationFolderに移動させる
+
+				// 例外状況
+				// DestinationFolderとWorkFolderが同じ場合、かつ
+				// 拡張子を含むOriginalのファイル名とOutputPathのファイル名が同じ場合、かつ
+				// IsProtecteOriginalがtrueのときに
+				// Destinationへの配置が実行できない状況が生まれる
+
+
+
+				// 検証が必要：フォルダでも同様に配置不可な状況が検知できるか
+
+				Status = ReactiveStreamStatus.Finalizing;
+
+				
+
 				var destFolder = finalizer.GetDestinationFolder();
 				if (this.WorkFolder.FullName == destFolder.FullName &&
 				Path.GetFileName(OriginalPath) == Path.GetFileName(SourcePath) &&
@@ -212,13 +238,22 @@ namespace ReactiveFolder.Model
 			}
 			catch(Exception e)
 			{
+				FailedCuaseException = new Exception("ReactiveStreamFailed on Finalize", e);
+
 				Status = ReactiveStreamStatus.Failed;
 			}
 			finally
 			{
 				// 必ず仮出力用フォルダはリセットしておく
-				TempOutputFolder.Delete(true);
-				TempOutputFolder = GenerateTempOutputFolder();
+				if (TempOutputFolder != null)
+				{
+					TempOutputFolder.Refresh();
+					if (TempOutputFolder.Exists)
+					{
+						TempOutputFolder.Delete(true);
+					}
+				}
+				//				TempOutputFolder = GenerateTempOutputFolder();
 
 				if (outputPath != null)
 				{
@@ -255,11 +290,19 @@ namespace ReactiveFolder.Model
 
 			try
 			{
-				outputFileInfo.CopyTo(finalizeFilePath);
+				var destFileInfo = new FileInfo(finalizeFilePath);
+				if (destFileInfo.Exists)
+				{
+					destFileInfo.Delete();
+				}
+				outputFileInfo.CopyTo(destFileInfo.FullName);
 				return finalizeFilePath;
 			}
 			catch (Exception e)
 			{
+				FailedCuaseException = new Exception("ReactiveStreamFailed on Finalize file", e);
+
+				Status = ReactiveStreamStatus.Failed;
 				// TODO: 
 			}
 
@@ -293,7 +336,9 @@ namespace ReactiveFolder.Model
 			}
 			catch(Exception e)
 			{
-				// TODO: 
+				FailedCuaseException = new Exception("ReactiveStreamFailed on Finalize folder", e);
+
+				Status = ReactiveStreamStatus.Failed;
 			}
 
 			return null;

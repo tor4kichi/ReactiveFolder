@@ -40,8 +40,8 @@
                     <materialDesign:PopupBox DockPanel.Dock="Right" 
                                              PlacementMode="BottomAndAlignRightEdges">
                         <StackPanel>
-                            <Button Content="Open in explorer" />
-                            <Button Content="Delete this folder" />
+                            <Button Content="Open in explorer" Command="{Binding OpenInExplorerCommand}" />
+                            <Button Content="Delete this folder" Command="{Binding RemoveThisFolderCommand}" />
                         </StackPanel>
                     </materialDesign:PopupBox>
 

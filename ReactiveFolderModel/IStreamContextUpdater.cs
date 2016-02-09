@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReactiveFolder.Model.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,14 +10,9 @@ namespace ReactiveFolder.Model
 {
 	public interface IStreamContextUpdater
 	{
-		OutputItemType Update(string sourcePath, DirectoryInfo destFolder);
-	}
+		FolderItemType InputItemType { get; }
+		FolderItemType OutputItemType { get; }
 
-	public enum OutputItemType
-	{
-		File,
-		Folder,
-
-		Failed,
+		void Update(string sourcePath, DirectoryInfo destFolder);
 	}
 }

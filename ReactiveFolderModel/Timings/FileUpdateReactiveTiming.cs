@@ -61,14 +61,14 @@ namespace ReactiveFolder.Model.Timings
 			{
 				SourceFiles.Remove(removeItem);
 			}
-//			SourceFiles.AddRange(workDir.GetFiles().Select(x => new PreservedFileInfo(x.FullName)));
-//			SourceFiles.AddRange(workDir.GetDirectories().Select(x => new PreservedFileInfo(x.FullName)));
 		}
 
 
 
 		public bool FileIsNeedUpdate(ReactiveStreamContext payload)
 		{
+			return true;
+			/*
 			var fileAlreadyExist = SourceFiles.Any(x =>
 			{
 				return x.Path == payload.SourcePath;
@@ -95,6 +95,7 @@ namespace ReactiveFolder.Model.Timings
 				// まだPathが登録されていない場合は更新が必要
 				return true;
 			}
+			*/
 		}
 
 		void UpdateTargetFile(ReactiveStreamContext payload)

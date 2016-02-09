@@ -13,6 +13,8 @@ using System.IO;
 using ReactiveFolder.Model.AppPolicy;
 using MaterialDesignThemes.Wpf;
 using System.Reactive.Linq;
+using ReactiveFolder.Model.Util;
+using Microsoft.Win32;
 
 namespace Modules.AppPolicy.ViewModels
 {
@@ -129,9 +131,9 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReactiveProperty<string> DefaultOptionText { get; private set; }
 
-		public ReactiveProperty<PathType> InputPathType { get; private set; }
+		public ReactiveProperty<FolderItemType> InputPathType { get; private set; }
 
-		public ReactiveProperty<PathType> OutputPathType { get; private set; }
+		public ReactiveProperty<FolderItemType> OutputPathType { get; private set; }
 
 		public ReactiveProperty<string> ExtentionText { get; private set; }
 
@@ -196,7 +198,18 @@ namespace Modules.AppPolicy.ViewModels
 				return _ChangeApplicationPathCommand
 					?? (_ChangeApplicationPathCommand = new DelegateCommand(() =>
 					{
-						// TODO: 
+						var dialog = new OpenFileDialog();
+
+						dialog.Multiselect = false;
+						dialog.Filter = "Application Files (.exe)|*.exe|All Files (*.*)|*.*";
+						dialog.CheckFileExists = true;
+
+						var result = dialog.ShowDialog();
+
+						if (result != null && ((bool)result) == true)
+						{
+							AppPolicy.ApplicationPath = dialog.FileName;
+						}
 					}));
 			}
 		}

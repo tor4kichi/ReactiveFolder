@@ -66,9 +66,26 @@ namespace ReactiveFolder.Model.Actions
 		}
 
 
-		
+		public ApplicationPolicy GetAppPolicy()
+		{
+			return AppPolicyFactory.FromAppGuid(AppGuid);
+		}
 
-		
+		public override FolderItemType InputItemType
+		{
+			get
+			{
+				return GetAppPolicy().InputPathType;
+			}
+		}
+
+		public override FolderItemType OutputItemType
+		{
+			get
+			{
+				return GetAppPolicy().OutputPathType;
+			}
+		}
 
 		public AppLaunchReactiveAction()
 		{
@@ -96,7 +113,8 @@ namespace ReactiveFolder.Model.Actions
 			return result;
 		}
 
-		public override void Reaction(ReactiveStreamContext context)
+
+		public override void Update(string sourcePath, DirectoryInfo destFolder)
 		{
 			var sandbox = CreateSandbox();
 
@@ -104,14 +122,16 @@ namespace ReactiveFolder.Model.Actions
 			{
 				throw new Exception("");
 			}
-			
-			var path = sandbox.Execute(context);
 
-
-			// Note: contextへの書き込みはAction側の責任で行う
-
+			try
+			{
+				var path = sandbox.Execute(sourcePath, destFolder);
+			}
+			catch (Exception e)
+			{
+				
+			}
 		}
-
 
 		public ApplicationExecuteSandbox CreateSandbox()
 		{
@@ -130,6 +150,8 @@ namespace ReactiveFolder.Model.Actions
 
 			return appPolicy.CreateExecuteSandbox(appParam);
 		}
+
+		
 	}
 	
 }

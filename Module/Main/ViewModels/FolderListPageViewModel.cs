@@ -12,6 +12,7 @@ using Reactive.Bindings.Extensions;
 using System.IO;
 using Prism.Events;
 using ReactiveFolderStyles;
+using System.Diagnostics;
 
 namespace Modules.Main.ViewModels
 {
@@ -208,11 +209,27 @@ namespace Modules.Main.ViewModels
 
 						// move to Reaction editer page.
 						NavigationService.Journal.GoBack();
-						NavigationService.Journal.Clear();
+					}
+					, () => _MonitorModel.RootFolder.Folder.FullName != this.CurrentFolder.Folder.FullName
+					
+					));
+			}
+		}
+		private DelegateCommand _OpenInExplorerCommand;
+		public DelegateCommand OpenInExplorerCommand
+		{
+			get
+			{
+				return _OpenInExplorerCommand
+					?? (_OpenInExplorerCommand = new DelegateCommand(() =>
+					{
+						Process.Start(this.CurrentFolder.Folder.FullName);
 					}));
 			}
 		}
 
+
+		
 	}
 
 

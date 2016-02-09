@@ -96,7 +96,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.AddTo(_CompositeDisposable);
 
 
-
+			/* System.NotSupportExceptionがでるためコメントアウト
 			SampleItems = new ObservableCollection<string>(FileFilterModel.FileFilter(ReactionModel.WorkFolder).Select(x => x.Name));
 
 			FileFilterModel.IncludeFilter
@@ -109,6 +109,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 						);
 				})
 				.AddTo(_CompositeDisposable);
+			*/
 		}
 
 
