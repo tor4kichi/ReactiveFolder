@@ -14,6 +14,9 @@
       prism:ViewModelLocator.AutoWireViewModel="True"
       >
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
    
     <Grid
         >
@@ -122,21 +125,54 @@
                             <DataTemplate>
                                 <Button Style="{StaticResource ListButton}"
                                         Command="{Binding OpenReactionCommand}"
+                                        HorizontalContentAlignment="Stretch"
+                                        Height="40"
                                         >
-                                    <StackPanel Orientation="Horizontal">
+                                    <DockPanel>
 
                                         <materialDesign:PackIcon Kind="File"
                                                                  Style="{StaticResource ListPrimaryIcon}"
+                                                                 DockPanel.Dock="Left"
                                                                 />
-                                        <StackPanel Orientation="Vertical">
+
+                                       
+
+                                        <!-- Validationで失敗している時に表示するアイコン -->
+                                        <materialDesign:PackIcon Visibility="{Binding IsInvalid, Converter={StaticResource BoolToVisibility}}"
+                                                                 Kind="Alert"
+                                                                 Style="{StaticResource ListSecondaryIcon}"
+                                                                 Foreground="Red"
+                                                                 VerticalAlignment="Center"
+                                                                 HorizontalAlignment="Right"
+                                                                 ToolTip="Invalid reaction"
+                                                                 DockPanel.Dock="Right"
+                                                                 Background="Transparent"
+                                                                 />
+                                        
+                                         <!-- アクティブではない時に表示するアイコン -->
+                                        <materialDesign:PackIcon Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}"
+                                                                 Kind="InformationOutline"
+                                                                 Style="{StaticResource ListSecondaryIcon}"
+                                                                 VerticalAlignment="Center"
+                                                                 HorizontalAlignment="Right"
+                                                                 ToolTip="Inactive reaction"
+                                                                 DockPanel.Dock="Right"
+                                                                 Background="Transparent"
+                                                                 />
+
+
+                                        <StackPanel Orientation="Vertical" Margin="0 2">
                                             <TextBlock Text="{Binding Name}"
                                                     Style="{StaticResource ListPrimaryText}"
                                                     />
+
+                                            <Border Margin="0 2 0 0" />
+                                            
                                             <TextBlock Text="{Binding FilePath}"
                                                     Style="{StaticResource ListSecondaryText}"
                                                     />
                                         </StackPanel>
-                                    </StackPanel>
+                                    </DockPanel>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

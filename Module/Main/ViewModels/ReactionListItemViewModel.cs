@@ -24,6 +24,11 @@ namespace Modules.Main.ViewModels
 		public string FilePath { get; private set; }
 
 
+		public bool IsInactive { get; private set; }
+
+		public bool IsInvalid { get; private set; }
+
+
 		public ReactionListItemViewModel(PageViewModelBase pageVM, FolderReactionModel reactionModel)
 		{
 			PageVM = pageVM;
@@ -35,6 +40,9 @@ namespace Modules.Main.ViewModels
 
 			FilePath = ReactionModel.WorkFolder?.FullName ?? "<no setting>";
 
+			IsInactive = false == ReactionModel.IsEnable;
+
+			IsInvalid = false == ReactionModel.IsValid;
 		}
 
 

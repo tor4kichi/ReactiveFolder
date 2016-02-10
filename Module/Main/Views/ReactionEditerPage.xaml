@@ -13,7 +13,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="1200" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True">
-    <DockPanel Margin="0 16">
+    <DockPanel >
         
         <!-- Top Buttons -->
         <DockPanel DockPanel.Dock="Top">
@@ -83,9 +83,9 @@
             HorizontalScrollBarVisibility="Hidden" 
                         VerticalScrollBarVisibility="Auto"
                         >
-            <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Vertical" Margin="0 0 0 16">
                 <ItemsControl HorizontalContentAlignment="Stretch"
-                            Margin="16"
+                              Margin="16"
                             >
                     <ItemsControl.ItemContainerStyle>
                         <Style TargetType="ContentControl">
