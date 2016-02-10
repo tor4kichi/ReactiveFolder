@@ -30,22 +30,24 @@
             </Grid>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                <TextBox Text="{Binding RenamePattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Text="{Binding OutputNamePattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Width="200"
+                         ToolTip="%NAME% %INDEX% %DATE% %YY% %MM% %DD% %HH% %mm% %SS%"
                          materialDesign:TextFieldAssist.Hint="Rename"
                          />
                 
                 <!-- Renameで扱える特殊文字列の説明 -->
             </StackPanel>
 
-             <!--
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Output Sample" />
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        >
                 <TextBlock Text="{Binding OutputPathSample.Value}"
                            Margin="8 0"
+                          
                            />
             </StackPanel>
-            -->
+            
         </StackPanel>
 
        

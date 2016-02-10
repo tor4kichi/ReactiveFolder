@@ -47,7 +47,10 @@ namespace ReactiveFolder.Model
 
 		public ReactiveStreamStatus Status { get; private set; }
 
-		public ReactiveStreamContext(DirectoryInfo dir, string itempath, bool protecteOriginal = true)
+
+		public int Index { get; private set; }
+
+		public ReactiveStreamContext(DirectoryInfo dir, string itempath, int index = -1, bool protecteOriginal = true)
 		{
 			WorkFolder = dir;
 			IsProtectOriginal = protecteOriginal;
@@ -205,9 +208,9 @@ namespace ReactiveFolder.Model
 
 				var destFolder = finalizer.GetDestinationFolder();
 				if (this.WorkFolder.FullName == destFolder.FullName &&
-				Path.GetFileName(OriginalPath) == Path.GetFileName(SourcePath) &&
-				IsProtectOriginal == true
-				)
+					Path.GetFileName(OriginalPath) == Path.GetFileName(SourcePath) &&
+					IsProtectOriginal == true
+					)
 				{
 					// Finalizeに失敗？
 					outputPath = null;

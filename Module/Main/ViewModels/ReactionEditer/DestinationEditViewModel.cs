@@ -46,11 +46,14 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			OutputPathSample = Observable.CombineLatest(
 					Destination.ObserveProperty(x => x.AbsoluteFolderPath)
 						.Where(x => false == String.IsNullOrWhiteSpace(x))
-					, OutputNamePattern
+					, Destination.ObserveProperty(x => x.OutputNamePattern)
+						.Throttle(TimeSpan.FromSeconds(0.75))
+						.Select(Destination.TestRename)
+						.Where(x => false == String.IsNullOrWhiteSpace(x))
 				)
 				.Select(x =>
 				{
-					return Path.Combine(x[0], x[1]);
+					return Path.Combine(x[0], x[1] + ".extention");
 				})
 				.ToReadOnlyReactiveProperty()
 				.AddTo(_CompositeDisposable);
@@ -114,7 +117,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					?? (_ResetRenamePartternCommand = new DelegateCommand(() =>
 					{
 						// TODO: use const
-						RenamePattern.Value = "{name}";
+						RenamePattern.Value = ReactiveDestinationBase.DefaultRenamePattern;
 
 					}));
 			}
