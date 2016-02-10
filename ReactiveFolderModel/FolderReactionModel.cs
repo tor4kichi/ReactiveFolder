@@ -43,7 +43,7 @@ namespace ReactiveFolder.Model
 		public string Name { get; set; }
 
 		[DataMember]
-		public bool IsDisable { get; set; }
+		public bool IsEnable { get; set; }
 
 		[DataMember]
 		public string WorkFolderPath { get; private set; }
@@ -274,7 +274,7 @@ namespace ReactiveFolder.Model
 		{
 			Guid = Guid.NewGuid();
 			Name = "";
-			IsDisable = false;
+			IsEnable = true;
 
 			IsNeedValidation = true;
 
@@ -682,7 +682,7 @@ namespace ReactiveFolder.Model
 			}
 
 
-			if (IsDisable)
+			if (false == IsEnable)
 			{
 				return true;
 			}
@@ -740,7 +740,7 @@ namespace ReactiveFolder.Model
 
 
 
-			if (this.IsDisable && false == forceEnabling)
+			if (false == this.IsEnable && false == forceEnabling)
 			{
 				return true;
 			}

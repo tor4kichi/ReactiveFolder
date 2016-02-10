@@ -11,9 +11,9 @@
              xmlns:prism="http://prismlibrary.com/"             
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DesignHeight="1200" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True">
-    <DockPanel>
+    <DockPanel Margin="0 16">
         
         <!-- Top Buttons -->
         <DockPanel DockPanel.Dock="Top">
@@ -38,7 +38,7 @@
                                 <materialDesign:PackIcon Kind="Leaf" ToolTip="Test" />
                             </Button>
                             <Button Command="{Binding SaveCommand}"
-                                    IsEnabled="{Binding IsEnableSave.Value}"
+                                    IsEnabled="{Binding CanSave.Value}"
                                     Style="{StaticResource AppbarButton}"
                                     >
                                 <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save"/>
@@ -70,6 +70,7 @@
                             </TextBox>
 
                         </Border>
+
                     </DockPanel>
                 </StackPanel>
                 
@@ -77,16 +78,15 @@
         </DockPanel>
 
         
-        <Grid x:Name="ReactionContent">
-
-            <ScrollViewer HorizontalAlignment="Stretch"
-                HorizontalScrollBarVisibility="Hidden" 
-                          VerticalScrollBarVisibility="Auto"
-                          >
-
+        
+        <ScrollViewer HorizontalAlignment="Stretch"
+            HorizontalScrollBarVisibility="Hidden" 
+                        VerticalScrollBarVisibility="Auto"
+                        >
+            <StackPanel Orientation="Vertical">
                 <ItemsControl HorizontalContentAlignment="Stretch"
-                          Margin="16"
-                          >
+                            Margin="16"
+                            >
                     <ItemsControl.ItemContainerStyle>
                         <Style TargetType="ContentControl">
                             <Setter Property="Template">
@@ -131,9 +131,9 @@
                                                 </materialDesign:PackIcon>
 
                                                 <TextBlock Text="{Binding Title, Mode=OneTime}" 
-                                                           VerticalAlignment="Center"
-                                                           Margin="8 0"
-                                                           >
+                                                            VerticalAlignment="Center"
+                                                            Margin="8 0"
+                                                            >
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
                                                             <Style.Triggers>
@@ -180,7 +180,34 @@
 
                 </ItemsControl>
 
-            </ScrollViewer>
-        </Grid>
+                <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="8 8" />
+
+
+                <TextBlock Text="Additional Option" 
+                                VerticalAlignment="Center"
+                                Margin="32 16"
+                           Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                />
+
+                <StackPanel Orientation="Vertical"
+                            Margin="40 0 16 0"
+                            >
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock Text="Active"
+                                    Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                   />
+                        <Border Width="200">
+                            <ToggleButton 
+                                ToolTip="Inactive | Active"
+                                HorizontalAlignment="Right"        
+                                IsChecked="{Binding IsEnable.Value, Mode=TwoWay}"
+                                />
+                        </Border>
+                    </StackPanel>
+
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
     </DockPanel>
 </UserControl>

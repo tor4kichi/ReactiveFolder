@@ -27,6 +27,7 @@ namespace Modules.Main.ViewModels
 		Unknown
 	}
 
+	// TODO: WorkFolderの切り替えに伴うVMの変更部分について、ViewModelをさらに切り出して読みやすくしたい
 	
 	public class ReactionEditerPageViewModel : PageViewModelBase, INavigationAware, IDisposable
 	{
@@ -46,7 +47,9 @@ namespace Modules.Main.ViewModels
 		public ReactiveProperty<ActionsEditViewModel> ActionsEditVM { get; private set; }
 		public ReactiveProperty<DestinationEditViewModel> DestinationEditVM { get; private set; }
 
-		public ReactiveProperty<bool> IsEnableSave { get; private set; }
+		public ReactiveProperty<bool> IsEnable { get; private set; }
+
+		public ReactiveProperty<bool> CanSave { get; private set; }
 
 
 		public ReactionEditerPageViewModel(IRegionManager regionManager, FolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager)
@@ -63,7 +66,9 @@ namespace Modules.Main.ViewModels
 			ActionsEditVM = new ReactiveProperty<ActionsEditViewModel>();
 			DestinationEditVM = new ReactiveProperty<DestinationEditViewModel>();
 
-			IsEnableSave = new ReactiveProperty<bool>(true);
+			IsEnable = new ReactiveProperty<bool>(false);
+
+			CanSave = new ReactiveProperty<bool>(true);
 		}
 
 
@@ -98,9 +103,17 @@ namespace Modules.Main.ViewModels
 					OnPropertyChanged(nameof(IsReactionValid));
 				})
 				.AddTo(_CompositeDisposable);
-			
 
-			IsEnableSave.Value = true;
+			// On/Off
+			IsEnable.Value = Reaction.IsEnable;
+			IsEnable.Subscribe(x =>
+				{
+					Reaction.IsEnable = x;
+				})
+				.AddTo(_CompositeDisposable);
+
+
+			CanSave.Value = true;
 		}
 
 
@@ -134,7 +147,7 @@ namespace Modules.Main.ViewModels
 			CleanUpReactionSubscribe();
 
 			ReactionWorkName?.Dispose();
-			IsEnableSave?.Dispose();
+			CanSave?.Dispose();
 
 			WorkFolderEditVM.Value?.Dispose();
 			FilterEditVM.Value?.Dispose();
@@ -172,7 +185,7 @@ namespace Modules.Main.ViewModels
 				return _SaveCommand
 					?? (_SaveCommand = new DelegateCommand(() =>
 					{
-						IsEnableSave.Value = false;
+						CanSave.Value = false;
 
 						try
 						{
@@ -181,7 +194,7 @@ namespace Modules.Main.ViewModels
 								_MonitorModel.SaveReaction(Reaction);
 								await Task.Delay(500);
 							})
-							.ContinueWith(_ => { IsEnableSave.Value = true; });
+							.ContinueWith(_ => { CanSave.Value = true; });
 						}
 						finally
 						{

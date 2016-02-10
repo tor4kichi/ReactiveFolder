@@ -1,5 +1,7 @@
 ﻿using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.Mvvm;
+using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 using ReactiveFolder.Model;
 using System;
 using System.Collections.Generic;
@@ -17,7 +19,6 @@ namespace Modules.Main.ViewModels
 
 		public FolderReactionModel ReactionModel { get; private set; }
 
-
 		public string Name { get; private set; }
 
 		public string FilePath { get; private set; }
@@ -33,7 +34,6 @@ namespace Modules.Main.ViewModels
 			var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
 			FilePath = ReactionModel.WorkFolder?.FullName ?? "<no setting>";
-
 
 		}
 
