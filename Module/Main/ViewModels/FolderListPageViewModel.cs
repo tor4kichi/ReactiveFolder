@@ -174,9 +174,7 @@ namespace Modules.Main.ViewModels
 					{
 						var desktop = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
-						var targetDir = new System.IO.DirectoryInfo(desktop);
-
-						var reaction = CurrentFolder.AddReaction(targetDir);
+						var reaction = CurrentFolder.AddReaction();
 						reaction.Name = "something reaction";
 
 						reaction.Filter = new ReactiveFolder.Model.Filters.FileReactiveFilter();

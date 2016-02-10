@@ -32,15 +32,8 @@ namespace Modules.Main.ViewModels
 
 			var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-			var isUnderUserFolder = ReactionModel.WorkFolder.FullName.IndexOf(userFolder) == 0;
-			if (isUnderUserFolder)
-			{
-				FilePath = "<user>" + ReactionModel.WorkFolder.FullName.Substring(userFolder.Length);
-			}
-			else
-			{
-				FilePath = ReactionModel.WorkFolder.FullName;
-			}
+			FilePath = ReactionModel.WorkFolder?.FullName ?? "<no setting>";
+
 
 		}
 

@@ -31,7 +31,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 			WorkFolderPath = Reaction.ObserveProperty(x => x.WorkFolder)
-				.Select(x => x.FullName)
+				.Select(x => x?.FullName ?? "<not selected>")
 				.ToReactiveProperty()
 				.AddTo(_CompositeDisposable);
 		}

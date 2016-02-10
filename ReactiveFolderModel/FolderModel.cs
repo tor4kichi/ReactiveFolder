@@ -108,9 +108,9 @@ namespace ReactiveFolder.Model
 			}
 		}
 
-		public FolderReactionModel AddReaction(DirectoryInfo targetDir)
+		public FolderReactionModel AddReaction()
 		{
-			var reaction = new FolderReactionModel(targetDir);
+			var reaction = new FolderReactionModel();
 
 			_Models.Add(reaction);
 

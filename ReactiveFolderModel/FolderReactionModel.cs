@@ -270,7 +270,7 @@ namespace ReactiveFolder.Model
 		/// 一意に判別できる値が割り振られるようにしてください。
 		/// </summary>
 		/// <param name="id"></param>
-		public FolderReactionModel(DirectoryInfo targetFolder)
+		public FolderReactionModel()
 		{
 			Guid = Guid.NewGuid();
 			Name = "";
@@ -284,15 +284,12 @@ namespace ReactiveFolder.Model
 			FileUpdateTiming = new FileUpdateReactiveTiming();
 
 			var asbDestination = new AbsolutePathReactiveDestination();
-			if (targetFolder != null)
-			{
-				asbDestination.AbsoluteFolderPath = targetFolder.FullName;
-			}
+			
 			Destination = asbDestination;
 
 			CheckInterval = TimeSpan.FromMinutes(1);
 
-			WorkFolder = targetFolder;
+			WorkFolder = null;
 		}
 
 
@@ -302,7 +299,10 @@ namespace ReactiveFolder.Model
 		{
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
 			
-			WorkFolder = new DirectoryInfo(WorkFolderPath);
+			if (false == String.IsNullOrWhiteSpace(WorkFolderPath))
+			{
+				WorkFolder = new DirectoryInfo(WorkFolderPath);
+			}
 
 			ResetWorkingFolder();
 		}
@@ -383,7 +383,7 @@ namespace ReactiveFolder.Model
 			outResult = outResult ?? new ValidationResult();
 
 
-			var isWorkFolderValid = WorkFolder.Exists;
+			var isWorkFolderValid = WorkFolder?.Exists ?? false;
 			if (false == isWorkFolderValid)
 			{
 				outResult.AddMessage("NOT_EXIST_WORKFODLER");
@@ -597,6 +597,11 @@ namespace ReactiveFolder.Model
 
 		private ReactiveStreamContext CreatePayload()
 		{
+			if (WorkFolder == null)
+			{
+				throw new Exception("not exist WorkFolder in FolderReactioinModel.CreatePayload().");
+			}
+
 			return new ReactiveStreamContext(WorkFolder, "");
 		}
 		

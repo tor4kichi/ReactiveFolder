@@ -12,31 +12,38 @@ namespace ReactiveFolder.Model.Filters
 
 		public static IEnumerable<string> GetFileCandidateFilterPatterns(this FolderReactionModel reaction)
 		{
-			yield return "*.*";
-
-			// 拡張子
-			var extentions = reaction.WorkFolder.EnumerateFiles()
-				.Select(x => x.Extension)
-				.Distinct();
-
-			foreach (var ext in extentions)
+			
+			if (reaction.WorkFolder != null)
 			{
-				yield return "*" + ext; // ex) *.jpg
+				yield return "*.*";
+
+				// 拡張子
+				var extentions = reaction.WorkFolder.EnumerateFiles()
+					.Select(x => x.Extension)
+					.Distinct();
+
+				foreach (var ext in extentions)
+				{
+					yield return "*" + ext; // ex) *.jpg
+				}
 			}
 		}
 
 
 		public static IEnumerable<string> GetFolderCandidateFilterPatterns(this FolderReactionModel reaction)
 		{			
-			yield return "/*";
-
-			// フォルダ名
-			var folders = reaction.WorkFolder.EnumerateDirectories()
-				.Select(x => x.Name);
-
-			foreach (var folderName in folders)
+			if (reaction.WorkFolder != null)
 			{
-				yield return "/" + folderName; // ex) /myfolder
+				yield return "/*";
+
+				// フォルダ名
+				var folders = reaction.WorkFolder.EnumerateDirectories()
+					.Select(x => x.Name);
+
+				foreach (var folderName in folders)
+				{
+					yield return "/" + folderName; // ex) /myfolder
+				}
 			}
 		}
 	}
