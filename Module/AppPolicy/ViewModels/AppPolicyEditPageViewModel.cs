@@ -132,11 +132,12 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReactiveProperty<string> AppName { get; private set; }
 
-		public ReactiveProperty<string> DefaultOptionText { get; private set; }
-
+		
 		public ReactiveProperty<FolderItemType> InputPathType { get; private set; }
 
 		public ReactiveProperty<FolderItemType> OutputPathType { get; private set; }
+
+		public ReactiveProperty<string> DefaultOptionText { get; private set; }
 
 		public ReactiveProperty<string> ExtentionText { get; private set; }
 
@@ -166,6 +167,9 @@ namespace Modules.AppPolicy.ViewModels
 			InputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.InputPathType);
 
 			OutputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.OutputPathType);
+
+
+			
 
 			AcceptExtentions = appPolicy.AcceptExtentions
 				.ToReadOnlyReactiveCollection();
@@ -336,6 +340,8 @@ namespace Modules.AppPolicy.ViewModels
 		public ReactiveProperty<string> OptionText { get; private set; }
 		public ReactiveProperty<string> OutputExtention { get; private set; }
 
+		public ReactiveProperty<string> FinalOptionText { get; private set; }
+
 		public AppPolicyArgumentViewModel(ApplicationPolicyViewModel appPolicyVM, ApplicationPolicy appPolicy, AppArgument argument)
 		{
 			this.AppPolicyVM = appPolicyVM;
@@ -346,6 +352,23 @@ namespace Modules.AppPolicy.ViewModels
 			Description = this.Argument.ToReactivePropertyAsSynchronized(x => x.Description);
 			OptionText = this.Argument.ToReactivePropertyAsSynchronized(x => x.OptionText);
 			OutputExtention = this.Argument.ToReactivePropertyAsSynchronized(x => x.OutputExtention);
+
+
+			FinalOptionText = Observable.Merge(
+				AppPolicyVM.InputPathType.ToUnit(),
+				AppPolicyVM.OutputPathType.ToUnit(),
+				AppPolicyVM.DefaultOptionText.ToUnit(),
+				OptionText.ToUnit(),
+				OutputExtention.ToUnit()
+				)
+				.Select(_ =>
+				{
+					var ext = AppPolicy.AcceptExtentions.FirstOrDefault() ?? ".ext";
+					var dummyInput = "dummyFolder/filename" + ext;
+					var dummyFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+					return AppPolicy.MakeArgumentsText(dummyInput, new DirectoryInfo(dummyFolder), Argument);
+				})
+				.ToReactiveProperty();
 		}
 
 		private DelegateCommand _EditArgumentCommand;
@@ -381,6 +404,8 @@ namespace Modules.AppPolicy.ViewModels
 			Description.Dispose();
 			OptionText.Dispose();
 			OutputExtention.Dispose();
+
+			FinalOptionText.Dispose();
 		}
 	}
 }

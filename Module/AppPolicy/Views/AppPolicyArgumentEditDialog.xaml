@@ -28,12 +28,12 @@
 
             <TextBlock Text="App argument text"
                        />
-            <TextBox Text="{Binding OptionText.Value}"
+            <TextBox Text="{Binding OptionText.Value, UpdateSourceTrigger=PropertyChanged}"
                       materialDesign:TextFieldAssist.Hint="ex) -f %IN_FILE%"
                      />
             <TextBlock Text="Output file Extention"
                        />
-            <TextBox Text="{Binding OutputExtention.Value}"
+            <TextBox Text="{Binding OutputExtention.Value, UpdateSourceTrigger=PropertyChanged}"
                      materialDesign:TextFieldAssist.Hint="same input if not set extention."
                      />
             <TextBlock Text="Description" 
@@ -42,6 +42,18 @@
                       materialDesign:TextFieldAssist.Hint="(option)"
                      />
 
+
+            <TextBlock>
+                    <Run>Final Option Text</Run>
+            </TextBlock>
+
+            <Border BorderThickness="1" BorderBrush="Gray" Padding="2">
+                <TextBlock Text="{Binding FinalOptionText.Value}" 
+                           TextWrapping="Wrap"
+                           FontSize="14"
+                           />
+            </Border>
+            
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
                 <Button Style="{StaticResource MaterialDesignFlatButton}"
                                         IsDefault="True"
@@ -62,6 +74,7 @@
                     Cancel
                 </Button>
             </StackPanel>
+            
         </StackPanel>
     </Grid>
 </UserControl>

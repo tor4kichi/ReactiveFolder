@@ -272,37 +272,46 @@ namespace ReactiveFolder.Model.AppPolicy
 		}
 
 
+	
+
+
 		public string MakeArgumentsText(string inputPath, DirectoryInfo outputDir, AppArgument param)
 		{
 			var argumentText = $"{this.DefaultOptionText} {(param.OptionText)}";
 
-			string outputFilePath = null;
+			string input = null;
+			string output = null;
 
-			// 出力パス名を作成する
-			// ファイルからフォルダに変換アプリの場合には、
-			// 拡張子を取り外す
-			if (InputPathType == FolderItemType.File && 
-				OutputPathType == FolderItemType.Folder)
+			switch (InputPathType)
 			{
-				outputFilePath = Path.Combine(outputDir.FullName, Path.GetFileNameWithoutExtension(inputPath));
-			}
-			else
-			{
-				outputFilePath = Path.Combine(outputDir.FullName, Path.GetFileName(inputPath));
-				if (false == String.IsNullOrWhiteSpace(param.OutputExtention))
-				{
-					outputFilePath = Path.ChangeExtension(outputFilePath, param.OutputExtention);
-				}
+				case FolderItemType.File:
+					input = inputPath;
+					break;
+				case FolderItemType.Folder:
+					input = inputPath;
+					break;
+				default:
+					break;
 			}
 
-			inputPath = inputPath.Replace("\\", "/");
-			outputFilePath = outputFilePath.Replace("\\", "/");
+			switch (OutputPathType)
+			{
+				case FolderItemType.File:
+					output = Path.Combine(outputDir.FullName, Path.GetFileName(inputPath));
+					if (false == param.SameInputExtention)
+					{
+						output = Path.ChangeExtension(output, param.OutputExtention);
+					}
+					break;
+				case FolderItemType.Folder:
+					output = Path.Combine(outputDir.FullName, Path.GetFileNameWithoutExtension(inputPath));
+					break;
+				default:
+					break;
+			}
 
-			argumentText = Regex.Replace(argumentText, "%IN_NAME%", Path.GetFileName(inputPath));
-			argumentText = Regex.Replace(argumentText, "%OUT_NAME%", Path.GetFileName(outputFilePath));
-			argumentText = Regex.Replace(argumentText, "%IN_PATH%", inputPath);
-			argumentText = Regex.Replace(argumentText, "%OUT_PATH%", outputFilePath);
-			argumentText = Regex.Replace(argumentText, "%OUT_FOLDER%", outputDir.FullName);
+			argumentText = argumentText.Replace("%IN%", input);
+			argumentText = argumentText.Replace("%OUT%", output);
 
 			return argumentText;
 		}

@@ -211,6 +211,7 @@
                                                     <TextBlock Text="{Binding ArgumentName.Value}"
                                                     Style="{StaticResource ListPrimaryText}"
                                                     />
+                                                    <TextBlock Text="{Binding OptionText.Value}" />
                                                 </StackPanel>
 
                                             </Button>
