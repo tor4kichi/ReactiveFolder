@@ -103,6 +103,9 @@ namespace ReactiveFolder.Model
 					_Filter.SetParentReactionModel(this);
 
 					ValidateFilter();
+
+					OnPropertyChanged(nameof(InputType));
+					OnPropertyChanged(nameof(OutputType));
 				}
 			}
 		}
@@ -322,6 +325,8 @@ namespace ReactiveFolder.Model
 			action.SetParentReactionModel(this);
 
 			ValidateActions();
+
+			OnPropertyChanged(nameof(OutputType));
 		}
 
 
@@ -339,6 +344,8 @@ namespace ReactiveFolder.Model
 				action.ClearParentReactionModel();
 
 				ValidateActions();
+
+				OnPropertyChanged(nameof(OutputType));
 			}
 		}
 
@@ -407,7 +414,30 @@ namespace ReactiveFolder.Model
 		}
 
 
+		public FolderItemType InputType
+		{
+			get
+			{
+				// TODO: Notify
+				return Filter.OutputItemType;
+			}
+		}
 
+		public FolderItemType OutputType
+		{
+			get
+			{
+				// TODO: Notify
+				if (Actions.Count > 0)
+				{
+					return Actions.Last().OutputItemType;
+				}
+				else
+				{
+					return Filter.OutputItemType;
+				}
+			}
+		}
 
 
 

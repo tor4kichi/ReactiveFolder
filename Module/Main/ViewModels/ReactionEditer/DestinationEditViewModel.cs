@@ -43,17 +43,23 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 			OutputFolderPath = Destination.AbsoluteFolderPath;
 
-			OutputPathSample = Observable.CombineLatest(
-					Destination.ObserveProperty(x => x.AbsoluteFolderPath)
-						.Where(x => false == String.IsNullOrWhiteSpace(x))
-					, Destination.ObserveProperty(x => x.OutputNamePattern)
-						.Throttle(TimeSpan.FromSeconds(0.75))
-						.Select(Destination.TestRename)
-						.Where(x => false == String.IsNullOrWhiteSpace(x))
+			OutputPathSample = Observable.Merge(
+					Destination.ObserveProperty(x => x.AbsoluteFolderPath).Where(x => false == String.IsNullOrWhiteSpace(x)).ToUnit(),
+					Destination.ObserveProperty(x => x.OutputNamePattern).Throttle(TimeSpan.FromSeconds(0.75)).ToUnit(),
+					Reaction.ObserveProperty(x => x.OutputType).ToUnit()
 				)
+				.Select(_ => Destination.TestRename())
+				.Where(x => false == String.IsNullOrEmpty(x))
 				.Select(x =>
 				{
-					return Path.Combine(x[0], x[1] + ".extention");
+					if (Reaction.OutputType == ReactiveFolder.Model.Util.FolderItemType.Folder)
+					{
+						return Path.Combine(Destination.AbsoluteFolderPath, x);
+					}
+					else
+					{
+						return Path.Combine(Destination.AbsoluteFolderPath, x) + ".extention";
+					}
 				})
 				.ToReadOnlyReactiveProperty()
 				.AddTo(_CompositeDisposable);

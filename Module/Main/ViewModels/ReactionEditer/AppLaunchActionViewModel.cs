@@ -59,8 +59,11 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			var currentAppPolicy = _AppPolicyManager.FromAppGuid(Action.AppGuid);
 			if (currentAppPolicy != null)
 			{
-				var vm = AppList.Single(x => x.AppGuid == Action.AppGuid);
-				AppPolicyVM.Value = vm;
+				var vm = AppList.SingleOrDefault(x => x.AppGuid == Action.AppGuid);
+				if (vm != null)
+				{
+					AppPolicyVM.Value = vm;
+				}
 			}
 
 			// App変更時のモデルへの書き戻し
