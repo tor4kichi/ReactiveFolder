@@ -150,7 +150,7 @@ namespace ReactiveFolder.Model.AppPolicy
 		private ObservableCollection<string> _AcceptExtentions { get; set; }
 		public ReadOnlyObservableCollection<string> AcceptExtentions { get; private set; }
 
-		
+
 
 
 		/// <summary>
@@ -317,6 +317,11 @@ namespace ReactiveFolder.Model.AppPolicy
 		}
 
 		
+
+
+		
+
+
 
 		public ApplicationExecuteSandbox CreateExecuteSandbox(AppArgument param)
 		{

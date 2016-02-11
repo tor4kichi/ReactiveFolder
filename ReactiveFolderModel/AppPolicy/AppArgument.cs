@@ -1,6 +1,7 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -73,9 +74,40 @@ namespace ReactiveFolder.Model.AppPolicy
 			}
 			set
 			{
-				SetProperty(ref _OutputExtention, value);
+				if (SetProperty(ref _OutputExtention, value))
+				{
+					IsValidOutputExtention =
+						_OutputExtention.StartsWith(".")
+						 && Path.HasExtension(_OutputExtention);
+				}
 			}
 		}
+
+
+		public bool IsValid
+		{
+			get
+			{
+				return IsValidOutputExtention;
+			}
+		}
+			
+			
+
+
+		private bool _IsValidOutputExtention;
+		public bool IsValidOutputExtention
+		{
+			get
+			{
+				return _IsValidOutputExtention;
+			}
+			set
+			{
+				SetProperty(ref _IsValidOutputExtention, value);
+			}
+		}
+
 
 		public AppArgument(int id)
 		{

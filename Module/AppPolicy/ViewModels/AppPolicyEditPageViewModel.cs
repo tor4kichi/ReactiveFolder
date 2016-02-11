@@ -169,8 +169,6 @@ namespace Modules.AppPolicy.ViewModels
 			OutputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.OutputPathType);
 
 
-			
-
 			AcceptExtentions = appPolicy.AcceptExtentions
 				.ToReadOnlyReactiveCollection();
 
