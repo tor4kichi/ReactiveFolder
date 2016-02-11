@@ -346,6 +346,46 @@ namespace ReactiveFolder.Model.AppPolicy
 				return outputExtentions;
 			}
 		}
+
+		/// <summary>
+		/// <para>IFolderItemOutputerの出力タイプとこのポリシーの入力タイプが一致し、かつ</para>
+		/// <para>IFolderItemOutputerの出力予定のFilterの全てに対応している場合にtrueを返す</para>
+		/// </summary>
+		/// <param name="outputer"></param>
+		/// <returns>outputerに完全対応している場合はtrue</returns>
+		public bool CheckCanProcessSupport(IFolderItemOutputer outputer)
+		{
+			if (outputer.OutputItemType != this.InputPathType)
+			{
+				return false;
+			}
+
+			
+
+			var outputTypes = outputer.GetFilters();
+
+			return outputTypes
+				.All(x => AcceptExtentions.Any(y => x == y));
+		}
+
+		/// <summary>
+		/// <para>IFolderItemOutputerの出力タイプとこのポリシーの入力タイプが一致し、かつ</para>
+		/// <para>IFolderItemOutputerの出力予定のFilterの 一部にでも 対応している場合にtrueを返す</para>
+		/// </summary>
+		/// <param name="outputer"></param>
+		/// <returns></returns>
+		public bool CheckCanProcessPartOfSupport(IFolderItemOutputer outputer)
+		{
+			if (outputer.OutputItemType != this.InputPathType)
+			{
+				return false;
+			}
+
+			var outputTypes = outputer.GetFilters();
+
+			return outputTypes
+				.Any(x => AcceptExtentions.Any(y => x == y));
+		}
 	}
 
 

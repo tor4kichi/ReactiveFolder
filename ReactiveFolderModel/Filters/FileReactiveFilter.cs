@@ -250,6 +250,12 @@ namespace ReactiveFolder.Model.Filters
 			}
 		}
 
+
+
+
+
+	
+
 		public IEnumerable<string> FilterWithExtention(IEnumerable<string> extentions)
 		{
 			if (HasFilter)
@@ -273,6 +279,22 @@ namespace ReactiveFolder.Model.Filters
 				return Enumerable.Empty<string>();
 			}
 		}
-		
+
+		// interface IFolderItemOutputer
+
+		public override FolderItemType OutputItemType
+		{
+			get
+			{
+				return FolderItemType.File;
+			}
+		}
+
+		public override IEnumerable<string> GetFilters()
+		{
+			return this.IncludeFilter
+				.Select(x => Path.GetExtension(x))
+				.Distinct();
+		}
 	}
 }

@@ -23,7 +23,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		private IAppPolicyManager _AppPolicyManager;
 		public AppLaunchReactiveAction Action { get; private set; }
 
-		public ReadOnlyReactiveCollection<AppPolicyViewModel> AppList { get; private set; }
+		public IEnumerable<AppPolicyViewModel> AppList { get; private set; }
 
 		public ReactiveProperty<AppPolicyViewModel> AppPolicyVM { get; private set; }
 
@@ -38,8 +38,15 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			_AppPolicyManager = appPolicyManager;
 			Action = appAction;
 
+			// 現在のアクションの前段にあるFilter、またはActionが出力するファイルタイプ・拡張子によってAppListの内容をフィルタする
+			var prevFolderItemOutputer = reactionModel.GetPreviousFolderItemOutputer(Action);
+			var filters = prevFolderItemOutputer.GetFilters();
+
 			AppList = appPolicyManager.Policies
-				.ToReadOnlyReactiveCollection(x => new AppPolicyViewModel(Action, x));
+				// 前段の出力タイプと、
+				.Where(x => x.CheckCanProcessPartOfSupport(prevFolderItemOutputer))
+				.Select(x => new AppPolicyViewModel(Action, x));
+			
 
 
 

@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Model
 {
-	public interface IStreamContextUpdater
+	public interface IStreamContextUpdater : IFolderItemOutputer
 	{
 		FolderItemType InputItemType { get; }
-		FolderItemType OutputItemType { get; }
+//		FolderItemType OutputItemType { get; }
 
 		void Update(string sourcePath, DirectoryInfo destFolder);
 	}

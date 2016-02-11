@@ -57,9 +57,20 @@ namespace ReactiveFolder.Model.Filters
 		/// </summary>
 		[DataMember]
 		private ObservableCollection<string> _ExcludeFilters { get; set; }
-
-
 		public ReadOnlyObservableCollection<string> ExcludeFilter { get; private set; }
+
+
+
+		public override FolderItemType OutputItemType
+		{
+			get
+			{
+				return FolderItemType.Folder;
+			}
+		}
+
+
+
 
 
 		public FolderReactiveFilter()
@@ -140,6 +151,11 @@ namespace ReactiveFolder.Model.Filters
 			// TODO: 
 
 			return allDir;
+		}
+
+		public override IEnumerable<string> GetFilters()
+		{
+			return IncludeFilter;
 		}
 	}
 }

@@ -378,6 +378,41 @@ namespace ReactiveFolder.Model
 		}
 
 
+
+
+		// IFolderItemOutputerを実装する
+
+		public IFolderItemOutputer GetPreviousFolderItemOutputer(ReactiveActionBase source)
+		{
+			if (false == Actions.Contains(source))
+			{
+				return Filter;
+			}
+
+			if (Actions.Count <= 1)
+			{
+				return Filter;
+			}
+
+			var actionPosition = Actions.IndexOf(source);
+			if (actionPosition == 0)
+			{
+				// Filter
+				return Filter;
+			}
+			else
+			{
+				return Actions.ElementAt(actionPosition - 1);
+			}
+		}
+
+
+
+
+
+
+
+
 		public ValidationResult ValidateWorkFolder(ValidationResult outResult = null)
 		{
 			outResult = outResult ?? new ValidationResult();

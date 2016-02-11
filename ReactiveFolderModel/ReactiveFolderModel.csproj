@@ -152,6 +152,7 @@
     <Compile Include="FolderModel.cs" />
     <Compile Include="FolderReactionModel.cs" />
     <Compile Include="FolderReactionMonitor.cs" />
+    <Compile Include="IFolderItemOutputer.cs" />
     <Compile Include="IStreamContextFinalizer.cs" />
     <Compile Include="IStreamContextUpdater.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

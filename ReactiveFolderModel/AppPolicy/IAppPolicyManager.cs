@@ -30,19 +30,6 @@ namespace ReactiveFolder.Model.AppPolicy
 		{
 			return appPolicyManager.Policies.SingleOrDefault(x => x.Guid == appGuid);
 		}
-
-		public static IEnumerable<ApplicationPolicy> GetPoliciesWithFileFilter(this IAppPolicyManager appPolicyManager, ReactiveFolder.Model.Filters.FileReactiveFilter filter)
-		{
-			// Filterから出力予定の拡張子集合に対して部分一致するアプリポリシーを取得する
-			return appPolicyManager.Policies.Where(x =>
-			{
-				return filter.FilterWithExtention(x.AcceptExtentions).Count() > 0;
-			});
-			
-
-		}
-
-
 	}
 
 

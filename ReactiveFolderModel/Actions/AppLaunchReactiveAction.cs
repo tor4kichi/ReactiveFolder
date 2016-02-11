@@ -151,7 +151,10 @@ namespace ReactiveFolder.Model.Actions
 			return appPolicy.CreateExecuteSandbox(appParam);
 		}
 
-		
+		public override IEnumerable<string> GetFilters()
+		{
+			return GetAppPolicy().AcceptExtentions;
+		}
 	}
 	
 }

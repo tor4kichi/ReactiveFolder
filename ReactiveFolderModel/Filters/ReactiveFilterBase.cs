@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReactiveFolder.Model.Util;
 
 namespace ReactiveFolder.Model
 {
@@ -14,8 +15,10 @@ namespace ReactiveFolder.Model
 		public IEnumerable<DirectoryInfo> Direcotories { get; set; }
 	}
 
-	public abstract class ReactiveFilterBase : ReactiveStreamBase
+	public abstract class ReactiveFilterBase : ReactiveStreamBase, IFolderItemOutputer
 	{
+		public abstract FolderItemType OutputItemType { get; }
+
 		public override IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev)
 		{
 			return prev.SelectMany(Filter);
@@ -44,5 +47,7 @@ namespace ReactiveFolder.Model
 
 		public virtual IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir) { return null; }
 		public virtual IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir) { return null; }
+
+		public abstract IEnumerable<string> GetFilters();
 	}
 }
