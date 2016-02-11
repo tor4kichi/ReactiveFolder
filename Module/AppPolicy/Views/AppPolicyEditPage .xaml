@@ -50,6 +50,56 @@
                     </StackPanel>
 
 
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="IO Type" 
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    >
+                            <ComboBox ItemsSource="{x:Static vm:ApplicationPolicyViewModel.FolderItemTypes}"
+                                      SelectedItem="{Binding InputPathType.Value, Mode=TwoWay}"
+                                      VerticalAlignment="Center"
+                                      Width="200"
+                                      >
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <Run>Input </Run>
+                                            <Run Text="{Binding Mode=OneTime}" />
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+
+                            </ComboBox>
+
+                            <materialDesign:PackIcon Kind="ArrowRight" 
+                                                     Foreground="Black"
+                                                     Margin="16"
+                                                     VerticalAlignment="Center"
+                                                     HorizontalAlignment="Center"
+                                                     />
+
+                            <ComboBox ItemsSource="{x:Static vm:ApplicationPolicyViewModel.FolderItemTypes}"
+                                      SelectedItem="{Binding OutputPathType.Value, Mode=TwoWay}"
+                                      VerticalAlignment="Center"
+                                      Width="200"                                      
+                                      >
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <Run>Output </Run>
+                                            <Run Text="{Binding  Mode=OneTime}" />
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+
+                            </ComboBox>
+
+                        </StackPanel>
+                    </StackPanel>
+
 
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Default Option Text" 
@@ -61,7 +111,7 @@
                                     DockPanel.Dock="Right"
                                                      />
                             <TextBlock x:Name="DefaultOptionTextDescription" 
-                                   Text="%IN_FILE% %OUT_FILE% %OUT_FOLDER%"
+                                   Text="%INPUT% %OUTPUT%"
                                        Foreground="Gray"
                                        />
                             

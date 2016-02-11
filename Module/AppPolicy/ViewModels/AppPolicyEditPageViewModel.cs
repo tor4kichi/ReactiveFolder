@@ -123,6 +123,9 @@ namespace Modules.AppPolicy.ViewModels
 
 	public class ApplicationPolicyViewModel : BindableBase
 	{
+		public static FolderItemType[] FolderItemTypes = (FolderItemType[]) Enum.GetValues(typeof(FolderItemType));
+
+
 		public ApplicationPolicy AppPolicy { get; private set; }
 
 		public ReactiveProperty<string> ApplicationPath { get; private set; }
