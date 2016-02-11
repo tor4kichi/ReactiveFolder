@@ -107,7 +107,6 @@
                                    />
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
                             <TextBox Text="{Binding DefaultOptionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                     
                                      MinWidth="200"
                                     DockPanel.Dock="Right"
                                                      />
