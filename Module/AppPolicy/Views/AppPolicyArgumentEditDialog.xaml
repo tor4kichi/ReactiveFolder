@@ -29,8 +29,10 @@
             <TextBlock Text="App argument text"
                        />
             <TextBox Text="{Binding OptionText.Value, UpdateSourceTrigger=PropertyChanged}"
-                      materialDesign:TextFieldAssist.Hint="ex) -f %IN_FILE%"
+                      materialDesign:TextFieldAssist.Hint="-i %IN% -o %OUT%"
+                     ToolTip="%IN% %OUT%"
                      />
+
             <TextBlock Text="Output file Extention"
                        />
             <TextBox Text="{Binding OutputExtention.Value, UpdateSourceTrigger=PropertyChanged}"

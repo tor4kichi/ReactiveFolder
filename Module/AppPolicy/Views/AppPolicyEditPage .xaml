@@ -108,12 +108,10 @@
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
                             <TextBox Text="{Binding DefaultOptionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                      MinWidth="200"
+                                     materialDesign:TextFieldAssist.Hint="-i %IN% -o %OUT%"
+                                     ToolTip="%IN% %OUT%, both of replace to file/folder name, depends from IO Type settings."
                                     DockPanel.Dock="Right"
                                                      />
-                            <TextBlock x:Name="DefaultOptionTextDescription" 
-                                   Text="%INPUT% %OUTPUT%"
-                                       Foreground="Gray"
-                                       />
                             
                         </StackPanel>
                         
