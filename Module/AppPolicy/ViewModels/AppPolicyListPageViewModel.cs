@@ -12,6 +12,7 @@ using Reactive.Bindings.Extensions;
 using System.IO;
 using ReactiveFolder.Model.AppPolicy;
 using Microsoft.Win32;
+using ReactiveFolder.Util;
 
 namespace Modules.AppPolicy.ViewModels
 {
@@ -136,9 +137,51 @@ namespace Modules.AppPolicy.ViewModels
 						// ProgramFiles等の強い権限が必要なファイルパスの場合は、自動チェックの対象外として
 						// 必ずアプリパスの再指定を要求する
 
+						var dialog = new OpenFileDialog();
 
+						dialog.Title = "ReactiveFolder - Import Application Policy";
+						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+						dialog.Filter = $"App Policy|*{_AppPolicyManager.PolicyFileExtention}|Json|*.json|All|*.*";
+						dialog.DefaultExt = _AppPolicyManager.PolicyFileExtention;
+						dialog.Multiselect = true;
+
+						var result = dialog.ShowDialog();
+
+
+						if (result != null && ((bool)result) == true)
+						{
+							foreach(var destFilePath in dialog.FileNames)
+							{
+								ImportApplicationPolicy(destFilePath);
+							}
+						}
 					}));
 			}
+
+		}
+
+
+		private void ImportApplicationPolicy(string path)
+		{
+			var appPolicy = FileSerializeHelper.LoadAsync<ApplicationPolicy>(path);
+
+			if (_AppPolicyManager.HasAppPolicy(appPolicy))
+			{
+				// TODO: すでにAppPolicyがあるときの選択をユーザーに尋ねる
+				// 上書きする
+				// インポートしたファイルをGuidを強制的に書き換えて別ファイルとして取り込む
+				// 
+				// キャンセル
+
+				// ApplicationPolicyにエクスポート実行者によるバージョン管理機能があればベター？
+
+			}
+			else
+			{
+				_AppPolicyManager.AddAppPolicy(appPolicy);
+			}
+
 		}
 
 

@@ -258,11 +258,26 @@
                                     >
                                 <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save" />
                             </Button>
-                            <Button Command="{Binding DeleteCommand}"
-                                    Style="{StaticResource AppbarButton}"
-                                    >
-                                <materialDesign:PackIcon Kind="Delete" ToolTip="Delete"/>
-                            </Button>
+
+                            <materialDesign:PopupBox 
+                                             PlacementMode="BottomAndAlignRightEdges">
+                                <StackPanel>
+                                    <Button Command="{Binding ExportCommand}">
+                                        <DockPanel>
+                                            <materialDesign:PackIcon Kind="Export" DockPanel.Dock="Left" />
+                                            <Border Margin="8 0 0 0" />
+                                            <TextBlock Text="Export" />
+                                        </DockPanel>
+                                    </Button>
+                                    <Button Command="{Binding DeleteCommand}">
+                                        <DockPanel>
+                                            <materialDesign:PackIcon Kind="Delete" DockPanel.Dock="Left" />
+                                            <Border Margin="8 0 0 0" />
+                                            <TextBlock Text="Delete" />
+                                        </DockPanel>
+                                    </Button>
+                                </StackPanel>
+                            </materialDesign:PopupBox>
                         </StackPanel>
 
                         <TextBlock Text="Edit Application Policy"

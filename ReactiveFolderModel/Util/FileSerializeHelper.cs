@@ -132,6 +132,12 @@ namespace ReactiveFolder.Util
 			}
 		}
 
+		static public T LoadAsync<T>(string filePath)
+			where T : class
+		{
+			return LoadAsync<T>(new FileInfo(filePath));
+		}
+
 		static public T LoadAsync<T>(FileInfo fileInfo)
 			where T : class
 			

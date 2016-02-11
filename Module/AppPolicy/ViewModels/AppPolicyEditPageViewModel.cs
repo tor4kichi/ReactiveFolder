@@ -96,6 +96,60 @@ namespace Modules.AppPolicy.ViewModels
 		}
 
 
+		private DelegateCommand _ExportCommand;
+		public DelegateCommand ExportCommand
+		{
+			get
+			{
+				return _ExportCommand
+					?? (_ExportCommand = new DelegateCommand(() =>
+					{
+						var appPolicy = this.AppPolicyVM.Value.AppPolicy;
+						// 出力先のファイル名を取得
+						var dialog = new SaveFileDialog();
+
+						dialog.Title = "ReactiveFolder - select export application policy file";
+						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+						dialog.AddExtension = true;
+						dialog.FileName = appPolicy.AppName;
+						dialog.Filter = $"App Policy|*{_AppPolicyManager.PolicyFileExtention}|Json|*.json|All|*.*";
+						dialog.DefaultExt = _AppPolicyManager.PolicyFileExtention;
+
+
+						var result = dialog.ShowDialog();
+
+
+						if (result != null && ((bool)result) == true)
+						{
+							var destFilePath = dialog.FileName;
+
+							var sourceFilePath = _AppPolicyManager.GetSaveFilePath(appPolicy);
+
+							var sourceFileInfo = new FileInfo(sourceFilePath);
+
+							try
+							{
+								sourceFileInfo.CopyTo(destFilePath);
+							}
+							catch
+							{
+								System.Diagnostics.Debug.WriteLine("failed export Application Policy.");
+								System.Diagnostics.Debug.WriteLine("from :" + sourceFilePath);
+								System.Diagnostics.Debug.WriteLine("  to :" + destFilePath);
+							}
+						}
+						
+
+
+						// 
+					}));
+			}
+		}
+
+
+
+
 		private DelegateCommand _DeleteCommand;
 		public DelegateCommand DeleteCommand
 		{

@@ -53,7 +53,21 @@ namespace ReactiveFolder
 		public DirectoryInfo SaveFolderInfo { get; private set; }
 
 
-		
+		public string SaveFolderPath
+		{
+			get
+			{
+				return SaveFolderInfo.FullName;
+			}
+		}
+
+		public string PolicyFileExtention
+		{
+			get
+			{
+				return APP_POLICY_EXTENTION;
+			}
+		}
 
 
 		public AppPolicyManager(DirectoryInfo saveFolderInfo)
@@ -68,7 +82,7 @@ namespace ReactiveFolder
 
 
 
-		private string MakePolicyFilePath(ApplicationPolicy policy)
+		public string GetSaveFilePath(ApplicationPolicy policy)
 		{
 			return Path.ChangeExtension(
 				Path.Combine(this.SaveFolderInfo.FullName, policy.Guid.ToString())
@@ -81,14 +95,30 @@ namespace ReactiveFolder
 
 		public void SavePolicyFile(ApplicationPolicy policy)
 		{
-			var filepath = MakePolicyFilePath(policy);
+			var filepath = GetSaveFilePath(policy);
 
 			FileSerializeHelper.Save(filepath, policy);
 		}
 
 
+		/// <summary>
+		/// comperer ApplicationPolicy.Guid
+		/// </summary>
+		/// <param name="policy"></param>
+		/// <returns>if same Guid ApplicationPolicy then return true.</returns>
+		public bool HasAppPolicy(ApplicationPolicy policy)
+		{
+			return _Policies.Any(x => x.Guid == policy.Guid);
+		}
+
 		public void AddAppPolicy(ApplicationPolicy policy)
 		{
+			if (_Policies.Any(x => x.Guid == policy.Guid))
+			{
+				throw new Exception("Already exist ApplicationPolicy name: " + policy.AppName + " guid:" + policy.Guid);
+			}
+
+
 			_Policies.Add(policy);
 
 			SavePolicyFile(policy);
@@ -109,7 +139,7 @@ namespace ReactiveFolder
 
 		private void DeletePolicyFile(ApplicationPolicy policy)
 		{
-			var filepath = MakePolicyFilePath(policy);
+			var filepath = GetSaveFilePath(policy);
 
 			var fileInfo = new FileInfo(filepath);
 

@@ -9,12 +9,19 @@ namespace ReactiveFolder.Model.AppPolicy
 {
 	public interface IAppPolicyManager
 	{
+	
 		ReadOnlyObservableCollection<ApplicationPolicy> Policies { get; }
 
+		bool HasAppPolicy(ApplicationPolicy policy);
 		void AddAppPolicy(ApplicationPolicy policy);
 		void RemoveAppPolicy(ApplicationPolicy policy);
 
 		void SavePolicyFile(ApplicationPolicy policy);
+
+		string PolicyFileExtention { get; }
+		string SaveFolderPath { get; }
+		string GetSaveFilePath(ApplicationPolicy policy);
+
 	}
 
 	public static class AppPolicyManagerHelper
