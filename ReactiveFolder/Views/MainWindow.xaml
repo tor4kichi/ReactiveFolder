@@ -24,13 +24,13 @@
         FontFamily="{StaticResource MaterialDesignFont}"
         >
     
-    
+    <!--
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Activated">
             <i:InvokeCommandAction Command="{Binding WindowActivatedCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    
+    -->
     
     <Window.Resources>
             <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>

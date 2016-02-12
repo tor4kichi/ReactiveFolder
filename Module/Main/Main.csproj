@@ -162,6 +162,9 @@
     <Compile Include="Views\DialogContent\DeleteReactionConfirmDialogContent.xaml.cs">
       <DependentUpon>DeleteReactionConfirmDialogContent.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\DialogContent\ReactionSaveAndBackConfirmDialogContent.xaml.cs">
+      <DependentUpon>ReactionSaveAndBackConfirmDialogContent.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ReactionEditer\ActionEditControl.xaml.cs">
       <DependentUpon>ActionEditControl.xaml</DependentUpon>
     </Compile>
@@ -205,6 +208,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\DialogContent\DeleteReactionConfirmDialogContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DialogContent\ReactionSaveAndBackConfirmDialogContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

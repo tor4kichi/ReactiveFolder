@@ -30,7 +30,7 @@ namespace Modules.Main.ViewModels
 	}
 
 	// TODO: WorkFolderの切り替えに伴うVMの変更部分について、ViewModelをさらに切り出して読みやすくしたい
-	
+
 	public class ReactionEditerPageViewModel : PageViewModelBase, INavigationAware, IDisposable
 	{
 		private FolderReactionModel Reaction;
@@ -40,19 +40,28 @@ namespace Modules.Main.ViewModels
 		public IRegionNavigationService NavigationService;
 
 		public ReactiveProperty<ReactionViewModel> ReactionVM { get; private set; }
-		
-		public ReactiveProperty<bool> CanSave { get; private set; }
 
 		public string RollbackData { get; private set; }
+
+
+		public ReactiveProperty<bool> IsNeedSave { get; private set; }
+
+		private IDisposable CanSaveSubscriber;
 
 		public ReactionEditerPageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager)
 			: base(regionManager, monitor)
 		{
 			_AppPolicyManager = appPolicyManager;
-
+			_CompositeDisposable = new CompositeDisposable();
 
 			ReactionVM = new ReactiveProperty<ReactionViewModel>();
-			CanSave = new ReactiveProperty<bool>(true);
+			IsNeedSave = new ReactiveProperty<bool>(false);
+
+			SaveCommand = IsNeedSave.ToReactiveCommand(false)
+					.AddTo(_CompositeDisposable);
+
+			SaveCommand.Subscribe(_ => Save())
+				.AddTo(_CompositeDisposable);
 		}
 
 
@@ -63,7 +72,7 @@ namespace Modules.Main.ViewModels
 
 		public void OnNavigatedFrom(NavigationContext navigationContext)
 		{
-
+			
 		}
 
 		public void OnNavigatedTo(NavigationContext navigationContext)
@@ -80,13 +89,26 @@ namespace Modules.Main.ViewModels
 				RollbackData = FileSerializeHelper.ToJson(Reaction);
 
 				ReactionVM.Value = new ReactionViewModel(Reaction, _AppPolicyManager);
+
+				IsNeedSave.Value = false;
+
+				CanSaveSubscriber = Observable.Merge(
+					Reaction.ObserveProperty(x => x.IsNeedValidation, false).ToUnit(),
+					Reaction.PropertyChangedAsObservable().ToUnit()
+					)
+					.Subscribe(_ =>
+					{
+						IsNeedSave.Value = true;
+					});
+					
 			}
 		}
 
 		public void Dispose()
 		{
 			ReactionVM.Value?.Dispose();
-			CanSave.Dispose();
+			CanSaveSubscriber?.Dispose();
+			_CompositeDisposable?.Dispose();
 		}
 
 		private DelegateCommand _BackCommand;
@@ -95,47 +117,99 @@ namespace Modules.Main.ViewModels
 			get
 			{
 				return _BackCommand
-					?? (_BackCommand = new DelegateCommand(() =>
+					?? (_BackCommand = new DelegateCommand(async () =>
 					{
-						if (NavigationService.Journal.CanGoBack)
+						if (IsNeedSave.Value)
 						{
-							NavigationService.Journal.GoBack();
+							var result = await ShowReactionSaveAndBackConfirmDialog();
+
+							if (result.HasValue == false)
+							{
+								// キャンセル
+							}
+							else if (result.Value == true)
+							{
+								// 保存して戻る
+								Save();
+								Back();
+							}
+							else if (result.Value == false)
+							{
+								// 保存せずに戻る
+
+								// ロールバックして戻る
+								RollbackReactionModel();
+								Back();
+							}
 						}
 						else
 						{
-							this.NavigationToFolderListPage(_MonitorModel.RootFolder);
+							Back();
 						}
+
+						
 					}));
 			}
 		}
 
 
 
-		private DelegateCommand _SaveCommand;
-		public DelegateCommand SaveCommand
+		private void Back()
 		{
-			get
+			if (NavigationService.Journal.CanGoBack)
 			{
-				return _SaveCommand
-					?? (_SaveCommand = new DelegateCommand(() =>
-					{
-						CanSave.Value = false;
-
-						try
-						{
-							Task.Run(async () =>
-							{
-								_MonitorModel.SaveReaction(Reaction);
-								await Task.Delay(500);
-							})
-							.ContinueWith(_ => { CanSave.Value = true; });
-						}
-						finally
-						{
-
-						}
-					}));
+				NavigationService.Journal.GoBack();
 			}
+			else
+			{
+				this.NavigationToFolderListPage(_MonitorModel.RootFolder);
+			}
+		}
+
+		private void RollbackReactionModel()
+		{
+			var prevModel = FileSerializeHelper.FromJson<FolderReactionModel>(RollbackData);
+
+			Reaction.WorkFolder = prevModel.WorkFolder;
+			Reaction.Filter = prevModel.Filter;
+
+			var remActions = Reaction.Actions.ToList();
+			foreach (var remAction in remActions)
+			{
+				Reaction.RemoveAction(remAction);
+			}
+
+			foreach (var action in prevModel.Actions)
+			{
+				Reaction.AddAction(action);
+			}
+
+			// Timingsは
+			//			Reaction.FileUpdateTiming = prevModel.FileUpdateTiming;
+
+			Reaction.Destination.OutputNamePattern = prevModel.Destination.OutputNamePattern;
+			Reaction.Destination.AbsoluteFolderPath = prevModel.Destination.AbsoluteFolderPath;
+
+
+			IsNeedSave.Value = false;
+		}
+
+
+		public ReactiveCommand SaveCommand { get; private set; }
+
+		private void Save()
+		{
+			IsNeedSave.Value = false;
+
+			try
+			{
+				_MonitorModel.SaveReaction(Reaction);
+			}
+			catch
+			{
+				IsNeedSave.Value = true;
+			}
+			
 		}
 
 		private DelegateCommand _TestCommand;
@@ -238,6 +312,13 @@ namespace Modules.Main.ViewModels
 		public async Task<bool?> ShowReactionDeleteConfirmDialog()
 		{
 			var view = new Views.DialogContent.DeleteReactionConfirmDialogContent();
+
+			return (bool?)await DialogHost.Show(view, "ReactionEditCommonDialogHost");
+		}
+
+		public async Task<bool?> ShowReactionSaveAndBackConfirmDialog()
+		{
+			var view = new Views.DialogContent.ReactionSaveAndBackConfirmDialogContent();
 
 			return (bool?)await DialogHost.Show(view, "ReactionEditCommonDialogHost");
 		}

@@ -101,7 +101,7 @@ namespace ReactiveFolder.Models
 			{
 				Settings.AppPolicySaveFolder = DefaultAppPolicySavePath;
 
-				Properties.Settings.Default.ReactionSaveFolder = Settings.AppPolicySaveFolder;
+				Properties.Settings.Default.AppPolicySaveFolder = Settings.AppPolicySaveFolder;
 				Properties.Settings.Default.Save();
 			}
 		}

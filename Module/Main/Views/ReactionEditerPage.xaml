@@ -38,7 +38,6 @@
                                     <materialDesign:PackIcon Kind="Leaf" ToolTip="Test" />
                                 </Button>
                                 <Button Command="{Binding SaveCommand}"
-                                        IsEnabled="{Binding CanSave.Value}"
                                         Style="{StaticResource AppbarButton}"
                                         >
                                     <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save"/>
@@ -80,7 +79,7 @@
                                            Style="{StaticResource MaterialDesignSubheadingTextBlock}"                                           
                                            />
                                 <Border  HorizontalAlignment="Right">
-                                    <TextBox Text="{Binding ReactionWorkName.Value}"
+                                    <TextBox Text="{Binding ReactionWorkName.Value, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{StaticResource MaterialDesignTextBox}"
                                      MinWidth="200"
                                    >

@@ -40,10 +40,32 @@ namespace ReactiveFolder.Models
 		public Guid Guid { get; private set; }
 
 		[DataMember]
-		public string Name { get; set; }
+		private string _Name;
+		public string Name
+		{
+			get
+			{
+				return _Name;
+			}
+			set
+			{
+				SetProperty(ref _Name, value);
+			}
+		}
 
 		[DataMember]
-		public bool IsEnable { get; set; }
+		private bool _IsEnable;
+		public bool IsEnable
+		{
+			get
+			{
+				return _IsEnable;
+			}
+			set
+			{
+				SetProperty(ref _IsEnable, value);
+			}
+		}
 
 		[DataMember]
 		public string WorkFolderPath { get; private set; }
@@ -77,7 +99,18 @@ namespace ReactiveFolder.Models
 		}
 
 		[DataMember]
-		public TimeSpan CheckInterval { get; set; }
+		private TimeSpan _CheckInterval;
+		public TimeSpan CheckInterval
+		{
+			get
+			{
+				return _CheckInterval;
+			}
+			set
+			{
+				SetProperty(ref _CheckInterval, value);
+			}
+		}
 
 
 
@@ -129,30 +162,8 @@ namespace ReactiveFolder.Models
 
 
 		[DataMember]
-		private ReactiveDestinationBase _Destination;
-		public ReactiveDestinationBase Destination
-		{
-			get
-			{
-				return _Destination;
-			}
-			private set
-			{
-				var old = _Destination;
-				if (SetProperty(ref _Destination, value))
-				{
-					if (old != null)
-					{
-						old.ClearParentReactionModel();
-					}
-
-					_Destination?.SetParentReactionModel(this);
-
-					ValidateDestination();
-				}
-			}
-		}
-
+		public AbsolutePathReactiveDestination Destination { get; private set; }
+		
 
 		public bool IsRunning
 		{
@@ -175,7 +186,7 @@ namespace ReactiveFolder.Models
 			{
 				return _IsNeedValidation;
 			}
-			set
+			private set
 			{
 				SetProperty(ref _IsNeedValidation, value);
 			}
@@ -297,10 +308,8 @@ namespace ReactiveFolder.Models
 
 			FileUpdateTiming = new FileUpdateReactiveTiming();
 
-			var asbDestination = new AbsolutePathReactiveDestination();
+			Destination = new AbsolutePathReactiveDestination();
 			
-			Destination = asbDestination;
-
 			CheckInterval = TimeSpan.FromMinutes(1);
 
 			WorkFolder = null;
@@ -317,6 +326,15 @@ namespace ReactiveFolder.Models
 			{
 				WorkFolder = new DirectoryInfo(WorkFolderPath);
 			}
+
+			// ストリーム生成オブジェクトを初期化
+			Filter?.SetParentReactionModel(this);
+			foreach(var action in Actions)
+			{
+				action.SetParentReactionModel(this);
+			}
+			FileUpdateTiming?.SetParentReactionModel(this);
+			Destination?.SetParentReactionModel(this);
 
 			ResetWorkingFolder();
 		}
