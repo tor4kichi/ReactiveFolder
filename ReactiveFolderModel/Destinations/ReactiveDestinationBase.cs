@@ -26,7 +26,7 @@ namespace ReactiveFolder.Models.Destinations
 		static Dictionary<string, Func<ReactiveStreamContext, string>> FormatMap;
 
 
-		public static readonly string DefaultRenamePattern = "%NAME%";
+		public const string DefaultRenamePattern = "%NAME%";
 		
 		static ReactiveDestinationBase()
 		{
@@ -152,7 +152,7 @@ namespace ReactiveFolder.Models.Destinations
 		}
 		
 
-		public ReactiveDestinationBase(string outputNamePattern = "{name}")
+		public ReactiveDestinationBase(string outputNamePattern = "")
 		{
 			OutputNamePattern = outputNamePattern;
 		}
