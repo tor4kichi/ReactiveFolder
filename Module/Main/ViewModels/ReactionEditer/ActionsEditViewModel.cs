@@ -69,13 +69,13 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 		public async Task<object> OpenAppLaunchActionEditDialog(AppLaunchActionViewModel vm)
-		{
-			var view = new Views.ReactionEditer.AppLaunchActionEditDialogContent()
+		{ 
+			var view = new Views.DialogContent.AppLaunchActionEditDialogContent()
 			{
 				DataContext = vm
 			};
 
-			return await DialogHost.Show(view, "AppLuanchActionEditDialog");
+			return await DialogHost.Show(view, "ReactionEditCommonDialogHost");
 		}
 
 

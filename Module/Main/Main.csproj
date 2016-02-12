@@ -159,10 +159,13 @@
     <Compile Include="ViewModels\ReactionEditer\ReactionEditViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditer\WorkFolderEditViewModel.cs" />
     <Compile Include="ViewModels\ReactionListItemViewModel.cs" />
+    <Compile Include="Views\DialogContent\DeleteReactionConfirmDialogContent.xaml.cs">
+      <DependentUpon>DeleteReactionConfirmDialogContent.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ReactionEditer\ActionEditControl.xaml.cs">
       <DependentUpon>ActionEditControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ReactionEditer\AppLaunchActionEditDialogContent.xaml.cs">
+    <Compile Include="Views\DialogContent\AppLaunchActionEditDialogContent.xaml.cs">
       <DependentUpon>AppLaunchActionEditDialogContent.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ReactionEditer\DestinationEditControl.xaml.cs">
@@ -201,11 +204,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\DialogContent\DeleteReactionConfirmDialogContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ReactionEditer\ActionEditControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ReactionEditer\AppLaunchActionEditDialogContent.xaml">
+    <Page Include="Views\DialogContent\AppLaunchActionEditDialogContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

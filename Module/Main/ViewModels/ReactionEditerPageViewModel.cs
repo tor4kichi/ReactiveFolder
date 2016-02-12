@@ -1,4 +1,6 @@
-﻿using Modules.Main.ViewModels.ReactionEditer;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
+using Modules.Main.ViewModels.ReactionEditer;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
@@ -14,7 +16,6 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Modules.Main.ViewModels
 {
@@ -220,12 +221,93 @@ namespace Modules.Main.ViewModels
 			}
 		}
 
+		private DelegateCommand _ExportCommand;
+		public DelegateCommand ExportCommand
+		{
+			get
+			{
+				return _ExportCommand
+					?? (_ExportCommand = new DelegateCommand(() =>
+					{
+						// SaveFileDialogで保存先パスを取得
+
+						// ファイルコピー
+						// 出力先のファイル名を取得
+						var dialog = new SaveFileDialog();
+
+						dialog.Title = "ReactiveFolder - select export application policy file";
+						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+						dialog.AddExtension = true;
+						dialog.FileName = Reaction.Name;
+						dialog.Filter = $"Json|*.json|All|*.*";
 
 
-		
-		
+						var result = dialog.ShowDialog();
 
 
+						if (result != null && ((bool)result) == true)
+						{
+							var destFilePath = dialog.FileName;
+
+							var reactionSaveFoler = _MonitorModel.FindReactionParentFolder(Reaction);
+							var sourceFilePath = reactionSaveFoler.MakeReactionSaveFilePath(Reaction);
+
+							var sourceFileInfo = new FileInfo(sourceFilePath);
+
+							try
+							{
+								sourceFileInfo.CopyTo(destFilePath);
+							}
+							catch
+							{
+								System.Diagnostics.Debug.WriteLine("failed export Reaction File.");
+								System.Diagnostics.Debug.WriteLine("from :" + sourceFilePath);
+								System.Diagnostics.Debug.WriteLine("  to :" + destFilePath);
+
+								throw;
+							}
+
+							// TODO: エクスポート完了のトースト表示
+							// 出力先フォルダをトーストから開けるとよりモアベター
+						}
+					}
+					));
+			}
+		}
+
+		private DelegateCommand _DeleteCommand;
+		public DelegateCommand DeleteCommand
+		{
+			get
+			{
+				return _DeleteCommand
+					?? (_DeleteCommand = new DelegateCommand(async () =>
+					{
+						// 確認ダイアログを表示
+						var result = await ShowReactionDeleteConfirmDialog();
+
+						// 削除
+						if (result != null && result.HasValue && result.Value == true)
+						{
+							var reactionSaveFoler = _MonitorModel.FindReactionParentFolder(Reaction);
+							reactionSaveFoler.RemoveReaction(Reaction.Guid);
+
+							await BackCommand.Execute();
+						}
+					}
+					));
+			}
+		}
+
+
+
+		public async Task<bool?> ShowReactionDeleteConfirmDialog()
+		{
+			var view = new Views.DialogContent.DeleteReactionConfirmDialogContent();
+
+			return (bool?)await DialogHost.Show(view, "ReactionEditCommonDialogHost");
+		}
 
 	}
 }

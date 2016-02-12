@@ -131,11 +131,7 @@
 
 
         </StackPanel>
-        <materialDesign:DialogHost Identifier="AppLuanchActionEditDialog"
-                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Margin="8 40"
-                                       />
-
+        
     </Grid>
 
 </UserControl>

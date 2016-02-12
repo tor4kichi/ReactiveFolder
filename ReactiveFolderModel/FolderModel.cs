@@ -310,6 +310,10 @@ namespace ReactiveFolder.Model
 			}
 		}
 
+		public string MakeReactionSaveFilePath(FolderReactionModel reaction)
+		{
+			return Path.Combine(Folder.FullName, reaction.Guid.ToString() + ".json");
+		}
 
 
 		public void SaveReaction(FolderReactionModel reaction)
