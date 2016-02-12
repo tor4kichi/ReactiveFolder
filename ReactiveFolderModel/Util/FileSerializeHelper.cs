@@ -57,16 +57,9 @@ namespace ReactiveFolder.Models.Util
 			switch (format)
 			{
 				case ContentFormat.Json:
-					var js = new JsonSerializer();
-					js.TypeNameHandling = TypeNameHandling.Objects;
-					js.Formatting = Newtonsoft.Json.Formatting.Indented;
 
-                    using (StringWriter sw = new StringWriter())
-					{
-                        js.Serialize(sw, saveTarget);
-						var str = sw.ToString();
-						buf = System.Text.Encoding.UTF8.GetBytes(str);
-                    }
+					var str = ToJson<T>(saveTarget);
+					buf = System.Text.Encoding.UTF8.GetBytes(str);
 
 					break;
 				case ContentFormat.Xml:
@@ -154,15 +147,7 @@ namespace ReactiveFolder.Models.Util
 					case ContentFormat.Json:
 						var rawJson = stream.ReadToEnd();
 
-						if (String.IsNullOrWhiteSpace(rawJson))
-						{
-							return null;
-						}
-
-						returnObj = JsonConvert.DeserializeObject<T>(rawJson, new JsonSerializerSettings()
-						{
-							TypeNameHandling = TypeNameHandling.Objects
-						});
+						returnObj = FromJson<T>(rawJson);
 
 						break;
 
@@ -256,7 +241,34 @@ namespace ReactiveFolder.Models.Util
 		}
 
 
+		public static string ToJson<T>(T source)
+			where T : class
+		{
+			var js = new JsonSerializer();
+			js.TypeNameHandling = TypeNameHandling.Objects;
+			js.Formatting = Newtonsoft.Json.Formatting.Indented;
 
+			using (StringWriter sw = new StringWriter())
+			{
+				js.Serialize(sw, source);
+				return sw.ToString();
+			}
+		}
+
+
+		public static T FromJson<T>(string jsonText)
+			where T : class
+		{
+			if (String.IsNullOrWhiteSpace(jsonText))
+			{
+				return null;
+			}
+
+			return JsonConvert.DeserializeObject<T>(jsonText, new JsonSerializerSettings()
+			{
+				TypeNameHandling = TypeNameHandling.Objects
+			});
+		}
 		
 	}
 

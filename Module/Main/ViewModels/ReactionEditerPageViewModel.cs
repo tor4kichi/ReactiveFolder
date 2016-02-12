@@ -8,6 +8,7 @@ using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -38,92 +39,20 @@ namespace Modules.Main.ViewModels
 
 		public IRegionNavigationService NavigationService;
 
-
-		public bool IsReactionValid { get; private set; }
-
-		public ReactiveProperty<string> ReactionWorkName { get; private set; }
-
-		public ReactiveProperty<WorkFolderEditViewModel> WorkFolderEditVM { get; private set; }
-		public ReactiveProperty<FilterEditViewModel> FilterEditVM { get; private set; }
-		public ReactiveProperty<ActionsEditViewModel> ActionsEditVM { get; private set; }
-		public ReactiveProperty<DestinationEditViewModel> DestinationEditVM { get; private set; }
-
-		public ReactiveProperty<bool> IsEnable { get; private set; }
-
+		public ReactiveProperty<ReactionViewModel> ReactionVM { get; private set; }
+		
 		public ReactiveProperty<bool> CanSave { get; private set; }
 
+		public string RollbackData { get; private set; }
 
 		public ReactionEditerPageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager)
 			: base(regionManager, monitor)
 		{
 			_AppPolicyManager = appPolicyManager;
 
-			IsReactionValid = false;
 
-			ReactionWorkName = new ReactiveProperty<string>("");
-
-			WorkFolderEditVM = new ReactiveProperty<WorkFolderEditViewModel>();
-			FilterEditVM = new ReactiveProperty<FilterEditViewModel>();
-			ActionsEditVM = new ReactiveProperty<ActionsEditViewModel>();
-			DestinationEditVM = new ReactiveProperty<DestinationEditViewModel>();
-
-			IsEnable = new ReactiveProperty<bool>(false);
-
+			ReactionVM = new ReactiveProperty<ReactionViewModel>();
 			CanSave = new ReactiveProperty<bool>(true);
-		}
-
-
-		private void Initialize()
-		{
-			// initialize with this.Reaction
-			CleanUpReactionSubscribe();
-
-			_CompositeDisposable = new CompositeDisposable();
-
-			ReactionWorkName.Value = Reaction.Name;
-
-			ReactionWorkName.Subscribe(x =>
-			{
-				if (false == String.IsNullOrWhiteSpace(x))
-				{
-					Reaction.Name = x;
-				}
-			})
-			.AddTo(_CompositeDisposable);
-
-			Reaction.ObserveProperty(x => x.WorkFolder)
-				.Subscribe(x =>
-				{
-					WorkFolderEditVM.Value?.Dispose();
-					FilterEditVM.Value?.Dispose();
-					ActionsEditVM.Value?.Dispose();
-					DestinationEditVM.Value?.Dispose();
-
-					WorkFolderEditVM.Value = new WorkFolderEditViewModel(Reaction);
-					FilterEditVM.Value = new FilterEditViewModel(Reaction);
-					ActionsEditVM.Value = new ActionsEditViewModel(Reaction, _AppPolicyManager);
-					DestinationEditVM.Value = new DestinationEditViewModel(Reaction);
-				})
-				.AddTo(_CompositeDisposable);
-
-			Reaction.ObserveProperty(x => x.IsValid)
-				.Subscribe(x =>
-				{
-					IsReactionValid = x;
-					OnPropertyChanged(nameof(IsReactionValid));
-				})
-				.AddTo(_CompositeDisposable);
-
-			// On/Off
-			IsEnable.Value = Reaction.IsEnable;
-			IsEnable.Subscribe(x =>
-				{
-					Reaction.IsEnable = x;
-				})
-				.AddTo(_CompositeDisposable);
-
-
-			CanSave.Value = true;
 		}
 
 
@@ -140,29 +69,24 @@ namespace Modules.Main.ViewModels
 		public void OnNavigatedTo(NavigationContext navigationContext)
 		{
 			NavigationService = navigationContext.NavigationService;
-			Reaction = base.ReactionModelFromNavigationParameters(navigationContext.Parameters);
 
-			Initialize();
-		}
+			var reaction = base.ReactionModelFromNavigationParameters(navigationContext.Parameters);
 
+			if (Reaction != reaction)
+			{
+				ReactionVM.Value?.Dispose();
 
-		private void CleanUpReactionSubscribe()
-		{
-			_CompositeDisposable?.Dispose();
-			_CompositeDisposable = null;
+				Reaction = reaction;
+				RollbackData = FileSerializeHelper.ToJson(Reaction);
+
+				ReactionVM.Value = new ReactionViewModel(Reaction, _AppPolicyManager);
+			}
 		}
 
 		public void Dispose()
 		{
-			CleanUpReactionSubscribe();
-
-			ReactionWorkName?.Dispose();
-			CanSave?.Dispose();
-
-			WorkFolderEditVM.Value?.Dispose();
-			FilterEditVM.Value?.Dispose();
-			ActionsEditVM.Value?.Dispose();
-			DestinationEditVM.Value?.Dispose();
+			ReactionVM.Value?.Dispose();
+			CanSave.Dispose();
 		}
 
 		private DelegateCommand _BackCommand;
@@ -318,5 +242,57 @@ namespace Modules.Main.ViewModels
 			return (bool?)await DialogHost.Show(view, "ReactionEditCommonDialogHost");
 		}
 
+	}
+
+
+
+	public class ReactionViewModel : BindableBase, IDisposable
+	{
+		CompositeDisposable _CompositeDisposable;
+
+
+		FolderReactionModel Reaction;
+		IAppPolicyManager _AppPolicyManager;
+
+		public ReactiveProperty<bool> IsReactionValid { get; private set; }
+
+		public ReactiveProperty<string> ReactionWorkName { get; private set; }
+
+		public WorkFolderEditViewModel WorkFolderEditVM { get; private set; }
+		public FilterEditViewModel FilterEditVM { get; private set; }
+		public ActionsEditViewModel ActionsEditVM { get; private set; }
+		public DestinationEditViewModel DestinationEditVM { get; private set; }
+
+		public ReactiveProperty<bool> IsEnable { get; private set; }
+
+		// Reactionmodelを受け取ってVMを生成する
+
+		public ReactionViewModel(FolderReactionModel reaction, IAppPolicyManager appPolicyManager)
+		{
+			_CompositeDisposable = new CompositeDisposable();
+			Reaction = reaction;
+			_AppPolicyManager = appPolicyManager;
+
+
+			IsReactionValid = Reaction.ObserveProperty(x => x.IsValid)
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
+
+			ReactionWorkName = Reaction.ToReactivePropertyAsSynchronized(x => x.Name)
+				.AddTo(_CompositeDisposable);
+
+			WorkFolderEditVM = new WorkFolderEditViewModel(Reaction);
+			FilterEditVM = new FilterEditViewModel(Reaction);
+			ActionsEditVM = new ActionsEditViewModel(Reaction, _AppPolicyManager);
+			DestinationEditVM = new DestinationEditViewModel(Reaction);
+
+			IsEnable = Reaction.ToReactivePropertyAsSynchronized(x => x.IsEnable)
+				.AddTo(_CompositeDisposable);
+		}
+
+		public void Dispose()
+		{
+			_CompositeDisposable?.Dispose();
+		}
 	}
 }

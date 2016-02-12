@@ -33,7 +33,6 @@
 
                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                                 <Button Command="{Binding TestCommand}"
-                                        IsEnabled="{Binding IsReactionValid.Value}"
                                         Style="{StaticResource AppbarButton}"
                                         >
                                     <materialDesign:PackIcon Kind="Leaf" ToolTip="Test" />
@@ -59,165 +58,174 @@
                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </DockPanel>
                     
-                    
-                        <DockPanel MaxWidth="800" Margin="16 8">
-
-                            <Border Margin="0">
-                                <!-- TODO: Validation -->
-                                <TextBox Text="{Binding ReactionWorkName.Value}"
-                                     Style="{StaticResource MaterialDesignTextBox}"
-                                     FontSize="36"
-                                     MinWidth="300"
-                                     Foreground="White"
-                                     HorizontalAlignment="Left"
-                                     materialDesign:TextFieldAssist.Hint="File name"
-                                   >
-                                    <TextBox.Resources>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
-                                        </Style>
-                                    </TextBox.Resources>
-                                </TextBox>
-
-                            </Border>
-
-                        </DockPanel>
                     </StackPanel>
                 
                 </materialDesign:ColorZone>
             </DockPanel>
 
-        
-        
+
+
             <ScrollViewer HorizontalAlignment="Stretch"
                 HorizontalScrollBarVisibility="Hidden" 
                             VerticalScrollBarVisibility="Auto"
                             >
-                <StackPanel Orientation="Vertical" Margin="0 0 0 16">
-                    <ItemsControl HorizontalContentAlignment="Stretch"
+
+                <ScrollViewer.Resources>
+                    <DataTemplate x:Key="ReactionEditTemplate">
+                        <StackPanel Orientation="Vertical" Margin="0 16">
+
+                            <StackPanel Orientation="Vertical" Margin="56 16 16 0">
+                                
+                                <TextBlock Text="Reaction Name" 
+                                           Style="{StaticResource MaterialDesignSubheadingTextBlock}"                                           
+                                           />
+                                <Border  HorizontalAlignment="Right">
+                                    <TextBox Text="{Binding ReactionWorkName.Value}"
+                                     Style="{StaticResource MaterialDesignTextBox}"
+                                     MinWidth="200"
+                                   >
+                                        <TextBox.Resources>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
+                                            </Style>
+                                        </TextBox.Resources>
+                                    </TextBox>
+
+                                </Border>
+                            </StackPanel>
+
+                            <ItemsControl HorizontalContentAlignment="Stretch"
                                   Margin="16"
                                 >
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type ContentControl}">
-                                            <StackPanel Orientation="Vertical">
-                                           
-                                                <!-- Common Validation UI -->
-                                                <StackPanel Orientation="Horizontal"
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ContentControl}">
+                                                    <StackPanel Orientation="Vertical">
+
+                                                        <!-- Common Validation UI -->
+                                                        <StackPanel Orientation="Horizontal"
                                                             Margin="0 16"
                                                             >
-                                                    <!-- Validate State Icon -->
-                                                    <materialDesign:PackIcon 
+                                                            <!-- Validate State Icon -->
+                                                            <materialDesign:PackIcon 
                                                             VerticalAlignment="Center"
                                                             Margin="8 0"
                                                             >
-                                                        <materialDesign:PackIcon.Style>
-                                                            <Style TargetType="{x:Type materialDesign:PackIcon}">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
-                                                                        <DataTrigger.Setters>
-                                                                            <Setter Property="Kind" Value="CommentQuestionOutline"/>
-                                                                            <Setter Property="Foreground" Value="Gray"/>
-                                                                        </DataTrigger.Setters>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
-                                                                        <DataTrigger.Setters>
-                                                                            <Setter Property="Kind" Value="Check"/>
-                                                                            <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}"/>
-                                                                        </DataTrigger.Setters>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
-                                                                        <DataTrigger.Setters>
-                                                                            <Setter Property="Kind" Value="Alert"/>
-                                                                            <Setter Property="Foreground" Value="Red"/>
-                                                                        </DataTrigger.Setters>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
+                                                                <materialDesign:PackIcon.Style>
+                                                                    <Style TargetType="{x:Type materialDesign:PackIcon}">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
+                                                                                <DataTrigger.Setters>
+                                                                                    <Setter Property="Kind" Value="CommentQuestionOutline"/>
+                                                                                    <Setter Property="Foreground" Value="Gray"/>
+                                                                                </DataTrigger.Setters>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
+                                                                                <DataTrigger.Setters>
+                                                                                    <Setter Property="Kind" Value="Check"/>
+                                                                                    <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}"/>
+                                                                                </DataTrigger.Setters>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
+                                                                                <DataTrigger.Setters>
+                                                                                    <Setter Property="Kind" Value="Alert"/>
+                                                                                    <Setter Property="Foreground" Value="Red"/>
+                                                                                </DataTrigger.Setters>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
 
-                                                            </Style>
-                                                        </materialDesign:PackIcon.Style>
-                                                    </materialDesign:PackIcon>
+                                                                    </Style>
+                                                                </materialDesign:PackIcon.Style>
+                                                            </materialDesign:PackIcon>
 
-                                                    <TextBlock Text="{Binding Title, Mode=OneTime}" 
+                                                            <TextBlock Text="{Binding Title, Mode=OneTime}" 
                                                                 VerticalAlignment="Center"
                                                                 Margin="8 0"
                                                                 >
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
-                                                                        <DataTrigger.Setters>
-                                                                        </DataTrigger.Setters>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
-                                                                        <DataTrigger.Setters>
-                                                                        </DataTrigger.Setters>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
-                                                                        <DataTrigger.Setters>
-                                                                            <Setter Property="Foreground" Value="Red"/>
-                                                                        </DataTrigger.Setters>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
+                                                                                <DataTrigger.Setters>
+                                                                                </DataTrigger.Setters>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
+                                                                                <DataTrigger.Setters>
+                                                                                </DataTrigger.Setters>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
+                                                                                <DataTrigger.Setters>
+                                                                                    <Setter Property="Foreground" Value="Red"/>
+                                                                                </DataTrigger.Setters>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
 
-                                                    </TextBlock>
+                                                            </TextBlock>
 
-                                                </StackPanel>
-                                            
-                                                <Border Margin="40 0 0 0">
-                                                    <ContentPresenter />
-                                                </Border>
+                                                        </StackPanel>
 
-                                            </StackPanel>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                    
-                    
-                        <editerView:WorkFolderEditControl DataContext="{Binding WorkFolderEditVM.Value}" />
+                                                        <Border Margin="40 0 0 0">
+                                                            <ContentPresenter />
+                                                        </Border>
 
-                        <editerView:FilterEditControl DataContext="{Binding FilterEditVM.Value}" />
-
-                        <editerView:ActionEditControl DataContext="{Binding ActionsEditVM.Value}" />
-
-                        <editerView:DestinationEditControl DataContext="{Binding DestinationEditVM.Value}" />
-
-                    </ItemsControl>
-
-                    <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="8 8" />
+                                                    </StackPanel>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
 
 
-                    <TextBlock Text="Additional Option" 
+                                <editerView:WorkFolderEditControl DataContext="{Binding WorkFolderEditVM}" />
+
+                                <editerView:FilterEditControl DataContext="{Binding FilterEditVM}" />
+
+                                <editerView:ActionEditControl DataContext="{Binding ActionsEditVM}" />
+
+                                <editerView:DestinationEditControl DataContext="{Binding DestinationEditVM}" />
+
+                            </ItemsControl>
+
+                            <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="8 8" />
+
+
+                            <TextBlock Text="Additional Option" 
                                     VerticalAlignment="Center"
                                     Margin="32 16"
                                Style="{StaticResource MaterialDesignSubheadingTextBlock}"
                                     />
 
-                    <StackPanel Orientation="Vertical"
+                            <StackPanel Orientation="Vertical"
                                 Margin="40 0 16 0"
                                 >
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <TextBlock Text="Active"
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock Text="Active"
                                         Style="{StaticResource MaterialDesignSubheadingTextBlock}"
                                        />
-                            <Border Width="200">
-                                <ToggleButton 
+                                    <Border Width="200">
+                                        <ToggleButton 
                                     ToolTip="Inactive | Active"
                                     HorizontalAlignment="Right"        
                                     IsChecked="{Binding IsEnable.Value, Mode=TwoWay}"
                                     />
-                            </Border>
+                                    </Border>
+                                </StackPanel>
+
+                            </StackPanel>
+
                         </StackPanel>
-
-                    </StackPanel>
-
-                </StackPanel>
+                    </DataTemplate>
+                </ScrollViewer.Resources>
+                
+                <ContentControl Content="{Binding ReactionVM.Value}"
+                                ContentTemplate="{StaticResource ReactionEditTemplate}"
+                                >
+                </ContentControl>
+                
             </ScrollViewer>
 
        

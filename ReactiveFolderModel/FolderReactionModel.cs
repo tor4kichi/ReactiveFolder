@@ -168,7 +168,18 @@ namespace ReactiveFolder.Models
 		private BehaviorSubject<ReactiveStreamContext> RemoteTrigger;
 
 
-		private bool IsNeedValidation;
+		private bool _IsNeedValidation;
+		public bool IsNeedValidation
+		{
+			get
+			{
+				return _IsNeedValidation;
+			}
+			set
+			{
+				SetProperty(ref _IsNeedValidation, value);
+			}
+		}
 
 
 		
