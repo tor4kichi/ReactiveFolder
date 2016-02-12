@@ -6,8 +6,8 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
-using ReactiveFolder.Model;
-using ReactiveFolder.Model.AppPolicy;
+using ReactiveFolder.Models;
+using ReactiveFolder.Models.AppPolicy;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -53,7 +53,7 @@ namespace Modules.Main.ViewModels
 		public ReactiveProperty<bool> CanSave { get; private set; }
 
 
-		public ReactionEditerPageViewModel(IRegionManager regionManager, FolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager)
+		public ReactionEditerPageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager)
 			: base(regionManager, monitor)
 		{
 			_AppPolicyManager = appPolicyManager;

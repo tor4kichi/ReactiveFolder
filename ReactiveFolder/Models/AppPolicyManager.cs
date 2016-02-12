@@ -1,16 +1,16 @@
-﻿using ReactiveFolder.Model.Actions;
+﻿using ReactiveFolder.Models.Actions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ReactiveFolder.Model.Filters;
+using ReactiveFolder.Models.Filters;
 using System.IO;
-using ReactiveFolder.Util;
-using ReactiveFolder.Model.AppPolicy;
+using ReactiveFolder.Models.Util;
+using ReactiveFolder.Models.AppPolicy;
 using System.Collections.ObjectModel;
 
-namespace ReactiveFolder
+namespace ReactiveFolder.Models
 {
 	// Note: Policy のリネームは基本的にサポートされない。
 	// 
@@ -38,8 +38,16 @@ namespace ReactiveFolder
 
 			foreach (var fileInfo in saveFolderInfo.EnumerateFiles($"*{APP_POLICY_EXTENTION}"))
 			{
-				var policy = FileSerializeHelper.LoadAsync<ApplicationPolicy>(fileInfo);
-				factory._Policies.Add(policy);
+				try
+				{
+					var policy = FileSerializeHelper.LoadAsync<ApplicationPolicy>(fileInfo);
+					factory._Policies.Add(policy);
+				}
+				catch(Exception e)
+				{
+					System.Diagnostics.Debug.WriteLine("faield app policy loading. filepath : " + fileInfo.FullName);
+					System.Diagnostics.Debug.WriteLine(e.Message);
+				}
 			}
 
 			return factory;

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 
 namespace Modules.Monitor
 {
@@ -14,9 +14,9 @@ namespace Modules.Monitor
 	{
 		IRegionManager _regionManager;
 
-		FolderReactionMonitorModel _MonitorModel;
+		IFolderReactionMonitorModel _MonitorModel;
 
-		public MonitorModule(IRegionManager regionManager, FolderReactionMonitorModel monitorModel)
+		public MonitorModule(IRegionManager regionManager, IFolderReactionMonitorModel monitorModel)
 		{
 			_regionManager = regionManager;
 			_MonitorModel = monitorModel;

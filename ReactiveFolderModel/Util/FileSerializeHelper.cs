@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using System.Runtime.InteropServices.WindowsRuntime;
 
 
-namespace ReactiveFolder.Util
+namespace ReactiveFolder.Models.Util
 {
 	// Json.NET Conditional Serialization 
 	// http://www.geekytidbits.com/conditional-serialization-with-json-net/

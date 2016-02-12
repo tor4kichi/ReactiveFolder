@@ -1,5 +1,5 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

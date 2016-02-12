@@ -3,10 +3,10 @@ using System.Linq;
 using Prism.Mvvm;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 using System.Reactive.Linq;
 using System.Reactive.Disposables;
-using ReactiveFolder.Model.Destinations;
+using ReactiveFolder.Models.Destinations;
 using System.IO;
 using Microsoft.Practices.Prism.Commands;
 
@@ -52,7 +52,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.Where(x => false == String.IsNullOrEmpty(x))
 				.Select(x =>
 				{
-					if (Reaction.OutputType == ReactiveFolder.Model.Util.FolderItemType.Folder)
+					if (Reaction.OutputType == ReactiveFolder.Models.Util.FolderItemType.Folder)
 					{
 						return Path.Combine(Destination.AbsoluteFolderPath, x);
 					}

@@ -1,10 +1,10 @@
-﻿using ReactiveFolder.Model.Util;
+﻿using ReactiveFolder.Models.Util;
 using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
 
-namespace ReactiveFolder.Model
+namespace ReactiveFolder.Models
 {
 	// Note: アクションはフォルダ→フォルダの射影を行わない
 	// あるのはフォルダ→ファイルまたはファイル→ファイルの２パターンのみ

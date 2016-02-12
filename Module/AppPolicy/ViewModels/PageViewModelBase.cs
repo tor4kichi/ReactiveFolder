@@ -1,8 +1,8 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
 using Prism.Regions;
-using ReactiveFolder.Model;
-using ReactiveFolder.Model.Actions;
-using ReactiveFolder.Model.AppPolicy;
+using ReactiveFolder.Models;
+using ReactiveFolder.Models.Actions;
+using ReactiveFolder.Models.AppPolicy;
 using System;
 using System.Collections.Generic;
 using System.Linq;

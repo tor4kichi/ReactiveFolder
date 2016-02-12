@@ -1,4 +1,4 @@
-﻿using ReactiveFolder.Model.Util;
+﻿using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 
-namespace ReactiveFolder.Model.Filters
+namespace ReactiveFolder.Models.Filters
 {
 	[DataContract]
 	public class FolderReactiveFilter : ReactiveFilterBase

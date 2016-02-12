@@ -2,7 +2,7 @@
 using Prism.Mvvm;
 using Prism.Regions;
 using Reactive.Bindings;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +34,7 @@ namespace Modules.Main.ViewModels
 
 		public ReactiveProperty<bool> CanGoBack { get; private set; }
 
-		public FolderListPageViewModel(IRegionManager regionManager, FolderReactionMonitorModel monitor, IEventAggregator ea)
+		public FolderListPageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IEventAggregator ea)
 			: base(regionManager, monitor)
 		{
 			_EventAggregator = ea;
@@ -177,7 +177,7 @@ namespace Modules.Main.ViewModels
 						var reaction = CurrentFolder.AddReaction();
 						reaction.Name = "something reaction";
 
-						reaction.Filter = new ReactiveFolder.Model.Filters.FileReactiveFilter();
+						reaction.Filter = new ReactiveFolder.Models.Filters.FileReactiveFilter();
 
 						//						reaction.AddAction(new RenameReactiveAction("#{name}"));
 

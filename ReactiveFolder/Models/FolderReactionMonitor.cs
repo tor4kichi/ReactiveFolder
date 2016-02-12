@@ -1,6 +1,7 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
 using Reactive.Bindings.Extensions;
-using ReactiveFolder.Util;
+using ReactiveFolder.Models;
+using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,7 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ReactiveFolder.Model
+namespace ReactiveFolder.Models
 {
 
 	
@@ -25,7 +26,7 @@ namespace ReactiveFolder.Model
 		public int DefaultIntervalSeconds { get; set; }
 	}
 
-	public class FolderReactionMonitorModel : BindableBase, IDisposable
+	public class FolderReactionMonitorModel : BindableBase, IFolderReactionMonitorModel
 	{
 
 		
@@ -116,15 +117,26 @@ namespace ReactiveFolder.Model
 
 			if (settingSaveFileInfo.Exists)
 			{
-				var settings = FileSerializeHelper.LoadAsync<MonitorSettings>(settingSaveFileInfo);
+				try
+				{
+					var settings = FileSerializeHelper.LoadAsync<MonitorSettings>(settingSaveFileInfo);
 
-				if (settings == null)
+					if (settings == null)
+					{					
+						return;
+					}
+
+					this.DefaultInterval = TimeSpan.FromSeconds(settings.DefaultIntervalSeconds);
+				}
+				catch(Exception e)
 				{
 					settingSaveFileInfo.Delete();
-					return;
-				}
 
-				this.DefaultInterval = TimeSpan.FromSeconds(settings.DefaultIntervalSeconds);
+					System.Diagnostics.Debug.WriteLine("faield ReactiveFolder Settings loading. filepath : " + settingSaveFileInfo.FullName);
+					System.Diagnostics.Debug.WriteLine(e.Message);
+				}
+				
+			
 			}
 			else
 			{

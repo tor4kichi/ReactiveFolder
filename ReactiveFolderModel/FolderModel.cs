@@ -1,4 +1,4 @@
-﻿using ReactiveFolder.Util;
+﻿using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReactiveFolder.Model
+namespace ReactiveFolder.Models
 {
 	public class FolderModel
 	{
@@ -71,14 +71,23 @@ namespace ReactiveFolder.Model
 
 		public void UpdateReactionModels()
 		{
-			var files = Folder.EnumerateFiles("*.json")
-				.Where(x => x.Name != FolderReactionMonitorModel.MONITOR_SETTINGS_FILENAME);
+			var files = Folder.EnumerateFiles("*.json");
 
 
 			var models = files.Select(fileInfo =>
 			{
-				return FileSerializeHelper.LoadAsync<FolderReactionModel>(fileInfo);
+				try
+				{
+					return FileSerializeHelper.LoadAsync<FolderReactionModel>(fileInfo);
+				}
+				catch(Exception e)
+				{
+					System.Diagnostics.Debug.WriteLine("faield Reaction File loading. filepath : " + fileInfo.FullName);
+					System.Diagnostics.Debug.WriteLine(e.Message);
+					return null;
+				}
 			})
+			.Where(x => x != null)
 			.ToArray();
 
 

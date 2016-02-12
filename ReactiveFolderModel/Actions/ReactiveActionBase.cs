@@ -1,4 +1,4 @@
-﻿using ReactiveFolder.Model.Util;
+﻿using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReactiveFolder.Model.Actions
+namespace ReactiveFolder.Models.Actions
 {
 	public abstract class ReactiveActionBase : ReactiveStreamBase, IStreamContextUpdater
 	{

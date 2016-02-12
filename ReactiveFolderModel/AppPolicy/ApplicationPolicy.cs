@@ -1,5 +1,5 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
-using ReactiveFolder.Model.Util;
+using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace ReactiveFolder.Model.AppPolicy
+namespace ReactiveFolder.Models.AppPolicy
 {
 	
 	// TODO: コマンドラインアプリのExitCodeの意味付けを設定できるようにしたい

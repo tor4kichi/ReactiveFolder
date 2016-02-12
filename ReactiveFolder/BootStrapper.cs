@@ -9,13 +9,13 @@ using System.Windows;
 using Microsoft.Practices.Unity;
 using Prism.Unity;
 using ReactiveFolder.Views;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 using Prism.Modularity;
 
 using ReactiveFolder.Properties;
 using System.IO;
-using ReactiveFolder.Model.Actions;
-using ReactiveFolder.Model.AppPolicy;
+using ReactiveFolder.Models.Actions;
+using ReactiveFolder.Models.AppPolicy;
 using Microsoft.Practices.Prism.Regions;
 using Prism.Events;
 
@@ -49,7 +49,7 @@ namespace ReactiveFolder
 		}
 
 
-		private FolderReactionMonitorModel InitializeMonitorModel()
+		private IFolderReactionMonitorModel InitializeMonitorModel()
 		{
 			var monitorSaveFolderPath = Properties.Settings.Default.MonitorDataSaveFolderPath;
 			if (false == Directory.Exists(monitorSaveFolderPath))
@@ -100,7 +100,7 @@ namespace ReactiveFolder
 
 
 			// リアクションモニターのインスタンスを生成＆DIコンテナに登録
-			this.Container.RegisterInstance(InitializeMonitorModel());
+			this.Container.RegisterInstance<IFolderReactionMonitorModel>(InitializeMonitorModel());
 
 			// アプリ起動ポリシー管理のインスタンスを生成＆DIコンテナに登録
 			var appLaunchManager = InitializeAppLaunchAction();

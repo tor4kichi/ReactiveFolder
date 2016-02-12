@@ -5,9 +5,9 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ReactiveFolder.Model.Util;
+using ReactiveFolder.Models.Util;
 
-namespace ReactiveFolder.Model
+namespace ReactiveFolder.Models
 {
 	public class FilterResult
 	{

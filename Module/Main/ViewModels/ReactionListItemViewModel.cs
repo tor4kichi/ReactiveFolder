@@ -2,7 +2,7 @@
 using Microsoft.Practices.Prism.Mvvm;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

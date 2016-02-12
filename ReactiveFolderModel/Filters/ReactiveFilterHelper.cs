@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReactiveFolder.Model.Filters
+namespace ReactiveFolder.Models.Filters
 {
 	public static class ReactiveFilterHelper
 	{

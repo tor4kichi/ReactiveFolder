@@ -6,7 +6,7 @@ using Microsoft.Practices.Prism.Mvvm;
 using static System.Environment;
 using System.Runtime.CompilerServices;
 
-namespace ReactiveFolder.Model
+namespace ReactiveFolder.Models
 {
 	public abstract class ReactiveStreamBase : BindableBase, Util.IValidatable
 	{

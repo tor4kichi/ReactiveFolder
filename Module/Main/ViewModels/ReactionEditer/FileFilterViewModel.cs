@@ -3,8 +3,8 @@ using System.Linq;
 using Prism.Commands;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
-using ReactiveFolder.Model;
-using ReactiveFolder.Model.Filters;
+using ReactiveFolder.Models;
+using ReactiveFolder.Models.Filters;
 using System.Reactive.Linq;
 using System.Collections.ObjectModel;
 

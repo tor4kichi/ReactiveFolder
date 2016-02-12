@@ -10,7 +10,7 @@ using System.Reactive.Disposables;
 using Reactive.Bindings.Extensions;
 using ReactiveFolderStyles;
 using Prism.Commands;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 
 namespace ReactiveFolder.ViewModels
 {
@@ -19,10 +19,10 @@ namespace ReactiveFolder.ViewModels
 		public ReactiveProperty<bool> IsOpenSideMenu { get; private set; }
 
 
-		private FolderReactionMonitorModel _Monitor;
+		private IFolderReactionMonitorModel _Monitor;
 		private CompositeDisposable _CompositeDisposable;
 
-		public MainWindowViewModel(IEventAggregator ea, FolderReactionMonitorModel monitor)
+		public MainWindowViewModel(IEventAggregator ea, IFolderReactionMonitorModel monitor)
 		{
 			_Monitor = monitor;
 

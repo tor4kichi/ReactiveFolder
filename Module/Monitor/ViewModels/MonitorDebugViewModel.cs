@@ -1,5 +1,5 @@
 ﻿using Prism.Mvvm;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +11,11 @@ namespace Modules.Monitor.ViewModels
 	public class MonitorDebugViewModel : BindableBase
 	{
 		public string MyText { get; private set; }
-		public FolderReactionMonitorModel MonitorModel { get; private set; }
+		public IFolderReactionMonitorModel MonitorModel { get; private set; }
 
 
 
-		public MonitorDebugViewModel(FolderReactionMonitorModel monitor)
+		public MonitorDebugViewModel(IFolderReactionMonitorModel monitor)
 		{
 			MonitorModel = monitor;
 

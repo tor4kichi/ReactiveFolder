@@ -1,6 +1,6 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
 using Prism.Regions;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +15,9 @@ namespace Modules.Main.ViewModels
 	{
 		protected IRegionManager _RegionManager { get; private set; }
 
-		protected FolderReactionMonitorModel _MonitorModel { get; private set; }
+		protected IFolderReactionMonitorModel _MonitorModel { get; private set; }
 
-		public PageViewModelBase(IRegionManager regionManager, FolderReactionMonitorModel monitor)
+		public PageViewModelBase(IRegionManager regionManager, IFolderReactionMonitorModel monitor)
 		{
 			_RegionManager = regionManager;
 			_MonitorModel = monitor;

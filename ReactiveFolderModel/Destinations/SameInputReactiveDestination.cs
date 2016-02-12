@@ -1,4 +1,4 @@
-﻿using ReactiveFolder.Model.Util;
+﻿using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReactiveFolder.Model.Destinations
+namespace ReactiveFolder.Models.Destinations
 {
 	[DataContract]
 	public class SameInputReactiveDestination : ReactiveDestinationBase

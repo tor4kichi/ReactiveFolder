@@ -174,8 +174,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AppPolicyManager.cs" />
+    <Compile Include="Models\AppPolicyManager.cs" />
     <Compile Include="BootStrapper.cs" />
+    <Compile Include="Models\FolderReactionMonitor.cs" />
     <Compile Include="ViewModels\SideMenuViewModel.cs" />
     <Compile Include="Views\SideMenu.xaml.cs">
       <DependentUpon>SideMenu.xaml</DependentUpon>

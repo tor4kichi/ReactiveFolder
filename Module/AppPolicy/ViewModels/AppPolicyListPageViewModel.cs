@@ -2,7 +2,7 @@
 using Prism.Mvvm;
 using Prism.Regions;
 using Reactive.Bindings;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Reactive.Bindings.Extensions;
 using System.IO;
-using ReactiveFolder.Model.AppPolicy;
+using ReactiveFolder.Models.AppPolicy;
 using Microsoft.Win32;
-using ReactiveFolder.Util;
+using ReactiveFolder.Models.Util;
 
 namespace Modules.AppPolicy.ViewModels
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
-using ReactiveFolder.Model.AppPolicy;
-using ReactiveFolder.Model.Filters;
-using ReactiveFolder.Model.Util;
+using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolder.Models.Filters;
+using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +11,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReactiveFolder.Model.Actions
+namespace ReactiveFolder.Models.Actions
 {
 	[DataContract]
 	public class AppLaunchReactiveAction : ReactiveActionBase

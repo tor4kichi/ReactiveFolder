@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Globalization;
 using System.Threading;
 using ReactiveFolder;
-using ReactiveFolder.Model;
+using ReactiveFolder.Models;
 
 namespace ReactiveFolder
 {

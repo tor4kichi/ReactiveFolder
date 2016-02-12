@@ -1,4 +1,4 @@
-﻿using ReactiveFolder.Model.Util;
+﻿using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
 
-namespace ReactiveFolder.Model.Timings
+namespace ReactiveFolder.Models.Timings
 {
 	[DataContract]
 	public class FileUpdateReactiveTiming : ReactiveTimingBase

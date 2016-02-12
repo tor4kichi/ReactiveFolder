@@ -10,14 +10,14 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-using ReactiveFolder.Model.Filters;
-using ReactiveFolder.Model.Timings;
-using ReactiveFolder.Model.Actions;
-using ReactiveFolder.Model.Destinations;
+using ReactiveFolder.Models.Filters;
+using ReactiveFolder.Models.Timings;
+using ReactiveFolder.Models.Actions;
+using ReactiveFolder.Models.Destinations;
 using Microsoft.Practices.Prism;
-using ReactiveFolder.Model.Util;
+using ReactiveFolder.Models.Util;
 
-namespace ReactiveFolder.Model
+namespace ReactiveFolder.Models
 {
 	[DataContract]
 	public class FolderReactionModel : BindableBase
@@ -483,15 +483,19 @@ namespace ReactiveFolder.Model
 					outResult.AddMessage($"that {(nameof(Filter))} code contains bug or error.");
 					outResult.AddMessage($"[Exception Message]:{e.Message}");
 				}
+
+				IsFilterValid = Filter.IsValid;
 			}
 			else
 			{
 				// Filter not exist.
 				outResult.AddMessage(($"{(nameof(Filter))} is must set to Reaction."));
+
+				IsFilterValid = false;
 			}
 
 
-			IsFilterValid = Filter.IsValid;
+			
 
 
 
@@ -587,15 +591,21 @@ namespace ReactiveFolder.Model
 					outResult.AddMessage(($"{(nameof(Destination))} has validation error."));
 					outResult.AddMessages(Destination.ValidateResult.Messages);
 				}
+
+				IsDestinationValid = Destination.IsValid;
 			}
 			else
 			{
 				// Destination not exist
 				outResult.AddMessage(($"{(nameof(Destination))} is must set to Reaction."));
+
+				IsDestinationValid = false;
+
+				// TODO: DestinationがNullである場合って例外処理が必要じゃなイカ？
 			}
 
 
-			IsDestinationValid = Destination.IsValid;
+			
 
 
 			return outResult;
