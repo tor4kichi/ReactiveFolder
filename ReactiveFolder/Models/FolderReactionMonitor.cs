@@ -17,40 +17,18 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Models
 {
-
-	
-
-
-	public class MonitorSettings
-	{
-		public int DefaultIntervalSeconds { get; set; }
-	}
-
 	public class FolderReactionMonitorModel : BindableBase, IFolderReactionMonitorModel
 	{
 
-		
-		public static FolderReactionMonitorModel LoadOrCreate(DirectoryInfo saveFolder, Func<string, bool> skipReactionFolder = null)
-		{
-			var model = new FolderReactionMonitorModel(saveFolder);
-
-			model.InitializeSettings();
-			model.InitializeReactions();
-
-			return model;
-		}
-
-
+	
 		public const string MONITOR_SETTINGS_FILENAME = "settings.json";
 
-
-
-		private DirectoryInfo _SaveFolder;
-		public DirectoryInfo SaveFolder
+		private DirectoryInfo _MonitorSettingsSaveFolder;
+		public DirectoryInfo MonitorSettingsSaveFolder
 		{
 			get
 			{
-				return _SaveFolder;
+				return _MonitorSettingsSaveFolder;
 			}
 			set
 			{
@@ -59,7 +37,25 @@ namespace ReactiveFolder.Models
 					value.Create();
 				}
 
-				_SaveFolder = value;
+				_MonitorSettingsSaveFolder = value;
+			}
+		}
+
+		private DirectoryInfo _ReactionSaveFolder;
+		public DirectoryInfo ReactionSaveFolder
+		{
+			get
+			{
+				return _ReactionSaveFolder;
+			}
+			set
+			{
+				if (false == value.Exists)
+				{
+					value.Create();
+				}
+
+				_ReactionSaveFolder = value;
 			}
 		}
 
@@ -80,106 +76,18 @@ namespace ReactiveFolder.Models
 			}
 		}		
 
-		private FolderReactionMonitorModel(DirectoryInfo saveFolder)
+		public FolderReactionMonitorModel(DirectoryInfo saveFolder)
 		{
-			SaveFolder = saveFolder;
+			ReactionSaveFolder = saveFolder;
 
 			DefaultInterval = TimeSpan.FromMinutes(15);
+
+			InitializeReactions();
 		}
 
 
 
-		public async void Save()
-		{
-			SaveSettings();
-		}
-
-
-		#region private Settings
-
-		private FileInfo MakeSettingFileInfo()
-		{
-			// SaveFolderが存在しなければ作成を試みる?
-
-			return new FileInfo(
-				Path.Combine(
-					this.SaveFolder.FullName,
-					MONITOR_SETTINGS_FILENAME
-					)
-				);
-		}
-
-
-		private void InitializeSettings()
-		{
-			// saveFolder内のsettings.jsonを読む
-			var settingSaveFileInfo = MakeSettingFileInfo();
-
-			if (settingSaveFileInfo.Exists)
-			{
-				try
-				{
-					var settings = FileSerializeHelper.LoadAsync<MonitorSettings>(settingSaveFileInfo);
-
-					if (settings == null)
-					{					
-						return;
-					}
-
-					this.DefaultInterval = TimeSpan.FromSeconds(settings.DefaultIntervalSeconds);
-				}
-				catch(Exception e)
-				{
-					settingSaveFileInfo.Delete();
-
-					System.Diagnostics.Debug.WriteLine("faield ReactiveFolder Settings loading. filepath : " + settingSaveFileInfo.FullName);
-					System.Diagnostics.Debug.WriteLine(e.Message);
-				}
-				
-			
-			}
-			else
-			{
-				SaveSettings();
-			}
-		}
-
-
-		#endregion
-
-
-
-		#region public Settings
-
-		public void SaveSettings()
-		{
-			var settings = new MonitorSettings();
-
-			settings.DefaultIntervalSeconds = (int)this.DefaultInterval.TotalSeconds;
-
-			var settingSaveFileInfo = MakeSettingFileInfo();
-
-			FileSerializeHelper.Save(settingSaveFileInfo, settings);
-		}
-
-
-
-		#endregion
-
-
-		public void SaveReaction(FolderReactionModel reaction)
-		{
-			var folder = FindReactionParentFolder(reaction);
-			if (folder != null)
-			{
-				folder.SaveReaction(reaction);
-			}
-			else
-			{
-				// 削除されたリアクション、またはフォルダが削除されている
-			}
-		}
-
+		
 
 		public FolderReactionModel FindReaction(Guid guid)
 		{
@@ -208,7 +116,7 @@ namespace ReactiveFolder.Models
 
 		private void InitializeReactions()
 		{
-			RootFolder = FolderModel.LoadFolder(SaveFolder);
+			RootFolder = FolderModel.LoadFolder(ReactionSaveFolder);
 		}
 
 

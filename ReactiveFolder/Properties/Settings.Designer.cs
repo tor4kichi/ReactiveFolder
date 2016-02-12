@@ -26,12 +26,36 @@ namespace ReactiveFolder.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string MonitorDataSaveFolderPath {
+        public string ReactionSaveFolder {
             get {
-                return ((string)(this["MonitorDataSaveFolderPath"]));
+                return ((string)(this["ReactionSaveFolder"]));
             }
             set {
-                this["MonitorDataSaveFolderPath"] = value;
+                this["ReactionSaveFolder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AppPolicySaveFolder {
+            get {
+                return ((string)(this["AppPolicySaveFolder"]));
+            }
+            set {
+                this["AppPolicySaveFolder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public int DefaultMonitorIntervalSeconds {
+            get {
+                return ((int)(this["DefaultMonitorIntervalSeconds"]));
+            }
+            set {
+                this["DefaultMonitorIntervalSeconds"] = value;
             }
         }
     }

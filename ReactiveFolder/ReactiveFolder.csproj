@@ -177,6 +177,9 @@
     <Compile Include="Models\AppPolicyManager.cs" />
     <Compile Include="BootStrapper.cs" />
     <Compile Include="Models\FolderReactionMonitor.cs" />
+    <Compile Include="Models\IReactiveFolderApp.cs" />
+    <Compile Include="Models\ReactiveFolderApp.cs" />
+    <Compile Include="Models\ReactiveFolderGlobalSettings.cs" />
     <Compile Include="ViewModels\SideMenuViewModel.cs" />
     <Compile Include="Views\SideMenu.xaml.cs">
       <DependentUpon>SideMenu.xaml</DependentUpon>

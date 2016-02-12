@@ -30,7 +30,7 @@ namespace ReactiveFolder.Models.Actions
 			}
 		}
 
-		public static void SetAppPolicyFactory(IAppPolicyManager factory)
+		public static void SetAppPolicyManager(IAppPolicyManager factory)
 		{
 			_AppPolicyFactory = factory;
 		}

@@ -6,18 +6,34 @@ namespace ReactiveFolder.Models
 {
 	public interface IFolderReactionMonitorModel : IDisposable, INotifyPropertyChanged
 	{
-		TimeSpan DefaultInterval { get; set; }
 		FolderModel RootFolder { get; }
-		DirectoryInfo SaveFolder { get; set; }
+		DirectoryInfo ReactionSaveFolder { get; set; }
 
-		void Exit();
 		FolderModel FindFolder(string path);
 		FolderReactionModel FindReaction(Guid guid);
 		FolderModel FindReactionParentFolder(Guid guid);
 		FolderModel FindReactionParentFolder(FolderReactionModel model);
-		void Save();
-		void SaveReaction(FolderReactionModel reaction);
-		void SaveSettings();
+
+		TimeSpan DefaultInterval { get; set; }
 		void Start();
+		void Exit();
 	}
+
+	public static class IFolderReactionMonitorModelHelper
+	{
+		public static void SaveReaction(this IFolderReactionMonitorModel moonitor, FolderReactionModel reaction)
+		{
+			var folder = moonitor.FindReactionParentFolder(reaction);
+			if (folder != null)
+			{
+				folder.SaveReaction(reaction);
+			}
+			else
+			{
+				// 削除されたリアクション、またはフォルダが削除されている
+			}
+		}
+
+	}
+
 }
