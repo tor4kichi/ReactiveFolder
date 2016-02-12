@@ -6,6 +6,7 @@ using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Filters;
+using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,37 +22,9 @@ namespace Modules.Main.ViewModels.ReactionEditer
 	public class FilterEditViewModel : ReactionEditViewModelBase
 	{
 
+		public List<FilterViewModelBase> Filters { get; private set; }
 
-		/// <summary>
-		/// FileまたはFolderのフィルターモデルタイプ
-		/// </summary>
-		public ReactiveProperty<ReactionFilterType> FilterType { get; private set; }
-
-
-
-		public FileFilterViewModel FileFilterVM { get; private set; }
-
-		public FolderFilterViewModel FolderFilterVM { get; private set; }
-
-
-
-
-
-		// Note: IsFileFilterSelectedとIsFolderFilterSelectedはコマンドでよくね？
-		// という意見もあるが、ラジオボタンを初期化する際にVM側からFileかFolderを伝えるために
-		// わかりやすさを重視して二つとものフラグを持つ形にしている
-
-		/// <summary>
-		/// FileFilterを選択しているかのフラグ
-		/// </summary>
-		public ReactiveProperty<bool> IsFileFilterSelected { get; private set; }
-
-		/// <summary>
-		/// FolderFilterを選択しているかのフラグ
-		/// </summary>
-		public ReactiveProperty<bool> IsFolderFilterSelected { get; private set; }
-
-
+		public ReactiveProperty<FilterViewModelBase> SelectedFilterVM { get; private set; }
 
 
 		public FilterEditViewModel(FolderReactionModel reactionModel)
@@ -62,56 +35,39 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.AddTo(_CompositeDisposable);
 
 
-
-			var currentFilterType = FilterModelToVMType(Reaction.Filter);
-
-			FilterType = new ReactiveProperty<ReactionFilterType>(currentFilterType)
-				.AddTo(_CompositeDisposable);
-
-		
+			// 
+			// Reactionが持っていないフィルターモデルは個々で作成する
 
 
-			if (currentFilterType == ReactionFilterType.Files)
+			var currentFilterType = Reaction.Filter.OutputItemType;
+
+			FileFilterViewModel fileFilterVM;
+			FolderFilterViewModel folderFilterVM;
+
+			if (currentFilterType == FolderItemType.File)
 			{
-				FileFilterVM = new FileFilterViewModel(Reaction, Reaction.Filter as FileReactiveFilter);
-				FolderFilterVM = new FolderFilterViewModel(Reaction, new FolderReactiveFilter());
+				fileFilterVM = new FileFilterViewModel(Reaction, Reaction.Filter as FileReactiveFilter);
+				folderFilterVM = new FolderFilterViewModel(Reaction, new FolderReactiveFilter());
 			}
-			else if (currentFilterType == ReactionFilterType.Folder)
+			else if (currentFilterType == FolderItemType.Folder)
 			{
-				FileFilterVM = new FileFilterViewModel(Reaction, new FileReactiveFilter());
-				FolderFilterVM = new FolderFilterViewModel(Reaction, Reaction.Filter as FolderReactiveFilter);
+				fileFilterVM = new FileFilterViewModel(Reaction, new FileReactiveFilter());
+				folderFilterVM = new FolderFilterViewModel(Reaction, Reaction.Filter as FolderReactiveFilter);
 			}
 			else
 			{
 				throw new Exception();
 			}
 
+			Filters = new List<FilterViewModelBase>();
+			Filters.Add(fileFilterVM);
+			Filters.Add(folderFilterVM);
 
-			
 
-			IsFileFilterSelected = new ReactiveProperty<bool>(currentFilterType == ReactionFilterType.Files)
-				.AddTo(_CompositeDisposable);
-			IsFileFilterSelected
-				.Where(x => x)
-				.Subscribe(_ =>
-				{
-					FilterType.Value = ReactionFilterType.Files;
-
-					Reaction.Filter = FileFilterVM.FileFilterModel;
-				})
-				.AddTo(_CompositeDisposable);
-
-			IsFolderFilterSelected = new ReactiveProperty<bool>(currentFilterType == ReactionFilterType.Folder)
-				.AddTo(_CompositeDisposable);
-			IsFolderFilterSelected
-				.Where(x => x)
-				.Subscribe(_ =>
-				{
-					FilterType.Value = ReactionFilterType.Folder;
-
-					Reaction.Filter = FolderFilterVM.FolderFilter;
-				})
-				.AddTo(_CompositeDisposable);
+			SelectedFilterVM = Reaction.ToReactivePropertyAsSynchronized(x => x.Filter,
+				convert: (model) => Filters.Single(y => y.Filter == model),
+				convertBack: (vm) => vm.Filter
+				);
 		}
 
 

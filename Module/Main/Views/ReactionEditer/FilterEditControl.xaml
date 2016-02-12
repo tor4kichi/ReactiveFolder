@@ -11,129 +11,111 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-
-    <Grid x:Name="FilterContainer" >
-
-
-        <!-- FileかFolderの選択を行うラジオボタン -->
-        <StackPanel Orientation="Vertical">
-
-            
-
-            <RadioButton 
-                GroupName="FilterTypeSelectorGroup" 
-                                     IsChecked="{Binding IsFileFilterSelected.Value, Mode=TwoWay}" Grid.ColumnSpan="2">
-                <TextBlock Text="File"></TextBlock>
-            </RadioButton>
-
-            <StackPanel IsEnabled="{Binding IsFileFilterSelected.Value}" Margin="0 8">
-                
-
-                <!-- Selected File Filter patterns -->
-                
-                <StackPanel DataContext="{Binding FileFilterVM}"
+    <UserControl.Resources>
+        <DataTemplate x:Key="FilterEditTemplate">
+            <StackPanel
                             Margin="16 0 0 0"
                             >
-                    <TextBlock Text="Positive List" 
+                <TextBlock Text="Positive List" 
                                />
 
-                    <StackPanel Orientation="Horizontal"
+                <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Right"
                                 >
-                        
-                        <ItemsControl ItemsSource="{Binding IncludeFilterPatterns}"
+
+                    <ItemsControl ItemsSource="{Binding IncludeFilterPatterns}"
                                       >
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border>
-                                        <Button
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border>
+                                    <Button
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                                         Command="{Binding Path=DataContext.RemoveIncludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
                                                         CommandParameter="{Binding}"
                                                         >
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding}"  Margin="8 0"/>
-                                                <materialDesign:PackIcon Kind="Close" />
-                                            </StackPanel>
-                                        </Button>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}"  Margin="8 0"/>
+                                            <materialDesign:PackIcon Kind="Close" />
+                                        </StackPanel>
+                                    </Button>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                        <StackPanel Orientation="Horizontal"
+                    <StackPanel Orientation="Horizontal"
                                     >
-                            <TextBox
+                        <TextBox
                                  Text="{Binding IncludeFilterText.Value}" 
                                  Width="200"
                                  Margin="0 0 8 0"
                                  />
-                            <Button Content="Add"
+                        <Button Content="Add"
                                 Command="{Binding AddIncludeFilterTextCommand}"
                                 CommandParameter="{Binding IncludeFilterText.Value}"
                                 >
-                            </Button>
+                        </Button>
 
-                        </StackPanel>
                     </StackPanel>
-                   
-                    
-                    <TextBlock Text="Negative List" 
+                </StackPanel>
+
+
+                <TextBlock Text="Negative List" 
                                />
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
 
-                        <ItemsControl ItemsSource="{Binding ExcludeFilterPatterns}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border>
-                                        <Button
+                    <ItemsControl ItemsSource="{Binding ExcludeFilterPatterns}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border>
+                                    <Button
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                                         Command="{Binding Path=DataContext.RemoveExcludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
                                                         CommandParameter="{Binding}"
                                                         >
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding}"  Margin="8 0"/>
-                                                <materialDesign:PackIcon Kind="Close" />
-                                            </StackPanel>
-                                        </Button>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        
-                        
-                        
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox 
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}"  Margin="8 0"/>
+                                            <materialDesign:PackIcon Kind="Close" />
+                                        </StackPanel>
+                                    </Button>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox 
                                  Text="{Binding ExcludeFilterText.Value}" 
                                  Width="200"
                                  Margin="0 0 8 0"
                                  />
-                            <Button Content="Add"
+                        <Button Content="Add"
                                 Command="{Binding AddExcludeFilterTextCommand}"
                                 CommandParameter="{Binding ElementName=ExcludeFiterText, Path=Text}"
                                 >
-                            </Button>
+                        </Button>
 
-                        </StackPanel>
                     </StackPanel>
-                   
-                    
+                </StackPanel>
 
 
 
-                    <!--
+
+
+                <!--
                     <TextBlock Text="Sample Files" />
                     <ItemsControl ItemsSource="{Binding SampleItems}">
                         <ItemsControl.ItemTemplate>
@@ -143,128 +125,26 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     -->
-                </StackPanel>
             </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid x:Name="FilterContainer" >
 
 
+        <!-- FileかFolderの選択を行うラジオボタン -->
+        <StackPanel Orientation="Vertical">
+            <ComboBox ItemsSource="{Binding Filters}"
+                      SelectedItem="{Binding SelectedFilterVM.Value}"
+                      DisplayMemberPath="FilterType"
+                >
 
+            </ComboBox>
 
-            <!-- Folder -->
-            <RadioButton GroupName="FilterTypeSelectorGroup" 
-                                     IsChecked="{Binding IsFolderFilterSelected.Value, Mode=TwoWay}" Grid.ColumnSpan="2">
-                <TextBlock Text="Folder"></TextBlock>
-            </RadioButton>
-
-            <Grid IsEnabled="{Binding IsFolderFilterSelected.Value}">
-
-                <StackPanel DataContext="{Binding FolderFilterVM}"
-                            Margin="16 0 0 0"
-                            >
-                    <TextBlock Text="Positive List" 
-                               />
-
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right"
+            <ContentControl Content="{Binding SelectedFilterVM.Value}"
+                                ContentTemplate="{StaticResource FilterEditTemplate}"
                                 >
-
-                        <ItemsControl ItemsSource="{Binding IncludeFilterPatterns}"
-                                      >
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border>
-                                        <Button
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                                        Command="{Binding Path=DataContext.RemoveIncludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
-                                                        CommandParameter="{Binding}"
-                                                        >
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding}"  Margin="8 0"/>
-                                                <materialDesign:PackIcon Kind="Close" />
-                                            </StackPanel>
-                                        </Button>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <StackPanel Orientation="Horizontal"
-                                    >
-                            <TextBox 
-                                 Text="{Binding IncludeFilterText.Value}" 
-                                 Width="200"
-                                 Margin="0 0 8 0"
-                                 />
-                            <Button Content="Add"
-                                Command="{Binding AddIncludeFilterTextCommand}"
-                                CommandParameter="{Binding IncludeFilterText.Value}"
-                                >
-                            </Button>
-
-                        </StackPanel>
-                    </StackPanel>
-
-
-                    <TextBlock Text="Negative List" 
-                               />
-
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-
-                        <ItemsControl ItemsSource="{Binding ExcludeFilterPatterns}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border>
-                                        <Button
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                                        Command="{Binding Path=DataContext.RemoveExcludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
-                                                        CommandParameter="{Binding}"
-                                                        >
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding}"  Margin="8 0"/>
-                                                <materialDesign:PackIcon Kind="Close" />
-                                            </StackPanel>
-                                        </Button>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-
-
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox 
-                                 Text="{Binding ExcludeFilterText.Value}" 
-                                 Width="200"
-                                 Margin="0 0 8 0"
-                                 />
-                            <Button Content="Add"
-                                Command="{Binding AddExcludeFilterTextCommand}"
-                                CommandParameter="{Binding ElementName=ExcludeFiterText, Path=Text}"
-                                >
-                            </Button>
-
-                        </StackPanel>
-                    </StackPanel>
-
-
-
-
-
-                    
-                </StackPanel>
-            </Grid>
-
+            </ContentControl>
         </StackPanel>
-
 
     </Grid>
 </UserControl>

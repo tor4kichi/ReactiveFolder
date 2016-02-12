@@ -18,49 +18,6 @@ namespace ReactiveFolder.Models.Filters
 		private static readonly IEnumerable<char> InvalidChars = Path.GetInvalidPathChars().AsEnumerable().Where(x => x == '*' || x == '?');
 
 
-
-
-		/// <summary>
-		/// <para>Default is *.*</para>
-		/// <para>
-		/// *と?のみ特殊文字として扱われます。
-		/// * は0文字以上の文字列、
-		/// ? は0また1個の文字として扱われます。
-		/// ex) *.jpg
-		/// </para>
-		/// <para>
-		/// 正規表現ではありません。
-		/// | による複数のパターンの連結は利用できません。
-		/// 複数のパターンを指定する場合は新しくFileReactiveFilterを作成してください。
-		/// </para>
-		/// </summary>
-		[DataMember]
-		private ObservableCollection<string> _IncludeFilters { get; set; }
-
-
-		public ReadOnlyObservableCollection<string> IncludeFilter { get; private set; }
-
-
-		/// <summary>
-		/// <para>Default is *.*</para>
-		/// <para>
-		/// *と?のみ特殊文字として扱われます。
-		/// * は0文字以上の文字列、
-		/// ? は0また1個の文字として扱われます。
-		/// ex) *.jpg
-		/// </para>
-		/// <para>
-		/// 正規表現ではありません。
-		/// | による複数のパターンの連結は利用できません。
-		/// 複数のパターンを指定する場合は新しくFileReactiveFilterを作成してください。
-		/// </para>
-		/// </summary>
-		[DataMember]
-		private ObservableCollection<string> _ExcludeFilters { get; set; }
-		public ReadOnlyObservableCollection<string> ExcludeFilter { get; private set; }
-
-
-
 		public override FolderItemType OutputItemType
 		{
 			get
@@ -69,68 +26,8 @@ namespace ReactiveFolder.Models.Filters
 			}
 		}
 
-
-
-
-
 		public FolderReactiveFilter()
 		{
-			_IncludeFilters = new ObservableCollection<string>();
-			IncludeFilter = new ReadOnlyObservableCollection<string>(_IncludeFilters);
-			_ExcludeFilters = new ObservableCollection<string>();
-			ExcludeFilter = new ReadOnlyObservableCollection<string>(_ExcludeFilters);
-		}
-
-
-		public void AddIncludeFilter(string pattern)
-		{
-			if (_IncludeFilters.Contains(pattern))
-			{
-				return;
-			}
-
-			_IncludeFilters.Add(pattern);
-
-			ValidatePropertyChanged();
-		}
-
-		public void RemoveInlcudeFilter(string pattern)
-		{
-			if (_IncludeFilters.Remove(pattern))
-			{
-				ValidatePropertyChanged();
-			}
-		}
-
-
-		public void AddExcludeFilter(string pattern)
-		{
-			if (_ExcludeFilters.Contains(pattern))
-			{
-				return;
-			}
-
-			_ExcludeFilters.Add(pattern);
-
-			ValidatePropertyChanged();
-		}
-
-		public void RemoveExcludeFilter(string pattern)
-		{
-			if (_ExcludeFilters.Remove(pattern))
-			{
-				ValidatePropertyChanged();
-			}
-		}
-
-
-
-
-		[OnDeserialized]
-		public void SetValuesOnDeserialized(StreamingContext context)
-		{
-			IncludeFilter = new ReadOnlyObservableCollection<string>(_IncludeFilters);
-			ExcludeFilter = new ReadOnlyObservableCollection<string>(_ExcludeFilters);
 		}
 
 

@@ -129,7 +129,8 @@ namespace ReactiveFolder.Models.Actions
 			}
 			catch (Exception e)
 			{
-				
+				System.Diagnostics.Debug.WriteLine("外部アプリの実行に失敗しました.");
+				System.Diagnostics.Debug.WriteLine(e.Message);
 			}
 		}
 
