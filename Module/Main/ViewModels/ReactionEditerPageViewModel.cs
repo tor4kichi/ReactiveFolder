@@ -82,6 +82,15 @@ namespace Modules.Main.ViewModels
 
 			ReactionWorkName.Value = Reaction.Name;
 
+			ReactionWorkName.Subscribe(x =>
+			{
+				if (false == String.IsNullOrWhiteSpace(x))
+				{
+					Reaction.Name = x;
+				}
+			})
+			.AddTo(_CompositeDisposable);
+
 			Reaction.ObserveProperty(x => x.WorkFolder)
 				.Subscribe(x =>
 				{

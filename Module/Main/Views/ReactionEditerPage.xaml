@@ -67,6 +67,7 @@
                                 <TextBox Text="{Binding ReactionWorkName.Value}"
                                      Style="{StaticResource MaterialDesignTextBox}"
                                      FontSize="36"
+                                     MinWidth="300"
                                      Foreground="White"
                                      HorizontalAlignment="Left"
                                      materialDesign:TextFieldAssist.Hint="File name"
