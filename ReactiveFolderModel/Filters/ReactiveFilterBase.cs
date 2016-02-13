@@ -17,6 +17,7 @@ namespace ReactiveFolder.Models
 		public IEnumerable<DirectoryInfo> Direcotories { get; set; }
 	}
 
+	[DataContract]
 	public abstract class ReactiveFilterBase : ReactiveStreamBase, IFolderItemOutputer
 	{
 		abstract public FolderItemType OutputItemType { get; }
@@ -123,14 +124,54 @@ namespace ReactiveFolder.Models
 		private ObservableCollection<string> _ExcludeFilters { get; set; }
 		public ReadOnlyObservableCollection<string> ExcludeFilter { get; private set; }
 
+
+		abstract public bool IsValidFilterPatternText(string pattern);
+
+
+		protected override ValidationResult InnerValidate()
+		{
+			var result = new ValidationResult();
+
+			foreach (var fileFilterParttern in IncludeFilter)
+			{
+				if (false == IsValidFilterPatternText(fileFilterParttern))
+				{
+					result.AddMessage("invalid include filter pattern text: " + fileFilterParttern);
+				}
+			}
+
+			foreach (var fileFilterParttern in ExcludeFilter)
+			{
+				if (false == IsValidFilterPatternText(fileFilterParttern))
+				{
+					result.AddMessage("invalid exclude filter pattern text: " + fileFilterParttern);
+				}
+			}
+
+			return result;
+		}
+
+
+		protected virtual string TransformFilterPattern(string pattern)
+		{
+			return pattern;
+		}
+
 		public void AddIncludeFilter(string pattern)
 		{
-			if (_IncludeFilters.Contains(pattern))
+			var newPattern = TransformFilterPattern(pattern);
+
+			if (false == IsValidFilterPatternText(newPattern))
 			{
 				return;
 			}
 
-			_IncludeFilters.Add(pattern);
+			if (_IncludeFilters.Contains(newPattern))
+			{
+				return;
+			}
+
+			_IncludeFilters.Add(newPattern);
 
 			ValidatePropertyChanged();
 		}
@@ -146,12 +187,19 @@ namespace ReactiveFolder.Models
 
 		public void AddExcludeFilter(string pattern)
 		{
-			if (_ExcludeFilters.Contains(pattern))
+			var newPattern = TransformFilterPattern(pattern);
+
+			if (false == IsValidFilterPatternText(newPattern))
 			{
 				return;
 			}
 
-			_ExcludeFilters.Add(pattern);
+			if (_ExcludeFilters.Contains(newPattern))
+			{
+				return;
+			}
+
+			_ExcludeFilters.Add(newPattern);
 
 			ValidatePropertyChanged();
 		}

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 {
 	// FilterEditViewModelが管理する対象となるFileVMとFolderVMのベース
 
-
+	
 	abstract public class FilterViewModelBase : BindableBase, IDisposable
 	{
 		public FolderReactionModel ReactionModel { get; private set; }
@@ -98,6 +99,19 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.ToReadOnlyReactiveCollection()
 				.AddTo(_CompositeDisposable);
 				*/
+
+			AddIncludeFilterTextCommand = IncludeFilterText
+				.Select(x => Filter.IsValidFilterPatternText(x))
+				.ToReactiveCommand<string>();
+
+			AddIncludeFilterTextCommand.Subscribe(AddIncludeFilterText);
+
+
+			AddExcludeFilterTextCommand = ExcludeFilterText
+				.Select(x => Filter.IsValidFilterPatternText(x))
+				.ToReactiveCommand<string>();
+
+			AddExcludeFilterTextCommand.Subscribe(AddExcludeFilterText);
 		}
 
 
@@ -110,21 +124,15 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-		private DelegateCommand<string> _AddIncludeFilterTextCommand;
-		public DelegateCommand<string> AddIncludeFilterTextCommand
+		public ReactiveCommand<string> AddIncludeFilterTextCommand { get; private set; }
+
+		private void AddIncludeFilterText(string word)
 		{
-			get
-			{
-				return _AddIncludeFilterTextCommand
-					?? (_AddIncludeFilterTextCommand = new DelegateCommand<string>(word =>
-					{
-						Filter.AddIncludeFilter(word);
+			Filter.AddIncludeFilter(word);
 
-						Filter.Validate();
+			Filter.Validate();
 
-						IncludeFilterText.Value = "";
-					}));
-			}
+			IncludeFilterText.Value = "";
 		}
 
 
@@ -152,21 +160,16 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-		private DelegateCommand<string> _AddExcludeFilterTextCommand;
-		public DelegateCommand<string> AddExcludeFilterTextCommand
+		public ReactiveCommand<string> AddExcludeFilterTextCommand { get; private set; }
+
+
+		private void AddExcludeFilterText(string word)
 		{
-			get
-			{
-				return _AddExcludeFilterTextCommand
-					?? (_AddExcludeFilterTextCommand = new DelegateCommand<string>(word =>
-					{
-						Filter.AddExcludeFilter(word);
+			Filter.AddExcludeFilter(word);
 
-						Filter.Validate();
+			Filter.Validate();
 
-						ExcludeFilterText.Value = "";
-					}));
-			}
+			ExcludeFilterText.Value = "";
 		}
 
 

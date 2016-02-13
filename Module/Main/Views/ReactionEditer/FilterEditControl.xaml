@@ -10,80 +10,44 @@
              xmlns:prism="http://prismlibrary.com/"          
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="600" d:DesignWidth="600">
     <UserControl.Resources>
         <DataTemplate x:Key="FilterEditTemplate">
-            <StackPanel
-                            Margin="16 0 0 0"
+            <Grid
+                            Margin="0 0 0 0"
                             >
-                <TextBlock Text="Positive List" 
-                               />
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Orientation="Vertical">
 
-                <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right"
-                                >
+                    <TextBlock Text="Positive List" 
+                           Grid.Row="0"
+                           Grid.Column="0"
+                           HorizontalAlignment="Center"
+                           Margin="0 8"
+                            />
 
                     <ItemsControl ItemsSource="{Binding IncludeFilterPatterns}"
-                                      >
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border>
-                                    <Button
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                                        Command="{Binding Path=DataContext.RemoveIncludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
-                                                        CommandParameter="{Binding}"
-                                                        >
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding}"  Margin="8 0"/>
-                                            <materialDesign:PackIcon Kind="Close" />
-                                        </StackPanel>
-                                    </Button>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <StackPanel Orientation="Horizontal"
+                               Grid.Row="3"
+                                Grid.Column="0"
                                     >
-                        <TextBox
-                                 Text="{Binding IncludeFilterText.Value}" 
-                                 Width="200"
-                                 Margin="0 0 8 0"
-                                 />
-                        <Button Content="Add"
-                                Command="{Binding AddIncludeFilterTextCommand}"
-                                CommandParameter="{Binding IncludeFilterText.Value}"
-                                >
-                        </Button>
-
-                    </StackPanel>
-                </StackPanel>
-
-
-                <TextBlock Text="Negative List" 
-                               />
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-
-                    <ItemsControl ItemsSource="{Binding ExcludeFilterPatterns}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" />
+                                <WrapPanel Orientation="Vertical" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border>
                                     <Button
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                                        Command="{Binding Path=DataContext.RemoveExcludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
-                                                        CommandParameter="{Binding}"
-                                                        >
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                    Command="{Binding Path=DataContext.RemoveIncludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                                    CommandParameter="{Binding}"
+                                                    >
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding}"  Margin="8 0"/>
                                             <materialDesign:PackIcon Kind="Close" />
@@ -95,25 +59,87 @@
                     </ItemsControl>
 
 
-
-                    <StackPanel Orientation="Horizontal">
-                        <TextBox 
-                                 Text="{Binding ExcludeFilterText.Value}" 
-                                 Width="200"
-                                 Margin="0 0 8 0"
-                                 />
+                    <DockPanel Margin="8 0">
                         <Button Content="Add"
-                                Command="{Binding AddExcludeFilterTextCommand}"
-                                CommandParameter="{Binding ElementName=ExcludeFiterText, Path=Text}"
-                                >
+                            Command="{Binding AddIncludeFilterTextCommand}"
+                            CommandParameter="{Binding IncludeFilterText.Value}"
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="8 8 0 8"
+                            Width="80"
+                            DockPanel.Dock="Right"
+                            >
                         </Button>
 
-                    </StackPanel>
+                        <TextBox Text="{Binding IncludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
+                                 
+                                 />
+
+                    </DockPanel>
+
                 </StackPanel>
 
 
+                <StackPanel Orientation="Vertical" 
+                            Grid.Column="1" >
+                    
+                    <TextBlock Text="Negative List" 
+                            Grid.Row="0"
+                           Grid.Column="1"
+                           HorizontalAlignment="Center"
+                           Margin="0 8"
+                            />
+
+                    <ItemsControl ItemsSource="{Binding ExcludeFilterPatterns}"
+                              Grid.Row="3"
+                              Grid.Column="1"
+                              >
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border>
+                                    <Button
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                    Command="{Binding Path=DataContext.RemoveExcludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                                    CommandParameter="{Binding}"
+                                                    >
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}"  Margin="8 0"/>
+                                            <materialDesign:PackIcon Kind="Close" />
+                                        </StackPanel>
+                                    </Button>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
 
+                    <DockPanel Margin="8 0">
+                        <Button Content="Add"
+                            Command="{Binding AddExcludeFilterTextCommand}"
+                            CommandParameter="{Binding ExcludeFilterText.Value}"
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="8 8 0 8"
+                            Width="80"
+                            DockPanel.Dock="Right"
+                            >
+                        </Button>
+
+                        <TextBox Text="{Binding ExcludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
+                                 
+                                 />
+
+                    </DockPanel>
+                </StackPanel>
+                
+
+
+                
 
                 <!--
                     <TextBlock Text="Sample Files" />
@@ -125,7 +151,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     -->
-            </StackPanel>
+            </Grid>
         </DataTemplate>
     </UserControl.Resources>
     <Grid x:Name="FilterContainer" >
@@ -136,9 +162,13 @@
             <ComboBox ItemsSource="{Binding Filters}"
                       SelectedItem="{Binding SelectedFilterVM.Value}"
                       DisplayMemberPath="FilterType"
+                      Width="400"
+                      HorizontalAlignment="Right"
                 >
 
             </ComboBox>
+
+            <Border Margin="0 0 0 8" />
 
             <ContentControl Content="{Binding SelectedFilterVM.Value}"
                                 ContentTemplate="{StaticResource FilterEditTemplate}"

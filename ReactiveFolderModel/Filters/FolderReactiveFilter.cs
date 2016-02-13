@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace ReactiveFolder.Models.Filters
 {
@@ -31,14 +32,18 @@ namespace ReactiveFolder.Models.Filters
 		}
 
 
-		protected override ValidationResult InnerValidate()
+		public override bool IsValidFilterPatternText(string pattern)
 		{
-			var result = new ValidationResult();
+			// /folder となる文字列のみを許容する？
+			// patternにフォルダで使用できない文字列が含まれていないか
 
-			// TODO: 
-			result.AddMessage("not implement");
+			return Regex.IsMatch(pattern, @"/?[\w\-]+");
+		}
 
-			return result;
+		protected override string TransformFilterPattern(string pattern)
+		{
+			// remove first slash
+			return pattern.TrimStart('/');
 		}
 
 		public override IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir)

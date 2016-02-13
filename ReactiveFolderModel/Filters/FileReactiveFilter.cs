@@ -31,45 +31,48 @@ namespace ReactiveFolder.Models.Filters
 
 
 
-		
 
 
-
-
-
-
-		protected override ValidationResult InnerValidate()
+		public override bool IsValidFilterPatternText(string pattern)
 		{
-			var result = new ValidationResult();
+			// *.png 
+			// *.*
+			// *
+			// abc.*
+			// abs*.png
+			// *.g*
+			// 
+			// patternにフォルダで使用できない文字列が含まれていないか
 
-			foreach(var fileFilterParttern in IncludeFilter.Concat(ExcludeFilter))
-			{
-				if (String.IsNullOrWhiteSpace(fileFilterParttern))
-				{
-					result.AddMessage($"{nameof(FileReactiveFilter)}: need file filter pattern. ex) '*.png|*.jpg'");
-					return result;
-				}
+			// ファイル名部分は\wと?と*が使える
+			// 拡張子部分は*または\w+のどちらか
+			// 
 
-				foreach (var invalidChar in InvalidChars)
-				{
-					if (fileFilterParttern.Contains(invalidChar))
-					{
-						result.AddMessage($"{nameof(FileReactiveFilter)}: contain invalid char '{invalidChar}'");
-					}
-				}
-
-				try
-				{
-					IsMatch("aaaa", fileFilterParttern);
-				}
-				catch
-				{
-					result.AddMessage($"{nameof(FileReactiveFilter)}: {fileFilterParttern} is not RegularExpression.");
-				}
-			}			
-
-			return result;
+			return Regex.IsMatch(pattern, @"(^[^.][\w\*\?.]+([^?.][\w]$))|^[\w\*\?]+[.][*]$|^\.[\w]+|^[\w]*\.[\w]+$");
 		}
+
+
+		protected override string TransformFilterPattern(string pattern)
+		{
+			// 拡張子だけを指定したい場合
+			if (pattern.StartsWith("."))
+			{
+				return "*" + pattern;
+			}
+			// ファイル名だけを指定した場合
+			else if (false == pattern.Contains("."))
+			{
+				return pattern + ".*";
+			}
+			// 他は普通の拡張子付きのファイル名っぽいからスルー
+			else
+			{
+				return pattern;
+			}
+		}
+
+
+
 
 		/// <summary>
 		/// FileFilterPatternsを使ってworkDirのトップレベルに存在するファイルをフィルタリングします。
@@ -137,6 +140,7 @@ namespace ReactiveFolder.Models.Filters
 
 			return Regex.IsMatch(input, regexPatttern);
 		}
+
 		private string ToRegexParttern(string pattern)
 		{
 			// .に\\を付け足してエスケープ
