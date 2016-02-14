@@ -6,20 +6,18 @@ namespace ReactiveFolder.Models
 {
 	public interface IFolderReactionMonitorModel : IDisposable, INotifyPropertyChanged
 	{
-		FolderModel RootFolder { get; }
+		TimeSpan DefaultInterval { get; set; }
 		DirectoryInfo ReactionSaveFolder { get; set; }
+		FolderModel RootFolder { get; }
 
 		FolderModel FindFolder(string path);
 		FolderReactionModel FindReaction(Guid guid);
 		FolderModel FindReactionParentFolder(Guid guid);
 		FolderModel FindReactionParentFolder(FolderReactionModel model);
-
-		TimeSpan DefaultInterval { get; set; }
-		void Start();
-		void Exit();
-
-		void PauseMonitoring(FolderReactionModel reaction);
-		void ResumeMonitoring(FolderReactionModel reaction);
+		void StartAllReactionMonitoring();
+		void StartMonitoring(FolderReactionModel reaction);
+		void StopAllReactionMonitoring();
+		void StopMonitoring(FolderReactionModel reaction);
 	}
 
 	public static class IFolderReactionMonitorModelHelper

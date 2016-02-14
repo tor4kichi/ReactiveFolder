@@ -79,7 +79,7 @@ namespace ReactiveFolder.Models
 
 		public void Dispose()
 		{
-			Exit();
+			StopAllReactionMonitoring();
 		}
 
 		
@@ -116,37 +116,26 @@ namespace ReactiveFolder.Models
 
 		#region Monitor Manage
 
-		public void Start()
+
+		public void StartMonitoring(FolderReactionModel reaction)
 		{
-			StartMonitoring();
-		}
+			StopMonitoring(reaction);
 
-
-		public void Exit()
-		{
-			StopMonitoring();
-		}
-
-
-
-
-		public void PauseMonitoring(FolderReactionModel reaction)
-		{
-			if (_RunningReactions.ContainsKey(reaction.Guid))
+			if (reaction.IsEnable && reaction.IsValid)
 			{
-				var monitor = _RunningReactions[reaction.Guid];
-
-				monitor.IsPause = true;
+				_RunningReactions.Add(reaction.Guid, new ReactionMonitor(reaction));
 			}
 		}
 
-		public void ResumeMonitoring(FolderReactionModel reaction)
+		public void StopMonitoring(FolderReactionModel reaction)
 		{
 			if (_RunningReactions.ContainsKey(reaction.Guid))
 			{
 				var monitor = _RunningReactions[reaction.Guid];
 
-				monitor.IsPause = false;
+				monitor.Dispose();
+
+				_RunningReactions.Remove(reaction.Guid);
 			}
 		}
 
@@ -154,14 +143,14 @@ namespace ReactiveFolder.Models
 		
 
 
-		private void StartMonitoring()
+		public void StartAllReactionMonitoring()
 		{
-			RecursiveFolder(RootFolder, CheckRunOrStopReactionMonitoring);
+			RecursiveFolder(RootFolder, StartMonitoring);
 		}
 
-		private void StopMonitoring()
+		public void StopAllReactionMonitoring()
 		{
-			RecursiveFolder(RootFolder, StopReactionMonitoring);
+			RecursiveFolder(RootFolder, StopMonitoring);
 		}
 
 		private void RecursiveFolder(FolderModel folder, Action<FolderReactionModel> act)
@@ -178,48 +167,6 @@ namespace ReactiveFolder.Models
 			}
 		}
 
-		private void CheckRunOrStopReactionMonitoring(FolderReactionModel reaction)
-		{
-
-			// Reaction start?
-			if (reaction.IsEnable && reaction.IsValid)
-			{
-				// start
-				if (false == _RunningReactions.ContainsKey(reaction.Guid))
-				{
-					var monitor = StartReactionMonitor(reaction);
-
-					_RunningReactions.Add(reaction.Guid, monitor);
-				}
-			}
-			else
-			{
-				// stop
-				StopReactionMonitoring(reaction);
-			}
-		}
-
-		private ReactionMonitor StartReactionMonitor(FolderReactionModel reaction)
-		{
-			return new ReactionMonitor(reaction);
-		}
-
-
-		private void StopReactionMonitoring(FolderReactionModel reaction)
-		{
-			if (_RunningReactions.ContainsKey(reaction.Guid))
-			{
-				var monitor = _RunningReactions[reaction.Guid];
-
-				monitor.Dispose();
-
-				_RunningReactions.Remove(reaction.Guid);
-			}
-		}
-
-
-
-
 
 		#endregion
 
@@ -233,7 +180,6 @@ namespace ReactiveFolder.Models
 		public FolderReactionModel Reaction { get; private set; }
 
 		public bool NowProcessing { get; private set; }
-		public bool IsPause { get; set; }
 		public bool IsTerminated { get; set; }
 
 		private IDisposable _Disposer;
@@ -243,7 +189,6 @@ namespace ReactiveFolder.Models
 		public ReactionMonitor(FolderReactionModel reaction)
 		{
 			Reaction = reaction;
-			IsPause = false;
 			NowProcessing = false;
 			IsTerminated = false;
 
@@ -252,8 +197,14 @@ namespace ReactiveFolder.Models
 
 		public void Dispose()
 		{
-			_Disposer?.Dispose();
-			_Disposer = null;
+			if (_Disposer != null)
+			{
+				_Disposer.Dispose();
+				_Disposer = null;
+
+				System.Diagnostics.Debug.WriteLine($"exit monitoring : {Reaction.Name}");
+			}
+			
 		}
 
 		public void Start()
@@ -264,6 +215,13 @@ namespace ReactiveFolder.Models
 				.Where(_ => CanExecute)
 				.Do(cnt => ExecuteReaction(cnt))
 				.Subscribe();
+
+			System.Diagnostics.Debug.WriteLine($"start monitoring : {Reaction.Name}");
+
+			if (CanExecute)
+			{
+				ExecuteReaction();
+			}
 		}
 
 
@@ -272,7 +230,6 @@ namespace ReactiveFolder.Models
 			get
 			{
 				return
-					false == this.IsPause &&
 					false == this.NowProcessing &&
 					false == this.IsTerminated;
 			}
@@ -281,7 +238,7 @@ namespace ReactiveFolder.Models
 		public void ExecuteReaction(long count = -1)
 		{
 			PreTrigger(count);
-			TriggerReactioin();
+			TriggerReaction();
 			PostTrigger();
 		}
 
@@ -291,15 +248,15 @@ namespace ReactiveFolder.Models
 
 			if (count == -1)
 			{
-				System.Diagnostics.Debug.WriteLine($"{Reaction.Name}の処理を開始しました。");
+				System.Diagnostics.Debug.WriteLine($"check reaction on remote : {Reaction.Name}");
 			}
 			else
 			{
-				System.Diagnostics.Debug.WriteLine($"{Reaction.Name}の{count+1}回目の処理を開始しました。");
+				System.Diagnostics.Debug.WriteLine($"check reaction on timer [{count + 1}] : {Reaction.Name}");
 			}
-        }
+		}
 
-		private void TriggerReactioin()
+		private void TriggerReaction()
 		{
 			// TODO: lock
 			try
@@ -318,7 +275,15 @@ namespace ReactiveFolder.Models
 		{
 			NowProcessing = false;
 
-			System.Diagnostics.Debug.WriteLine($"{Reaction.Name}の処理が終了しました。");
+			if (IsTerminated)
+			{
+				System.Diagnostics.Debug.WriteLine($"terminated reaction : {Reaction.Name}");
+				System.Diagnostics.Debug.WriteLine(TerminateCauseException.Message);
+			}
+			else
+			{
+				System.Diagnostics.Debug.WriteLine($"done reaction : {Reaction.Name}");
+			}
 		}
 
 		

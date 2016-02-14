@@ -74,7 +74,7 @@ namespace Modules.Main.ViewModels
 		public void OnNavigatedFrom(NavigationContext navigationContext)
 		{
 			// 一時停止していたモニタリングを再開
-			_MonitorModel.ResumeMonitoring(this.Reaction);
+			_MonitorModel.StartMonitoring(this.Reaction);
 		}
 
 		public void OnNavigatedTo(NavigationContext navigationContext)
@@ -104,8 +104,10 @@ namespace Modules.Main.ViewModels
 					});
 
 
+
 				// モニター処理を一時停止
-				_MonitorModel.PauseMonitoring(this.Reaction);
+				_MonitorModel.StopMonitoring(this.Reaction);
+
 			}
 		}
 
