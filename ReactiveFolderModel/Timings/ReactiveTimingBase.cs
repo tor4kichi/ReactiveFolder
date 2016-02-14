@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Models.Timings
 {
-	abstract public class ReactiveTimingBase : ReactiveStreamBase
+	abstract public class ReactiveTimingBase : ReactiveStraightStreamBase
 	{
 	}
 }

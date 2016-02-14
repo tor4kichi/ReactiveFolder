@@ -37,7 +37,7 @@ namespace ReactiveFolder.Models.Filters
 			// /folder となる文字列のみを許容する？
 			// patternにフォルダで使用できない文字列が含まれていないか
 
-			return Regex.IsMatch(pattern, @"/?[\w\-]+");
+			return Regex.IsMatch(pattern, @"/?[\w\-\*\?]+");
 		}
 
 		protected override string TransformFilterPattern(string pattern)
@@ -46,13 +46,58 @@ namespace ReactiveFolder.Models.Filters
 			return pattern.TrimStart('/');
 		}
 
-		public override IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir)
+
+		public override IEnumerable<ReactiveStreamContext> GenerateBranch(ReactiveStreamContext context)
 		{
-			var allDir = workDir.EnumerateDirectories("*.*", SearchOption.TopDirectoryOnly);
+			return DirectoryFilter(context.WorkFolder)
+				.Select(x => new ReactiveStreamContext(context.WorkFolder, x.FullName));
+		}
 
-			// TODO: 
 
-			return allDir;
+		public IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir)
+		{
+			return workDir.EnumerateDirectories("*.*", SearchOption.TopDirectoryOnly)
+				.Where(ApplyFilter);
+
+		}
+
+
+		private bool ApplyFilter(DirectoryInfo sourceDir)
+		{
+			// Note: 包含条件が指定されない場合に全てのファイルを処理してしまうのは不本意の大量データ処理といった事故に繋がる
+			// 対象フォルダ内の全件処理はIncludeFilterに"*.*"を明示的に指定された場合に限られる
+			var sourcePath = sourceDir.FullName;
+
+			// 包含条件に当てはまらない場合
+			if (false == IncludeFilter.Any(x => IsMatch(sourcePath, x)))
+			{
+				return false;
+			}
+
+			// 除外条件に当てはまる場合
+			if (ExcludeFilter.Any(x => IsMatch(sourcePath, x)))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		private bool IsMatch(string input, string pattern)
+		{
+			var regexPatttern = ToRegexParttern(pattern);
+
+			return Regex.IsMatch(input, regexPatttern);
+		}
+
+		private string ToRegexParttern(string pattern)
+		{
+			// .に\\を付け足してエスケープ
+			// ?と*をの直前に.を加える
+
+			return pattern
+				.Replace("?", ".?")
+				.Replace("*", ".*");
 		}
 
 		public override IEnumerable<string> GetFilters()

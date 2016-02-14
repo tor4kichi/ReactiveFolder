@@ -23,7 +23,10 @@ namespace ReactiveFolder.Models.Destinations
 			}
 			set
 			{
-				SetProperty(ref _AbsoluteFolderPath, value);
+				if (SetProperty(ref _AbsoluteFolderPath, value))
+				{
+					ValidatePropertyChanged();
+				}
 			}
 		}
 

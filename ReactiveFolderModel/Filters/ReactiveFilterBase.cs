@@ -18,7 +18,7 @@ namespace ReactiveFolder.Models
 	}
 
 	[DataContract]
-	public abstract class ReactiveFilterBase : ReactiveStreamBase, IFolderItemOutputer
+	abstract public class ReactiveFilterBase : ReactiveBranchingStreamBase, IFolderItemOutputer
 	{
 		abstract public FolderItemType OutputItemType { get; }
 
@@ -45,48 +45,13 @@ namespace ReactiveFolder.Models
 
 
 		
-		public virtual IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir) { return null; }
-		public virtual IEnumerable<DirectoryInfo> DirectoryFilter(DirectoryInfo workDir) { return null; }
-
 		public abstract IEnumerable<string> GetFilters();
-
-
-
-		public override IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev)
-		{
-			return prev.SelectMany(Filter);
-		}
-
-
-		private IEnumerable<ReactiveStreamContext> Filter(ReactiveStreamContext payload)
-		{
-			var files = FileFilter(payload.WorkFolder);
-			if (files != null)
-			{
-				foreach (var fileInfo in files)
-				{
-					yield return new ReactiveStreamContext(payload.WorkFolder, fileInfo.FullName);
-				}
-			}
-
-			var directories = DirectoryFilter(payload.WorkFolder);
-			if (directories != null)
-			{
-				foreach (var dirInfo in directories)
-				{
-					yield return new ReactiveStreamContext(payload.WorkFolder, dirInfo.FullName);
-				}
-			}
-		}
-
-
-
 
 
 
 
 		/// <summary>
-		/// <para>Default is *.*</para>
+		/// <para>Default is empty</para>
 		/// <para>
 		/// *と?のみ特殊文字として扱われます。
 		/// * は0文字以上の文字列、

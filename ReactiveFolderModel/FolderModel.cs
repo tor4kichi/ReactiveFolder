@@ -137,8 +137,6 @@ namespace ReactiveFolder.Models
 				throw new Exception();
 			}
 
-			removeTarget.Exit();
-
 			_Models.Remove(removeTarget);
 
 			DeleteReaction(removeTarget);
@@ -219,8 +217,6 @@ namespace ReactiveFolder.Models
 		{
 			if (_Children.Contains(folder))
 			{
-				folder.Exit();
-
 				_Children.Remove(folder);
 
 				folder.Folder.Delete(true);
@@ -286,6 +282,7 @@ namespace ReactiveFolder.Models
 			return null;
 		}
 
+		/*
 		public void Start()
 		{
 			System.Diagnostics.Debug.WriteLine($"start: {Folder.FullName}");
@@ -318,6 +315,8 @@ namespace ReactiveFolder.Models
 				child.Exit();
 			}
 		}
+
+	*/
 
 		public string MakeReactionSaveFilePath(FolderReactionModel reaction)
 		{

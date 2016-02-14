@@ -72,7 +72,8 @@ namespace Modules.Main.ViewModels
 
 		public void OnNavigatedFrom(NavigationContext navigationContext)
 		{
-			
+			// 一時停止していたモニタリングを再開
+			_MonitorModel.ResumeMonitoring(this.Reaction);
 		}
 
 		public void OnNavigatedTo(NavigationContext navigationContext)
@@ -100,7 +101,10 @@ namespace Modules.Main.ViewModels
 					{
 						IsNeedSave.Value = true;
 					});
-					
+
+
+				// モニター処理を一時停止
+				_MonitorModel.PauseMonitoring(this.Reaction);
 			}
 		}
 
@@ -220,9 +224,7 @@ namespace Modules.Main.ViewModels
 				return _TestCommand
 					?? (_TestCommand = new DelegateCommand(() =>
 					{
-						Reaction.Test();
-//						Reaction.Start();
-//						Reaction.CheckNow();
+						Reaction.Execute();
 					}
 					));
 			}

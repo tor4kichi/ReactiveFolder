@@ -72,6 +72,11 @@ namespace ReactiveFolder.Models.Filters
 		}
 
 
+		public override IEnumerable<ReactiveStreamContext> GenerateBranch(ReactiveStreamContext context)
+		{
+			return FileFilter(context.WorkFolder)
+				.Select(x => new ReactiveStreamContext(context.WorkFolder, x.FullName));
+		}
 
 
 		/// <summary>
@@ -79,57 +84,33 @@ namespace ReactiveFolder.Models.Filters
 		/// </summary>
 		/// <param name="workDir"></param>
 		/// <returns></returns>
-		public override IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir)
+		public IEnumerable<FileInfo> FileFilter(DirectoryInfo workDir)
 		{
-			var files = workDir.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly);
+			return workDir
+				.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly)
+				.Where(ApplyFilter);
 
-			var filterdFiles = ApplyFilter(files);
-
-			return filterdFiles;
 		}
 
-		private IEnumerable<FileInfo> ApplyFilter(IEnumerable<FileInfo> sourceFiles)
+		private bool ApplyFilter(FileInfo sourceFile)
 		{
 			// Note: 包含条件が指定されない場合に全てのファイルを処理してしまうのは不本意の大量データ処理といった事故に繋がる
 			// 対象フォルダ内の全件処理はIncludeFilterに"*.*"を明示的に指定された場合に限られる
+			var sourcePath = sourceFile.FullName;
 
-
-			// 包含条件
-			if (IncludeFilter.Count == 0)
+			// 包含条件に当てはまらない場合
+			if (false == IncludeFilter.Any(x => IsMatch(sourcePath, x)))
 			{
-				return Enumerable.Empty<FileInfo>();
+				return false;
 			}
 
-			var includeFilteredFiles = new List<FileInfo>();
-			foreach (var include in IncludeFilter)
+			// 除外条件に当てはまる場合
+			if (ExcludeFilter.Any(x => IsMatch(sourcePath, x)))
 			{
-				includeFilteredFiles.AddRange(
-					sourceFiles.Where(x => IsMatch(x.Name, include))
-					);
+				return false;
 			}
 
-			var distinctIncludeFiles = includeFilteredFiles.Distinct();
-
-
-			// 除外条件
-			if (ExcludeFilter.Count == 0)
-			{
-				return distinctIncludeFiles;
-			}
-
-			var excludeFilteredFiles = new List<FileInfo>();
-			foreach (var exclude in ExcludeFilter)
-			{
-				excludeFilteredFiles.AddRange(
-					distinctIncludeFiles.Where(x => false == IsMatch(x.Name, exclude))
-					);
-			}
-
-			var distinctExcludeFiles = excludeFilteredFiles.Distinct();
-
-
-
-			return distinctExcludeFiles;
+			return true;
 		}
 
 		// 単純なワイルドカード*と0or1文字指定の?を使っている

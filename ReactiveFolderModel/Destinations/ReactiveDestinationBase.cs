@@ -21,7 +21,7 @@ namespace ReactiveFolder.Models.Destinations
 	// * * * * * * * * * * * * 
 
 	[DataContract]
-	public abstract class ReactiveDestinationBase : ReactiveStreamBase, IStreamContextFinalizer
+	public abstract class ReactiveDestinationBase : ReactiveStraightStreamBase
 	{
 		static Dictionary<string, Func<ReactiveStreamContext, string>> FormatMap;
 
@@ -147,7 +147,10 @@ namespace ReactiveFolder.Models.Destinations
 			}
 			set
 			{
-				SetProperty(ref _OutputNamePattern, value);
+				if (SetProperty(ref _OutputNamePattern, value))
+				{
+					ValidatePropertyChanged();
+				}
 			}
 		}
 		
@@ -163,9 +166,6 @@ namespace ReactiveFolder.Models.Destinations
 		abstract public string GetDistinationFolderPath();
 
 
-
-		// for IStreamContextFinalizer
-		public string OutputName { get; private set; }
 
 		
 		// for IStreamContextFinalizer
@@ -190,6 +190,141 @@ namespace ReactiveFolder.Models.Destinations
 			}
 
 			return new DirectoryInfo(path);
+		}
+
+
+		public override void Execute(ReactiveStreamContext context)
+		{
+			// TODO: OutputNameを状態として保持するのは変やで、一時変数に変更しよう
+			var outputPath = FormatedString(this.OutputNamePattern, context);
+
+			try
+			{
+
+
+				// やること
+				// アウトプットしたいファイルまたはフォルダをNameに変更した上でDestinationFolderに移動させる
+
+				// 例外状況
+				// DestinationFolderとWorkFolderが同じ場合、かつ
+				// 拡張子を含むOriginalのファイル名とOutputPathのファイル名が同じ場合、かつ
+				// IsProtecteOriginalがtrueのときに
+				// Destinationへの配置が実行できない状況が生まれる
+
+
+
+				// 検証が必要：フォルダでも同様に配置不可な状況が検知できるか
+
+				var destFolder = GetDestinationFolder();
+				if (context.WorkFolder.FullName == destFolder.FullName &&
+					Path.GetFileName(context.OriginalPath) == Path.GetFileName(context.SourcePath) &&
+					context.IsProtectOriginal == true
+					)
+				{
+					// Finalizeに失敗？
+					outputPath = null;
+					throw new Exception("OutputItem cant deployment to destination folder.");
+				}
+
+				// OutputPathで指定されたファイルをfinalizer.DestinationFolderにコピーする
+				// コピーする前にファイル名をNameに変更する（拡張子はOutputPathのものを引き継ぐ）
+
+				string outputName = Path.GetFileNameWithoutExtension(context.OriginalPath);
+				if (false == String.IsNullOrWhiteSpace(outputName))
+				{
+					outputName = outputPath;
+				}
+
+				if (context.IsFile)
+				{
+					outputPath = FinalizeFile(context, outputName, destFolder);
+				}
+				else
+				{
+					outputPath = FinalizeFolder(context, outputName, destFolder);
+				}
+
+				if (outputPath != null)
+				{
+					context.Complete(outputPath);
+				}
+			}
+			catch (Exception e)
+			{
+				context.Failed("ReactiveStreamFailed on Finalize", e);
+			}
+		}
+
+
+		private string FinalizeFile(ReactiveStreamContext context, string outputName, DirectoryInfo destFolder)
+		{
+
+			var outputFileInfo = new FileInfo(context.SourcePath);
+			if (false == outputFileInfo.Exists)
+			{
+				return null;
+			}
+
+			var extention = Path.GetExtension(context.SourcePath);
+
+			var finalizeFilePath = Path.Combine(
+				destFolder.FullName,
+				Path.ChangeExtension(
+					outputName,
+					extention
+				)
+			);
+
+			try
+			{
+				var destFileInfo = new FileInfo(finalizeFilePath);
+				if (destFileInfo.Exists)
+				{
+					destFileInfo.Delete();
+				}
+				outputFileInfo.CopyTo(destFileInfo.FullName);
+				return finalizeFilePath;
+			}
+			catch (Exception e)
+			{
+				context.Failed("ReactiveStreamFailed on Finalize file", e);
+				// TODO: 
+			}
+
+			return null;
+		}
+
+		private string FinalizeFolder(ReactiveStreamContext context, string outputName, DirectoryInfo destFolder)
+		{
+			var outputFolderInfo = new DirectoryInfo(context.SourcePath);
+			if (false == outputFolderInfo.Exists)
+			{
+				return null;
+			}
+
+
+			var finalizeFolderPath = Path.Combine(
+				destFolder.FullName,
+				outputName
+			);
+
+			var finalizeFolderInfo = new DirectoryInfo(finalizeFolderPath);
+			try
+			{
+				if (finalizeFolderInfo.Exists)
+				{
+					finalizeFolderInfo.Delete();
+				}
+
+				outputFolderInfo.MoveTo(finalizeFolderPath);
+				return finalizeFolderPath;
+			}
+			catch (Exception e)
+			{
+				context.Failed("ReactiveStreamFailed on Finalize folder", e);
+			}
+
+			return null;
 		}
 
 
@@ -275,13 +410,8 @@ namespace ReactiveFolder.Models.Destinations
 			return text;
 		}
 
-
-		override public IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev)
-		{
-			return prev
-				.Do(context => OutputName = FormatedString(this.OutputNamePattern, context))
-				.Do(context => context.Finalize(this));
-		}
+		
+		
 
 		public static string FormatedString(string renamePattern, ReactiveStreamContext context)
 		{

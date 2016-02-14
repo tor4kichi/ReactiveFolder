@@ -97,9 +97,13 @@ namespace ReactiveFolder.Models.Timings
 
 
 
-		public override IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev)
+		public override void Execute(ReactiveStreamContext context)
 		{
-			return prev.Where(_ => CheckTimingAndUpdateNextTime());
+			// アップデートタイミングではない場合はfalseを返してStreamを終了させる
+			if (false == CheckTimingAndUpdateNextTime())
+			{
+				context.Done();
+			}
 		}
 
 		

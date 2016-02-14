@@ -153,8 +153,6 @@
     <Compile Include="FolderReactionModel.cs" />
     <Compile Include="IFolderItemOutputer.cs" />
     <Compile Include="IFolderReactionMonitorModel.cs" />
-    <Compile Include="IStreamContextFinalizer.cs" />
-    <Compile Include="IStreamContextUpdater.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReactiveStreamContext.cs" />
     <Compile Include="ReactiveStreamBase.cs" />

@@ -22,7 +22,8 @@ namespace ReactiveFolder.Models
 	[DataContract]
 	public class FolderReactionModel : BindableBase
 	{
-
+		// Note: 現在の状態を利用してFolderReactionを実行します。
+		// Folderのモニタリング自体はFolderReactionModelでは行いません。
 
 		// ***************************
 
@@ -87,8 +88,6 @@ namespace ReactiveFolder.Models
 			{
 				if (SetProperty(ref _WorkFolder, value))
 				{
-					Exit();
-
 					WorkFolderPath = _WorkFolder.FullName;
 
 					ResetWorkingFolder();
@@ -164,20 +163,6 @@ namespace ReactiveFolder.Models
 		[DataMember]
 		public AbsolutePathReactiveDestination Destination { get; private set; }
 		
-
-		public bool IsRunning
-		{
-			get
-			{
-				return _Disposer != null;
-			}
-		}
-
-		private IDisposable _Disposer;
-
-
-		private BehaviorSubject<ReactiveStreamContext> RemoteTrigger;
-
 
 		private bool _IsNeedValidation;
 		public bool IsNeedValidation
@@ -347,8 +332,6 @@ namespace ReactiveFolder.Models
 		/// <param name="action"></param>
 		public void AddAction(ReactiveActionBase action)
 		{
-			Exit();
-
 			_Actions.Add(action);
 
 			action.SetParentReactionModel(this);
@@ -366,8 +349,6 @@ namespace ReactiveFolder.Models
 		/// <param name="action"></param>
 		public void RemoveAction(ReactiveActionBase action)
 		{
-			Exit();
-
 			if (_Actions.Remove(action))
 			{
 				action.ClearParentReactionModel();
@@ -415,8 +396,7 @@ namespace ReactiveFolder.Models
 
 
 
-
-		// IFolderItemOutputerを実装する
+		// sourceに入力可能なアクションのタイプを特定するためのメソッド
 
 		public IFolderItemOutputer GetPreviousFolderItemOutputer(ReactiveActionBase source)
 		{
@@ -699,7 +679,7 @@ namespace ReactiveFolder.Models
 			Destination?.Initialize(WorkFolder);
 		}
 
-		private ReactiveStreamContext CreatePayload()
+		public ReactiveStreamContext CreatePayload()
 		{
 			if (WorkFolder == null)
 			{
@@ -709,173 +689,63 @@ namespace ReactiveFolder.Models
 			return new ReactiveStreamContext(WorkFolder, "");
 		}
 		
-		/// <summary>
-		/// 処理ストリームを作成します。
-		/// ストリームは引数のtriggerによって実行タイミングが管理されます。
-		/// </summary>
-		/// <param name="trigger"></param>
-		/// <returns></returns>
-		private IObservable<ReactiveStreamContext> Generate(IObservable<ReactiveStreamContext> trigger)
+
+		public void Execute()
 		{
-			if (false == IsValid)
-			{
-				throw new Exception();
-			}
-
-			
-
-			
-
-			// Note: なんでTimingsより先にFilterを実行するの？
-			// それはね、Timingsにはファイルの更新日時を読んでトリガーするものがあるからさ
-			// see@ FileUpdateReactiveTiming.cs
-
-
-			// Filter
-			var filterdTrigger = Filter.Chain(trigger);
-
-
-
-
-			// Timing
-			var timingTrigger = FileUpdateTiming.Chain(filterdTrigger);
-			
-
-			// Actions
-			IObservable<ReactiveStreamContext> actionChainObserver = timingTrigger;
-			foreach (var action in Actions)
-			{
-				try
-				{
-					actionChainObserver = action.Chain(actionChainObserver);
-				}
-				catch (Exception e)
-				{
-					throw new Exception($"stream generate failed in FolderReactionModel. name:{Name}", e);
-				}
-			}
-
-
-			// Destinations
-			var finalizedChainObserver = Destination.Chain(actionChainObserver);
-
-
-			return finalizedChainObserver;
-		}
-
-
-
-		/// <summary>
-		/// <para>監視タスクを開始します。</para>
-		/// <para>このメソッドは最初にExit()を呼び出します。</para>
-		/// <para>タスクの作成前にValidate()による妥当性チェックが呼び出され
-		/// このチェックに失敗した場合、監視タスクは開始されません。</para>
-		/// </summary>
-		/// <param name="rootTrigger"></param>
-		/// <param name="subscriber"></param>
-		/// <returns></returns>
-		public bool Start(Action<ReactiveStreamContext> subscriber = null)
-		{
-			Exit();
-
-			ResetWorkingFolder();
+//			ResetWorkingFolder();
 
 			if (false == IsValid)
 			{
-				return false;
+				return;
 			}
 
 
 			if (false == IsEnable)
 			{
-				return true;
+				return;
 			}
 
+			var initialContext = CreatePayload();
+			var streams = EnumStreamItems();
 
+			var failedItems = Filter.GenerateBranch(initialContext)
+				.Where(context =>
+				{
+					foreach (var stream in streams)
+					{
+						stream.Execute(context);
 
-			// タイマーによるトリガーを作成
-			var timerTrigger = Observable.Interval(CheckInterval)
-				.Select(_ => CreatePayload());
+						if (!context.IsRunnning) break;
+					}
 
-			var remoteTrigger = new BehaviorSubject<ReactiveStreamContext>(CreatePayload());
-			var mergedTrigger =
-				Observable.Merge(remoteTrigger, timerTrigger);
+					return !context.IsCompleted;
+				});
 
-			var hotMergedTrigger = mergedTrigger.Publish();
-
-
-			Generate(hotMergedTrigger)
-				.Publish()
-				.Connect();
-
-
-			_Disposer = hotMergedTrigger.Connect();
-
-			RemoteTrigger = remoteTrigger;
-
-			return true;
-		}
-
-
-		public void CheckNow()
-		{
-			RemoteTrigger?.OnNext(CreatePayload());
-		}
-
-		/// <summary>
-		/// <para>現在の設定で処理ストリームを作成します。</para>
-		/// <para>このメソッドは最初にExit()を呼び出します。</para>
-		/// <para>テスト前にValidate()による妥当性チェックが呼び出され
-		/// このチェックに失敗した場合、テストは開始されません。</para>
-		/// </summary>
-		/// <param name="testContext"></param>
-		/// <param name="forceEnabling">trueを指定すると、IsDisableの設定を一時的にtrueに設定してテストを開始します。</param>
-		public bool Test( bool forceEnabling = false)
-		{
-			Exit();
-
-			ResetWorkingFolder();
-
-
-			if (false == IsValid)
+			foreach (var context in failedItems)
 			{
-				return false;
+				System.Diagnostics.Debug.WriteLine(context.SourcePath);
+
+				if (context.FailedMessage != null)
+				{
+					System.Diagnostics.Debug.WriteLine(context.FailedMessage);
+				}
+
+				if (context.FailedCuaseException != null)
+				{
+					System.Diagnostics.Debug.WriteLine(context.FailedCuaseException);
+				}
 			}
-
-
-
-			if (false == this.IsEnable && false == forceEnabling)
-			{
-				return true;
-			}
-			
-			// 仮のトリガー
-			var trigger = new BehaviorSubject<ReactiveStreamContext>(CreatePayload());
-
-			// ストリームを作る
-			var observer = Generate(trigger);
-
-			// ストリームにtestContextのアイテムを流す
-			var disposer = observer.Publish()
-				.Connect();
-
-//			trigger.OnNext(CreatePayload());
-
-			// ストリームを閉じる
-			disposer.Dispose();
-
-			return true;
 		}
 
-
-
-		/// <summary>
-		/// 監視タスクを終了します。
-		/// </summary>
-		public void Exit()
+		private IEnumerable<ReactiveStraightStreamBase> EnumStreamItems()
 		{
-			_Disposer?.Dispose();
-			_Disposer = null;
+			yield return FileUpdateTiming;
+			foreach(var action in Actions)
+			{
+				yield return action;
+			}
+
+			yield return Destination;
 		}
 	}
 

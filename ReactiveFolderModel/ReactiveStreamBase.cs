@@ -130,10 +130,7 @@ namespace ReactiveFolder.Models
 
 
 
-		abstract public IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev);
-
-
-
+		
 
 		protected ReactiveStreamContext GenerateTempStreamContext()
 		{
@@ -144,8 +141,18 @@ namespace ReactiveFolder.Models
 	}
 
 
+	abstract public class ReactiveStraightStreamBase : ReactiveStreamBase
+	{
+		abstract public void Execute(ReactiveStreamContext context);
+	}
+
+
+	abstract public class ReactiveBranchingStreamBase : ReactiveStreamBase
+	{
+		abstract public IEnumerable<ReactiveStreamContext> GenerateBranch(ReactiveStreamContext context);
+	}
 
 
 
-	
+
 }

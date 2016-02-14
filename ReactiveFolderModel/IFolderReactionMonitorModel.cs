@@ -17,6 +17,9 @@ namespace ReactiveFolder.Models
 		TimeSpan DefaultInterval { get; set; }
 		void Start();
 		void Exit();
+
+		void PauseMonitoring(FolderReactionModel reaction);
+		void ResumeMonitoring(FolderReactionModel reaction);
 	}
 
 	public static class IFolderReactionMonitorModelHelper

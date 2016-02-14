@@ -26,7 +26,7 @@ namespace Modules.Monitor
 		{
 			_MonitorModel.DefaultInterval = TimeSpan.FromHours(1);
 
-//			_MonitorModel.Start();
+			_MonitorModel.Start();
 
 		}
 	}

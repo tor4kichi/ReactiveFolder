@@ -26,12 +26,17 @@ namespace ReactiveFolder.Models.Timings
 		}
 
 
-		public override IObservable<ReactiveStreamContext> Chain(IObservable<ReactiveStreamContext> prev)
+		public override void Execute(ReactiveStreamContext context)
 		{
 			// ファイルやフォルダが更新された作成されていた場合にObservableシーケンスを後続に流す
-			return prev
-				.Where(payload => FileIsNeedUpdate(payload))
-				.Do(payload => UpdateTargetFile(payload));
+			if (FileIsNeedUpdate(context))
+			{
+				UpdateTargetFile(context);
+			}
+			else
+			{
+				context.Done();
+			}
 		}
 
 
