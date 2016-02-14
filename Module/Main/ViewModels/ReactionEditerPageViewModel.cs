@@ -12,6 +12,7 @@ using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -347,6 +348,7 @@ namespace Modules.Main.ViewModels
 		public DestinationEditViewModel DestinationEditVM { get; private set; }
 
 		public ReactiveProperty<bool> IsEnable { get; private set; }
+		public ReactiveProperty<string> MonitorIntervalSeconds { get; private set; }
 
 		// Reactionmodelを受け取ってVMを生成する
 
@@ -371,6 +373,31 @@ namespace Modules.Main.ViewModels
 
 			IsEnable = Reaction.ToReactivePropertyAsSynchronized(x => x.IsEnable)
 				.AddTo(_CompositeDisposable);
+
+			// see@ http://stackoverflow.com/questions/1833830/timespan-parse-time-format-hhmmss
+			// https://msdn.microsoft.com/en-us/library/ee372286.aspx
+			MonitorIntervalSeconds = Reaction.ToReactivePropertyAsSynchronized(
+				x => x.CheckInterval
+				, convert: (timespan) => ((int)timespan.TotalSeconds).ToString()
+				, convertBack: (seconds) => TimeSpan.FromSeconds(int.Parse(seconds))
+				, ignoreValidationErrorValue: true
+			)
+			.AddTo(_CompositeDisposable);
+
+			MonitorIntervalSeconds.SetValidateNotifyError(text =>
+			{
+				int temp;
+				if (false == int.TryParse(text, out temp))
+				{
+					return "Number Only";
+				}
+
+				return null;
+			});
+
+			
+
+
 		}
 
 		public void Dispose()

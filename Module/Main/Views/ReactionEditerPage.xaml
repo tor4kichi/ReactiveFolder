@@ -10,6 +10,7 @@
              xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
              xmlns:prism="http://prismlibrary.com/"             
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mybehavior="clr-namespace:ReactiveFolderStyles.Behaviors;assembly=ReactiveFolderStyles"
              mc:Ignorable="d" 
              d:DesignHeight="1200" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True">
@@ -204,6 +205,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock Text="Active"
                                         Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                               VerticalAlignment="Center"
                                        />
                                     <Border Width="200">
                                         <ToggleButton 
@@ -213,6 +215,31 @@
                                     />
                                     </Border>
                                 </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                                    <TextBlock Text="Check Interval"
+                                        Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                               VerticalAlignment="Center"
+                                       />
+
+
+                                    <DockPanel  Width="200" HorizontalAlignment="Right" >
+                                        <TextBlock Text="seconds" 
+                                                   VerticalAlignment="Center" 
+                                                   DockPanel.Dock="Right" 
+                                                   Margin="8 0 0 0"
+                                                   />
+
+                                        <TextBox Text="{Binding MonitorIntervalSeconds.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" 
+                                                         mybehavior:TextBoxHelper.IsNumeric="True"
+                                                 Width="100"
+                                                 HorizontalAlignment="Right"
+                                                 
+                                        />
+                                    </DockPanel>
+                                </StackPanel>
+
+
 
                             </StackPanel>
 
