@@ -11,6 +11,7 @@ namespace ReactiveFolder.Models
 {
 	public class FolderModel
 	{
+		public const string REACTION_EXTENTION = ".rf.json";
 
 		public DirectoryInfo Folder { get; private set; }
 
@@ -71,9 +72,11 @@ namespace ReactiveFolder.Models
 
 		public void UpdateReactionModels()
 		{
-			var files = Folder.EnumerateFiles("*.json");
+			var files = Folder.EnumerateFiles($"*{REACTION_EXTENTION}");
 
-
+			// TODO: 読み込みの最適化
+			// ファイル名で既に読まれているアイテムと比較する
+			// インスタンスを生成する前に判断するように軽量化したい
 			var models = files.Select(fileInfo =>
 			{
 				try
@@ -117,15 +120,16 @@ namespace ReactiveFolder.Models
 			}
 		}
 
-		public FolderReactionModel AddReaction()
+		public void AddReaction(FolderReactionModel reaction)
 		{
-			var reaction = new FolderReactionModel();
+			if (null != FindReaction(reaction.Guid))
+			{
+				throw new Exception();
+			}
 
 			_Models.Add(reaction);
 
 			SaveReaction(reaction);
-
-			return reaction;
 		}
 
 		public void RemoveReaction(Guid guid)
@@ -282,53 +286,17 @@ namespace ReactiveFolder.Models
 			return null;
 		}
 
-		/*
-		public void Start()
-		{
-			System.Diagnostics.Debug.WriteLine($"start: {Folder.FullName}");
-
-			foreach (var reaction in Models)
-			{
-				if (false == reaction.Start())
-				{
-					System.Diagnostics.Debug.WriteLine($"{reaction.Name}は問題があるためモニタータスクを開始できませんでした。");
-				}
-			}
-
-			foreach (var child in Children)
-			{
-				child.Start();
-			}
-
-			System.Diagnostics.Debug.WriteLine($"start done: {Folder.FullName}");
-		}
-
-		public void Exit()
-		{
-			foreach (var reaction in Models)
-			{
-				reaction.Exit();
-			}
-
-			foreach (var child in Children)
-			{
-				child.Exit();
-			}
-		}
-
-	*/
+		
 
 		public string MakeReactionSaveFilePath(FolderReactionModel reaction)
 		{
-			return Path.Combine(Folder.FullName, reaction.Guid.ToString() + ".json");
+			return Path.Combine(Folder.FullName, reaction.Guid.ToString() + REACTION_EXTENTION);
 		}
 
 
 		public void SaveReaction(FolderReactionModel reaction)
 		{
-			var saveFolder = Folder;
-
-			var reactionFileName = Path.Combine(saveFolder.FullName, reaction.Guid.ToString() + ".json");
+			var reactionFileName = MakeReactionSaveFilePath(reaction);
 
 			var reactionFileInfo = new FileInfo(reactionFileName);
 			if (reactionFileInfo.Exists)
@@ -342,9 +310,7 @@ namespace ReactiveFolder.Models
 
 		private async void DeleteReaction(FolderReactionModel reaction)
 		{
-			var saveFolder = Folder;
-
-			var reactionFileName = Path.Combine(saveFolder.FullName, reaction.Guid.ToString() + ".json");
+			var reactionFileName = MakeReactionSaveFilePath(reaction);
 
 			var reactionFileInfo = new FileInfo(reactionFileName);
 			if (reactionFileInfo.Exists)
