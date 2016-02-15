@@ -13,6 +13,8 @@ using System.IO;
 using Prism.Events;
 using ReactiveFolderStyles;
 using System.Diagnostics;
+using Microsoft.Win32;
+using ReactiveFolder.Models.Util;
 
 namespace Modules.Main.ViewModels
 {
@@ -144,6 +146,20 @@ namespace Modules.Main.ViewModels
 			}
 		}
 
+		private DelegateCommand _RefreshCommand;
+		public DelegateCommand RefreshCommand
+		{
+			get
+			{
+				return _RefreshCommand
+					?? (_RefreshCommand = new DelegateCommand(() =>
+					{
+						CurrentFolder.UpdateReactionModels();
+						CurrentFolder.UpdateChildren();
+					}));
+			}
+		}
+
 
 		private DelegateCommand _AddFolderCommand;
 		public DelegateCommand AddFolderCommand
@@ -174,15 +190,14 @@ namespace Modules.Main.ViewModels
 					{
 						var desktop = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
-						var reaction = CurrentFolder.AddReaction();
-						reaction.Name = "something reaction";
+						var reaction = new FolderReactionModel();
+
+						reaction.Name = "TypeYourReactionNameHere";
 
 						reaction.Filter = new ReactiveFolder.Models.Filters.FileReactiveFilter();
 
-						//						reaction.AddAction(new RenameReactiveAction("#{name}"));
-
 						// save
-						CurrentFolder.SaveReaction(reaction);
+						CurrentFolder.AddReaction(reaction);
 
 						// 
 						_MonitorModel.StartMonitoring(reaction);
@@ -192,6 +207,60 @@ namespace Modules.Main.ViewModels
 					}));
 			}
 		}
+
+
+
+		private DelegateCommand _ImportReactionCommand;
+		public DelegateCommand ImportReactionCommand
+		{
+			get
+			{
+				return _ImportReactionCommand
+					?? (_ImportReactionCommand = new DelegateCommand(() =>
+					{
+
+						var dialog = new OpenFileDialog();
+
+						dialog.Title = "ReactiveFolder - Import Reaction File";
+						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+						dialog.Filter = $"Reaction File|*{FolderModel.REACTION_EXTENTION}|Json|*.json|All|*.*";
+						dialog.Multiselect = true;
+
+						var result = dialog.ShowDialog();
+
+
+						if (result != null && ((bool)result) == true)
+						{
+							foreach (var destFilePath in dialog.FileNames)
+							{
+								ImportReactionFile(destFilePath);
+							}
+						}
+
+						// move to Reaction editer page.
+						//						NavigationToReactionEditerPage(reaction);
+					}));
+			}
+		}
+
+		private void ImportReactionFile(string path)
+		{
+			var importedReaction = FileSerializeHelper.LoadAsync<FolderReactionModel>(path);
+
+			if (null != _MonitorModel.FindReaction(importedReaction.Guid))
+			{
+				// alread exist reaction
+				// Guidを張り替える？
+			}
+			else
+			{
+				CurrentFolder.AddReaction(importedReaction);
+			}
+		}
+
+
+
 
 		private DelegateCommand _RemoveThisFolderCommand;
 		public DelegateCommand RemoveThisFolderCommand

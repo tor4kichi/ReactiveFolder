@@ -40,13 +40,22 @@
                         >
                     </ToggleButton>
 
-                    <materialDesign:PopupBox DockPanel.Dock="Right" 
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" >
+
+                        <Button Command="{Binding RefreshCommand}"
+                                Style="{StaticResource AppbarButton}"
+                                >
+                            <materialDesign:PackIcon Kind="Refresh" />
+                        </Button>
+                        
+                        <materialDesign:PopupBox 
                                              PlacementMode="BottomAndAlignRightEdges">
-                        <StackPanel>
-                            <Button Content="Open in explorer" Command="{Binding OpenInExplorerCommand}" />
-                            <Button Content="Delete this folder" Command="{Binding RemoveThisFolderCommand}" />
-                        </StackPanel>
-                    </materialDesign:PopupBox>
+                            <StackPanel>
+                                <Button Content="Open in explorer" Command="{Binding OpenInExplorerCommand}" />
+                                <Button Content="Delete this folder" Command="{Binding RemoveThisFolderCommand}" />
+                            </StackPanel>
+                        </materialDesign:PopupBox>
+                    </StackPanel>
 
                     <TextBlock Text="Folder"
                                FontSize="22"
@@ -191,10 +200,14 @@
                 </materialDesign:PopupBox.ToggleCheckedContent>
                 <StackPanel>
                     <Button
-                        ToolTip="Add Foler" Command="{Binding AddFolderCommand}">
+                        ToolTip="Add Folder" Command="{Binding AddFolderCommand}">
                         <materialDesign:PackIcon Kind="Folder" Width="24" Height="24" />
                     </Button>
-                    <Button ToolTip="Add File" Command="{Binding AddReactionCommand}">
+                    <Button
+                        ToolTip="Import Reaction" Command="{Binding ImportReactionCommand}">
+                        <materialDesign:PackIcon Kind="Folder" Width="24" Height="24" />
+                    </Button>
+                    <Button ToolTip="Add Reaction" Command="{Binding AddReactionCommand}">
                         <materialDesign:PackIcon Kind="File" Width="24" Height="24" />
                     </Button>
                 </StackPanel>
