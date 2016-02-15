@@ -718,6 +718,8 @@ namespace ReactiveFolder.Models
 						if (!context.IsRunnning) break;
 					}
 
+					context.CleanupTempOutputFolder();
+
 					return !context.IsCompleted;
 				});
 
