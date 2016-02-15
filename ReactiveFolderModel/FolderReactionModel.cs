@@ -768,6 +768,13 @@ namespace ReactiveFolder.Models
 
 			yield return Destination;
 		}
+
+
+
+		public static void ResetGuid(FolderReactionModel reaction)
+		{
+			reaction.Guid = Guid.NewGuid();
+		}
 	}
 
 

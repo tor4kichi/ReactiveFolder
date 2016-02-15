@@ -77,11 +77,14 @@ namespace ReactiveFolder.Models
 			// TODO: 読み込みの最適化
 			// ファイル名で既に読まれているアイテムと比較する
 			// インスタンスを生成する前に判断するように軽量化したい
+
+
 			var models = files.Select(fileInfo =>
 			{
+				FolderReactionModel reaction;
 				try
 				{
-					return FileSerializeHelper.LoadAsync<FolderReactionModel>(fileInfo);
+					reaction = FileSerializeHelper.LoadAsync<FolderReactionModel>(fileInfo);
 				}
 				catch(Exception e)
 				{
@@ -89,6 +92,30 @@ namespace ReactiveFolder.Models
 					System.Diagnostics.Debug.WriteLine(e.Message);
 					return null;
 				}
+
+				var name = Path.GetFileNameWithoutExtension(fileInfo.Name);
+
+				if (name != reaction.Guid.ToString())
+				{
+					FolderReactionModel.ResetGuid(reaction);
+
+					var oldFilePath = fileInfo.FullName;
+					var renamedPath = MakeReactionSaveFilePath(reaction);
+					try
+					{
+						fileInfo.MoveTo(renamedPath);
+
+						System.Diagnostics.Debug.WriteLine("Reaction Renamed:");
+						System.Diagnostics.Debug.WriteLine("from : " + oldFilePath);
+						System.Diagnostics.Debug.WriteLine("to   : " + renamedPath);
+					}
+					catch(Exception e)
+					{
+						System.Diagnostics.Debug.WriteLine(e.Message);
+					}
+				}
+
+				return reaction;
 			})
 			.Where(x => x != null)
 			.ToArray();
@@ -122,9 +149,10 @@ namespace ReactiveFolder.Models
 
 		public void AddReaction(FolderReactionModel reaction)
 		{
+			// Note: 特にインポートした時にGuidが重複しているときの対策
 			if (null != FindReaction(reaction.Guid))
 			{
-				throw new Exception();
+				FolderReactionModel.ResetGuid(reaction);
 			}
 
 			_Models.Add(reaction);
