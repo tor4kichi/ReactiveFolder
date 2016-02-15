@@ -156,7 +156,7 @@ namespace ReactiveFolder.Models.Timings
 		{
 			get
 			{
-				return Source.IsUpdated || false == Dest.IsExist;
+				return Source.IsUpdated;
 			}
 		}
 	}
