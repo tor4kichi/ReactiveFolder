@@ -10,6 +10,7 @@ namespace ReactiveFolder.Models
 	{
 		public string ReactionSaveFolder { get; set; }
 		public string AppPolicySaveFolder { get; set; }
+		public string UpdateRecordSaveFolder { get; set; }
 
 		public int DefaultMonitorIntervalSeconds { get; set; }
 	}

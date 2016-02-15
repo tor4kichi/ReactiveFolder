@@ -50,7 +50,10 @@ namespace ReactiveFolder.Models.Filters
 		public override IEnumerable<ReactiveStreamContext> GenerateBranch(ReactiveStreamContext context)
 		{
 			return DirectoryFilter(context.WorkFolder)
-				.Select(x => new ReactiveStreamContext(context.WorkFolder, x.FullName));
+				.Select(x => new ReactiveStreamContext(context.WorkFolder, x.FullName))
+				// 遅延評価によってSelectが複数回呼ばれることを防止するため配列化
+				.ToArray(); 
+
 		}
 
 

@@ -292,8 +292,10 @@ namespace ReactiveFolder.Models
 			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
 
 			FileUpdateTiming = new FileUpdateReactiveTiming();
+			FileUpdateTiming.SetParentReactionModel(this);
 
 			Destination = new AbsolutePathReactiveDestination();
+			Destination.SetParentReactionModel(this);
 			
 			CheckInterval = TimeSpan.FromMinutes(1);
 
@@ -305,12 +307,13 @@ namespace ReactiveFolder.Models
 		[OnDeserialized]
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
-			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
-			
 			if (false == String.IsNullOrWhiteSpace(WorkFolderPath))
 			{
 				WorkFolder = new DirectoryInfo(WorkFolderPath);
 			}
+
+			Actions = new ReadOnlyObservableCollection<ReactiveActionBase>(_Actions);
+			
 
 			// ストリーム生成オブジェクトを初期化
 			Filter?.SetParentReactionModel(this);
@@ -321,7 +324,7 @@ namespace ReactiveFolder.Models
 			FileUpdateTiming?.SetParentReactionModel(this);
 			Destination?.SetParentReactionModel(this);
 
-			ResetWorkingFolder();
+//			ResetWorkingFolder();
 		}
 
 
@@ -692,7 +695,7 @@ namespace ReactiveFolder.Models
 
 		public void Execute()
 		{
-//			ResetWorkingFolder();
+			ResetWorkingFolder();
 
 			if (false == IsValid)
 			{
@@ -708,22 +711,28 @@ namespace ReactiveFolder.Models
 			var initialContext = CreatePayload();
 			var streams = EnumStreamItems();
 
-			var failedItems = Filter.GenerateBranch(initialContext)
-				.Where(context =>
+			var branchedContexts = Filter.GenerateBranch(initialContext);
+
+
+			// 実行
+			foreach(var context in branchedContexts)
+			{
+				foreach (var stream in streams)
 				{
-					foreach (var stream in streams)
-					{
-						stream.Execute(context);
+					if (!context.IsRunnning) break;
 
-						if (!context.IsRunnning) break;
-					}
+					stream.Execute(context);
+				}
+			}
 
-					context.CleanupTempOutputFolder();
+			// 正常終了した場合の処理
+			foreach (var context in branchedContexts.Where(x => x.IsCompleted))
+			{
+				FileUpdateTiming.OnContextComplete(context);
+			}
 
-					return !context.IsCompleted;
-				});
-
-			foreach (var context in failedItems)
+			// 失敗した処理情報をデバッグ出力
+			foreach (var context in branchedContexts.Where(x => x.IsFailed))
 			{
 				System.Diagnostics.Debug.WriteLine(context.SourcePath);
 
@@ -737,6 +746,16 @@ namespace ReactiveFolder.Models
 					System.Diagnostics.Debug.WriteLine(context.FailedCuaseException);
 				}
 			}
+
+
+			// コンテキストの終了処理
+			foreach (var context in branchedContexts)
+			{
+				context.Dispose();
+			}
+
+			// 完了処理
+			FileUpdateTiming.OnCompleteReaction();
 		}
 
 		private IEnumerable<ReactiveStraightStreamBase> EnumStreamItems()

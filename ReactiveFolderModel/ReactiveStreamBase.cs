@@ -5,9 +5,11 @@ using System.Linq;
 using Microsoft.Practices.Prism.Mvvm;
 using static System.Environment;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 namespace ReactiveFolder.Models
 {
+	[DataContract]
 	public abstract class ReactiveStreamBase : BindableBase, Util.IValidatable
 	{
 

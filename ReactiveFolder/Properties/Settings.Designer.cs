@@ -58,5 +58,17 @@ namespace ReactiveFolder.Properties {
                 this["DefaultMonitorIntervalSeconds"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string UpdateRecordSaveFolder {
+            get {
+                return ((string)(this["UpdateRecordSaveFolder"]));
+            }
+            set {
+                this["UpdateRecordSaveFolder"] = value;
+            }
+        }
     }
 }

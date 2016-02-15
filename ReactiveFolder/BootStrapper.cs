@@ -15,6 +15,7 @@ using Prism.Modularity;
 using ReactiveFolder.Properties;
 using ReactiveFolder.Models.AppPolicy;
 using Prism.Events;
+using ReactiveFolder.Models.Timings;
 
 namespace ReactiveFolder
 {
@@ -35,8 +36,12 @@ namespace ReactiveFolder
 			// リアクションモニターのインスタンスを生成＆DIコンテナに登録
 			this.Container.RegisterInstance<IFolderReactionMonitorModel>(app.ReactionMonitor);
 
-			// アプリ起動ポリシー管理のインスタンスを生成＆DIコンテナに登録
+			// アプリ起動ポリシー管理の〃
 			this.Container.RegisterInstance<IAppPolicyManager>(app.AppPolicyManager);
+
+			// ファイル更新タイミング記録管理の〃
+			this.Container.RegisterInstance<IFileUpdateRecordManager>(app.UpdateRecordManager);
+
 
 			// イベント管理
 			var ea = new EventAggregator();

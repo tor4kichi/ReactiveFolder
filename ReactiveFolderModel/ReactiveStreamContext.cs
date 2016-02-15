@@ -12,7 +12,7 @@ namespace ReactiveFolder.Models
 
 	// Note: Contextは
 
-	public class ReactiveStreamContext
+	public class ReactiveStreamContext : IDisposable
 	{
 		/// <summary>
 		/// <para>Default is true.</para>
@@ -76,6 +76,13 @@ namespace ReactiveFolder.Models
 			SourcePath = OriginalPath;
 
 			Status = ReactiveStreamStatus.Running;
+		}
+
+
+
+		public void Dispose()
+		{
+			CleanupTempOutputFolder();
 		}
 
 
@@ -149,12 +156,11 @@ namespace ReactiveFolder.Models
 				if (TempOutputFolder.Exists)
 				{
 					TempOutputFolder.Delete(true);
+					_TempOutputFolder = null;
 				}
 			}
 		}
 
-		
-		
 		
 
 		public bool IsFile

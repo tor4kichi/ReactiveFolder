@@ -75,7 +75,9 @@ namespace ReactiveFolder.Models.Filters
 		public override IEnumerable<ReactiveStreamContext> GenerateBranch(ReactiveStreamContext context)
 		{
 			return FileFilter(context.WorkFolder)
-				.Select(x => new ReactiveStreamContext(context.WorkFolder, x.FullName));
+				.Select(x => new ReactiveStreamContext(context.WorkFolder, x.FullName))
+				// 遅延評価されると複数回Selectが実行されるため、配列化する
+				.ToArray();
 		}
 
 

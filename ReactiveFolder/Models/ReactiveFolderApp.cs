@@ -39,19 +39,26 @@ namespace ReactiveFolder.Models
 
 
 
+		public static readonly string DefaultUpdateRecordSavePath =
+			new DirectoryInfo(
+			Path.Combine(
+					DefaultGlobalSettingSavePath,
+					"update_record"
+				)
+			).FullName;
 
 
 
-
-
-		public FolderReactionMonitorModel ReactionMonitor { get; private set; }
-
-		public AppPolicyManager AppPolicyManager { get; private set; }
 
 		public ReactiveFolderGlobalSettings Settings { get; private set; }
 
 
 
+		public AppPolicyManager AppPolicyManager { get; private set; }
+
+		public FileUpdateRecordManager UpdateRecordManager { get; private set; }
+
+		public FolderReactionMonitorModel ReactionMonitor { get; private set; }
 
 
 
@@ -61,20 +68,32 @@ namespace ReactiveFolder.Models
 
 			LoadGlobalSettings();
 
-			// ReactionMonitorを初期化
+
+			
+			AppPolicyManager = InitializeAppLaunchAction(Settings.AppPolicySaveFolder);
+
+
+
+			UpdateRecordManager = InitializeFileUpdateRecordManager(Settings.UpdateRecordSaveFolder);
+
+
+			// Note: AppPolicyとUpdateRecordが ReactionMonitor の前提条件となるため、ReactionMonitorを最後に初期化
+
+
 			ReactionMonitor = InitializeMonitorModel(Settings.ReactionSaveFolder);
 			ReactionMonitor.DefaultInterval = TimeSpan.FromSeconds(Settings.DefaultMonitorIntervalSeconds);
 
-			// AppPolicyManagerを初期化
-			AppPolicyManager = InitializeAppLaunchAction(Settings.AppPolicySaveFolder);
+
+
 		}
 
 
 
 		public void SaveGlobalSettings()
 		{
-			Properties.Settings.Default.ReactionSaveFolder = Settings.ReactionSaveFolder;
 			Properties.Settings.Default.AppPolicySaveFolder = Settings.AppPolicySaveFolder;
+			Properties.Settings.Default.UpdateRecordSaveFolder = Settings.UpdateRecordSaveFolder;
+			Properties.Settings.Default.ReactionSaveFolder = Settings.ReactionSaveFolder;
 			Properties.Settings.Default.DefaultMonitorIntervalSeconds = Settings.DefaultMonitorIntervalSeconds;
 
 			Properties.Settings.Default.Save();
@@ -82,20 +101,13 @@ namespace ReactiveFolder.Models
 
 		public void LoadGlobalSettings()
 		{
-			Settings.ReactionSaveFolder = Properties.Settings.Default.ReactionSaveFolder;
 			Settings.AppPolicySaveFolder = Properties.Settings.Default.AppPolicySaveFolder;
+			Settings.UpdateRecordSaveFolder = Properties.Settings.Default.UpdateRecordSaveFolder;
+			Settings.ReactionSaveFolder = Properties.Settings.Default.ReactionSaveFolder;
 			Settings.DefaultMonitorIntervalSeconds = Properties.Settings.Default.DefaultMonitorIntervalSeconds;
 
 
 			// パスチェック
-
-			if (String.IsNullOrWhiteSpace(Settings.ReactionSaveFolder))
-			{
-				Settings.ReactionSaveFolder = DefaultReactionSavePath;
-
-				Properties.Settings.Default.ReactionSaveFolder = Settings.ReactionSaveFolder;
-				Properties.Settings.Default.Save();
-			}
 
 			if (String.IsNullOrWhiteSpace(Settings.AppPolicySaveFolder))
 			{
@@ -104,15 +116,26 @@ namespace ReactiveFolder.Models
 				Properties.Settings.Default.AppPolicySaveFolder = Settings.AppPolicySaveFolder;
 				Properties.Settings.Default.Save();
 			}
+
+			if (String.IsNullOrWhiteSpace(Settings.UpdateRecordSaveFolder))
+			{
+				Settings.UpdateRecordSaveFolder = DefaultUpdateRecordSavePath;
+
+				Properties.Settings.Default.UpdateRecordSaveFolder = Settings.UpdateRecordSaveFolder;
+				Properties.Settings.Default.Save();
+			}
+
+			if (String.IsNullOrWhiteSpace(Settings.ReactionSaveFolder))
+			{
+				Settings.ReactionSaveFolder = DefaultReactionSavePath;
+
+				Properties.Settings.Default.ReactionSaveFolder = Settings.ReactionSaveFolder;
+				Properties.Settings.Default.Save();
+			}
 		}
 
 
-		static FolderReactionMonitorModel InitializeMonitorModel(string monitorSaveFolderPath)
-		{
-			return new FolderReactionMonitorModel(new DirectoryInfo(monitorSaveFolderPath));
-		}
-
-
+		
 		/// <summary>
 		/// 外部アプリの使用ポリシーのファイルを読み込んでAppPolicyFactoryを初期化する
 		/// </summary>
@@ -140,5 +163,23 @@ namespace ReactiveFolder.Models
 			return appPolicyManager;
 		}
 		
+
+		static FileUpdateRecordManager InitializeFileUpdateRecordManager(string recordSaveFolderPath)
+		{
+			var manager = new FileUpdateRecordManager();
+			manager.SetSaveFolder(new DirectoryInfo(recordSaveFolderPath));
+
+			Timings.FileUpdateReactiveTiming.SetFileUpdateRecordManager(manager);
+
+			return manager;
+		}
+
+
+		static FolderReactionMonitorModel InitializeMonitorModel(string monitorSaveFolderPath)
+		{
+			return new FolderReactionMonitorModel(new DirectoryInfo(monitorSaveFolderPath));
+		}
+
+
 	}
 }

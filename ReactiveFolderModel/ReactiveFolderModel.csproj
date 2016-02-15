@@ -157,6 +157,7 @@
     <Compile Include="ReactiveStreamContext.cs" />
     <Compile Include="ReactiveStreamBase.cs" />
     <Compile Include="Timings\FileUpdateReactiveTiming.cs" />
+    <Compile Include="Timings\IFileUpdateRecordManager.cs" />
     <Compile Include="Timings\ReactiveTimingBase.cs" />
     <Compile Include="Timings\TimerReactiveTiming.cs" />
     <Compile Include="Util\FileSerializeHelper.cs" />
