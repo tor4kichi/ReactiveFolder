@@ -93,7 +93,7 @@ namespace ReactiveFolder.Models
 					return null;
 				}
 
-				var name = Path.GetFileNameWithoutExtension(fileInfo.Name);
+				var name = fileInfo.Name.Substring(0, fileInfo.Name.Length - FolderModel.REACTION_EXTENTION.Length);
 
 				if (name != reaction.Guid.ToString())
 				{
