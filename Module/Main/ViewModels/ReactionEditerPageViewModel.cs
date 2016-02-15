@@ -73,8 +73,12 @@ namespace Modules.Main.ViewModels
 
 		public void OnNavigatedFrom(NavigationContext navigationContext)
 		{
-			// 一時停止していたモニタリングを再開
-			_MonitorModel.StartMonitoring(this.Reaction);
+			// 削除されている場合を除いて
+			if (this.Reaction != null)
+			{
+				// 一時停止していたモニタリングを再開
+				_MonitorModel.StartMonitoring(this.Reaction);
+			}
 		}
 
 		public void OnNavigatedTo(NavigationContext navigationContext)
@@ -302,8 +306,13 @@ namespace Modules.Main.ViewModels
 						// 削除
 						if (result != null && result.HasValue && result.Value == true)
 						{
+							_MonitorModel.StopMonitoring(Reaction);
+
 							var reactionSaveFoler = _MonitorModel.FindReactionParentFolder(Reaction);
 							reactionSaveFoler.RemoveReaction(Reaction.Guid);
+
+
+							Reaction = null;
 
 							await BackCommand.Execute();
 						}

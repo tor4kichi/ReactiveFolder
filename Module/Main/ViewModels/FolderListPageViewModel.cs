@@ -184,6 +184,9 @@ namespace Modules.Main.ViewModels
 						// save
 						CurrentFolder.SaveReaction(reaction);
 
+						// 
+						_MonitorModel.StartMonitoring(reaction);
+
 						// move to Reaction editer page.
 						NavigationToReactionEditerPage(reaction);
 					}));
