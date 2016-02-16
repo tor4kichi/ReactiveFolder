@@ -1,6 +1,8 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
+using Reactive.Bindings;
+using ReactiveFolder.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +16,38 @@ namespace Modules.Settings.ViewModels
 		public IRegionManager _RegionManager;
 		public IRegionNavigationService NavigationService;
 
+		public IReactiveFolderSettings Settings { get; private set; }
 
 
-		public SettingsPageViewModel(IRegionManager regionManagar)
+		public ReactiveProperty<string> ReactionCheckInterval { get; private set; }
+
+
+
+
+		public SettingsPageViewModel(IRegionManager regionManagar, IReactiveFolderSettings settings)
 		{
 			_RegionManager = regionManagar;
+			Settings = settings;
+
+			ReactionCheckInterval = new ReactiveProperty<string>(settings.DefaultMonitorIntervalSeconds.ToString());
+
+			ReactionCheckInterval.Subscribe(x =>
+			{
+				settings.DefaultMonitorIntervalSeconds = int.Parse(x);
+				settings.Save();
+			});
+
+			ReactionCheckInterval.SetValidateNotifyError(x => 
+			{
+				int temp;
+				if (false == int.TryParse(x, out temp))
+				{
+					return "Number Only";
+				}
+
+				return null;
+			});
+
 		}
 
 		private DelegateCommand _BackCommand;

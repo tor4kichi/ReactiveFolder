@@ -7,6 +7,7 @@
              mc:Ignorable="d" 
              xmlns:prism="http://prismlibrary.com/"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mybehavior="clr-namespace:ReactiveFolderStyles.Behaviors;assembly=ReactiveFolderStyles"
              d:DesignHeight="300" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
@@ -33,8 +34,27 @@
         </DockPanel>
 
 
-        <DockPanel>
-            <TextBlock Text="setting" />
-        </DockPanel>
+        <StackPanel Orientation="Vertical" Margin="16 0">
+            <TextBlock Text="Reaction File Default" 
+                           Style="{StaticResource ListSubheaderText}"/>
+
+
+            <ItemsControl Margin="16 0">
+
+                <DockPanel>
+
+                    <TextBox Text="{Binding ReactionCheckInterval.Value, UpdateSourceTrigger=PropertyChanged}"
+                             DockPanel.Dock="Right"
+                             Width="200"
+                             mybehavior:TextBoxHelper.IsNumeric="True"
+                             ></TextBox>
+                             
+                    <TextBlock Text="Check Interval" 
+                               VerticalAlignment="Center"
+                               />
+                    
+                </DockPanel>
+            </ItemsControl>
+        </StackPanel>
     </DockPanel>
 </UserControl>

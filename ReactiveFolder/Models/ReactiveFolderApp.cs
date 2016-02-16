@@ -10,7 +10,7 @@ using ReactiveFolder.Models.Util;
 
 namespace ReactiveFolder.Models
 {
-	public class ReactiveFolderApp : IReactiveFolderApp
+	public class ReactiveFolderApp 
 	{
 		
 		public static readonly string DefaultGlobalSettingSavePath =
@@ -50,7 +50,7 @@ namespace ReactiveFolder.Models
 
 
 
-		public ReactiveFolderGlobalSettings Settings { get; private set; }
+		public ReactiveFolderSettings Settings { get; private set; }
 
 
 
@@ -64,7 +64,7 @@ namespace ReactiveFolder.Models
 
 		public ReactiveFolderApp()
 		{
-			Settings = new ReactiveFolderGlobalSettings();
+			Settings = new ReactiveFolderSettings();
 
 			LoadGlobalSettings();
 
@@ -91,20 +91,12 @@ namespace ReactiveFolder.Models
 
 		public void SaveGlobalSettings()
 		{
-			Properties.Settings.Default.AppPolicySaveFolder = Settings.AppPolicySaveFolder;
-			Properties.Settings.Default.UpdateRecordSaveFolder = Settings.UpdateRecordSaveFolder;
-			Properties.Settings.Default.ReactionSaveFolder = Settings.ReactionSaveFolder;
-			Properties.Settings.Default.DefaultMonitorIntervalSeconds = Settings.DefaultMonitorIntervalSeconds;
-
-			Properties.Settings.Default.Save();
+			
 		}
 
 		public void LoadGlobalSettings()
 		{
-			Settings.AppPolicySaveFolder = Properties.Settings.Default.AppPolicySaveFolder;
-			Settings.UpdateRecordSaveFolder = Properties.Settings.Default.UpdateRecordSaveFolder;
-			Settings.ReactionSaveFolder = Properties.Settings.Default.ReactionSaveFolder;
-			Settings.DefaultMonitorIntervalSeconds = Properties.Settings.Default.DefaultMonitorIntervalSeconds;
+			Settings.Load();
 
 
 			// パスチェック
@@ -112,26 +104,19 @@ namespace ReactiveFolder.Models
 			if (String.IsNullOrWhiteSpace(Settings.AppPolicySaveFolder))
 			{
 				Settings.AppPolicySaveFolder = DefaultAppPolicySavePath;
-
-				Properties.Settings.Default.AppPolicySaveFolder = Settings.AppPolicySaveFolder;
-				Properties.Settings.Default.Save();
 			}
 
 			if (String.IsNullOrWhiteSpace(Settings.UpdateRecordSaveFolder))
 			{
 				Settings.UpdateRecordSaveFolder = DefaultUpdateRecordSavePath;
-
-				Properties.Settings.Default.UpdateRecordSaveFolder = Settings.UpdateRecordSaveFolder;
-				Properties.Settings.Default.Save();
 			}
 
 			if (String.IsNullOrWhiteSpace(Settings.ReactionSaveFolder))
 			{
 				Settings.ReactionSaveFolder = DefaultReactionSavePath;
-
-				Properties.Settings.Default.ReactionSaveFolder = Settings.ReactionSaveFolder;
-				Properties.Settings.Default.Save();
 			}
+
+			Settings.Save();
 		}
 
 

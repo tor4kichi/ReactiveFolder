@@ -42,6 +42,7 @@ namespace ReactiveFolder
 			// ファイル更新タイミング記録管理の〃
 			this.Container.RegisterInstance<IFileUpdateRecordManager>(app.UpdateRecordManager);
 
+			this.Container.RegisterInstance<IReactiveFolderSettings>(app.Settings);
 
 			// イベント管理
 			var ea = new EventAggregator();
