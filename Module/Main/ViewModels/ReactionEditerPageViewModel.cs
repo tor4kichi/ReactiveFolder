@@ -7,7 +7,9 @@ using Prism.Regions;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
+using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolder.Models.Timings;
 using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
@@ -48,6 +50,7 @@ namespace Modules.Main.ViewModels
 		public ReactiveProperty<bool> IsNeedSave { get; private set; }
 
 		private IDisposable CanSaveSubscriber;
+
 
 		public ReactionEditerPageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager)
 			: base(regionManager, monitor)
@@ -92,7 +95,7 @@ namespace Modules.Main.ViewModels
 				ReactionVM.Value?.Dispose();
 
 				Reaction = reaction;
-				RollbackData = FileSerializeHelper.ToJson(Reaction);
+				BackupReactionModel();
 
 				ReactionVM.Value = new ReactionViewModel(Reaction, _AppPolicyManager);
 
@@ -121,6 +124,55 @@ namespace Modules.Main.ViewModels
 			CanSaveSubscriber?.Dispose();
 			_CompositeDisposable?.Dispose();
 		}
+
+
+
+
+
+		private void BackupReactionModel()
+		{
+			RollbackData = FileSerializeHelper.ToJson(Reaction);
+		}
+
+		private void RollbackReactionModel()
+		{
+			var prevModel = FileSerializeHelper.FromJson<FolderReactionModel>(RollbackData);
+
+			Reaction.WorkFolder = prevModel.WorkFolder;
+			Reaction.Filter = prevModel.Filter;
+
+			var remActions = Reaction.Actions.ToList();
+			foreach (var remAction in remActions)
+			{
+				Reaction.RemoveAction(remAction);
+			}
+
+			foreach (var action in prevModel.Actions)
+			{
+				Reaction.AddAction(action);
+			}
+
+			// Timingsは
+			//			Reaction.FileUpdateTiming = prevModel.FileUpdateTiming;
+
+			Reaction.Destination.OutputNamePattern = prevModel.Destination.OutputNamePattern;
+			Reaction.Destination.AbsoluteFolderPath = prevModel.Destination.AbsoluteFolderPath;
+
+
+			IsNeedSave.Value = false;
+		}
+
+
+
+
+
+		
+
+
+
+
+
+
 
 		private DelegateCommand _BackCommand;
 		public DelegateCommand BackCommand
@@ -177,40 +229,17 @@ namespace Modules.Main.ViewModels
 			}
 		}
 
-		private void RollbackReactionModel()
-		{
-			var prevModel = FileSerializeHelper.FromJson<FolderReactionModel>(RollbackData);
-
-			Reaction.WorkFolder = prevModel.WorkFolder;
-			Reaction.Filter = prevModel.Filter;
-
-			var remActions = Reaction.Actions.ToList();
-			foreach (var remAction in remActions)
-			{
-				Reaction.RemoveAction(remAction);
-			}
-
-			foreach (var action in prevModel.Actions)
-			{
-				Reaction.AddAction(action);
-			}
-
-			// Timingsは
-			//			Reaction.FileUpdateTiming = prevModel.FileUpdateTiming;
-
-			Reaction.Destination.OutputNamePattern = prevModel.Destination.OutputNamePattern;
-			Reaction.Destination.AbsoluteFolderPath = prevModel.Destination.AbsoluteFolderPath;
-
-
-			IsNeedSave.Value = false;
-		}
-
-
+		
 		public ReactiveCommand SaveCommand { get; private set; }
 
 		private void Save()
 		{
 			IsNeedSave.Value = false;
+
+			if (IsNeedClearUpdateRecord())
+			{
+				FileUpdateReactiveTiming.FileUpdateRecordManager.ClearRecord(Reaction);
+			}
 
 			try
 			{
@@ -220,8 +249,34 @@ namespace Modules.Main.ViewModels
 			{
 				IsNeedSave.Value = true;
 			}
-			
+
+			BackupReactionModel();
 		}
+
+		// TODO: IsNeedClearUpdateRecord()をModel側へ移行させる
+		private bool IsNeedClearUpdateRecord()
+		{
+			var prevModel = FileSerializeHelper.FromJson<FolderReactionModel>(RollbackData);
+
+			if (prevModel.WorkFolder.FullName != Reaction.WorkFolder.FullName)
+			{
+				return true;
+			}
+			if (prevModel.Destination.AbsoluteFolderPath != Reaction.Destination.AbsoluteFolderPath)
+			{
+				return true;
+			}
+
+			if (false == prevModel.Actions.SequenceEqual(Reaction.Actions))
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+
+
 
 		private DelegateCommand _TestCommand;
 		public DelegateCommand TestCommand
@@ -337,6 +392,8 @@ namespace Modules.Main.ViewModels
 			return (bool?)await DialogHost.Show(view, "ReactionEditCommonDialogHost");
 		}
 
+
+		
 	}
 
 
@@ -416,4 +473,8 @@ namespace Modules.Main.ViewModels
 			_CompositeDisposable?.Dispose();
 		}
 	}
+
+	
+
+
 }

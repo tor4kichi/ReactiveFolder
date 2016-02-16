@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Models.Actions
 {
-	public abstract class ReactiveActionBase : ReactiveStraightStreamBase, IFolderItemOutputer
+	public abstract class ReactiveActionBase : ReactiveStraightStreamBase, IFolderItemOutputer, System.IEquatable<ReactiveActionBase>
 	{
 		abstract public FolderItemType InputItemType { get; }
 		abstract public FolderItemType OutputItemType { get; }
@@ -105,6 +105,7 @@ namespace ReactiveFolder.Models.Actions
 			context.SetNextWorkingPath(sourcePath);
 		}
 
+		abstract public bool Equals(ReactiveActionBase other);
 	}
 
 

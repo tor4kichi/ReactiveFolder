@@ -156,6 +156,21 @@ namespace ReactiveFolder.Models.Actions
 		{
 			return GetAppPolicy().AcceptExtentions;
 		}
+
+
+
+		public override bool Equals(ReactiveActionBase other)
+		{
+			if (false == other is AppLaunchReactiveAction)
+			{
+				return false;
+			}
+
+			var cast = other as AppLaunchReactiveAction;
+
+			return this.AppGuid == cast.AppGuid &&
+				this.AppArgumentId == cast.AppArgumentId;
+		}
 	}
 	
 }

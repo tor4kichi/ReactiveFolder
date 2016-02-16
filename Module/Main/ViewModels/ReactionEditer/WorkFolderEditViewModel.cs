@@ -2,6 +2,7 @@
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
+using ReactiveFolder.Models.Timings;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -52,7 +53,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
-
+						var oldFolder = Reaction.WorkFolder;
 						try
 						{
 							var result = dialog.ShowDialog();
@@ -65,16 +66,16 @@ namespace Modules.Main.ViewModels.ReactionEditer
 								{
 									return;
 								}
-								Reaction.WorkFolder = folderInfo;
 
+								// Note: WorkFolderが変更されると、これまで処理したアイテムの内容がセーブを待たずに直ちにリセットされます。
+
+								Reaction.WorkFolder = folderInfo;
 							}
 						}
 						finally
 						{
 							//							dialog.Dispose();						
 						}
-
-
 					}));
 			}
 		}

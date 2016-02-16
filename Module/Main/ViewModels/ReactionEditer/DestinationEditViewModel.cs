@@ -95,7 +95,10 @@ namespace Modules.Main.ViewModels.ReactionEditer
 									return;
 								}
 
+
+								// Note: Destination.AbsoluteFolderPath が変更されるとReactionのファイル更新情報がセーブを待たずに直ちにリセットされます。
 								Destination.AbsoluteFolderPath = folderInfo.FullName;
+
 								OutputFolderPath = folderInfo.FullName;
 								OnPropertyChanged(nameof(OutputFolderPath));
 							}
