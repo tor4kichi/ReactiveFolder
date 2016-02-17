@@ -2,6 +2,8 @@
 using Prism.Mvvm;
 using Prism.Regions;
 using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
+
 using ReactiveFolder.Models;
 using System;
 using System.Collections.Generic;
