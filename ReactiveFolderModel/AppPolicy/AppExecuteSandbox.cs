@@ -29,7 +29,6 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public bool Validate(ReactiveStreamContext context)
 		{
-			// TODO: Policy.Validate();
 			if (Policy == null)
 			{
 				return false;

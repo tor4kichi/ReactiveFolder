@@ -15,9 +15,6 @@ namespace ReactiveFolder.Models.AppPolicy
 	
 	// TODO: コマンドラインアプリのExitCodeの意味付けを設定できるようにしたい
 
-	// TODO: InputとOutputのPathを含めたAppOptionをC# Scriptingで処理したい
-	// -file {inputFile} -o {outputFolder} 
-	// みたいな指定をしたら解釈してオプションを入れ替えてくれる感じで
 
 	[DataContract]
 	public class ApplicationPolicy : BindableBase

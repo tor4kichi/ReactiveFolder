@@ -48,11 +48,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.Select(x => new AppPolicyViewModel(Action, x));
 			
 
-
-
-			
-			// TODO: 未選択状態の番兵となるAppPolicyVMを使って安全に表示を行いたい
-
 			
 			AppPolicyVM = new ReactiveProperty<AppPolicyViewModel>();
 			
@@ -142,7 +137,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				return _RemoveActionCommand
 					?? (_RemoveActionCommand = new DelegateCommand(() =>
 					{
-						// TODO: 確認ダイアログ
+						// TODO: アクションの削除 確認ダイアログ
 						EditVM.RemoveAction(this);
 					}));
 			}

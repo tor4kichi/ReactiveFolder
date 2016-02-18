@@ -258,7 +258,6 @@ namespace ReactiveFolder.Models
 
 		private void TriggerReaction()
 		{
-			// TODO: lock
 			try
 			{
 				Reaction.Execute();

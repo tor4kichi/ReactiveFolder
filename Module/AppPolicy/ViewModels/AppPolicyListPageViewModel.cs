@@ -109,7 +109,6 @@ namespace Modules.AppPolicy.ViewModels
 							// パスが確認されたらApplicationPolicyを作成してReactiveFolderアプリ空間内に
 							// アプリポリシーファイルを作成させる
 
-							// TODO: 作成に失敗した場合の処理
 							var newAppPolicy = new ApplicationPolicy(path);
 							_AppPolicyManager.AddAppPolicy(newAppPolicy);
 
@@ -132,7 +131,6 @@ namespace Modules.AppPolicy.ViewModels
 				return _ImportAppPolicyCommand
 					?? (_ImportAppPolicyCommand = new DelegateCommand(() =>
 					{
-						// TODO: アプリポリシーのインポート
 						// アプリのパスを確認する
 						// ProgramFiles等の強い権限が必要なファイルパスの場合は、自動チェックの対象外として
 						// 必ずアプリパスの再指定を要求する
@@ -168,12 +166,7 @@ namespace Modules.AppPolicy.ViewModels
 
 			if (_AppPolicyManager.HasAppPolicy(appPolicy))
 			{
-				// TODO: すでにAppPolicyがあるときの選択をユーザーに尋ねる
-				// 上書きする
-				// インポートしたファイルをGuidを強制的に書き換えて別ファイルとして取り込む
-				// 
-				// キャンセル
-
+				// TODO: インポートしたファイルをGuidを強制的に書き換えて別ファイルとして取り込む
 				// ApplicationPolicyにエクスポート実行者によるバージョン管理機能があればベター？
 
 			}
@@ -212,7 +205,6 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReactiveProperty<string> AppName { get; private set; }
 
-		// TODO: 拡張子
 		// TODO: アイコン画像
 
 		public AppPolicyListItemViewModel(AppPolicyListPageViewModel pageVM, ApplicationPolicy appPolicy)

@@ -29,19 +29,6 @@ namespace Modules.Main.ViewModels
 			
 		}
 
-		// TODO: Rename Folder
-
-		// TODO: Add Folder
-		// TODO: Add Reaction
-
-		// TODO: Remove Folder
-		// TODO: Remove Reaction
-
-
-
-
-
-
 		private DelegateCommand _OpenFolderReactionListCommand;
 		public DelegateCommand OpenFolderReactionListCommand
 		{

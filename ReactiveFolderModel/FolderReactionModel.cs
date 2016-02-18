@@ -430,7 +430,6 @@ namespace ReactiveFolder.Models
 		{
 			get
 			{
-				// TODO: Notify
 				return Filter.OutputItemType;
 			}
 		}
@@ -439,7 +438,6 @@ namespace ReactiveFolder.Models
 		{
 			get
 			{
-				// TODO: Notify
 				if (Actions.Count > 0)
 				{
 					return Actions.Last().OutputItemType;
@@ -543,27 +541,9 @@ namespace ReactiveFolder.Models
 			{
 				// Note: アクションが設定されていなければ、ただのコピー動作になる。
 				// （出力先はDestinationの設定に依存する）
-				// この暗黙のデフォルト動作は想定されたものとして扱うべきか否か…。
-				// しかしながら、ユーザーが単純なコピー操作を組み上げたい場合に備えて、
-				// TODO: コピー用のアクションを追加するか、デフォルト動作についての説明を用意するか、
-				// 判断しないといけない。
 
 				IsActionsValid = true;
 			}
-
-
-
-
-
-			// *************************
-
-			// TODO: Filterで出力したファイルをアクションが処理できるか検証する
-
-			// *************************
-
-
-			
-
 
 			return outResult;
 		}
@@ -612,8 +592,6 @@ namespace ReactiveFolder.Models
 				outResult.AddMessage(($"{(nameof(Destination))} is must set to Reaction."));
 
 				IsDestinationValid = false;
-
-				// TODO: DestinationがNullである場合って例外処理が必要じゃなイカ？
 			}
 
 

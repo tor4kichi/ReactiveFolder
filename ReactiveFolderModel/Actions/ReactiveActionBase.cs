@@ -22,11 +22,6 @@ namespace ReactiveFolder.Models.Actions
 
 		public override void Execute(ReactiveStreamContext context)
 		{
-
-			// TODO: OutputPathにすでにファイルが存在していたら
-			//			OutputPath = GenerateTempFilePath();
-
-
 			// TODO: SourcePathのファイルが存在しなかったら終了
 
 			var sourcePath = context.SourcePath;
@@ -62,7 +57,6 @@ namespace ReactiveFolder.Models.Actions
 					}
 					else
 					{
-						// TODO: 出力先フォルダにアイテムが追加されていないよ
 						context.Failed("not found processed file: " + processedFileInfo.FullName);
 					}
 
@@ -73,7 +67,6 @@ namespace ReactiveFolder.Models.Actions
 
 					break;
 				case FolderItemType.Folder:
-					// TODO: フォルダの更新をチェック
 					var foldername = Path.GetFileName(sourcePath);
 					var processedFolderInfo = tempOutputFolder.EnumerateDirectories().SingleOrDefault(x => x.Name == foldername);
 
@@ -83,7 +76,6 @@ namespace ReactiveFolder.Models.Actions
 					}
 					else
 					{
-						// TODO: 出力先フォルダに作業後のフォルダが
 						context.Failed("not found processed folder: " + processedFolderInfo.FullName);
 					}
 					break;

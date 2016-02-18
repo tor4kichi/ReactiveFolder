@@ -12,14 +12,6 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Models.Destinations
 {
-	// * * * * * * * * * * * * 
-
-		
-	// TODO: Initializeで渡されるworkDirが無効な場合に対応する
-
-
-	// * * * * * * * * * * * * 
-
 	[DataContract]
 	public abstract class ReactiveDestinationBase : ReactiveStraightStreamBase
 	{
@@ -288,7 +280,6 @@ namespace ReactiveFolder.Models.Destinations
 			catch (Exception e)
 			{
 				context.Failed("ReactiveStreamFailed on Finalize file", e);
-				// TODO: 
 			}
 
 			return null;

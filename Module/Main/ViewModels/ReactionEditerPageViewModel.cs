@@ -32,7 +32,6 @@ namespace Modules.Main.ViewModels
 		Unknown
 	}
 
-	// TODO: WorkFolderの切り替えに伴うVMの変更部分について、ViewModelをさらに切り出して読みやすくしたい
 
 	public class ReactionEditerPageViewModel : PageViewModelBase, INavigationAware, IDisposable
 	{

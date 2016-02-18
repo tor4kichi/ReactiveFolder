@@ -18,8 +18,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 {
 	public class ActionsEditViewModel : ReactionEditViewModelBase
 	{
-		// TODO: アプリケーションのリストとAppArgumentの辞書
-
 		private IAppPolicyManager _AppPolicyManager;
 
 

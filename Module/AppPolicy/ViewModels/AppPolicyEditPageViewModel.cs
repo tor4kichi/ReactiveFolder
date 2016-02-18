@@ -320,12 +320,8 @@ namespace Modules.AppPolicy.ViewModels
 				return _AddArgumentCommand
 					?? (_AddArgumentCommand = new DelegateCommand(() =>
 					{
-						// TODO: 
-
 						var newArg = AppPolicy.AddNewArgument();
 
-
-						//						var vm = AppArguments.Single(x => x.Argument == newArg);
 						var vm = new AppPolicyArgumentViewModel(this, AppPolicy, newArg);
 
 						OpenArgumentEditDialog(vm);
@@ -373,7 +369,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		public void RemoveArgument(AppPolicyArgumentViewModel argumentVM)
 		{
-			// TODO: RemoveArgument show confirm dialog.
+			// TODO: AppArgumentの削除 確認ダイアログの表示
 			AppPolicy.RemoveArgument(argumentVM.Argument);
 		}
 

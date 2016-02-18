@@ -136,9 +136,6 @@ namespace Modules.Main.ViewModels
 						{
 							_EventAggregator.GetEvent<PubSubEvent<ReactiveFolderPageType>>()
 								.Publish(ReactiveFolderPageType.ReactiveFolder);
-							// TODO: OpenSideMenu
-							//							this.NavigationToFolderListPage(_MonitorModel.RootFolder);
-							//							NavigationService.Journal.Clear();
 						}
 					}
 					

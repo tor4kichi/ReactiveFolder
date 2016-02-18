@@ -99,8 +99,6 @@ namespace ReactiveFolder.Models
 
 		private DirectoryInfo GenerateTempOutputFolder()
 		{
-			// TODO: アプリ空間のテンポラリフォルダに仮フォルダを作成して返す
-			// Context上に一つあれば十分かも
 			var tempFolderName = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
 			var dir = new DirectoryInfo(
 				Path.Combine(
@@ -127,7 +125,7 @@ namespace ReactiveFolder.Models
 		{
 			Status = ReactiveStreamStatus.Failed;
 
-			// TODO: 
+			FailedCuaseException = e;
 		}
 
 		public void Complete(string outputItemPath)
