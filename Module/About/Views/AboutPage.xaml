@@ -4,37 +4,201 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Modules.About.Views"
+             xmlns:vm="clr-namespace:Modules.About.ViewModels"
              mc:Ignorable="d" 
              xmlns:prism="http://prismlibrary.com/"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mybehavior="clr-namespace:ReactiveFolderStyles.Behaviors;assembly=ReactiveFolderStyles"
              d:DesignHeight="300" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
     <DockPanel>
         <!-- Top Buttons -->
-        <DockPanel DockPanel.Dock="Top">
-            <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
-                                       Height="48"
-                                          Mode="PrimaryMid" DockPanel.Dock="Top">
+        <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                                        Mode="PrimaryMid" DockPanel.Dock="Top"
+                                  >
 
-                <DockPanel VerticalAlignment="Center" Margin="8" >
+            <StackPanel Orientation="Vertical"
+                        Margin="8 0" 
+                        >
+                <Border Height="48"
+                    >
+                    <DockPanel VerticalAlignment="Center"
+                               >
 
-                    <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
+                        <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
                             Style="{StaticResource AppbarButton}"
                             >
-                        <materialDesign:PackIcon Kind="ArrowLeft"  />
-                    </Button>
+                            <materialDesign:PackIcon Kind="ArrowLeft"  />
+                        </Button>
 
-                    <TextBlock Text="About"
-                               FontSize="22"
-                               HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </DockPanel>
-            </materialDesign:ColorZone>
-        </DockPanel>
+                        <TextBlock Text="About"
+                                FontSize="22"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </DockPanel>
+
+                </Border>
+                
 
 
-        <DockPanel>
-            <TextBlock Text="about" />
-        </DockPanel>
+                <!-- tabs -->
+                <Border 
+                    HorizontalAlignment="Stretch"
+                    >
+                    <ListBox ItemsSource="{Binding Tabs}"
+                    SelectedItem="{Binding SelectedTab.Value}"
+                    SelectionMode="Single"
+                        HorizontalAlignment="Center"
+                    >
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" ></StackPanel>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border MinWidth="150" MinHeight="50">
+                                    <TextBlock Text="{Binding Title}" 
+                                        Foreground="{StaticResource PrimaryHueMidForegroundBrush}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontSize="15"
+                                    />
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                </Border>
+                    
+            </StackPanel>
+        </materialDesign:ColorZone>
+
+      
+
+       
+            
+        <!-- tab content -->
+        <Border>
+            <StackPanel Orientation="Vertical">
+                <ContentControl Content="{Binding SelectedTab.Value}" VerticalContentAlignment="Stretch">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type vm:AboutTabViewModel}">
+                            <StackPanel Orientation="Vertical"  Margin="16" HorizontalAlignment="Center">
+                                
+                                <TextBlock Style="{StaticResource MaterialDesignDisplay1TextBlock}"
+                                           Margin="0 8"
+                                           >
+                                    ReactiveFolder
+                                </TextBlock>
+                                
+                                <TextBlock TextWrapping="Wrap"
+                                           Margin="0 8"
+                                           >
+                                    <Run>フォルダにいれるだけで自動変換</Run>
+                                    <Run>エクスプローラーでファイルやフォルダが追加されたことに反応してあなたが指定したアクションを自動で実行してくれます。</Run>
+                                </TextBlock>
+
+
+                                <TextBlock Margin="0 8">
+                                    <Run>ソースコード：</Run>
+                                    <Hyperlink NavigateUri="https://github.com/tor4kichi/ReactiveFolder" 
+                                               mybehavior:HyperlinkExtensions.IsExternal="True"
+                                               >
+                                        https://github.com/tor4kichi/ReactiveFolder
+                                    </Hyperlink>
+                                </TextBlock>
+
+                                <TextBlock Margin="0 8">
+                                    <Run>Lisence : </Run>
+                                    <Hyperlink NavigateUri="https://github.com/tor4kichi/ReactiveFolder/blob/master/LICENSE" 
+                                               mybehavior:HyperlinkExtensions.IsExternal="True"
+                                               ToolTip="https://github.com/tor4kichi/ReactiveFolder/blob/master/LICENSE"
+                                               >
+                                        GPL v3
+                                    </Hyperlink>
+                                </TextBlock>
+
+                                <TextBlock Margin="0 8">
+                                    <Run>Created by tor4kichi</Run>
+                                </TextBlock>
+
+                                
+                                
+                            </StackPanel>
+                        </DataTemplate>
+                            
+                            
+                        <DataTemplate DataType="{x:Type vm:HowToTabViewModel}">
+                            <TextBlock Text="How To Tab Content Test" />
+                        </DataTemplate>
+                            
+                            
+                        <DataTemplate DataType="{x:Type vm:LisenceTabViewModel}">
+                            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel Orientation="Vertical"  Margin="16">
+
+                                    <TextBlock Text="ReactiveFolder can not build up if without below powerful software's. lot of thanks!"
+                                           TextWrapping="Wrap"
+                                           />
+
+                                    <Border BorderThickness="0 0 1 0" 
+                                        BorderBrush="{StaticResource MaterialDesignDivider}" 
+                                        Margin="0 0 8 0" />
+
+                                    <TextBlock HorizontalAlignment="Right" Text="(order by alphabet)" />
+
+                                    <ItemsControl ItemsSource="{Binding Libraries}" >
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel ItemWidth="400" 
+                                                           Width="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportWidth}"
+                                                           />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.Resources>
+                                            <DataTemplate DataType="{x:Type vm:LibraryItem}">
+                                                <materialDesign:Card UniformCornerRadius="14" 
+                                                                 Padding="4"
+                                                                 Margin="2"
+                                                                 >
+                                                    <StackPanel Orientation="Vertical" Margin="8">
+                                                        <TextBlock 
+                                                           Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                                            ToolTip="{Binding SiteUri}"
+                                                            Margin="0 0 0 8"
+                                                               >
+                                                            <Hyperlink NavigateUri="{Binding SiteUri}" 
+                                                                       mybehavior:HyperlinkExtensions.IsExternal="True"
+                                                                       >
+                                                                <Run Text="{Binding LibraryName}" />
+                                                            </Hyperlink>
+                                                        </TextBlock>
+                                                        
+                                                        <Border BorderThickness="0 0 1 0" Margin="0 0 8 0" 
+                                                            BorderBrush="{StaticResource MaterialDesignDivider}"
+                                                                HorizontalAlignment="Stretch"
+                                                                />
+
+                                                        <TextBlock Text="{Binding AuthorName}" />
+                                                        <TextBlock Text="{Binding LisenceTypeName}" />
+
+                                                    </StackPanel>
+                                                </materialDesign:Card>
+                                            </DataTemplate>
+                                        </ItemsControl.Resources>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ScrollViewer>
+                           
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
+            </StackPanel>
+        </Border>
+            
+            
+      
     </DockPanel>
 </UserControl>
