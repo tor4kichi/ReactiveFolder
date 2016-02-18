@@ -26,24 +26,12 @@ namespace ReactiveFolder.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ReactionSaveFolder {
+        public string SaveFolder {
             get {
-                return ((string)(this["ReactionSaveFolder"]));
+                return ((string)(this["SaveFolder"]));
             }
             set {
-                this["ReactionSaveFolder"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string AppPolicySaveFolder {
-            get {
-                return ((string)(this["AppPolicySaveFolder"]));
-            }
-            set {
-                this["AppPolicySaveFolder"] = value;
+                this["SaveFolder"] = value;
             }
         }
         
@@ -56,18 +44,6 @@ namespace ReactiveFolder.Properties {
             }
             set {
                 this["DefaultMonitorIntervalSeconds"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string UpdateRecordSaveFolder {
-            get {
-                return ((string)(this["UpdateRecordSaveFolder"]));
-            }
-            set {
-                this["UpdateRecordSaveFolder"] = value;
             }
         }
     }

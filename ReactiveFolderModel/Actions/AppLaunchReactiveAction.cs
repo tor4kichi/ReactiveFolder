@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Models.Actions
 {
+	// TODO: AppPolicyやAppArgumentが削除された場合に備える
+	// GetAppPolicy()を使う部分が安定しない
+
 	[DataContract]
 	public class AppLaunchReactiveAction : ReactiveActionBase
 	{
@@ -75,7 +78,7 @@ namespace ReactiveFolder.Models.Actions
 		{
 			get
 			{
-				return GetAppPolicy().InputPathType;
+				return GetAppPolicy()?.InputPathType ?? FolderItemType.File;
 			}
 		}
 
@@ -83,7 +86,7 @@ namespace ReactiveFolder.Models.Actions
 		{
 			get
 			{
-				return GetAppPolicy().OutputPathType;
+				return GetAppPolicy()?.OutputPathType ?? FolderItemType.File;
 			}
 		}
 
@@ -154,7 +157,15 @@ namespace ReactiveFolder.Models.Actions
 
 		public override IEnumerable<string> GetFilters()
 		{
-			return GetAppPolicy().AcceptExtentions;
+			var appPolicy = GetAppPolicy();
+			if (appPolicy != null)
+			{
+				return appPolicy.AcceptExtentions;
+			}
+			else
+			{
+				return Enumerable.Empty<string>();
+			}
 		}
 
 

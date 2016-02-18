@@ -12,7 +12,10 @@ namespace ReactiveFolder.Models
 {
 	public class ReactiveFolderApp 
 	{
-		
+		public const string APP_POLICY_FOLDER_NAME = "app_policy";
+		public const string REACTION_FOLDER_NAME = "reaction";
+		public const string UPDATE_RECORD_FOLDER_NAME = "update_record";
+
 		public static readonly string DefaultGlobalSettingSavePath =
 			new DirectoryInfo(
 			Path.Combine(
@@ -21,31 +24,7 @@ namespace ReactiveFolder.Models
 				)
 			).FullName;
 
-		public static readonly string DefaultReactionSavePath =
-			new DirectoryInfo(
-			Path.Combine(
-					DefaultGlobalSettingSavePath,
-					"reaction"
-				)
-			).FullName;
-
-		public static readonly string DefaultAppPolicySavePath =
-			new DirectoryInfo(
-			Path.Combine(
-					DefaultGlobalSettingSavePath,
-					"apppolicy"
-				)
-			).FullName;
-
-
-
-		public static readonly string DefaultUpdateRecordSavePath =
-			new DirectoryInfo(
-			Path.Combine(
-					DefaultGlobalSettingSavePath,
-					"update_record"
-				)
-			).FullName;
+		
 
 
 
@@ -69,18 +48,19 @@ namespace ReactiveFolder.Models
 			LoadGlobalSettings();
 
 
-			
-			AppPolicyManager = InitializeAppLaunchAction(Settings.AppPolicySaveFolder);
+			var appPolicySaveFolder = Path.Combine(Settings.SaveFolder, APP_POLICY_FOLDER_NAME);
+			AppPolicyManager = InitializeAppLaunchAction(appPolicySaveFolder);
 
 
 
-			UpdateRecordManager = InitializeFileUpdateRecordManager(Settings.UpdateRecordSaveFolder);
+			var updateRecordSaveFolder = Path.Combine(Settings.SaveFolder, UPDATE_RECORD_FOLDER_NAME);
+			UpdateRecordManager = InitializeFileUpdateRecordManager(updateRecordSaveFolder);
 
 
 			// Note: AppPolicyとUpdateRecordが ReactionMonitor の前提条件となるため、ReactionMonitorを最後に初期化
 
-
-			ReactionMonitor = InitializeMonitorModel(Settings.ReactionSaveFolder);
+			var reactionSaveFolder = Path.Combine(Settings.SaveFolder, REACTION_FOLDER_NAME);
+			ReactionMonitor = InitializeMonitorModel(reactionSaveFolder);
 			ReactionMonitor.DefaultInterval = TimeSpan.FromSeconds(Settings.DefaultMonitorIntervalSeconds);
 
 
@@ -100,20 +80,10 @@ namespace ReactiveFolder.Models
 
 
 			// パスチェック
-
-			if (String.IsNullOrWhiteSpace(Settings.AppPolicySaveFolder))
+			if (String.IsNullOrEmpty(Settings.SaveFolder) ||
+				false == Directory.Exists(Settings.SaveFolder))
 			{
-				Settings.AppPolicySaveFolder = DefaultAppPolicySavePath;
-			}
-
-			if (String.IsNullOrWhiteSpace(Settings.UpdateRecordSaveFolder))
-			{
-				Settings.UpdateRecordSaveFolder = DefaultUpdateRecordSavePath;
-			}
-
-			if (String.IsNullOrWhiteSpace(Settings.ReactionSaveFolder))
-			{
-				Settings.ReactionSaveFolder = DefaultReactionSavePath;
+				Settings.SaveFolder = DefaultGlobalSettingSavePath;
 			}
 
 			Settings.Save();
