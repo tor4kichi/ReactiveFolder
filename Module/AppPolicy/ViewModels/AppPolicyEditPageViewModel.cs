@@ -195,6 +195,10 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReactiveProperty<string> ExtentionText { get; private set; }
 
+		public ReactiveProperty<bool> IsInputFile { get; private set; }
+
+		public ReactiveProperty<bool> IsOutputFile { get; private set; }
+
 		// 入力可能なファイル拡張子（複数）
 		public ReadOnlyReactiveCollection<string> AcceptExtentions { get; private set; }
 
@@ -222,8 +226,11 @@ namespace Modules.AppPolicy.ViewModels
 
 			OutputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.OutputPathType);
 
+			IsInputFile = InputPathType.Select(x => x == FolderItemType.File)
+				.ToReactiveProperty();
 
-			
+			IsOutputFile = OutputPathType.Select(x => x == FolderItemType.File)
+				.ToReactiveProperty();
 
 			AcceptExtentions = appPolicy.AcceptExtentions
 				.ToReadOnlyReactiveCollection();
@@ -375,6 +382,17 @@ namespace Modules.AppPolicy.ViewModels
 
 
 	}
+
+
+
+
+
+
+
+
+
+
+
 
 
 	public class AppPolicyArgumentViewModel : BindableBase, IDisposable

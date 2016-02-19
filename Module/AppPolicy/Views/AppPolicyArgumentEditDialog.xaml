@@ -9,6 +9,9 @@
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="500">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisiblity" />
+    </UserControl.Resources>
     <Grid Width="500">
         <StackPanel Margin="16">
             <StackPanel.Resources>
@@ -33,11 +36,16 @@
                      ToolTip="%IN% %OUT%"
                      />
 
-            <TextBlock Text="Output file Extention"
+            <StackPanel Orientation="Vertical" 
+                        Visibility="{Binding AppPolicyVM.IsOutputFile.Value, Converter={StaticResource BoolToVisiblity}}"
+                        >
+                <TextBlock Text="Output file Extention"
                        />
-            <TextBox Text="{Binding OutputExtention.Value, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Text="{Binding OutputExtention.Value, UpdateSourceTrigger=PropertyChanged}"
                      materialDesign:TextFieldAssist.Hint="same input if not set extention."
                      />
+            </StackPanel>
+            
             <TextBlock Text="Description" 
                        />
             <TextBox Text="{Binding Description.Value}"
