@@ -30,7 +30,7 @@ namespace ReactiveFolder.ViewModels
 
 			MenuItems.Add(new MenuItemViewModel()
 			{
-				Title = "Folder List",
+				Title = "Manage Reaction",
 				Kind = PackIconKind.Home,
 				SelectedAction = (regionManager) =>
 				{

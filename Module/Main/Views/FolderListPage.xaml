@@ -57,10 +57,12 @@
                         </materialDesign:PopupBox>
                     </StackPanel>
 
-                    <TextBlock Text="Folder"
+                    <TextBlock 
                                FontSize="22"
                                
-                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Run Text="Manage Reaction" />
+                    </TextBlock>
                 </DockPanel>
             </materialDesign:ColorZone>
         </DockPanel>
