@@ -97,7 +97,7 @@
                                            Margin="0 8"
                                            >
                                     <Run>フォルダにいれるだけで自動変換</Run>
-                                    <Run>エクスプローラーでファイルやフォルダが追加されたことに反応してあなたが指定したアクションを自動で実行してくれます。</Run>
+                                    <Run>エクスプローラーでファイルやフォルダが追加されたことに反応してあなたが指定したアクションを自動で実行してくれるReactive（反応的）なフォルダを実現します。</Run>
                                 </TextBlock>
 
 
@@ -129,10 +129,6 @@
                             </StackPanel>
                         </DataTemplate>
                             
-                            
-                        <DataTemplate DataType="{x:Type vm:HowToTabViewModel}">
-                            <TextBlock Text="How To Tab Content Test" />
-                        </DataTemplate>
                             
                             
                         <DataTemplate DataType="{x:Type vm:LisenceTabViewModel}">

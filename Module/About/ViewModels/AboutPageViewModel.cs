@@ -29,9 +29,7 @@ namespace Modules.About.ViewModels
 
 			var aboutTabVM = new AboutTabViewModel();
 			var lisenceTabVM = new LisenceTabViewModel();
-			var howToTabVM = new HowToTabViewModel();
 			Tabs.Add(aboutTabVM);
-			Tabs.Add(howToTabVM);
 			Tabs.Add(lisenceTabVM);
 
 
@@ -91,12 +89,6 @@ namespace Modules.About.ViewModels
 	{
 
 		public override string Title { get; } = "What's this?";
-	}
-
-	public class HowToTabViewModel : TabViewModelBase
-	{
-
-		public override string Title { get; } = "How To";
 	}
 
 
