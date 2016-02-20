@@ -84,7 +84,7 @@
 >
 
             <ScrollViewer>
-                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16 0">
+                <StackPanel Orientation="Vertical" Grid.Row="1" Margin="24 16">
 
                     <TextBlock Text="Folder" 
                            Style="{StaticResource ListSubheaderText}"/>
