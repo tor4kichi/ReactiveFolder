@@ -15,8 +15,10 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
     <DockPanel>
+        
 
         <DockPanel.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVisiblity" />
 
             <DataTemplate x:Key="AppPolicyTemplate">
                 <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16">
@@ -118,7 +120,9 @@
                     </StackPanel>
 
 
-                    <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Vertical" 
+                                Visibility="{Binding IsInputFile.Value, Converter={StaticResource BoolToVisiblity}}"
+                                >
 
                         <TextBlock Text="Accept Extentions"
                                    Style="{StaticResource ListSubheaderText}"
@@ -306,28 +310,8 @@
 
                
             </ScrollViewer>
-<!--
-            <materialDesign:PopupBox Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
-                                         PlacementMode="TopAndAlignCentres"                                 
-                                         HorizontalAlignment="Right"
-                                         VerticalAlignment="Bottom"
-                                         Margin="16"
-                                         ToolTip="">
-                <materialDesign:PopupBox.ToggleCheckedContent>
-                    <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
-                </materialDesign:PopupBox.ToggleCheckedContent>
-                <StackPanel>
-                    <Button
-                            ToolTip="New App Policy" Command="{Binding AddAppPolicyCommand}">
-                        <materialDesign:PackIcon Kind="Folder" Width="24" Height="24" />
-                    </Button>
-                    <Button ToolTip="Import" Command="{Binding ImportAppPolicyCommand}">
-                        <materialDesign:PackIcon Kind="File" Width="24" Height="24" />
-                    </Button>
-                </StackPanel>
-            </materialDesign:PopupBox>
--->
-            <materialDesign:DialogHost Identifier="DeleteConfirmDialog"
+
+            <materialDesign:DialogHost Identifier="AppPolicyEditDialogHost"
                                  HorizontalAlignment="Center" VerticalAlignment="Center"
                                        Margin="8 40"
                                        >
@@ -335,41 +319,8 @@
                 
             </materialDesign:DialogHost>
 
-            <materialDesign:DialogHost Identifier="ArgumentEditDialog"
-                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                 
-                                 >
                
-                <!-- 
-                <Border BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}"
-                            MinWidth="256" MinHeight="256" ClipToBounds="True">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <ListBox x:Name="FruitListBox">
-                            <ListBoxItem>Apple</ListBoxItem>
-                            <ListBoxItem>Banana</ListBoxItem>
-                            <ListBoxItem>Pear</ListBoxItem>
-                        </ListBox>
-                        <materialDesign:ColorZone Mode="PrimaryMid" Grid.Row="1" Effect="{DynamicResource MaterialDesignShadowDepth5}">
-                            <TextBlock Margin="16">Fruit Bowl</TextBlock>
-                        </materialDesign:ColorZone>
-                        <Button Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"                                
-                                    Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
-                                    VerticalAlignment="Bottom" HorizontalAlignment="Right" 
-                                    Grid.Row="0" Margin="0 0 28 -20">
-                            <Viewbox Width="22" Height="22">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Button}, Path=Foreground}" />
-                                </Canvas>
-                            </Viewbox>
-                        </Button>
-                    </Grid>
-                </Border>
-                -->
-            </materialDesign:DialogHost>
+             
         </Grid>
         
        

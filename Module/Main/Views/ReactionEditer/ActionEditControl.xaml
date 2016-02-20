@@ -97,6 +97,34 @@
     <Grid x:Name="ActionsContainer" >
         <StackPanel Orientation="Vertical">
 
+            <TextBlock Text="処理内容" 
+                        VerticalAlignment="Center"
+                        Margin="0 0 0 16"
+                       FontWeight="Bold"
+                        >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
+                                <DataTrigger.Setters>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+
+            </TextBlock>
+
+
 
             <ItemsControl ItemsSource="{Binding Actions}" 
                       ItemTemplate="{StaticResource ActionListItemTemplate}"
@@ -106,11 +134,12 @@
                 </i:Interaction.Behaviors>
             </ItemsControl>
 
-            <Grid >
+            <Grid Margin="0 8">
 
                 <Button Command="{Binding AddAppLaunchActionCommand}"
                     HorizontalAlignment="Stretch"
                     Margin="16 0"
+                        Width="200"
                     >
                     <StackPanel Orientation="Horizontal">
                         <!--

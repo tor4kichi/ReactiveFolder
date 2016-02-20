@@ -36,7 +36,7 @@
                                 <Button Command="{Binding TestCommand}"
                                         Style="{StaticResource AppbarButton}"
                                         >
-                                    <materialDesign:PackIcon Kind="Leaf" ToolTip="Test" />
+                                    <materialDesign:PackIcon Kind="Run" ToolTip="Test Run" />
                                 </Button>
                                 <Button Command="{Binding SaveCommand}"
                                         Style="{StaticResource AppbarButton}"
@@ -72,45 +72,75 @@
 
                 <ScrollViewer.Resources>
                     <DataTemplate x:Key="ReactionEditTemplate">
-                        <StackPanel Orientation="Vertical" Margin="0 16">
+                        <StackPanel Orientation="Vertical" Margin="16 16 16 0">
 
-                            <StackPanel Orientation="Vertical" Margin="56 16 16 0">
-                                
-                                <TextBlock Text="Reaction Name" 
-                                           Style="{StaticResource MaterialDesignSubheadingTextBlock}"                                           
+                            <StackPanel Orientation="Vertical" Margin="40 16 0 0">
+
+                                <DockPanel>
+                                    <TextBlock Text="Reaction Name" 
+                                           Style="{StaticResource MaterialDesignSubheadingTextBlock}"    
+                                               DockPanel.Dock="Left"
                                            />
-                                <Border  HorizontalAlignment="Right">
-                                    <TextBox Text="{Binding ReactionWorkName.Value, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource MaterialDesignTextBox}"
-                                     MinWidth="200"
-                                   >
-                                        <TextBox.Resources>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
-                                            </Style>
-                                        </TextBox.Resources>
-                                    </TextBox>
+                                    <Border  HorizontalAlignment="Right"
+                                             DockPanel.Dock="Right"
+                                             Width="200"
+                                             >
+                                        <TextBox Text="{Binding ReactionWorkName.Value, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource MaterialDesignTextBox}"
+                                             MinWidth="200"
+                                           >
+                                            <TextBox.Resources>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
+                                                </Style>
+                                            </TextBox.Resources>
+                                        </TextBox>
 
-                                </Border>
+                                    </Border>
+                                </DockPanel>
+
+                                <Border Margin="0 8" />
+
+                                <DockPanel>
+                                    <TextBlock Text="Enable Reaction"
+                                        Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                               VerticalAlignment="Center"
+                                               DockPanel.Dock="Left"
+                                       />
+                                    <Border HorizontalAlignment="Right"
+                                             DockPanel.Dock="Right"
+                                             Width="200"
+                                            >
+                                        <ToggleButton 
+                                            ToolTip="Disable | Enable"
+                                            HorizontalAlignment="Left"        
+                                            IsChecked="{Binding IsEnable.Value, Mode=TwoWay}"
+                                            />  
+                                    </Border>
+                                </DockPanel>
                             </StackPanel>
 
                             <ItemsControl HorizontalContentAlignment="Stretch"
-                                  Margin="16"
+                                  Margin="0 16"
                                 >
                                 <ItemsControl.ItemContainerStyle>
                                     <Style TargetType="ContentControl">
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="{x:Type ContentControl}">
-                                                    <StackPanel Orientation="Vertical">
+                                                    <DockPanel 
+                                                                Margin="0 16"
+                                                                >
 
                                                         <!-- Common Validation UI -->
                                                         <StackPanel Orientation="Horizontal"
-                                                            Margin="0 16"
+                                                                    VerticalAlignment="Top"
+                                                                    DockPanel.Dock="Left"
+                                                            Margin="0 1"
                                                             >
                                                             <!-- Validate State Icon -->
                                                             <materialDesign:PackIcon 
-                                                            VerticalAlignment="Center"
+                                                            VerticalAlignment="Bottom"
                                                             Margin="8 0"
                                                             >
                                                                 <materialDesign:PackIcon.Style>
@@ -139,40 +169,13 @@
                                                                     </Style>
                                                                 </materialDesign:PackIcon.Style>
                                                             </materialDesign:PackIcon>
-
-                                                            <TextBlock Text="{Binding Title, Mode=OneTime}" 
-                                                                VerticalAlignment="Center"
-                                                                Margin="8 0"
-                                                                >
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
-                                                                                <DataTrigger.Setters>
-                                                                                </DataTrigger.Setters>
-                                                                            </DataTrigger>
-                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
-                                                                                <DataTrigger.Setters>
-                                                                                </DataTrigger.Setters>
-                                                                            </DataTrigger>
-                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
-                                                                                <DataTrigger.Setters>
-                                                                                    <Setter Property="Foreground" Value="Red"/>
-                                                                                </DataTrigger.Setters>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-
-                                                            </TextBlock>
-
                                                         </StackPanel>
 
-                                                        <Border Margin="40 0 0 0">
+                                                        <Border Margin="8 0 0 0">
                                                             <ContentPresenter />
                                                         </Border>
 
-                                                    </StackPanel>
+                                                    </DockPanel>
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -190,40 +193,24 @@
 
                             </ItemsControl>
 
-                            <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="8 8" />
+                            <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="0 8" />
 
 
-                            <TextBlock Text="Additional Option" 
-                                    VerticalAlignment="Center"
-                                    Margin="32 16"
-                               Style="{StaticResource MaterialDesignSubheadingTextBlock}"
-                                    />
 
                             <StackPanel Orientation="Vertical"
-                                Margin="40 0 16 0"
+                                Margin="40 0 0 0"
                                 >
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <TextBlock Text="Active"
-                                        Style="{StaticResource MaterialDesignSubheadingTextBlock}"
-                                               VerticalAlignment="Center"
-                                       />
-                                    <Border Width="200">
-                                        <ToggleButton 
-                                    ToolTip="Inactive | Active"
-                                    HorizontalAlignment="Right"        
-                                    IsChecked="{Binding IsEnable.Value, Mode=TwoWay}"
-                                    />
-                                    </Border>
-                                </StackPanel>
+                                
 
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                                <DockPanel>
                                     <TextBlock Text="Check Interval"
                                         Style="{StaticResource MaterialDesignSubheadingTextBlock}"
                                                VerticalAlignment="Center"
+                                               DockPanel.Dock="Left"
                                        />
 
 
-                                    <DockPanel  Width="200" HorizontalAlignment="Right" >
+                                    <DockPanel  Width="200" HorizontalAlignment="Right">
                                         <TextBlock Text="seconds" 
                                                    VerticalAlignment="Center" 
                                                    DockPanel.Dock="Right" 
@@ -232,17 +219,17 @@
 
                                         <TextBox Text="{Binding MonitorIntervalSeconds.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" 
                                                          mybehavior:TextBoxHelper.IsNumeric="True"
-                                                 Width="100"
-                                                 HorizontalAlignment="Right"
                                                  
                                         />
                                     </DockPanel>
-                                </StackPanel>
+                                </DockPanel>
 
 
 
                             </StackPanel>
 
+                            <Border Height="100" />
+                            
                         </StackPanel>
                     </DataTemplate>
                 </ScrollViewer.Resources>

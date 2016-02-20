@@ -69,6 +69,12 @@
   <ItemGroup>
     <Compile Include="Behaviors\HyperLinkExtention.cs" />
     <Compile Include="Behaviors\TextBoxHelper.cs" />
+    <Compile Include="DialogContent\DeleteConfirmDialogContent.xaml.cs">
+      <DependentUpon>DeleteConfirmDialogContent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DialogContent\SaveAndBackConfirmDialogContent.xaml.cs">
+      <DependentUpon>SaveAndBackConfirmDialogContent.xaml</DependentUpon>
+    </Compile>
     <Compile Include="OpenSideMenuEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -98,6 +104,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="DialogContent\DeleteConfirmDialogContent.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DialogContent\SaveAndBackConfirmDialogContent.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

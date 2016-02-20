@@ -16,20 +16,52 @@
     <Grid x:Name="WorkFolderContainer" >
         <StackPanel Orientation="Vertical">
 
-            <Grid>
+            <TextBlock Text="対象フォルダ" 
+                        VerticalAlignment="Center"
+                        Margin="0 0 0 16"
+                       FontWeight="Bold"
+                        >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
+                                <DataTrigger.Setters>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+
+            </TextBlock>
+            
+            <DockPanel>
                 <TextBlock Text="{Binding WorkFolderPath.Value}" 
                                VerticalAlignment="Center"
+                           DockPanel.Dock="Left"
+                           Margin="0 0 0 8"
+                           TextWrapping="WrapWithOverflow"
+                           
                                />
 
-                    <Button 
-                        Command="{Binding FolderSelectCommand}"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
-                        HorizontalAlignment="Right"
-                        >
-                        <TextBlock Text="Select Folder" />
-                    </Button>
+                <Button 
+                    Command="{Binding FolderSelectCommand}"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    HorizontalAlignment="Right"
+                    Width="200"
+                    >
+                    <TextBlock Text="Select Folder" />
+                </Button>
 
-            </Grid>
+            </DockPanel>
             
         </StackPanel>
         <!-- Folderの選択 -->

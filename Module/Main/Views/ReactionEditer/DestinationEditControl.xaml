@@ -17,19 +17,53 @@
 
         <StackPanel Orientation="Vertical">
 
+            <TextBlock Text="出力先フォルダとリネーム" 
+                        VerticalAlignment="Center"
+                        Margin="0 0 0 16"
+                       FontWeight="Bold"
+                        >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
+                                <DataTrigger.Setters>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
 
-            <Grid>
+            </TextBlock>
+
+            <DockPanel>
                 <TextBlock Text="{Binding OutputFolderPath}"
                            VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           DockPanel.Dock="Left"
+                           Margin="0 0 8 0"
                            />
 
                 <Button Content="Select Folder" 
                         Command="{Binding SelectOutputFolderCommand}"
                         HorizontalAlignment="Right"
+                        Width="200"
                         />
-            </Grid>
+            </DockPanel>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Bottom"
+                        Margin="0 8"
+                        >
                 <TextBox Text="{Binding OutputNamePattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Width="200"
                          ToolTip="%NAME% %INDEX% %DATE% %YY% %MM% %DD% %HH% %mm% %SS%"

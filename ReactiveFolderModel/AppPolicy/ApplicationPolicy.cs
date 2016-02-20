@@ -203,6 +203,11 @@ namespace ReactiveFolder.Models.AppPolicy
 				return false;
 			}
 
+			if (_AcceptExtentions.Contains(extention))
+			{
+				return false;
+			}
+
 			// 終端に.はng
 			if(extention.EndsWith("."))
 			{
@@ -382,6 +387,44 @@ namespace ReactiveFolder.Models.AppPolicy
 
 			return outputTypes
 				.Any(x => AcceptExtentions.Any(y => x == y));
+		}
+
+
+		public void RollbackFrom(ApplicationPolicy backup)
+		{
+			this.AppName = backup.AppName;
+			this.ApplicationPath = backup.ApplicationPath;
+			this.DefaultOptionText = backup.DefaultOptionText;
+			this.InputPathType = backup.InputPathType;
+			this.OutputPathType = backup.OutputPathType;
+			this.MaxProcessTime = backup.MaxProcessTime;
+
+
+			// AcceptExtentions
+			var remExtentions = this.AcceptExtentions.ToArray();
+			foreach (var ext in remExtentions)
+			{
+				this.RemoveAcceptExtention(ext);
+			}
+
+			foreach (var ext in backup.AcceptExtentions)
+			{
+				this.AddAcceptExtention(ext);
+			}
+
+			// AppParams (AppArgument?)
+			var remParams = this.AppParams.ToArray();
+			foreach (var remParam in remParams)
+			{
+				this.RemoveArgument(remParam);
+			}
+
+			foreach (var addparam in backup.AppParams)
+			{
+				this._AppParams.Add(addparam);
+			}
+
+
 		}
 	}
 

@@ -28,7 +28,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 		public FilterEditViewModel(FolderReactionModel reactionModel)
-			: base(@"Filter", reactionModel)
+			: base(reactionModel)
 		{
 			Reaction.ObserveProperty(x => x.IsFilterValid)
 				.Subscribe(x => IsValid.Value = x)

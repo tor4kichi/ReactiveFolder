@@ -25,14 +25,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public FolderReactionModel Reaction { get; private set; }
 
 		public ReactiveProperty<ValidationState> ValidateState { get; private set; }
-		public string Title { get; private set; }
 		public ReactiveProperty<bool> IsValid { get; private set; }
 
 		protected CompositeDisposable _CompositeDisposable;
 
-		public ReactionEditViewModelBase(string title, FolderReactionModel reactionModel)
+		public ReactionEditViewModelBase(FolderReactionModel reactionModel)
 		{
-			Title = title;
 			Reaction = reactionModel;
 			_CompositeDisposable = new CompositeDisposable();
 

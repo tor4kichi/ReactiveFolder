@@ -72,7 +72,8 @@
                         </Button>
 
                         <TextBox Text="{Binding IncludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
-                                 
+                                 materialDesign:TextFieldAssist.Hint="ex) *.png"
+                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
                                  />
 
                     </DockPanel>
@@ -131,7 +132,8 @@
                         </Button>
 
                         <TextBox Text="{Binding ExcludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
-                                 
+                                 materialDesign:TextFieldAssist.Hint="ex) filename.*"
+                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
                                  />
 
                     </DockPanel>
@@ -157,14 +159,51 @@
     <Grid x:Name="FilterContainer" >
 
 
-        <!-- FileかFolderの選択を行うラジオボタン -->
+       
         <StackPanel Orientation="Vertical">
+
+            <TextBlock Text="処理対象の絞り込み条件" 
+                        VerticalAlignment="Center"
+                        Margin="0 0 0 16"
+                       FontWeight="Bold"
+                        >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
+                                <DataTrigger.Setters>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+
+            </TextBlock>
+
+            <!-- FileかFolderの選択を行うラジオボタン -->
             <ComboBox ItemsSource="{Binding Filters}"
                       SelectedItem="{Binding SelectedFilterVM.Value}"
-                      DisplayMemberPath="FilterType"
-                      Width="400"
+                      Width="200"
                       HorizontalAlignment="Right"
+                      Margin="0 0 0 8"
                 >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock>
+                            <Run Text="Input " />
+                            <Run Text="{Binding FilterType, Mode=OneTime}" />
+                        </TextBlock>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
 
             </ComboBox>
 
