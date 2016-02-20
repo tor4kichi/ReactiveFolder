@@ -207,7 +207,7 @@
                     </Button>
                     <Button
                         ToolTip="Import Reaction" Command="{Binding ImportReactionCommand}">
-                        <materialDesign:PackIcon Kind="Folder" Width="24" Height="24" />
+                        <materialDesign:PackIcon Kind="Import" Width="24" Height="24" />
                     </Button>
                     <Button ToolTip="Add Reaction" Command="{Binding AddReactionCommand}">
                         <materialDesign:PackIcon Kind="File" Width="24" Height="24" />
