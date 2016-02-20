@@ -98,6 +98,7 @@
                                 <Button Style="{StaticResource ListButton}"
                                         Command="{Binding OpenFolderReactionListCommand}"
                                         Margin="0 0 0 8"
+                                        Height="40"
                                         >
                                     
                                     <StackPanel Orientation="Horizontal"
