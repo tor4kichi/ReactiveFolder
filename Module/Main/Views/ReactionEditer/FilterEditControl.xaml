@@ -162,7 +162,7 @@
 
             <TextBlock Text="処理対象の絞り込み条件" 
                         VerticalAlignment="Center"
-                        Margin="0 0"
+                        Margin="0 0 0 8"
                         >
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
@@ -189,10 +189,18 @@
             <!-- FileかFolderの選択を行うラジオボタン -->
             <ComboBox ItemsSource="{Binding Filters}"
                       SelectedItem="{Binding SelectedFilterVM.Value}"
-                      DisplayMemberPath="FilterType"
-                      Width="400"
+                      Width="200"
                       HorizontalAlignment="Right"
+                      Margin="0 8"
                 >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock>
+                            <Run Text="Input " />
+                            <Run Text="{Binding FilterType, Mode=OneTime}" />
+                        </TextBlock>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
 
             </ComboBox>
 
