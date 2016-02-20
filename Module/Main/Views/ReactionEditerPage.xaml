@@ -75,23 +75,49 @@
                         <StackPanel Orientation="Vertical" Margin="0 16">
 
                             <StackPanel Orientation="Vertical" Margin="56 16 16 0">
-                                
-                                <TextBlock Text="Reaction Name" 
-                                           Style="{StaticResource MaterialDesignSubheadingTextBlock}"                                           
-                                           />
-                                <Border  HorizontalAlignment="Right">
-                                    <TextBox Text="{Binding ReactionWorkName.Value, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource MaterialDesignTextBox}"
-                                     MinWidth="200"
-                                   >
-                                        <TextBox.Resources>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
-                                            </Style>
-                                        </TextBox.Resources>
-                                    </TextBox>
 
-                                </Border>
+                                <DockPanel>
+                                    <TextBlock Text="Reaction Name" 
+                                           Style="{StaticResource MaterialDesignSubheadingTextBlock}"    
+                                               DockPanel.Dock="Left"
+                                           />
+                                    <Border  HorizontalAlignment="Right"
+                                             DockPanel.Dock="Right"
+                                             Width="200"
+                                             >
+                                        <TextBox Text="{Binding ReactionWorkName.Value, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource MaterialDesignTextBox}"
+                                             MinWidth="200"
+                                           >
+                                            <TextBox.Resources>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
+                                                </Style>
+                                            </TextBox.Resources>
+                                        </TextBox>
+
+                                    </Border>
+                                </DockPanel>
+
+                                <Border Margin="0 8" />
+
+                                <DockPanel>
+                                    <TextBlock Text="Enable Reaction"
+                                        Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                               VerticalAlignment="Center"
+                                               DockPanel.Dock="Left"
+                                       />
+                                    <Border HorizontalAlignment="Right"
+                                             DockPanel.Dock="Right"
+                                             Width="200"
+                                            >
+                                        <ToggleButton 
+                                            ToolTip="Disable | Enable"
+                                            HorizontalAlignment="Left"        
+                                            IsChecked="{Binding IsEnable.Value, Mode=TwoWay}"
+                                            />  
+                                    </Border>
+                                </DockPanel>
                             </StackPanel>
 
                             <ItemsControl HorizontalContentAlignment="Stretch"
@@ -193,7 +219,7 @@
                             <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="8 8" />
 
 
-                            <TextBlock Text="Additional Option" 
+                            <TextBlock Text="Options" 
                                     VerticalAlignment="Center"
                                     Margin="32 16"
                                Style="{StaticResource MaterialDesignSubheadingTextBlock}"
@@ -202,19 +228,7 @@
                             <StackPanel Orientation="Vertical"
                                 Margin="40 0 16 0"
                                 >
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <TextBlock Text="Active"
-                                        Style="{StaticResource MaterialDesignSubheadingTextBlock}"
-                                               VerticalAlignment="Center"
-                                       />
-                                    <Border Width="200">
-                                        <ToggleButton 
-                                    ToolTip="Inactive | Active"
-                                    HorizontalAlignment="Right"        
-                                    IsChecked="{Binding IsEnable.Value, Mode=TwoWay}"
-                                    />
-                                    </Border>
-                                </StackPanel>
+                                
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
                                     <TextBlock Text="Check Interval"
