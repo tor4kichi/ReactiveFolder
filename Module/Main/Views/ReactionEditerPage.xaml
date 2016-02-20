@@ -196,25 +196,21 @@
                             <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="8 8" />
 
 
-                            <TextBlock Text="Options" 
-                                    VerticalAlignment="Center"
-                                    Margin="32 16"
-                               Style="{StaticResource MaterialDesignSubheadingTextBlock}"
-                                    />
 
                             <StackPanel Orientation="Vertical"
-                                Margin="40 0 16 0"
+                                Margin="56 0 16 0"
                                 >
                                 
 
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                                <DockPanel>
                                     <TextBlock Text="Check Interval"
                                         Style="{StaticResource MaterialDesignSubheadingTextBlock}"
                                                VerticalAlignment="Center"
+                                               DockPanel.Dock="Left"
                                        />
 
 
-                                    <DockPanel  Width="200" HorizontalAlignment="Right" >
+                                    <DockPanel  Width="200" HorizontalAlignment="Right">
                                         <TextBlock Text="seconds" 
                                                    VerticalAlignment="Center" 
                                                    DockPanel.Dock="Right" 
@@ -223,12 +219,10 @@
 
                                         <TextBox Text="{Binding MonitorIntervalSeconds.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" 
                                                          mybehavior:TextBoxHelper.IsNumeric="True"
-                                                 Width="100"
-                                                 HorizontalAlignment="Right"
                                                  
                                         />
                                     </DockPanel>
-                                </StackPanel>
+                                </DockPanel>
 
 
 
