@@ -72,7 +72,8 @@
                         </Button>
 
                         <TextBox Text="{Binding IncludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
-                                 
+                                 materialDesign:TextFieldAssist.Hint="ex) *.png"
+                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
                                  />
 
                     </DockPanel>
@@ -131,7 +132,8 @@
                         </Button>
 
                         <TextBox Text="{Binding ExcludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
-                                 
+                                 materialDesign:TextFieldAssist.Hint="ex) filename.*"
+                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
                                  />
 
                     </DockPanel>
