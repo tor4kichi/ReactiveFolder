@@ -162,7 +162,8 @@
 
             <TextBlock Text="処理対象の絞り込み条件" 
                         VerticalAlignment="Center"
-                        Margin="0 0 0 8"
+                        Margin="0 0 0 16"
+                       FontWeight="Bold"
                         >
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
@@ -191,7 +192,7 @@
                       SelectedItem="{Binding SelectedFilterVM.Value}"
                       Width="200"
                       HorizontalAlignment="Right"
-                      Margin="0 8"
+                      Margin="0 0 0 8"
                 >
                 <ComboBox.ItemTemplate>
                     <DataTemplate>

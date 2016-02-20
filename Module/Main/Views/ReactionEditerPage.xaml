@@ -72,9 +72,9 @@
 
                 <ScrollViewer.Resources>
                     <DataTemplate x:Key="ReactionEditTemplate">
-                        <StackPanel Orientation="Vertical" Margin="0 16">
+                        <StackPanel Orientation="Vertical" Margin="16 16 16 0">
 
-                            <StackPanel Orientation="Vertical" Margin="56 16 16 0">
+                            <StackPanel Orientation="Vertical" Margin="40 16 0 0">
 
                                 <DockPanel>
                                     <TextBlock Text="Reaction Name" 
@@ -121,7 +121,7 @@
                             </StackPanel>
 
                             <ItemsControl HorizontalContentAlignment="Stretch"
-                                  Margin="16"
+                                  Margin="0 16"
                                 >
                                 <ItemsControl.ItemContainerStyle>
                                     <Style TargetType="ContentControl">
@@ -129,7 +129,7 @@
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="{x:Type ContentControl}">
                                                     <DockPanel 
-                                                                Margin="0 8"
+                                                                Margin="0 16"
                                                                 >
 
                                                         <!-- Common Validation UI -->
@@ -193,12 +193,12 @@
 
                             </ItemsControl>
 
-                            <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="8 8" />
+                            <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="0 8" />
 
 
 
                             <StackPanel Orientation="Vertical"
-                                Margin="56 0 16 0"
+                                Margin="40 0 0 0"
                                 >
                                 
 
@@ -228,6 +228,8 @@
 
                             </StackPanel>
 
+                            <Border Height="100" />
+                            
                         </StackPanel>
                     </DataTemplate>
                 </ScrollViewer.Resources>

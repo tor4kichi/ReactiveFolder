@@ -19,7 +19,8 @@
 
             <TextBlock Text="出力先フォルダとリネーム" 
                         VerticalAlignment="Center"
-                        Margin="0 0 0 8"
+                        Margin="0 0 0 16"
+                       FontWeight="Bold"
                         >
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
@@ -43,16 +44,20 @@
 
             </TextBlock>
 
-            <Grid>
+            <DockPanel>
                 <TextBlock Text="{Binding OutputFolderPath}"
                            VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           DockPanel.Dock="Left"
+                           Margin="0 0 8 0"
                            />
 
                 <Button Content="Select Folder" 
                         Command="{Binding SelectOutputFolderCommand}"
                         HorizontalAlignment="Right"
+                        Width="200"
                         />
-            </Grid>
+            </DockPanel>
 
             <StackPanel Orientation="Horizontal" 
                         HorizontalAlignment="Right" 
