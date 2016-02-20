@@ -22,6 +22,7 @@
         TextOptions.TextRenderingMode="Auto"        
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{StaticResource MaterialDesignFont}"
+        Icon="/ReactiveFolder;component/Resources/icon.ico"
         >
     
     <!--
