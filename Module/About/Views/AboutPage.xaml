@@ -92,14 +92,23 @@
                                            >
                                     ReactiveFolder
                                 </TextBlock>
-                                
                                 <TextBlock TextWrapping="Wrap"
                                            Margin="0 8"
                                            >
                                     <Run>フォルダにいれるだけで自動変換</Run>
-                                    <Run>エクスプローラーでファイルやフォルダが追加されたことに反応してあなたが指定したアクションを自動で実行してくれるReactive（反応的）なフォルダを実現します。</Run>
                                 </TextBlock>
 
+                                <TextBlock TextWrapping="Wrap"
+                                           Margin="0 8"
+                                           >
+                                    <Run>フォルダにファイルやフォルダが追加されたことに反応してあなたが指定したアクションを自動で実行してくれるReactive（反応的）なフォルダを実現します。</Run>
+                                </TextBlock>
+
+                                <TextBlock TextWrapping="Wrap"
+                                           Margin="0 8"
+                                           >
+                                    <Run>外部アプリケーションの設定（Application Policy）を追加することで指定できるアクションは自由に拡張できます。</Run>
+                                </TextBlock>
 
                                 <TextBlock Margin="0 8">
                                     <Run>ソースコード：</Run>
@@ -133,17 +142,26 @@
                             
                         <DataTemplate DataType="{x:Type vm:LisenceTabViewModel}">
                             <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                                <StackPanel Orientation="Vertical"  Margin="16">
+                                <StackPanel Orientation="Vertical"  Margin="24">
 
-                                    <TextBlock Text="ReactiveFolder can not build up if without below powerful software's. lot of thanks!"
+                                    <TextBlock Text="ReactiveFolderは以下に挙げるライブラリやソフトウェアを抜きにしては到底作り得ませんでした。"
                                            TextWrapping="Wrap"
+                                               Margin="0 8"
                                            />
+                                    <TextBlock Text="開発者や貢献者の皆さんに深く感謝します。"
+                                           TextWrapping="Wrap"
+                                               Margin="0 8"
+                                           />
+
 
                                     <Border BorderThickness="0 0 1 0" 
                                         BorderBrush="{StaticResource MaterialDesignDivider}" 
                                         Margin="0 0 8 0" />
 
-                                    <TextBlock HorizontalAlignment="Right" Text="(order by alphabet)" />
+                                    <TextBlock Text="※アルファベット順"
+                                               Foreground="Gray"
+                                               Margin="0 8"
+                                               />
 
                                     <ItemsControl ItemsSource="{Binding Libraries}" >
                                         <ItemsControl.ItemsPanel>
