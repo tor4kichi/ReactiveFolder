@@ -15,23 +15,45 @@ using MaterialDesignThemes.Wpf;
 using System.Reactive.Linq;
 using ReactiveFolder.Models.Util;
 using Microsoft.Win32;
+using ReactiveFolderStyles.DialogContent;
+using System.Reactive.Disposables;
 
 namespace Modules.AppPolicy.ViewModels
 {
-	public class AppPolicyEditPageViewModel : PageViewModelBase, INavigationAware
+	public class AppPolicyEditPageViewModel : PageViewModelBase, INavigationAware, IDisposable
 	{
 		public IRegionNavigationService NavigationService;
 
-
+		public ApplicationPolicy AppPolicy { get; private set; }
 		public ReactiveProperty<ApplicationPolicyViewModel> AppPolicyVM { get; private set; }
 
+
+		public string RollbackData { get; private set; }
+
+
+		public ReactiveProperty<bool> IsNeedSave { get; private set; }
+
+		private IDisposable CanSaveSubscriber;
 
 		public AppPolicyEditPageViewModel(IRegionManager regionManager, IAppPolicyManager appPolicyManager)
 			: base(regionManager, appPolicyManager)
 		{
 			AppPolicyVM = new ReactiveProperty<ApplicationPolicyViewModel>();
+			IsNeedSave = new ReactiveProperty<bool>(false);
+
+			SaveCommand = IsNeedSave.ToReactiveCommand(false);
+
+			SaveCommand.Subscribe(_ => Save());
 		}
 
+
+		public void Dispose()
+		{
+			AppPolicyVM?.Dispose();
+			IsNeedSave?.Dispose();
+			CanSaveSubscriber?.Dispose();
+			SaveCommand?.Dispose();
+		}
 
 		public bool IsNavigationTarget(NavigationContext navigationContext)
 		{
@@ -49,14 +71,50 @@ namespace Modules.AppPolicy.ViewModels
 
 			try
 			{
+				AppPolicyVM.Value?.Dispose();
+				CanSaveSubscriber?.Dispose();
+
+
 				var policy = base.ApplicationPolicyFromNavigationParameters(navigationContext.Parameters);
 
+				AppPolicy = policy;
 				AppPolicyVM.Value = new ApplicationPolicyViewModel(policy);
+
+				BackupAppPolicyModel();
+
+				IsNeedSave.Value = false;
+
+				CanSaveSubscriber = Observable.Merge(
+						AppPolicy.PropertyChangedAsObservable().ToUnit(),
+						AppPolicy.AcceptExtentions.CollectionChangedAsObservable().ToUnit(),
+						AppPolicy.AppParams.CollectionChangedAsObservable().ToUnit(),
+						AppPolicy.AppParams.ObserveElementPropertyChanged().ToUnit()
+					)
+					.Subscribe(_ =>
+					{
+						IsNeedSave.Value = true;
+					});
 			}
 			catch
 			{
 				NavigationService.Journal.GoBack();
 			}
+		}
+
+
+
+		private void BackupAppPolicyModel()
+		{
+			RollbackData = FileSerializeHelper.ToJson(AppPolicy);
+		}
+
+		private void RollbackAppPolicyModel()
+		{
+			var prevModel = FileSerializeHelper.FromJson<ApplicationPolicy>(RollbackData);
+
+			AppPolicy.RollbackFrom(prevModel);
+
+			IsNeedSave.Value = false;
 		}
 
 
@@ -66,33 +124,70 @@ namespace Modules.AppPolicy.ViewModels
 			get
 			{
 				return _BackCommand
-					?? (_BackCommand = new DelegateCommand(() =>
+					?? (_BackCommand = new DelegateCommand(async () =>
 					{
-						if (NavigationService.Journal.CanGoBack)
+						if (IsNeedSave.Value)
 						{
-							NavigationService.Journal.GoBack();
+							var result = await ShowAppPolicySaveAndBackConfirmDialog();
+
+							if (result.HasValue == false)
+							{
+								// キャンセル
+							}
+							else if (result.Value == true)
+							{
+								// 保存して戻る
+								Save();
+								Back();
+							}
+							else if (result.Value == false)
+							{
+								// 保存せずに戻る
+
+								// ロールバックして戻る
+								RollbackAppPolicyModel();
+								Back();
+							}
 						}
 						else
 						{
-							_RegionManager.RequestNavigate("MainRegion", "FolderListPage");
+							Back();
 						}
+
 					}));
 			}
 		}
 
 
-
-		private DelegateCommand _SaveCommand;
-		public DelegateCommand SaveCommand
+		private void Back()
 		{
-			get
+			if (NavigationService.Journal.CanGoBack)
 			{
-				return _SaveCommand
-					?? (_SaveCommand = new DelegateCommand(() =>
-					{
-						_AppPolicyManager.SavePolicyFile(this.AppPolicyVM.Value.AppPolicy);
-					}));
+				NavigationService.Journal.GoBack();
 			}
+			else
+			{
+				_RegionManager.RequestNavigate("MainRegion", "FolderListPage");
+			}
+		}
+
+
+		public ReactiveCommand SaveCommand { get; private set; }
+
+		private void Save()
+		{
+			IsNeedSave.Value = false;
+
+			try
+			{
+				_AppPolicyManager.SavePolicyFile(this.AppPolicy);	
+			}
+			catch
+			{
+				IsNeedSave.Value = true;
+			}
+
+			BackupAppPolicyModel();
 		}
 
 
@@ -158,10 +253,7 @@ namespace Modules.AppPolicy.ViewModels
 				return _DeleteCommand
 					?? (_DeleteCommand = new DelegateCommand(async () =>
 					{
-						var confirmDialogContent = new Views.DeleteConfirmDialog();
-
-
-						var result = await DialogHost.Show(confirmDialogContent, "DeleteConfirmDialog");
+						var result = await ShowAppPolicyDeleteConfirmDialog();
 
 						if (result != null && ((bool)result) == true)
 						{
@@ -172,13 +264,39 @@ namespace Modules.AppPolicy.ViewModels
 					}));
 			}
 		}
+
+		
+		public async Task<bool?> ShowAppPolicySaveAndBackConfirmDialog()
+		{
+			var view = new SaveAndBackConfirmDialogContent();
+
+			return (bool?)await DialogHost.Show(view, "AppPolicyEditDialogHost");
+		}
+
+		public async Task<bool?> ShowAppPolicyDeleteConfirmDialog()
+		{
+			var view = new DeleteConfirmDialogContent()
+			{
+				DataContext = new DeleteConfirmDialogContentViewModel()
+				{
+					Title = "Delete AppPolicy?"
+				}
+			};
+
+
+
+			return (bool?)await DialogHost.Show(view, "AppPolicyEditDialogHost");
+		}
+
+		
 	}
 
 
-	public class ApplicationPolicyViewModel : BindableBase
+	public class ApplicationPolicyViewModel : BindableBase, IDisposable
 	{
 		public static FolderItemType[] FolderItemTypes = (FolderItemType[]) Enum.GetValues(typeof(FolderItemType));
 
+		private CompositeDisposable _CompositeDisposable;
 
 		public ApplicationPolicy AppPolicy { get; private set; }
 
@@ -211,50 +329,62 @@ namespace Modules.AppPolicy.ViewModels
 		{
 			AppPolicy = appPolicy;
 
-
+			_CompositeDisposable = new CompositeDisposable();
 
 			ApplicationPath = AppPolicy.ObserveProperty(x => x.ApplicationPath)
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 
-			AppName = AppPolicy.ToReactivePropertyAsSynchronized(x => x.AppName);
+			AppName = AppPolicy.ToReactivePropertyAsSynchronized(x => x.AppName)
+				.AddTo(_CompositeDisposable);
 
 
 			DefaultOptionText = AppPolicy
-				.ToReactivePropertyAsSynchronized(x => x.DefaultOptionText);
+				.ToReactivePropertyAsSynchronized(x => x.DefaultOptionText)
+				.AddTo(_CompositeDisposable);
 
-			InputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.InputPathType);
+			InputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.InputPathType)
+				.AddTo(_CompositeDisposable);
 
-			OutputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.OutputPathType);
+			OutputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.OutputPathType)
+				.AddTo(_CompositeDisposable);
 
 			IsInputFile = InputPathType.Select(x => x == FolderItemType.File)
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 
 			IsOutputFile = OutputPathType.Select(x => x == FolderItemType.File)
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 
 			AcceptExtentions = appPolicy.AcceptExtentions
-				.ToReadOnlyReactiveCollection();
+				.ToReadOnlyReactiveCollection()
+				.AddTo(_CompositeDisposable);
 
 			AppArguments = AppPolicy.AppParams.ToReadOnlyReactiveCollection(
 				x => new AppPolicyArgumentViewModel(this, AppPolicy, x)
-				);
+				)
+				.AddTo(_CompositeDisposable);
 
-			ExtentionText = new ReactiveProperty<string>("");
+			ExtentionText = new ReactiveProperty<string>("")
+				.AddTo(_CompositeDisposable);
 
 
 			AddAcceptExtentionCommand = ExtentionText
 				.Select(x => AppPolicy.CanAddAcceptExtention(x))
-				.ToReactiveCommand();
+				.ToReactiveCommand()
+				.AddTo(_CompositeDisposable);
 
 
 			AddAcceptExtentionCommand
 				.Select(x => ExtentionText.Value)
 				.Subscribe(x => 
-			{
-				AppPolicy.AddAcceptExtention(x);
+				{
+					AppPolicy.AddAcceptExtention(x);
 
-				ExtentionText.Value = "";
-			});
+					ExtentionText.Value = "";
+				})
+				.AddTo(_CompositeDisposable);
 		}
 
 
@@ -358,7 +488,7 @@ namespace Modules.AppPolicy.ViewModels
 				DataContext = tempVM
 			};
 
-			var result = await DialogHost.Show(view, "ArgumentEditDialog");
+			var result = await DialogHost.Show(view, "AppPolicyEditDialogHost");
 
 			if (result != null && ((bool)result) == true)
 			{
@@ -380,7 +510,10 @@ namespace Modules.AppPolicy.ViewModels
 			AppPolicy.RemoveArgument(argumentVM.Argument);
 		}
 
-
+		public void Dispose()
+		{
+			_CompositeDisposable.Dispose();
+		}
 	}
 
 
