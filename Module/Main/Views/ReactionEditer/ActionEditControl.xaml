@@ -106,11 +106,12 @@
                 </i:Interaction.Behaviors>
             </ItemsControl>
 
-            <Grid >
+            <Grid Margin="0 8">
 
                 <Button Command="{Binding AddAppLaunchActionCommand}"
                     HorizontalAlignment="Stretch"
                     Margin="16 0"
+                        Width="200"
                     >
                     <StackPanel Orientation="Horizontal">
                         <!--
