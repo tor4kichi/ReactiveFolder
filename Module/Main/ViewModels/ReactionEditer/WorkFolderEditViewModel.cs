@@ -23,7 +23,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 		public WorkFolderEditViewModel(FolderReactionModel reactionModel)
-			: base(@"Target Folder", reactionModel)
+			: base(reactionModel)
 		{
 
 			Reaction.ObserveProperty(x => x.IsWorkFolderValid)

@@ -27,7 +27,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public ReactiveProperty<string> RenamePattern { get; private set; }
 
 		public DestinationEditViewModel(FolderReactionModel reactionModel)
-			: base(@"Destination", reactionModel)
+			: base(reactionModel)
 		{
 			_CompositeDisposable = new CompositeDisposable();
 

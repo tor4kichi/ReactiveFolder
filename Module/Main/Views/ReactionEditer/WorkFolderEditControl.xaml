@@ -16,6 +16,32 @@
     <Grid x:Name="WorkFolderContainer" >
         <StackPanel Orientation="Vertical">
 
+            <TextBlock Text="対象フォルダ" 
+                        VerticalAlignment="Center"
+                        Margin="0 0"
+                        >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
+                                <DataTrigger.Setters>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
+                                <DataTrigger.Setters>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+
+            </TextBlock>
+            
             <Grid>
                 <TextBlock Text="{Binding WorkFolderPath.Value}" 
                                VerticalAlignment="Center"

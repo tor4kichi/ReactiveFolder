@@ -33,7 +33,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 		public ActionsEditViewModel(FolderReactionModel reactionModel, IAppPolicyManager appPolicyManager)
-			: base(@"Actions", reactionModel)
+			: base(reactionModel)
 		{
 			_AppPolicyManager = appPolicyManager;
 

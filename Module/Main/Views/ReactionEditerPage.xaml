@@ -128,17 +128,19 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="{x:Type ContentControl}">
-                                                    <StackPanel Orientation="Vertical"
+                                                    <DockPanel 
                                                                 Margin="0 8"
                                                                 >
 
                                                         <!-- Common Validation UI -->
                                                         <StackPanel Orientation="Horizontal"
-                                                            Margin="0 16"
+                                                                    VerticalAlignment="Top"
+                                                                    DockPanel.Dock="Left"
+                                                            Margin="0 1"
                                                             >
                                                             <!-- Validate State Icon -->
                                                             <materialDesign:PackIcon 
-                                                            VerticalAlignment="Center"
+                                                            VerticalAlignment="Bottom"
                                                             Margin="8 0"
                                                             >
                                                                 <materialDesign:PackIcon.Style>
@@ -167,40 +169,13 @@
                                                                     </Style>
                                                                 </materialDesign:PackIcon.Style>
                                                             </materialDesign:PackIcon>
-
-                                                            <TextBlock Text="{Binding Title, Mode=OneTime}" 
-                                                                VerticalAlignment="Center"
-                                                                Margin="8 0"
-                                                                >
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
-                                                                                <DataTrigger.Setters>
-                                                                                </DataTrigger.Setters>
-                                                                            </DataTrigger>
-                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
-                                                                                <DataTrigger.Setters>
-                                                                                </DataTrigger.Setters>
-                                                                            </DataTrigger>
-                                                                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
-                                                                                <DataTrigger.Setters>
-                                                                                    <Setter Property="Foreground" Value="Red"/>
-                                                                                </DataTrigger.Setters>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-
-                                                            </TextBlock>
-
                                                         </StackPanel>
 
-                                                        <Border Margin="40 0 0 0">
+                                                        <Border Margin="8 0 0 0">
                                                             <ContentPresenter />
                                                         </Border>
 
-                                                    </StackPanel>
+                                                    </DockPanel>
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
