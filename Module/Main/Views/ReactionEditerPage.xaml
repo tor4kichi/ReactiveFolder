@@ -128,7 +128,9 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="{x:Type ContentControl}">
-                                                    <StackPanel Orientation="Vertical">
+                                                    <StackPanel Orientation="Vertical"
+                                                                Margin="0 8"
+                                                                >
 
                                                         <!-- Common Validation UI -->
                                                         <StackPanel Orientation="Horizontal"
