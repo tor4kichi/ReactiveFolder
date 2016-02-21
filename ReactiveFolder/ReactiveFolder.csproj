@@ -54,7 +54,8 @@
     <StartupObject>ReactiveFolder.App</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>rf-x24______.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MaterialDesignColors, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
@@ -293,25 +294,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="9b0d43164963d181de7d2fdcaf85cd91_ol.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="rf-icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="rf-icon-2.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="rf-x24_.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="rf-x24___.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="rf-x24______.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

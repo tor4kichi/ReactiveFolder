@@ -218,13 +218,20 @@ namespace Modules.AppPolicy.ViewModels
 						if (result != null && ((bool)result) == true)
 						{
 							var destFilePath = dialog.FileName;
+							var destFileInfo = new FileInfo(destFilePath);
 
 							var sourceFilePath = _AppPolicyManager.GetSaveFilePath(appPolicy);
 
 							var sourceFileInfo = new FileInfo(sourceFilePath);
 
+							
 							try
 							{
+								if (destFileInfo.Exists)
+								{
+									destFileInfo.Delete();
+								}
+
 								sourceFileInfo.CopyTo(destFilePath);
 							}
 							catch
