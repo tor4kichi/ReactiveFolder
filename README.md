@@ -26,15 +26,7 @@ Windows向けのフォルダアクション自動化ツールです。
 * ReactiveProperty
 * WPF Native Folder Browser
 
-ReactiveFolderはこれらのライブラリやソフトウェアを抜きにしては到底作り得ませんでした。
-開発者や貢献者の皆さんに深く感謝します。
-
 
 # Lisence 
 
 [GPL v3](https://github.com/tor4kichi/ReactiveFolder/blob/master/LICENSE)
-
-使用に関して作者は一切責任を負いません。
-個人・団体、または非営利・営利の目的に問わず自由に使用できます。
-
-派生物のソースコードもGPL v3に準ずる必要があります。
