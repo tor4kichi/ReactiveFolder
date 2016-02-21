@@ -87,8 +87,8 @@ namespace Modules.AppPolicy.ViewModels
 				CanSaveSubscriber = Observable.Merge(
 						AppPolicy.PropertyChangedAsObservable().ToUnit(),
 						AppPolicy.AcceptExtentions.CollectionChangedAsObservable().ToUnit(),
-						AppPolicy.AppParams.CollectionChangedAsObservable().ToUnit(),
-						AppPolicy.AppParams.ObserveElementPropertyChanged().ToUnit()
+						AppPolicy.AppOutputFormats.CollectionChangedAsObservable().ToUnit(),
+						AppPolicy.AppOutputFormats.ObserveElementPropertyChanged().ToUnit()
 					)
 					.Subscribe(_ =>
 					{
@@ -368,7 +368,7 @@ namespace Modules.AppPolicy.ViewModels
 				.ToReadOnlyReactiveCollection()
 				.AddTo(_CompositeDisposable);
 
-			AppArguments = AppPolicy.AppParams.ToReadOnlyReactiveCollection(
+			AppArguments = AppPolicy.AppOutputFormats.ToReadOnlyReactiveCollection(
 				x => new AppPolicyArgumentViewModel(this, AppPolicy, x)
 				)
 				.AddTo(_CompositeDisposable);
@@ -464,7 +464,7 @@ namespace Modules.AppPolicy.ViewModels
 				return _AddArgumentCommand
 					?? (_AddArgumentCommand = new DelegateCommand(() =>
 					{
-						var newArg = AppPolicy.AddNewArgument();
+						var newArg = AppPolicy.AddNewOutputFormat();
 
 						var vm = new AppPolicyArgumentViewModel(this, AppPolicy, newArg);
 
@@ -481,7 +481,7 @@ namespace Modules.AppPolicy.ViewModels
 		public async void OpenArgumentEditDialog(AppPolicyArgumentViewModel argumentVM)
 		{
 			var tempVM = new AppPolicyArgumentViewModel(this, AppPolicy, 
-				new AppArgument(-1)
+				new AppOutputFormat(-1)
 				{
 					Name = argumentVM.Argument.Name,
 					OptionText = argumentVM.Argument.OptionText,
@@ -514,7 +514,7 @@ namespace Modules.AppPolicy.ViewModels
 		public void RemoveArgument(AppPolicyArgumentViewModel argumentVM)
 		{
 			// TODO: AppArgumentの削除 確認ダイアログの表示
-			AppPolicy.RemoveArgument(argumentVM.Argument);
+			AppPolicy.RemoveOutputFormat(argumentVM.Argument);
 		}
 
 		public void Dispose()
@@ -540,7 +540,7 @@ namespace Modules.AppPolicy.ViewModels
 		public ApplicationPolicyViewModel AppPolicyVM { get; private set; }
 		public ApplicationPolicy AppPolicy { get; private set; }
 
-		public AppArgument Argument { get; private set; }
+		public AppOutputFormat Argument { get; private set; }
 
 
 		public ReactiveProperty<string> ArgumentName { get; private set; }
@@ -550,7 +550,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReactiveProperty<string> FinalOptionText { get; private set; }
 
-		public AppPolicyArgumentViewModel(ApplicationPolicyViewModel appPolicyVM, ApplicationPolicy appPolicy, AppArgument argument)
+		public AppPolicyArgumentViewModel(ApplicationPolicyViewModel appPolicyVM, ApplicationPolicy appPolicy, AppOutputFormat argument)
 		{
 			this.AppPolicyVM = appPolicyVM;
 			this.AppPolicy = appPolicy;

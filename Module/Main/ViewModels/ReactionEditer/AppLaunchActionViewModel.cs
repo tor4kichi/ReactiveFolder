@@ -71,7 +71,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 				var appPolicy = _AppPolicyManager.FromAppGuid(x.AppGuid);
 				Action.AppArgumentId = appPolicy
-					.AppParams.FirstOrDefault()?.Id ?? AppArgument.IgnoreArgumentId;
+					.AppOutputFormats.FirstOrDefault()?.Id ?? AppOutputFormat.IgnoreArgumentId;
 			});
 
 
@@ -94,7 +94,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					(x, y) =>
 					{
 						var appPolicy = _AppPolicyManager.FromAppGuid(x);
-						var arg = appPolicy?.FindArgument(y) ?? null;
+						var arg = appPolicy?.FindOutputFormat(y) ?? null;
 						return arg?.Name ?? "-";
 					})
 					.ToReactiveProperty();
@@ -181,7 +181,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 			// App変更時のArgumentリストの更新
-			AppArgumentList = AppPolicy.AppParams.ToReadOnlyReactiveCollection(x =>
+			AppArgumentList = AppPolicy.AppOutputFormats.ToReadOnlyReactiveCollection(x =>
 				new AppPolicyArgumentViewModel(x)
 			)
 			.AddTo(_CompositeDisposable);
@@ -213,7 +213,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-		public AppArgument AppArgument { get; private set; }
+		public AppOutputFormat AppArgument { get; private set; }
 
 		public string ArgumentName { get; private set; }
 
@@ -223,7 +223,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			this.ArgumentName = "???";
 		}
 
-		public AppPolicyArgumentViewModel(AppArgument arg)
+		public AppPolicyArgumentViewModel(AppOutputFormat arg)
 		{
 			this.AppArgument = arg;
 

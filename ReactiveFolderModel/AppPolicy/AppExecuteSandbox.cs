@@ -12,7 +12,7 @@ namespace ReactiveFolder.Models.AppPolicy
 	public class ApplicationExecuteSandbox : BindableBase
 	{
 		public ApplicationPolicy Policy { get; private set; }
-		public AppArgument Param { get; private set; }
+		public AppOutputFormat Param { get; private set; }
 
 
 		/// <summary>
@@ -21,7 +21,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		/// <param name="policy"></param>
 		/// <param name="param"></param>
 		/// <param name="context"></param>
-		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppArgument param)
+		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppOutputFormat param)
 		{
 			Policy = policy;
 			Param = param;

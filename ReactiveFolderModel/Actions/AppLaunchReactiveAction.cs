@@ -145,7 +145,7 @@ namespace ReactiveFolder.Models.Actions
 				return null;
 			}
 
-			var appParam = appPolicy.FindArgument(this.AppArgumentId);
+			var appParam = appPolicy.FindOutputFormat(this.AppArgumentId);
 
 			if (appPolicy == null || appParam == null)
 			{

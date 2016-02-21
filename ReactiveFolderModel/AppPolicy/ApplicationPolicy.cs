@@ -136,18 +136,37 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
-		[DataMember]
-		private ObservableCollection<AppArgument> _AppParams { get; set; }
-		public ReadOnlyObservableCollection<AppArgument> AppParams { get; private set; }
+
+
 
 		[DataMember]
-		public int ArgumentIdSeed { get; private set; }
+		public int OptionDeclarationIdSeed { get; private set; }
+
+		[DataMember]
+		private ObservableCollection<AppOptionDeclaration> _OptionDeclarations { get; set; }
+		public ReadOnlyObservableCollection<AppOptionDeclaration> OptionDeclarations { get; private set; }
+
+		
+
+
+
+
+		[DataMember]
+		public int OutputFormatIdSeed { get; private set; }
+
+		[DataMember]
+		private ObservableCollection<AppOutputFormat> _AppOutputFormats { get; set; }
+		public ReadOnlyObservableCollection<AppOutputFormat> AppOutputFormats { get; private set; }
+
+
+
 
 		[DataMember]
 		private ObservableCollection<string> _AcceptExtentions { get; set; }
 		public ReadOnlyObservableCollection<string> AcceptExtentions { get; private set; }
 
-		
+
+
 
 
 		/// <summary>
@@ -159,17 +178,24 @@ namespace ReactiveFolder.Models.AppPolicy
 			ApplicationPath = applicationPath;
 			AppName = Path.GetFileNameWithoutExtension(ApplicationPath);
 
+			Guid = Guid.NewGuid();
+
 			MaxProcessTime = TimeSpan.FromMinutes(1);
 
-			DefaultOptionText = "";
-			_AppParams = new ObservableCollection<AppArgument>();
-			AppParams = new ReadOnlyObservableCollection<AppArgument>(_AppParams);
+			DefaultOptionText = "-i \"%IN%\" %OPTIONS% \"%OUT%\"";
+
+			OptionDeclarationIdSeed = 1;
+			_OptionDeclarations = new ObservableCollection<AppOptionDeclaration>();
+			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclaration>(_OptionDeclarations);
+
+			OutputFormatIdSeed = 1;
+			_AppOutputFormats = new ObservableCollection<AppOutputFormat>();
+			AppOutputFormats = new ReadOnlyObservableCollection<AppOutputFormat>(_AppOutputFormats);
+
 			_AcceptExtentions = new ObservableCollection<string>();
 			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
 
-			Guid = Guid.NewGuid();
 
-			ArgumentIdSeed = 1;
 		}
 
 
@@ -177,7 +203,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		[OnDeserialized]
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
-			AppParams = new ReadOnlyObservableCollection<AppArgument>(_AppParams);
+			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclaration>(_OptionDeclarations);
+			AppOutputFormats = new ReadOnlyObservableCollection<AppOutputFormat>(_AppOutputFormats);
 			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
 		}
 
@@ -246,40 +273,89 @@ namespace ReactiveFolder.Models.AppPolicy
 			return _AcceptExtentions.Remove(extention);
 		}
 
-		public int GetNextArgumentId()
+
+
+
+
+
+		public int GetNextOptionDeclarationId()
 		{
-			return ArgumentIdSeed++;
+			return OptionDeclarationIdSeed++;
 		}
 
-		public AppArgument AddNewArgument()
+		public AppOptionDeclaration AddNewOptionDeclaration()
 		{
-			var id = GetNextArgumentId();
-			var newArg = new AppArgument(id);
+			var id = GetNextOutputFormatId();
+			var newOption = new AppOptionDeclaration(id);
+
+			newOption.Name = $"Option {id}";
+
+			_OptionDeclarations.Add(newOption);
+			return newOption;
+		}
+
+		public bool RemoveOptionDeclaration(AppOptionDeclaration optionDecl)
+		{
+			return _OptionDeclarations.Remove(optionDecl);
+		}
+
+
+		public AppOptionDeclaration FindOptionDeclaration(int optionDeclId)
+		{
+			return _OptionDeclarations.SingleOrDefault(x => x.Id == optionDeclId);
+		}
+
+
+
+
+		public int GetNextOutputFormatId()
+		{
+			return OutputFormatIdSeed++;
+		}
+
+		public AppOutputFormat AddNewOutputFormat()
+		{
+			var id = GetNextOutputFormatId();
+			var newArg = new AppOutputFormat(id);
 			newArg.Name = $"Option {id}";
 
 
-			_AppParams.Add(newArg);
+			_AppOutputFormats.Add(newArg);
 			return newArg;
 		}
 
-		public bool RemoveArgument(AppArgument arg)
+		public bool RemoveOutputFormat(AppOutputFormat arg)
 		{
-			return _AppParams.Remove(arg);
+			return _AppOutputFormats.Remove(arg);
 		}
 
 		
-		public AppArgument FindArgument(int argId)
+		public AppOutputFormat FindOutputFormat(int argId)
 		{
-			return _AppParams.SingleOrDefault(x => x.Id == argId);
+			return _AppOutputFormats.SingleOrDefault(x => x.Id == argId);
 		}
 
 
 	
 
 
-		public string MakeArgumentsText(string inputPath, DirectoryInfo outputDir, AppArgument param)
+		public string MakeArgumentsText(string inputPath, DirectoryInfo outputDir, AppOutputFormat outputFormat = null, params AppOptionValueSet[] additionalOptions)
 		{
-			var argumentText = $"{this.DefaultOptionText} {(param.OptionText)}";
+			var options = 
+				additionalOptions.Union(outputFormat.Options)
+				.ToArray();
+
+			var optionsText = AppOptionsToArgumentText(options);
+
+
+			var primaryOptionText = this.DefaultOptionText;
+			if (false == String.IsNullOrEmpty(outputFormat.OptionText))
+			{
+				primaryOptionText = outputFormat.OptionText;
+			}
+
+
+			var argumentText = primaryOptionText;
 
 			string input = null;
 			string output = null;
@@ -300,9 +376,9 @@ namespace ReactiveFolder.Models.AppPolicy
 			{
 				case FolderItemType.File:
 					output = Path.Combine(outputDir.FullName, Path.GetFileName(inputPath));
-					if (false == param.SameInputExtention)
+					if (false == outputFormat.SameInputExtention)
 					{
-						output = Path.ChangeExtension(output, param.OutputExtention);
+						output = Path.ChangeExtension(output, outputFormat.OutputExtention);
 					}
 					break;
 				case FolderItemType.Folder:
@@ -314,15 +390,31 @@ namespace ReactiveFolder.Models.AppPolicy
 
 			argumentText = argumentText.Replace("%IN%", input);
 			argumentText = argumentText.Replace("%OUT%", output);
+			argumentText = argumentText.Replace("%OPTIONS%", optionsText);
 
 			return argumentText;
 		}
 
+
+
+		private string AppOptionsToArgumentText(IEnumerable<AppOptionValueSet> optionValues)
+		{
+			var arguments = optionValues.Join(OptionDeclarations,
+				(x) => x.OptionId,
+				(y) => y.Id,
+				(x, y) => new { Decl = y, Values = x.Values }
+				);
+
+			var argumentTexts = arguments.OrderBy(x => x.Decl.Order)
+				.Select(x => x.Decl.ConvertOptionText(x.Values));
+
+			return String.Join(" ", argumentTexts);
+		}
 		
 
-		public ApplicationExecuteSandbox CreateExecuteSandbox(AppArgument param)
+		public ApplicationExecuteSandbox CreateExecuteSandbox(AppOutputFormat param)
 		{
-			if (false == this.AppParams.Contains(param))
+			if (false == this.AppOutputFormats.Contains(param))
 			{
 				throw new Exception("invalid AppExecuteParam. it is diffarent ApplicationPolicy param?");
 			}
@@ -333,13 +425,13 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public IEnumerable<string> GetOutputExtentions()
 		{
-			var outputExtentions = _AppParams.Where(x => false == x.SameInputExtention)
+			var outputExtentions = _AppOutputFormats.Where(x => false == x.SameInputExtention)
 				.Select(x => x.OutputExtention)
 				.Distinct();
 
 			// 入力と同一の出力をする機能がある場合には、
 			// 入力拡張子を出力拡張子に含める
-			if (_AppParams.Any(x => x.SameInputExtention))
+			if (_AppOutputFormats.Any(x => x.SameInputExtention))
 			{
 				return outputExtentions.Concat(AcceptExtentions);
 			}
@@ -412,19 +504,29 @@ namespace ReactiveFolder.Models.AppPolicy
 				this.AddAcceptExtention(ext);
 			}
 
-			// AppParams (AppArgument?)
-			var remParams = this.AppParams.ToArray();
+			// AppOutputFormats
+			var remParams = this.AppOutputFormats.ToArray();
 			foreach (var remParam in remParams)
 			{
-				this.RemoveArgument(remParam);
+				this.RemoveOutputFormat(remParam);
 			}
 
-			foreach (var addparam in backup.AppParams)
+			foreach (var addparam in backup.AppOutputFormats)
 			{
-				this._AppParams.Add(addparam);
+				this._AppOutputFormats.Add(addparam);
 			}
 
+			// OptionDeclaration
+			var remOptionDecls = this.OptionDeclarations.ToArray();
+			foreach (var remOptionDecl in remOptionDecls)
+			{
+				this.RemoveOptionDeclaration(remOptionDecl);
+			}
 
+			foreach (var addOptionDecl in backup.OptionDeclarations)
+			{
+				this._OptionDeclarations.Add(addOptionDecl);
+			}
 		}
 	}
 
