@@ -18,9 +18,9 @@ namespace Modules.AppPolicy.Views
 	/// <summary>
 	/// AppPolicyArgumentEditDialog.xaml の相互作用ロジック
 	/// </summary>
-	public partial class AppPolicyArgumentEditDialog : UserControl
+	public partial class AppPolicyOutputFormatEditDialog : UserControl
 	{
-		public AppPolicyArgumentEditDialog()
+		public AppPolicyOutputFormatEditDialog()
 		{
 			InitializeComponent();
 		}

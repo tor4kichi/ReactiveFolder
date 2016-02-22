@@ -103,6 +103,7 @@
                     </StackPanel>
 
 
+                    <!-- 
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Default Option Text" 
                                    Style="{StaticResource ListSubheaderText}"
@@ -118,7 +119,7 @@
                         </StackPanel>
                         
                     </StackPanel>
-
+                    -->
 
                     <StackPanel Orientation="Vertical" 
                                 Visibility="{Binding IsInputFile.Value, Converter={StaticResource BoolToVisiblity}}"
@@ -181,7 +182,7 @@
                     <Grid>
                         <Button HorizontalAlignment="Right"
                             ToolTip="Add Function" 
-                            Command="{Binding AddArgumentCommand}"
+                            Command="{Binding AddOutputFormatCommand}"
                             Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
                             Margin="16 0"
                             >
@@ -191,7 +192,7 @@
                             <TextBlock Text="App Options by Function"
                                        Style="{StaticResource ListSubheaderText}"
                                />
-                            <ItemsControl ItemsSource="{Binding AppArguments}"
+                            <ItemsControl ItemsSource="{Binding AppOutputFormats}"
                                                   Style="{StaticResource List}"
                                                   ItemContainerStyle="{StaticResource ListItem}"
                                                  > 
@@ -206,11 +207,11 @@
                                             
                                             <Button Grid.Column="0"
                                                 Style="{StaticResource ListButton}"
-                                                Command="{Binding EditArgumentCommand}"
+                                                Command="{Binding EditOutputFormatCommand}"
                                                 >
 
                                                 <StackPanel Orientation="Vertical">
-                                                    <TextBlock Text="{Binding ArgumentName.Value}"
+                                                    <TextBlock Text="{Binding OutputFormatName.Value}"
                                                     Style="{StaticResource ListPrimaryText}"
                                                     />
                                                     <TextBlock Text="{Binding OptionText.Value}" />
@@ -221,7 +222,7 @@
                                             <!-- show only at mouseover -->
                                             <Button Grid.Column="1"
                                                     Style="{StaticResource MaterialDesignFlatButton}"
-                                                    Command="{Binding RemoveArgumentCommand}"
+                                                    Command="{Binding RemoveOutputFormatCommand}"
                                                     >
                                                 <materialDesign:PackIcon Kind="Delete" />
                                             </Button>

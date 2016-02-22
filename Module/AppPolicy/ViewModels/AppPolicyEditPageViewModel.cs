@@ -88,7 +88,9 @@ namespace Modules.AppPolicy.ViewModels
 						AppPolicy.PropertyChangedAsObservable().ToUnit(),
 						AppPolicy.AcceptExtentions.CollectionChangedAsObservable().ToUnit(),
 						AppPolicy.AppOutputFormats.CollectionChangedAsObservable().ToUnit(),
-						AppPolicy.AppOutputFormats.ObserveElementPropertyChanged().ToUnit()
+						AppPolicy.AppOutputFormats.ObserveElementPropertyChanged().ToUnit(),
+						AppPolicy.OptionDeclarations.CollectionChangedAsObservable().ToUnit(),
+						AppPolicy.OptionDeclarations.ObserveElementPropertyChanged().ToUnit()
 					)
 					.Subscribe(_ =>
 					{
@@ -316,8 +318,6 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReactiveProperty<FolderItemType> OutputPathType { get; private set; }
 
-		public ReactiveProperty<string> DefaultOptionText { get; private set; }
-
 		public ReactiveProperty<string> ExtentionText { get; private set; }
 
 		public ReactiveProperty<bool> IsInputFile { get; private set; }
@@ -328,7 +328,7 @@ namespace Modules.AppPolicy.ViewModels
 		public ReadOnlyReactiveCollection<string> AcceptExtentions { get; private set; }
 
 		// 機能定義（複数）
-		public ReadOnlyReactiveCollection<AppPolicyArgumentViewModel> AppArguments { get; private set; }
+		public ReadOnlyReactiveCollection<AppPolicyOutputFormatViewModel> AppOutputFormats { get; private set; }
 
 
 
@@ -345,10 +345,6 @@ namespace Modules.AppPolicy.ViewModels
 			AppName = AppPolicy.ToReactivePropertyAsSynchronized(x => x.AppName)
 				.AddTo(_CompositeDisposable);
 
-
-			DefaultOptionText = AppPolicy
-				.ToReactivePropertyAsSynchronized(x => x.DefaultOptionText)
-				.AddTo(_CompositeDisposable);
 
 			InputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.InputPathType)
 				.AddTo(_CompositeDisposable);
@@ -368,8 +364,8 @@ namespace Modules.AppPolicy.ViewModels
 				.ToReadOnlyReactiveCollection()
 				.AddTo(_CompositeDisposable);
 
-			AppArguments = AppPolicy.AppOutputFormats.ToReadOnlyReactiveCollection(
-				x => new AppPolicyArgumentViewModel(this, AppPolicy, x)
+			AppOutputFormats = AppPolicy.AppOutputFormats.ToReadOnlyReactiveCollection(
+				x => new AppPolicyOutputFormatViewModel(this, AppPolicy, x)
 				)
 				.AddTo(_CompositeDisposable);
 
@@ -456,19 +452,19 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
-		private DelegateCommand _AddArgumentCommand;
-		public DelegateCommand AddArgumentCommand
+		private DelegateCommand _AddOutputFormatCommand;
+		public DelegateCommand AddOutputFormatCommand
 		{
 			get
 			{
-				return _AddArgumentCommand
-					?? (_AddArgumentCommand = new DelegateCommand(() =>
+				return _AddOutputFormatCommand
+					?? (_AddOutputFormatCommand = new DelegateCommand(() =>
 					{
-						var newArg = AppPolicy.AddNewOutputFormat();
+						var newOutputFormat = AppPolicy.AddNewOutputFormat();
 
-						var vm = new AppPolicyArgumentViewModel(this, AppPolicy, newArg);
+						var vm = new AppPolicyOutputFormatViewModel(this, AppPolicy, newOutputFormat);
 
-						OpenArgumentEditDialog(vm);
+						OpenOutputFormatEditDialog(vm);
 					}));
 			}
 		}
@@ -478,19 +474,27 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
-		public async void OpenArgumentEditDialog(AppPolicyArgumentViewModel argumentVM)
+		public async void OpenOutputFormatEditDialog(AppPolicyOutputFormatViewModel outputFormatVM)
 		{
-			var tempVM = new AppPolicyArgumentViewModel(this, AppPolicy, 
-				new AppOutputFormat(-1)
-				{
-					Name = argumentVM.Argument.Name,
-					OptionText = argumentVM.Argument.OptionText,
-					Description = argumentVM.Argument.Description,
-					OutputExtention = argumentVM.Argument.OutputExtention
-				}
-			);
+			var tempOutputFormatModel = new AppOutputFormat(-1)
+			{
+				Name = outputFormatVM.OutputFormat.Name,
+				OutputExtention = outputFormatVM.OutputFormat.OutputExtention
+			};
 
-			var view = new Views.AppPolicyArgumentEditDialog()
+			foreach (var option in outputFormatVM.OutputFormat.Options)
+			{
+				var decl = AppPolicy.FindOptionDeclaration(option.OptionId);
+				tempOutputFormatModel.AddOrUpdateOption(decl, option.Values.ToArray());
+			}
+
+			var tempVM = new AppPolicyOutputFormatViewModel(this, AppPolicy, tempOutputFormatModel);
+
+
+
+
+
+			var view = new Views.AppPolicyOutputFormatEditDialog()
 			{
 				DataContext = tempVM
 			};
@@ -500,21 +504,25 @@ namespace Modules.AppPolicy.ViewModels
 			if (result != null && ((bool)result) == true)
 			{
 				// 変更を適用する
-				var tempArg = tempVM.Argument;
-				argumentVM.Argument.Name			= tempArg.Name;
-				argumentVM.Argument.OptionText		= tempArg.OptionText;
-				argumentVM.Argument.Description		= tempArg.Description;
-				argumentVM.Argument.OutputExtention = tempArg.OutputExtention;
+				var tempArg = tempVM.OutputFormat;
+				outputFormatVM.OutputFormat.Name			= tempArg.Name;
+				outputFormatVM.OutputFormat.OutputExtention = tempArg.OutputExtention;
+
+				foreach (var option in tempArg.Options)
+				{
+					var decl = AppPolicy.FindOptionDeclaration(option.OptionId);
+					outputFormatVM.OutputFormat.AddOrUpdateOption(decl, option.Values.ToArray());
+				}
 			}
 
 			tempVM.Dispose();
 		}
 
 
-		public void RemoveArgument(AppPolicyArgumentViewModel argumentVM)
+		public void RemoveOutputFormat(AppPolicyOutputFormatViewModel outputFormatVM)
 		{
-			// TODO: AppArgumentの削除 確認ダイアログの表示
-			AppPolicy.RemoveOutputFormat(argumentVM.Argument);
+			// TODO: AppOutputFormatの削除 確認ダイアログの表示
+			AppPolicy.RemoveOutputFormat(outputFormatVM.OutputFormat);
 		}
 
 		public void Dispose()
@@ -533,40 +541,34 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
+	// TODO: AppPolicyOutputFormatViewModelをAppOptionDeclarationに対応させる
 
-
-	public class AppPolicyArgumentViewModel : BindableBase, IDisposable
+	public class AppPolicyOutputFormatViewModel : BindableBase, IDisposable
 	{
 		public ApplicationPolicyViewModel AppPolicyVM { get; private set; }
 		public ApplicationPolicy AppPolicy { get; private set; }
 
-		public AppOutputFormat Argument { get; private set; }
+		public AppOutputFormat OutputFormat { get; private set; }
 
 
-		public ReactiveProperty<string> ArgumentName { get; private set; }
-		public ReactiveProperty<string> Description { get; private set; }
-		public ReactiveProperty<string> OptionText { get; private set; }
+		public ReactiveProperty<string> OutputFormatName { get; private set; }
 		public ReactiveProperty<string> OutputExtention { get; private set; }
 
 		public ReactiveProperty<string> FinalOptionText { get; private set; }
 
-		public AppPolicyArgumentViewModel(ApplicationPolicyViewModel appPolicyVM, ApplicationPolicy appPolicy, AppOutputFormat argument)
+		public AppPolicyOutputFormatViewModel(ApplicationPolicyViewModel appPolicyVM, ApplicationPolicy appPolicy, AppOutputFormat outputFormat)
 		{
 			this.AppPolicyVM = appPolicyVM;
 			this.AppPolicy = appPolicy;
-			this.Argument = argument;
+			this.OutputFormat = outputFormat;
 
-			ArgumentName = this.Argument.ToReactivePropertyAsSynchronized(x => x.Name);
-			Description = this.Argument.ToReactivePropertyAsSynchronized(x => x.Description);
-			OptionText = this.Argument.ToReactivePropertyAsSynchronized(x => x.OptionText);
-			OutputExtention = this.Argument.ToReactivePropertyAsSynchronized(x => x.OutputExtention);
+			OutputFormatName = this.OutputFormat.ToReactivePropertyAsSynchronized(x => x.Name);
+			OutputExtention = this.OutputFormat.ToReactivePropertyAsSynchronized(x => x.OutputExtention);
 
 
 			FinalOptionText = Observable.Merge(
 				AppPolicyVM.InputPathType.ToUnit(),
 				AppPolicyVM.OutputPathType.ToUnit(),
-				AppPolicyVM.DefaultOptionText.ToUnit(),
-				OptionText.ToUnit(),
 				OutputExtention.ToUnit()
 				)
 				.Select(_ =>
@@ -574,33 +576,33 @@ namespace Modules.AppPolicy.ViewModels
 					var ext = AppPolicy.AcceptExtentions.FirstOrDefault() ?? ".ext";
 					var dummyInput = "dummyFolder/filename" + ext;
 					var dummyFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-					return AppPolicy.MakeArgumentsText(dummyInput, new DirectoryInfo(dummyFolder), Argument);
+					return AppPolicy.MakeCommandLineOptionText(dummyInput, new DirectoryInfo(dummyFolder), OutputFormat);
 				})
 				.ToReactiveProperty();
 		}
 
-		private DelegateCommand _EditArgumentCommand;
-		public DelegateCommand EditArgumentCommand
+		private DelegateCommand _EditOutputFormatCommand;
+		public DelegateCommand EditOutputFormatCommand
 		{
 			get
 			{
-				return _EditArgumentCommand
-					?? (_EditArgumentCommand = new DelegateCommand(() =>
+				return _EditOutputFormatCommand
+					?? (_EditOutputFormatCommand = new DelegateCommand(() =>
 					{
-						AppPolicyVM.OpenArgumentEditDialog(this);
+						AppPolicyVM.OpenOutputFormatEditDialog(this);
 					}));
 			}
 		}
 
-		private DelegateCommand _RemoveArgumentCommand;
-		public DelegateCommand RemoveArgumentCommand
+		private DelegateCommand _RemoveOutputFormatCommand;
+		public DelegateCommand RemoveOutputFormatCommand
 		{
 			get
 			{
-				return _RemoveArgumentCommand
-					?? (_RemoveArgumentCommand = new DelegateCommand(() =>
+				return _RemoveOutputFormatCommand
+					?? (_RemoveOutputFormatCommand = new DelegateCommand(() =>
 					{
-						AppPolicyVM.RemoveArgument(this);
+						AppPolicyVM.RemoveOutputFormat(this);
 					}));
 			}
 		}
@@ -608,9 +610,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		public void Dispose()
 		{
-			ArgumentName.Dispose();
-			Description.Dispose();
-			OptionText.Dispose();
+			OutputFormatName.Dispose();
 			OutputExtention.Dispose();
 
 			FinalOptionText.Dispose();
