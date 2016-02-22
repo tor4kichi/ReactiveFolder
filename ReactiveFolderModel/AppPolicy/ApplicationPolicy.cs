@@ -94,19 +94,7 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
-		[DataMember]
-		private string _DefaultOptionText;
-		public string DefaultOptionText
-		{
-			get
-			{
-				return _DefaultOptionText;
-			}
-			set
-			{
-				SetProperty(ref _DefaultOptionText, value);
-			}
-		}
+		
 
 		[DataMember]
 		private FolderItemType _InputPathType;
@@ -136,15 +124,18 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
-
+		// TODO: NotifyPropertyChanged
+		public AppInputOptionDeclaration InputOption { get; private set; }
+		public AppOutputOptionDeclaration OutputOption { get; private set; }
+		
 
 
 		[DataMember]
 		public int OptionDeclarationIdSeed { get; private set; }
 
 		[DataMember]
-		private ObservableCollection<AppOptionDeclaration> _OptionDeclarations { get; set; }
-		public ReadOnlyObservableCollection<AppOptionDeclaration> OptionDeclarations { get; private set; }
+		private ObservableCollection<AppOptionDeclarationBase> _OptionDeclarations { get; set; }
+		public ReadOnlyObservableCollection<AppOptionDeclarationBase> OptionDeclarations { get; private set; }
 
 		
 
@@ -182,11 +173,9 @@ namespace ReactiveFolder.Models.AppPolicy
 
 			MaxProcessTime = TimeSpan.FromMinutes(1);
 
-			DefaultOptionText = "-i \"%IN%\" %OPTIONS% \"%OUT%\"";
-
 			OptionDeclarationIdSeed = 1;
-			_OptionDeclarations = new ObservableCollection<AppOptionDeclaration>();
-			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclaration>(_OptionDeclarations);
+			_OptionDeclarations = new ObservableCollection<AppOptionDeclarationBase>();
+			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclarationBase>(_OptionDeclarations);
 
 			OutputFormatIdSeed = 1;
 			_AppOutputFormats = new ObservableCollection<AppOutputFormat>();
@@ -196,6 +185,11 @@ namespace ReactiveFolder.Models.AppPolicy
 			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
 
 
+			InputOption = new AppInputOptionDeclaration(GetNextOptionDeclarationId());
+			OutputOption = new AppOutputOptionDeclaration(GetNextOptionDeclarationId());
+
+			_OptionDeclarations.Add(InputOption);
+			_OptionDeclarations.Add(OutputOption);
 		}
 
 
@@ -203,7 +197,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		[OnDeserialized]
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
-			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclaration>(_OptionDeclarations);
+			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclarationBase>(_OptionDeclarations);
 			AppOutputFormats = new ReadOnlyObservableCollection<AppOutputFormat>(_AppOutputFormats);
 			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
 		}
@@ -294,13 +288,13 @@ namespace ReactiveFolder.Models.AppPolicy
 			return newOption;
 		}
 
-		public bool RemoveOptionDeclaration(AppOptionDeclaration optionDecl)
+		public bool RemoveOptionDeclaration(AppOptionDeclarationBase optionDecl)
 		{
 			return _OptionDeclarations.Remove(optionDecl);
 		}
 
 
-		public AppOptionDeclaration FindOptionDeclaration(int optionDeclId)
+		public AppOptionDeclarationBase FindOptionDeclaration(int optionDeclId)
 		{
 			return _OptionDeclarations.SingleOrDefault(x => x.Id == optionDeclId);
 		}
@@ -341,37 +335,19 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public string MakeArgumentsText(string inputPath, DirectoryInfo outputDir, AppOutputFormat outputFormat = null, params AppOptionValueSet[] additionalOptions)
 		{
-			var options = 
-				additionalOptions.Union(outputFormat.Options)
-				.ToArray();
 
-			var optionsText = AppOptionsToArgumentText(options);
+			// Note: コマンドライン引数として使用するオプションを一つのリストにまとめて
+			// オプションからコマンドライン引数の文字列を生成します。
+			
 
-
-			var primaryOptionText = this.DefaultOptionText;
-			if (false == String.IsNullOrEmpty(outputFormat.OptionText))
-			{
-				primaryOptionText = outputFormat.OptionText;
-			}
+			// input
+			var inputValueSet = InputOption.CreateValueSet();
+			inputValueSet.Values[0].Value = inputPath;
 
 
-			var argumentText = primaryOptionText;
-
-			string input = null;
-			string output = null;
-
-			switch (InputPathType)
-			{
-				case FolderItemType.File:
-					input = inputPath;
-					break;
-				case FolderItemType.Folder:
-					input = inputPath;
-					break;
-				default:
-					break;
-			}
-
+			// output
+			var outputValueSet = OutputOption.CreateValueSet();
+			string output = null;		
 			switch (OutputPathType)
 			{
 				case FolderItemType.File:
@@ -388,25 +364,39 @@ namespace ReactiveFolder.Models.AppPolicy
 					break;
 			}
 
-			argumentText = argumentText.Replace("%IN%", input);
-			argumentText = argumentText.Replace("%OUT%", output);
-			argumentText = argumentText.Replace("%OPTIONS%", optionsText);
+			outputValueSet.Values[0].Value = output;
 
-			return argumentText;
+
+			// input + output + outputFormat.Options + additionalOptions
+			var options = 
+				additionalOptions.Union(outputFormat.Options)
+				.ToList();
+			options.Add(inputValueSet);
+			options.Add(outputValueSet);
+
+			// finalize
+			return AppOptionsToArgumentText(options);
 		}
 
-
+	
 
 		private string AppOptionsToArgumentText(IEnumerable<AppOptionValueSet> optionValues)
 		{
+			// TODO: ValuesをDeclarations に渡してValidation CanGenerate
+
+
 			var arguments = optionValues.Join(OptionDeclarations,
 				(x) => x.OptionId,
 				(y) => y.Id,
-				(x, y) => new { Decl = y, Values = x.Values }
+				(x, y) => new { Decl = y, Values = x }
 				);
 
 			var argumentTexts = arguments.OrderBy(x => x.Decl.Order)
-				.Select(x => x.Decl.ConvertOptionText(x.Values));
+				.Select(x =>
+				{
+					x.Decl.UpdateOptionValueSet(x.Values);
+					return x.Decl.GenerateOptionText();
+				});
 
 			return String.Join(" ", argumentTexts);
 		}
@@ -486,7 +476,6 @@ namespace ReactiveFolder.Models.AppPolicy
 		{
 			this.AppName = backup.AppName;
 			this.ApplicationPath = backup.ApplicationPath;
-			this.DefaultOptionText = backup.DefaultOptionText;
 			this.InputPathType = backup.InputPathType;
 			this.OutputPathType = backup.OutputPathType;
 			this.MaxProcessTime = backup.MaxProcessTime;

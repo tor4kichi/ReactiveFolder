@@ -38,21 +38,6 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 		[DataMember]
-		private string _OptionText;
-		public string OptionText
-		{
-			get
-			{
-				return _OptionText;
-			}
-			set
-			{
-				SetProperty(ref _OptionText, value);
-			}
-		}
-
-
-		[DataMember]
 		private string _OutputExtention;
 		public string OutputExtention
 		{
@@ -76,7 +61,6 @@ namespace ReactiveFolder.Models.AppPolicy
 		{
 			_Id = id;
 			Name = "";
-			OptionText = "";
 			OutputExtention = "";
 
 			_Options = new ObservableCollection<AppOptionValueSet>();

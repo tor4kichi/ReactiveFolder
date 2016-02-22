@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -9,8 +10,7 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Models.AppPolicy
 {
-	[DataContract]
-	public class AppOptionDeclaration : BindableBase
+	abstract public class AppOptionDeclarationBase : BindableBase
 	{
 		[DataMember]
 		private string _Name;
@@ -26,11 +26,6 @@ namespace ReactiveFolder.Models.AppPolicy
 				SetProperty(ref _Name, value);
 			}
 		}
-
-		[DataMember]
-		public int Id { get; private set; }
-
-
 
 		[DataMember]
 		private string _OptionTextPattern;
@@ -49,12 +44,9 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 
-
+		
 		[DataMember]
-		private ObservableCollection<AppOptionProperty> _UserProperties;
-
-		public ReadOnlyObservableCollection<AppOptionProperty> UserProperties { get; private set; }
-
+		public int Id { get; private set; }
 
 		[DataMember]
 		private int _Order;
@@ -72,15 +64,39 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
+		[DataMember]
+		protected ObservableCollection<AppOptionProperty> _UserProperties;
 
-		public AppOptionDeclaration(int id)
+		public ReadOnlyObservableCollection<AppOptionProperty> UserProperties { get; private set; }
+
+
+
+
+
+		private AppOptionValueSet _CurrentOptionValueSet;
+		public AppOptionValueSet CurrentOptionValueSet
 		{
-			Id = id;
+			get
+			{
+				return _CurrentOptionValueSet;
+			}
+		}
+
+
+		public void UpdateOptionValueSet(AppOptionValueSet optionValueSet)
+		{
+			_CurrentOptionValueSet = optionValueSet;
+		}
+
+
+
+		public AppOptionDeclarationBase(int id)
+		{
 			Name = "";
-			OptionTextPattern = "";
+			Id = id;
+			Order = 0;
 			_UserProperties = new ObservableCollection<AppOptionProperty>();
 			UserProperties = new ReadOnlyObservableCollection<AppOptionProperty>(_UserProperties);
-			Order = 0;
 		}
 
 		[OnDeserialized]
@@ -89,10 +105,13 @@ namespace ReactiveFolder.Models.AppPolicy
 			UserProperties = new ReadOnlyObservableCollection<AppOptionProperty>(_UserProperties);
 		}
 
-
+	
 
 		public bool Validate()
 		{
+			// TODO: CurrentOptionValueSetのValidate
+
+
 			if (String.IsNullOrWhiteSpace(OptionTextPattern))
 			{
 				return false;
@@ -121,17 +140,27 @@ namespace ReactiveFolder.Models.AppPolicy
 			return true;
 		}
 
-		public bool CanConvertOptionText(params dynamic[] values)
+		public bool CanGenerateOptionText()
 		{
-			if (_UserProperties.Count != values.Count())
+			if (CurrentOptionValueSet == null)
 			{
 				return false;
 			}
 
-			for(int propertyItr = 0; propertyItr < _UserProperties.Count; ++propertyItr)
+			if (CurrentOptionValueSet.OptionId != this.Id)
+			{
+				return false;
+			}
+
+			if (_UserProperties.Count != CurrentOptionValueSet.Values.Count())
+			{
+				return false;
+			}
+
+			for (int propertyItr = 0; propertyItr < _UserProperties.Count; ++propertyItr)
 			{
 				var prop = _UserProperties[propertyItr];
-				var val = values[propertyItr];
+				var val = CurrentOptionValueSet.Values[propertyItr];
 
 				if (prop.CanConvertOptionText(val))
 				{
@@ -143,9 +172,9 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
-		public string ConvertOptionText(params dynamic[] values)
+		public string GenerateOptionText()
 		{
-			if (_UserProperties.Count != values.Count())
+			if (_UserProperties.Count != CurrentOptionValueSet.Values.Count())
 			{
 				throw new Exception();
 			}
@@ -156,7 +185,7 @@ namespace ReactiveFolder.Models.AppPolicy
 			for (int propertyItr = 0; propertyItr < _UserProperties.Count; ++propertyItr)
 			{
 				var prop = _UserProperties[propertyItr];
-				var val = values[propertyItr];
+				var val = CurrentOptionValueSet.Values[propertyItr];
 
 				var patternedValiableName = ToPatternText(prop);
 
@@ -171,19 +200,97 @@ namespace ReactiveFolder.Models.AppPolicy
 			return outputtext;
 		}
 
-		private string ToPatternText(AppOptionProperty prop)
+		protected string ToPatternText(AppOptionProperty prop)
 		{
 			return $"%{prop.ValiableName}%";
+		}
+
+
+
+		public AppOptionValueSet CreateValueSet()
+		{
+			return new AppOptionValueSet()
+			{
+				OptionId = this.Id,
+				Values = _UserProperties
+					.Select(x =>
+						new AppOptionValue()
+						{
+							Name = x.ValiableName,
+							Value = x.DefaultValue
+						}
+					)
+					.ToArray()
+			};
+		}
+
+
+		
+	}
+
+	[DataContract]
+	public class AppInputOptionDeclaration : AppOptionDeclarationBase
+	{
+		private InputAppOptionProperty InputProperty { get; set; }
+
+
+		public AppInputOptionDeclaration(int id)
+			: base(id)
+		{
+			InputProperty = new InputAppOptionProperty();
+
+			_UserProperties.Add(InputProperty);
+
+			OptionTextPattern = ToPatternText(InputProperty);
+		}
+	}
+
+	[DataContract]
+	public class AppOutputOptionDeclaration : AppOptionDeclarationBase
+	{
+		private OutputAppOptionProperty OutputProperty { get; set; }
+
+		public AppOutputOptionDeclaration(int id)
+			: base(id)
+		{
+			OutputProperty = new OutputAppOptionProperty();
+
+			_UserProperties.Add(OutputProperty);
+
+			OptionTextPattern = ToPatternText(OutputProperty);
+		}
+	}
+
+	[DataContract]
+	public class AppOptionDeclaration : AppOptionDeclarationBase
+	{
+
+
+		public AppOptionDeclaration(int id)
+			: base(id)
+		{
+
+			
+		}
+
+		
+
+		protected void AddProperty(AppOptionProperty property)
+		{
+			_UserProperties.Add(property);
+		}
+
+		protected bool RemoveProperty(AppOptionProperty property)
+		{
+			return _UserProperties.Remove(property);
 		}
 	}
 
 
-	public enum PropertyType
-	{
-		StringList,
-		RangeNumber,
-		Number,
-	}
+
+
+
+
 
 	[DataContract]
 	abstract public class AppOptionProperty : BindableBase
@@ -203,7 +310,7 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
-
+		abstract public dynamic DefaultValue { get; }
 
 		abstract public bool Validate();
 		abstract public bool CanConvertOptionText(dynamic value);
@@ -212,15 +319,91 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 	[DataContract]
+	public class InputAppOptionProperty : AppOptionProperty
+	{
+		public override dynamic DefaultValue { get { return ""; } }
+
+
+		public override bool Validate()
+		{
+			return true;
+		}
+
+		public override bool CanConvertOptionText(dynamic value)
+		{
+			return value is string;
+		}
+
+		public override string ConvertOptionText(dynamic value = null)
+		{
+			return value as string;
+		}
+	}
+
+
+	[DataContract]
+	public class OutputAppOptionProperty : AppOptionProperty
+	{
+		public override dynamic DefaultValue { get { return ""; } }
+
+		public override bool Validate()
+		{
+			return true;
+		}
+
+		public override bool CanConvertOptionText(dynamic value)
+		{
+			return value is string;
+		}
+
+		public override string ConvertOptionText(dynamic value = null)
+		{
+			return value as string;
+		}
+	}
+
+
+
+	[DataContract]
 	public class StringListOptionProperty : AppOptionProperty
 	{
-		[DataMember]
-		private ObservableCollection<KeyValuePair<string, string>> _List;
+		public struct StringListItem
+		{
+			public string Label { get; set; }
+			public string Value { get; set; }
+		}
 
-		public ReadOnlyObservableCollection<KeyValuePair<string, string>> List { get; private set; }
+
+		[DataMember]
+		private ObservableCollection<StringListItem> _List;
+
+		public ReadOnlyObservableCollection<StringListItem> List { get; private set; }
 
 		[DataMember]
 		public int DefaultIndex { get; set; }
+
+
+
+		public StringListOptionProperty()
+		{
+			_List = new ObservableCollection<StringListItem>();
+
+			List = new ReadOnlyObservableCollection<StringListItem>(_List);
+		}
+
+		[OnDeserialized]
+		public void SetValuesOnDeserialized(StreamingContext context)
+		{
+			List = new ReadOnlyObservableCollection<StringListItem>(_List);
+		}
+
+
+
+
+
+		public override dynamic DefaultValue { get { return DefaultIndex; } }
+
+
 
 
 		public override bool Validate()
@@ -269,7 +452,12 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public void AddItem(string label, string val)
 		{
-			_List.Add(new KeyValuePair<string, string>(label, val));
+			_List.Add(new StringListItem()
+				{
+					Label = label,
+					Value = val
+				}
+			);
 		}
 
 		public void RemoveItem(int index)
@@ -277,14 +465,105 @@ namespace ReactiveFolder.Models.AppPolicy
 			_List.Remove(_List[index]);
 		}
 
-		public bool RemoveItem(KeyValuePair<string, string> pair)
+		public bool RemoveItem(StringListItem item)
 		{
-			return _List.Remove(pair);
+			return _List.Remove(item);
 		}
 
 	}
 
-	// TODO: AppOptionPropertyRangeNumber
-	// TODO: AppOptionPropertyNumber
+	[DataContract]
+	public class NumberAppOptionProperty : AppOptionProperty
+	{
+		public override dynamic DefaultValue
+		{
+			get
+			{
+				return 0;
+			}
+		}
 
+
+		public override bool Validate()
+		{
+			return true;
+		}
+
+		public override bool CanConvertOptionText(dynamic value)
+		{
+			if (false == value is int)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		public override string ConvertOptionText(dynamic value = null)
+		{
+			int castVal = (int)value;
+
+			return castVal.ToString();
+		}
+
+
+	}
+
+	[DataContract]
+	public class RangeNumberAppOptionProperty : NumberAppOptionProperty
+	{
+		[DataMember]
+		private int _MinValue;
+		public int MinValue
+		{
+			get
+			{
+				return _MinValue;
+			}
+			set
+			{
+				SetProperty(ref _MinValue, value);
+			}
+		}
+
+		[DataMember]
+		private int _MaxValue;
+		public int MaxValue
+		{
+			get
+			{
+				return _MaxValue;
+			}
+			set
+			{
+				SetProperty(ref _MaxValue, value);
+			}
+		}
+
+
+
+		public RangeNumberAppOptionProperty()
+		{
+			_MinValue = 0;
+			_MaxValue = 100;
+		}
+
+
+
+		
+
+		public override bool CanConvertOptionText(dynamic value)
+		{
+			if (false == value is int)
+			{
+				return false;
+			}
+
+			int castVal = (int)value;
+
+			return MinValue <= castVal && castVal <= MaxValue;
+		}
+
+		
+	}
 }
