@@ -28,7 +28,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public ReactiveProperty<AppPolicyViewModel> AppPolicyVM { get; private set; }
 
 		public ReactiveProperty<string> AppName { get; private set; }
-		public ReactiveProperty<string> ArgumentName { get; private set; }
+		public ReactiveProperty<string> OutputFormatName { get; private set; }
 
 
 		public AppLaunchActionViewModel(ActionsEditViewModel editVM, FolderReactionModel reactionModel, AppLaunchReactiveAction appAction, IAppPolicyManager appPolicyManager)
@@ -70,7 +70,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				Action.AppGuid = x.AppGuid;
 
 				var appPolicy = _AppPolicyManager.FromAppGuid(x.AppGuid);
-				Action.AppArgumentId = appPolicy
+				Action.AppOutputFormatId = appPolicy
 					.AppOutputFormats.FirstOrDefault()?.Id ?? AppOutputFormat.IgnoreArgumentId;
 			});
 
@@ -87,15 +87,15 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.Select(x => _AppPolicyManager.FromAppGuid(Action.AppGuid)?.AppName ?? "???")
 				.ToReactiveProperty();
 
-			ArgumentName =
+			OutputFormatName =
 				Observable.CombineLatest(
 					Action.ObserveProperty(x => x.AppGuid),
-					Action.ObserveProperty(x => x.AppArgumentId),
+					Action.ObserveProperty(x => x.AppOutputFormatId),
 					(x, y) =>
 					{
 						var appPolicy = _AppPolicyManager.FromAppGuid(x);
-						var arg = appPolicy?.FindOutputFormat(y) ?? null;
-						return arg?.Name ?? "-";
+						var outputFormat = appPolicy?.FindOutputFormat(y) ?? null;
+						return outputFormat?.Name ?? "-";
 					})
 					.ToReactiveProperty();
 					
@@ -157,10 +157,13 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		public Guid AppGuid { get; private set; }
 
-		public ReadOnlyReactiveCollection<AppPolicyArgumentViewModel> AppArgumentList { get; private set; }
+		public ReadOnlyReactiveCollection<AppPolicyOutputFormatViewModel> AppOutputFormatList { get; private set; }
 
 
-		public ReactiveProperty<AppPolicyArgumentViewModel> ArgumentVM { get; private set; }
+		public ReactiveProperty<AppPolicyOutputFormatViewModel> OutputFormatVM { get; private set; }
+
+
+		public ReadOnlyReactiveCollection<AppPolicyOptionViewModel> AppOptions { get; private set; }
 
 
 		public CompositeDisposable _CompositeDisposable;
@@ -180,23 +183,29 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			_CompositeDisposable = new CompositeDisposable();
 
 
-			// App変更時のArgumentリストの更新
-			AppArgumentList = AppPolicy.AppOutputFormats.ToReadOnlyReactiveCollection(x =>
-				new AppPolicyArgumentViewModel(x)
+			// App変更時のOutputFormatリストの更新
+			AppOutputFormatList = AppPolicy.AppOutputFormats.ToReadOnlyReactiveCollection(x =>
+				new AppPolicyOutputFormatViewModel(x)
 			)
 			.AddTo(_CompositeDisposable);
 
 
-			ArgumentVM = new ReactiveProperty<AppPolicyArgumentViewModel>(
-				AppArgumentList.SingleOrDefault(x => x.AppArgument.Id == ActionModel.AppArgumentId)
+			OutputFormatVM = new ReactiveProperty<AppPolicyOutputFormatViewModel>(
+				AppOutputFormatList.SingleOrDefault(x => x.AppOutputFormat.Id == ActionModel.AppOutputFormatId)
 				, ReactivePropertyMode.DistinctUntilChanged
 				);
 
 
-			ArgumentVM.Subscribe(x =>
+			OutputFormatVM.Subscribe(x =>
 			{
-				ActionModel.AppArgumentId = x.AppArgument.Id;
+				ActionModel.AppOutputFormatId = x.AppOutputFormat.Id;
 			});
+
+
+			AppOptions = AppPolicy.OptionDeclarations.ToReadOnlyReactiveCollection(x => 
+				new AppPolicyOptionViewModel(x)
+			);
+
 
 		}
 
@@ -207,27 +216,45 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		}
 	}
 
-	public class AppPolicyArgumentViewModel : BindableBase
+
+
+	public class AppPolicyOptionViewModel : BindableBase
 	{
-		public static readonly AppPolicyArgumentViewModel InvalidAppArgumentVM = new AppPolicyArgumentViewModel();
+		public AppOptionDeclarationBase Declaration { get; private set; }
 
-
-
-		public AppOutputFormat AppArgument { get; private set; }
-
-		public string ArgumentName { get; private set; }
-
-
-		public AppPolicyArgumentViewModel()
+		public AppPolicyOptionViewModel(AppOptionDeclarationBase decl)
 		{
-			this.ArgumentName = "???";
+			Declaration = decl;
 		}
 
-		public AppPolicyArgumentViewModel(AppOutputFormat arg)
-		{
-			this.AppArgument = arg;
 
-			this.ArgumentName = this.AppArgument?.Name ?? "???";
+
+
+	}
+
+
+
+	public class AppPolicyOutputFormatViewModel : BindableBase
+	{
+		public static readonly AppPolicyOutputFormatViewModel InvalidAppArgumentVM = new AppPolicyOutputFormatViewModel();
+
+
+
+		public AppOutputFormat AppOutputFormat { get; private set; }
+
+		public string OutputFormatName { get; private set; }
+
+
+		public AppPolicyOutputFormatViewModel()
+		{
+			this.OutputFormatName = "???";
+		}
+
+		public AppPolicyOutputFormatViewModel(AppOutputFormat outputFormat)
+		{
+			this.AppOutputFormat = outputFormat;
+
+			this.OutputFormatName = this.AppOutputFormat?.Name ?? "???";
 		}
 	}
 }

@@ -4,6 +4,7 @@ using ReactiveFolder.Models.Filters;
 using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -55,18 +56,28 @@ namespace ReactiveFolder.Models.Actions
 
 
 		[DataMember]
-		private int _AppArgumentId;
-		public int AppArgumentId
+		private int _AppOutputFormatId;
+		public int AppOutputFormatId
 		{
 			get
 			{
-				return _AppArgumentId;
+				return _AppOutputFormatId;
 			}
 			set
 			{
-				SetProperty(ref _AppArgumentId, value);
+				if (SetProperty(ref _AppOutputFormatId, value))
+				{
+					_AdditionalOptions.Clear();
+				}
 			}
 		}
+
+
+		[DataMember]
+		private ObservableCollection<AppOptionValueSet> _AdditionalOptions { get; set; }
+
+		public ReadOnlyObservableCollection<AppOptionValueSet> AdditionalOptions { get; private set; }
+
 
 
 		public ApplicationPolicy GetAppPolicy()
@@ -92,7 +103,15 @@ namespace ReactiveFolder.Models.Actions
 
 		public AppLaunchReactiveAction()
 		{
-			
+			_AdditionalOptions = new ObservableCollection<AppOptionValueSet>();
+
+			AdditionalOptions = new ReadOnlyObservableCollection<AppOptionValueSet>(_AdditionalOptions);
+		}
+
+		[OnDeserialized]
+		public void SetValuesOnDeserialized(StreamingContext context)
+		{
+			AdditionalOptions = new ReadOnlyObservableCollection<AppOptionValueSet>(_AdditionalOptions);
 		}
 
 
@@ -145,7 +164,7 @@ namespace ReactiveFolder.Models.Actions
 				return null;
 			}
 
-			var appParam = appPolicy.FindOutputFormat(this.AppArgumentId);
+			var appParam = appPolicy.FindOutputFormat(this.AppOutputFormatId);
 
 			if (appPolicy == null || appParam == null)
 			{
@@ -180,7 +199,24 @@ namespace ReactiveFolder.Models.Actions
 			var cast = other as AppLaunchReactiveAction;
 
 			return this.AppGuid == cast.AppGuid &&
-				this.AppArgumentId == cast.AppArgumentId;
+				this.AppOutputFormatId == cast.AppOutputFormatId;
+		}
+
+
+
+		public void AddAppOptionValueSet(AppOptionValueSet valueSet)
+		{
+			_AdditionalOptions.Add(valueSet);
+
+			ValidatePropertyChanged();
+		}
+
+		public void RemoveAppOptionValueSet(AppOptionValueSet valueSet)
+		{
+			if (_AdditionalOptions.Remove(valueSet))
+			{
+				ValidatePropertyChanged();
+			}
 		}
 	}
 	

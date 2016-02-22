@@ -49,7 +49,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public bool Execute(string sourctPath, DirectoryInfo destFolder)
 		{
-			var argumentText = Policy.MakeArgumentsText(sourctPath, destFolder, Param);
+			var argumentText = Policy.MakeCommandLineOptionText(sourctPath, destFolder, Param);
 
 			var processStartInfo = new ProcessStartInfo(Policy.ApplicationPath, argumentText);
 

@@ -46,13 +46,13 @@
                                 >
                     <ContentControl.ContentTemplate>
                         <DataTemplate>
-                            <ComboBox ItemsSource="{Binding AppArgumentList}"
-                                  SelectedItem="{Binding ArgumentVM.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            <ComboBox ItemsSource="{Binding AppOutputFormatList}"
+                                  SelectedItem="{Binding OutputFormatVM.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   >
 
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding ArgumentName}" />
+                                        <TextBlock Text="{Binding OutputFormatName}" />
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
@@ -61,6 +61,17 @@
                 </ContentControl>
             </StackPanel>
 
+
+            <!-- AppOptions -->
+            <StackPanel>
+                
+            </StackPanel>
+
+            
+            
+            
+            
+            
             <!-- Bottom Buttons -->
             <Grid>
 

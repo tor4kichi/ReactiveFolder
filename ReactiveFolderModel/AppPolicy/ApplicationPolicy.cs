@@ -330,10 +330,19 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
+		public bool ExistOutputFormat(int outputFormatId)
+		{
+			if (outputFormatId <= 0)
+			{
+				return false;
+			}
+
+			return _AppOutputFormats.Any(x => x.Id == outputFormatId);
+		}
 	
 
 
-		public string MakeArgumentsText(string inputPath, DirectoryInfo outputDir, AppOutputFormat outputFormat = null, params AppOptionValueSet[] additionalOptions)
+		public string MakeCommandLineOptionText(string inputPath, DirectoryInfo outputDir, AppOutputFormat outputFormat = null, params AppOptionValueSet[] additionalOptions)
 		{
 
 			// Note: コマンドライン引数として使用するオプションを一つのリストにまとめて

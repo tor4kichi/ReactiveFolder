@@ -75,7 +75,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 
-		public void AddOrUpdateOption(AppOptionDeclaration optionDecl, AppOptionValue[] vals)
+		public void AddOrUpdateOption(AppOptionDeclarationBase optionDecl, AppOptionValue[] vals)
 		{
 			var alreadyPair = _Options.SingleOrDefault(x => x.OptionId == optionDecl.Id);
 
