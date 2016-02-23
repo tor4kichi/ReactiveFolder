@@ -53,8 +53,8 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 		[DataMember]
-		private ObservableCollection<AppOptionValueSet> _Options { get; set; }
-		public ReadOnlyObservableCollection<AppOptionValueSet> Options { get; private set; }
+		private ObservableCollection<AppOptionValueSet> _OptionValueSets { get; set; }
+		public ReadOnlyObservableCollection<AppOptionValueSet> OptionValueSets { get; private set; }
 
 
 		public AppOutputFormat(int id)
@@ -63,45 +63,56 @@ namespace ReactiveFolder.Models.AppPolicy
 			Name = "";
 			OutputExtention = "";
 
-			_Options = new ObservableCollection<AppOptionValueSet>();
-			Options = new ReadOnlyObservableCollection<AppOptionValueSet>(_Options);
+			_OptionValueSets = new ObservableCollection<AppOptionValueSet>();
+			OptionValueSets = new ReadOnlyObservableCollection<AppOptionValueSet>(_OptionValueSets);
 		}
 
 		[OnDeserialized]
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
-			Options = new ReadOnlyObservableCollection<AppOptionValueSet>(_Options);
+			OptionValueSets = new ReadOnlyObservableCollection<AppOptionValueSet>(_OptionValueSets);
 		}
 
 
 
-		public void AddOrUpdateOption(AppOptionDeclarationBase optionDecl, AppOptionValue[] vals)
+		public AppOptionValueSet AddOption(AppOptionDeclarationBase optionDecl)
 		{
-			var alreadyPair = _Options.SingleOrDefault(x => x.OptionId == optionDecl.Id);
+			var valueSet = _OptionValueSets.SingleOrDefault(x => x.OptionId == optionDecl.Id);
 
-			if (alreadyPair != null)
+			if (valueSet == null)
 			{
-				alreadyPair.Values = vals;
-			}
-			else
-			{
-				_Options.Add(new AppOptionValueSet()
-				{
-					OptionId = optionDecl.Id,
-					Values = vals
-				});
+				valueSet = optionDecl.CreateValueSet();
+				_OptionValueSets.Add(valueSet);
 			}
 
+			return valueSet;
 		}
 
 
 		public void RemoveOption(AppOptionDeclaration optionDecl)
 		{
-			var val = _Options.SingleOrDefault(x => x.OptionId == optionDecl.Id);
+			var val = _OptionValueSets.SingleOrDefault(x => x.OptionId == optionDecl.Id);
 
 			if (val != null)
 			{
-				_Options.Remove(val);
+				_OptionValueSets.Remove(val);
+			}
+		}
+
+		public void UpdateOption(AppOptionDeclarationBase decl, AppOptionValue[] values)
+		{
+			var val = _OptionValueSets.SingleOrDefault(x => x.OptionId == decl.Id);
+
+			if (val.Values.Length != values.Length)
+			{
+				throw new Exception();
+			}
+
+			val.Values = values;
+
+			for (int itr = 0; itr < val.Values.Length; ++itr)
+			{
+				val.Values[itr] = values[itr];
 			}
 		}
 

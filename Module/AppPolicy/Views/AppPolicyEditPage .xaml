@@ -176,7 +176,47 @@
                     </StackPanel>
                     
                     
+                    
+                    <!-- Option Declaration -->
 
+                    <StackPanel Orientation="Vertical">
+
+                        <TextBlock Text="Options Declaration"
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
+
+                        <ItemsControl ItemsSource="{Binding OptionDeclarations}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:AppOptionDeclarationViewModel}">
+                                    <DockPanel>
+                                        <Button Command="{Binding RemoveDeclarationCommand}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Foreground="Red"
+                                                DockPanel.Dock="Right"
+                                                >
+                                            <materialDesign:PackIcon Kind="Close" />
+                                        </Button>
+                                        
+                                        <Button Command="{Binding EditDeclarationCommand}"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            >
+                                            <TextBlock Text="{Binding Name.Value}" />
+                                        </Button>
+
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Button Command="{Binding AddOptionDeclarationCommand}"
+                                Width="200"
+                                Margin="0 8"
+                                >
+                            <TextBlock Text="Add Option" />
+                        </Button>
+                    </StackPanel>
+                    
+                    
 
 
                     <Grid>
@@ -315,6 +355,7 @@
             <materialDesign:DialogHost Identifier="AppPolicyEditDialogHost"
                                  HorizontalAlignment="Center" VerticalAlignment="Center"
                                        Margin="8 40"
+                                       Width="500"
                                        >
 
                 

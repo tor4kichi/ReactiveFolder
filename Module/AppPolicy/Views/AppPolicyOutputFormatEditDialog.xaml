@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:Modules.AppPolicy.Views"
+             xmlns:vm="clr-namespace:Modules.AppPolicy.ViewModels"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              mc:Ignorable="d" 
@@ -27,15 +28,63 @@
 
             <TextBlock Text="Function Name"
                        />
-            <TextBox Text="{Binding ArgumentName.Value}"/>
+            <TextBox Text="{Binding OutputFormatName.Value}"/>
 
-            <TextBlock Text="App argument text"
-                       />
-            <TextBox Text="{Binding OptionText.Value, UpdateSourceTrigger=PropertyChanged}"
-                      materialDesign:TextFieldAssist.Hint="-i %IN% -o %OUT%"
-                     ToolTip="%IN% %OUT%"
-                     />
+            
+            
+            
+            
+            <!-- TODO: AppPolicy.AppOptionDeclarationsを選択してOutputFormat.Optionsを設定する -->
+            <ItemsControl ItemsSource="{Binding Options}">
+                <ItemsControl.Resources>
+                    <DataTemplate DataType="{x:Type vm:IOPathOptionValueViewModel}">
+                        <TextBlock Text="IOPath Content" />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:StringListOptionValueViewModel}">
+                        <TextBlock Text="StringList Content" />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:RangeNumberOptionValueViewModel}">
+                        <TextBlock Text="RangeNumber Content" />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:NumberOptionValueViewModel}">
+                        <TextBlock Text="Number Content" />
+                    </DataTemplate>
+                </ItemsControl.Resources>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:OptionValueSetViewModel}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding OptionName, Mode=OneTime}" />
 
+
+                            <ItemsControl ItemsSource="{Binding Properties}">
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ContentControl}">
+                                                    <DockPanel>
+                                                        <StackPanel DockPanel.Dock="Left">
+                                                            <TextBlock Text="{Binding PropertyName}" />
+                                                        </StackPanel>
+
+                                                        <Border Margin="8 0 0 0">
+                                                            <ContentPresenter />
+                                                        </Border>
+                                                    </DockPanel>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            
+            
+            
+            
             <StackPanel Orientation="Vertical" 
                         Visibility="{Binding AppPolicyVM.IsOutputFile.Value, Converter={StaticResource BoolToVisiblity}}"
                         >
@@ -46,13 +95,6 @@
                      />
             </StackPanel>
             
-            <TextBlock Text="Description" 
-                       />
-            <TextBox Text="{Binding Description.Value}"
-                      materialDesign:TextFieldAssist.Hint="(option)"
-                     />
-
-
             <TextBlock>
                     <Run>Final Option Text</Run>
             </TextBlock>

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolder.Models.AppPolicy
 {
-	public struct AppOptionValue
+	public class AppOptionValue
 	{
-		public string Name { get; set; }
+		public string ValiableName { get; set; }
 		public dynamic Value { get; set; }
 	}
 }

@@ -131,6 +131,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppPolicy\AppOptionProperty.cs" />
     <Compile Include="AppPolicy\AppOptionValue.cs" />
     <Compile Include="AppPolicy\AppOptionValueSet.cs" />
     <Compile Include="AppPolicy\AppOutputFormat.cs" />

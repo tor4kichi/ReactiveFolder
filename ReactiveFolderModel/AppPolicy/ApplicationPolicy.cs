@@ -125,8 +125,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 		// TODO: NotifyPropertyChanged
-		public AppInputOptionDeclaration InputOption { get; private set; }
-		public AppOutputOptionDeclaration OutputOption { get; private set; }
+		public AppIOPathOptionDeclaration InputOption { get; private set; }
+		public AppIOPathOptionDeclaration OutputOption { get; private set; }
 		
 
 
@@ -185,8 +185,8 @@ namespace ReactiveFolder.Models.AppPolicy
 			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
 
 
-			InputOption = new AppInputOptionDeclaration(GetNextOptionDeclarationId());
-			OutputOption = new AppOutputOptionDeclaration(GetNextOptionDeclarationId());
+			InputOption = new AppIOPathOptionDeclaration("IN", GetNextOptionDeclarationId());
+			OutputOption = new AppIOPathOptionDeclaration("OUT", GetNextOptionDeclarationId());
 
 			_OptionDeclarations.Add(InputOption);
 			_OptionDeclarations.Add(OutputOption);
@@ -279,7 +279,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public AppOptionDeclaration AddNewOptionDeclaration()
 		{
-			var id = GetNextOutputFormatId();
+			var id = GetNextOptionDeclarationId();
 			var newOption = new AppOptionDeclaration(id);
 
 			newOption.Name = $"Option {id}";
@@ -378,7 +378,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 			// input + output + outputFormat.Options + additionalOptions
 			var options = 
-				additionalOptions.Union(outputFormat.Options)
+				additionalOptions.Union(outputFormat.OptionValueSets)
 				.ToList();
 			options.Add(inputValueSet);
 			options.Add(outputValueSet);
