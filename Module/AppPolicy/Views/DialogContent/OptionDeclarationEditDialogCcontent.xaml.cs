@@ -29,7 +29,9 @@ namespace Modules.AppPolicy.Views.DialogContent
 
 	public class AppOptionPropertyTemplateSelecter : DataTemplateSelector
 	{
-		public DataTemplate IOPath { get; set; }
+		public DataTemplate Input { get; set; }
+		public DataTemplate Output { get; set; }
+		public DataTemplate FileOutput { get; set; }
 		public DataTemplate StringList { get; set; }
 		public DataTemplate Number { get; set; }
 		public DataTemplate LimitedNumber { get; set; }
@@ -37,9 +39,17 @@ namespace Modules.AppPolicy.Views.DialogContent
 
 		public override DataTemplate SelectTemplate(object item, DependencyObject container)
 		{
-			if (item is ViewModels.IOPathAppOptionPropertyViewModel)
+			if (item is ViewModels.InputPathAppOptionPropertyViewModel)
 			{
-				return IOPath;
+				return Input;
+			}
+			else if (item is ViewModels.FileOutputPathAppOptionPropertyViewModel)
+			{
+				return FileOutput;
+			}
+			else if (item is ViewModels.OutputPathAppOptionPropertyViewModel)
+			{
+				return Output;
 			}
 			else if (item is ViewModels.StringListAppOptionPropertyViewModel)
 			{

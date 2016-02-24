@@ -87,8 +87,6 @@ namespace Modules.AppPolicy.ViewModels
 				CanSaveSubscriber = Observable.Merge(
 						AppPolicy.PropertyChangedAsObservable().ToUnit(),
 						AppPolicy.AcceptExtentions.CollectionChangedAsObservable().ToUnit(),
-						AppPolicy.AppOutputFormats.CollectionChangedAsObservable().ToUnit(),
-						AppPolicy.AppOutputFormats.ObserveElementPropertyChanged().ToUnit(),
 						AppPolicy.OptionDeclarations.CollectionChangedAsObservable().ToUnit(),
 						AppPolicy.OptionDeclarations.ObserveElementPropertyChanged().ToUnit()
 					)
@@ -317,11 +315,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReactiveProperty<FolderItemType> InputPathType { get; private set; }
 
-		public ReactiveProperty<FolderItemType> OutputPathType { get; private set; }
-
 		public ReactiveProperty<bool> IsInputFile { get; private set; }
-
-		public ReactiveProperty<bool> IsOutputFile { get; private set; }
 
 
 
@@ -329,9 +323,6 @@ namespace Modules.AppPolicy.ViewModels
 
 		// 入力可能なファイル拡張子（複数）
 		public ReadOnlyReactiveCollection<string> AcceptExtentions { get; private set; }
-
-		// 機能定義（複数）
-		public ReadOnlyReactiveCollection<AppPolicyOutputFormatViewModel> AppOutputFormats { get; private set; }
 
 
 		// オプションのプロトタイプ宣言
@@ -355,14 +346,7 @@ namespace Modules.AppPolicy.ViewModels
 			InputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.InputPathType)
 				.AddTo(_CompositeDisposable);
 
-			OutputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.OutputPathType)
-				.AddTo(_CompositeDisposable);
-
 			IsInputFile = InputPathType.Select(x => x == FolderItemType.File)
-				.ToReactiveProperty()
-				.AddTo(_CompositeDisposable);
-
-			IsOutputFile = OutputPathType.Select(x => x == FolderItemType.File)
 				.ToReactiveProperty()
 				.AddTo(_CompositeDisposable);
 
@@ -390,13 +374,6 @@ namespace Modules.AppPolicy.ViewModels
 				})
 				.AddTo(_CompositeDisposable);
 
-
-
-
-			AppOutputFormats = AppPolicy.AppOutputFormats.ToReadOnlyReactiveCollection(
-				x => new AppPolicyOutputFormatViewModel(this, AppPolicy, x)
-				)
-				.AddTo(_CompositeDisposable);
 
 
 
@@ -435,25 +412,7 @@ namespace Modules.AppPolicy.ViewModels
 
 
 		public ReactiveCommand AddAcceptExtentionCommand { get; private set; }
-/*
-		private DelegateCommand _AddAcceptExtentionCommand;
-		public DelegateCommand AddAcceptExtentionCommand
-		{
-			get
-			{
-				return _AddAcceptExtentionCommand
-					?? (_AddAcceptExtentionCommand = new DelegateCommand(() =>
-					{
-						AppPolicy.AddAcceptExtention(ExtentionText.Value);
 
-						ExtentionText.Value = "";
-					},
-					
-					() => AppPolicy.CanAddAcceptExtention(ExtentionText.Value)
-					));
-			}
-		}
-*/
 
 		private DelegateCommand<string> _RemoveAcceptExtentionCommand;
 		public DelegateCommand<string> RemoveAcceptExtentionCommand
@@ -470,24 +429,7 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
-		private DelegateCommand _AddOutputFormatCommand;
-		public DelegateCommand AddOutputFormatCommand
-		{
-			get
-			{
-				return _AddOutputFormatCommand
-					?? (_AddOutputFormatCommand = new DelegateCommand(() =>
-					{
-						var newOutputFormat = AppPolicy.AddNewOutputFormat();
-
-						var vm = new AppPolicyOutputFormatViewModel(this, AppPolicy, newOutputFormat);
-
-						OpenOutputFormatEditDialog(vm);
-					}));
-			}
-		}
-
-
+		
 		private DelegateCommand _AddOptionDeclarationCommand;
 		public DelegateCommand AddOptionDeclarationCommand
 		{
@@ -496,7 +438,7 @@ namespace Modules.AppPolicy.ViewModels
 				return _AddOptionDeclarationCommand
 					?? (_AddOptionDeclarationCommand = new DelegateCommand(() =>
 					{
-						var decl = AppPolicy.AddNewOptionDeclaration();
+						var decl = AppPolicy.AddNewOptionDeclaration("Option");
 
 						// 編集ダイアログで開く
 						OpenOptionDeclarationEditDialog(decl);
@@ -505,51 +447,24 @@ namespace Modules.AppPolicy.ViewModels
 		}
 
 
-		// TODO: OpenOutputFormatEditDialog: VM じゃなくてModelを直接引数で受け取るようにする
-		public async void OpenOutputFormatEditDialog(AppPolicyOutputFormatViewModel outputFormatVM)
+		private DelegateCommand _AddOutputOptionDeclarationCommand;
+		public DelegateCommand AddOutputOptionDeclarationCommand
 		{
-			var tempOutputFormatModel = new AppOutputFormat(-1)
+			get
 			{
-				Name = outputFormatVM.OutputFormat.Name,
-				OutputExtention = outputFormatVM.OutputFormat.OutputExtention
-			};
+				return _AddOutputOptionDeclarationCommand
+					?? (_AddOutputOptionDeclarationCommand = new DelegateCommand(() =>
+					{
+						var decl = AppPolicy.AddOutputOptionDeclaration("Output Option");
 
-			foreach (var option in outputFormatVM.OutputFormat.OptionValueSets)
-			{
-				var decl = AppPolicy.FindOptionDeclaration(option.OptionId);
-				tempOutputFormatModel.AddOption(decl);
-				tempOutputFormatModel.UpdateOption(decl, option.Values.ToArray());
+						// 編集ダイアログで開く
+						OpenOptionDeclarationEditDialog(decl);
+					}));
 			}
-
-			var tempVM = new AppPolicyOutputFormatViewModel(this, AppPolicy, tempOutputFormatModel);
-
-
-
-
-
-			var view = new Views.AppPolicyOutputFormatEditDialog()
-			{
-				DataContext = tempVM
-			};
-
-			var result = await DialogHost.Show(view, "AppPolicyEditDialogHost");
-
-			if (result != null && ((bool)result) == true)
-			{
-				// 変更を適用する
-				var tempArg = tempVM.OutputFormat;
-				outputFormatVM.OutputFormat.Name			= tempArg.Name;
-				outputFormatVM.OutputFormat.OutputExtention = tempArg.OutputExtention;
-
-				foreach (var option in tempArg.OptionValueSets)
-				{
-					var decl = AppPolicy.FindOptionDeclaration(option.OptionId);
-					outputFormatVM.OutputFormat.UpdateOption(decl, option.Values.ToArray());
-				}
-			}
-
-			tempVM.Dispose();
 		}
+
+
+
 
 
 		public async void OpenOptionDeclarationEditDialog<T>(T decl)
@@ -572,35 +487,13 @@ namespace Modules.AppPolicy.ViewModels
 				// ロールバック
 				var rollbackModel = FileSerializeHelper.FromJson<T>(backupDecl);
 
-				decl.Name = rollbackModel.Name;
-				decl.Order = rollbackModel.Order;
-				decl.OptionTextPattern = rollbackModel.OptionTextPattern;
-
-				if (decl is AppOptionDeclaration)
-				{
-					var userDecl = decl as AppOptionDeclaration;
-					var removePropties = userDecl.UserProperties.ToArray();
-					foreach (var remProp in removePropties)
-					{
-						userDecl.RemoveProperty(remProp);
-					}
-
-					foreach (var addProp in rollbackModel.UserProperties)
-					{
-						userDecl.AddProperty(addProp);
-					}
-				}
+				decl.Rollback(rollbackModel);
 			}
 
 			tempVM.Dispose();
 		}
 
-		internal void RemoveOutputFormat(AppPolicyOutputFormatViewModel outputFormatVM)
-		{
-			// TODO: AppOutputFormatの削除 確認ダイアログの表示
-			AppPolicy.RemoveOutputFormat(outputFormatVM.OutputFormat);
-		}
-
+		
 
 		internal void RemoveDeclaration(AppOptionDeclarationBase declaration)
 		{
@@ -622,197 +515,7 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
-
-
-
-
-	// TODO: AppPolicyOutputFormatViewModelをAppOptionDeclarationに対応させる
-
-	public class AppPolicyOutputFormatViewModel : BindableBase, IDisposable
-	{
-		public ApplicationPolicyViewModel AppPolicyVM { get; private set; }
-		public ApplicationPolicy AppPolicy { get; private set; }
-
-		public AppOutputFormat OutputFormat { get; private set; }
-
-
-		public ReactiveProperty<string> OutputFormatName { get; private set; }
-		public ReactiveProperty<string> OutputExtention { get; private set; }
-
-		public ReactiveProperty<string> FinalOptionText { get; private set; }
-
-		public ReadOnlyReactiveCollection<OptionValueSetViewModel> Options { get; private set; }
-		 
-
-		public AppPolicyOutputFormatViewModel(ApplicationPolicyViewModel appPolicyVM, ApplicationPolicy appPolicy, AppOutputFormat outputFormat)
-		{
-			this.AppPolicyVM = appPolicyVM;
-			this.AppPolicy = appPolicy;
-			this.OutputFormat = outputFormat;
-			
-
-			OutputFormatName = this.OutputFormat.ToReactivePropertyAsSynchronized(x => x.Name);
-			OutputExtention = this.OutputFormat.ToReactivePropertyAsSynchronized(x => x.OutputExtention);
-
-
-			Options = this.OutputFormat.OptionValueSets.ToReadOnlyReactiveCollection(
-				x => new OptionValueSetViewModel(this, AppPolicy.FindOptionDeclaration(x.OptionId), x)
-				);
-
-
-			FinalOptionText = Observable.Merge(
-				AppPolicyVM.InputPathType.ToUnit(),
-				AppPolicyVM.OutputPathType.ToUnit(),
-				OutputExtention.ToUnit()
-				)
-				.Select(_ =>
-				{
-					var ext = AppPolicy.AcceptExtentions.FirstOrDefault() ?? ".ext";
-					var dummyInput = "dummyFolder/filename" + ext;
-					var dummyFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-					return AppPolicy.MakeCommandLineOptionText(dummyInput, new DirectoryInfo(dummyFolder), OutputFormat);
-				})
-				.ToReactiveProperty();
-		}
-
-		private DelegateCommand _EditOutputFormatCommand;
-		public DelegateCommand EditOutputFormatCommand
-		{
-			get
-			{
-				return _EditOutputFormatCommand
-					?? (_EditOutputFormatCommand = new DelegateCommand(() =>
-					{
-						AppPolicyVM.OpenOutputFormatEditDialog(this);
-					}));
-			}
-		}
-
-		private DelegateCommand _RemoveOutputFormatCommand;
-		public DelegateCommand RemoveOutputFormatCommand
-		{
-			get
-			{
-				return _RemoveOutputFormatCommand
-					?? (_RemoveOutputFormatCommand = new DelegateCommand(() =>
-					{
-						AppPolicyVM.RemoveOutputFormat(this);
-					}));
-			}
-		}
-
-
-		public void Dispose()
-		{
-			OutputFormatName.Dispose();
-			OutputExtention.Dispose();
-
-			FinalOptionText.Dispose();
-		}
-
-		internal void AddOption(AppOptionDeclarationBase appOptionDecl)
-		{
-			OutputFormat.AddOption(appOptionDecl);
-		}
-	}
-
-
-	public class OptionDeclarationViewModel : BindableBase
-	{
-		public AppPolicyOutputFormatViewModel OutputFormatVM { get; private set; }
-		public AppOptionDeclarationBase AppOptionDecl { get; private set; }
-
-
-		public string OptionName { get; private set; }
-
-
-		public OptionDeclarationViewModel(AppPolicyOutputFormatViewModel outputFormatVM, AppOptionDeclarationBase decl)
-		{
-			OutputFormatVM = outputFormatVM;
-			AppOptionDecl = decl;
-
-
-			OptionName = AppOptionDecl.Name;
-		}
-
-
-
-		private DelegateCommand _AddOptionCommand;
-		public DelegateCommand AddOptionCommand
-		{
-			get
-			{
-				return _AddOptionCommand
-					?? (_AddOptionCommand = new DelegateCommand(() =>
-					{
-						OutputFormatVM.AddOption(AppOptionDecl);
-					}));
-			}
-		}
-	}
-
-	public class OptionValueSetViewModel : BindableBase, IDisposable
-	{
-		public AppPolicyOutputFormatViewModel OutputFormatVM { get; private set; }
-		public AppOptionDeclarationBase AppOptionDecl { get; private set; }
-		public AppOptionValueSet ValueSet { get; private set; }
-
-
-		public string OptionName { get; private set; }
-
-
-		public List<OptionValueViewModel> Properties { get; private set; }
-
-		public OptionValueSetViewModel(AppPolicyOutputFormatViewModel outputFormatVM, AppOptionDeclarationBase decl, AppOptionValueSet valueSet)
-		{
-			OutputFormatVM = outputFormatVM;
-			AppOptionDecl = decl;
-			ValueSet = valueSet;
-
-			OptionName = AppOptionDecl.Name;
-
-			Properties = decl.UserProperties.Join(ValueSet.Values,
-				(x) => x.ValiableName,
-				(y) => y.ValiableName,
-				(x, y) => ToOptionPropertyVM(x, y)
-				)
-				.ToList();
-		}
-
-
-		private OptionValueViewModel ToOptionPropertyVM(AppOptionProperty optionProp, AppOptionValue val)
-		{
-			if (optionProp is IOPathAppOptionProperty)
-			{
-				return new IOPathOptionValueViewModel(optionProp as IOPathAppOptionProperty, val);
-			} 
-			else if (optionProp is StringListOptionProperty)
-			{
-				return new StringListOptionValueViewModel(optionProp as StringListOptionProperty, val);
-			}
-
-			// Note: 優先度： RangeNumber > Number 
-			else if (optionProp is RangeNumberAppOptionProperty)
-			{
-				return new RangeNumberOptionValueViewModel(optionProp as RangeNumberAppOptionProperty, val);
-			}
-			else if (optionProp is NumberAppOptionProperty)
-			{
-				return new NumberOptionValueViewModel(optionProp as NumberAppOptionProperty, val);
-			}
-
-			throw new Exception();
-		}
-
-		public void Dispose()
-		{
-			foreach (var prop in this.Properties)
-			{
-				prop.Dispose();
-			}
-		}
-	}
-
+	
 
 
 	

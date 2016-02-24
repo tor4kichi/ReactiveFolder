@@ -54,9 +54,9 @@ namespace Modules.AppPolicy.ViewModels
 		}
 	}
 
-	public class IOPathOptionValueViewModel : TemplatedOptionValueViewModel<IOPathAppOptionProperty>
+	public class IOPathOptionValueViewModel : TemplatedOptionValueViewModel<InputPathAppOptionProperty>
 	{
-		public IOPathOptionValueViewModel(IOPathAppOptionProperty prop, AppOptionValue val)
+		public IOPathOptionValueViewModel(InputPathAppOptionProperty prop, AppOptionValue val)
 			: base(prop, val)
 		{
 

@@ -21,9 +21,17 @@ namespace Modules.AppPolicy.ViewModels
 	{
 		public static AppOptionPropertyViewModel ToAppOptionPropertyVM(this AppOptionProperty property, AppOptionDeclarationViewModel declVM)
 		{
-			if (property is IOPathAppOptionProperty)
+			if (property is InputPathAppOptionProperty)
 			{
-				return new IOPathAppOptionPropertyViewModel(declVM, property as IOPathAppOptionProperty);
+				return new InputPathAppOptionPropertyViewModel(declVM, property as InputPathAppOptionProperty);
+			}
+			else if (property is FileOutputPathAppOptionProperty)
+			{
+				return new FileOutputPathAppOptionPropertyViewModel(declVM, property as FileOutputPathAppOptionProperty);
+			}
+			else if (property is OutputPathAppOptionProperty)
+			{
+				return new OutputPathAppOptionPropertyViewModel(declVM, property as OutputPathAppOptionProperty);
 			}
 			else if (property is StringListOptionProperty)
 			{
@@ -76,7 +84,7 @@ namespace Modules.AppPolicy.ViewModels
 						DeclarationVM.RemoveProperty(Property);
 					}
 					,
-					() => false == (Property is IOPathAppOptionProperty)
+					() => false == (Property is InputPathAppOptionProperty)
 					));
 			}
 		}
@@ -95,12 +103,33 @@ namespace Modules.AppPolicy.ViewModels
 	}
 
 
-	public class IOPathAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<IOPathAppOptionProperty>
+	public class InputPathAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<InputPathAppOptionProperty>
 	{
-		public IOPathAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, IOPathAppOptionProperty property)
+		public InputPathAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, InputPathAppOptionProperty property)
 			: base(declVM, property)
 		{
 
+		}
+	}
+
+	public class OutputPathAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<OutputPathAppOptionProperty>
+	{
+		public OutputPathAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, OutputPathAppOptionProperty property)
+			: base(declVM, property)
+		{
+		}
+	}
+
+	public class FileOutputPathAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<FileOutputPathAppOptionProperty>
+	{
+		public ReactiveProperty<string> Extention { get; private set; }
+
+
+		public FileOutputPathAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, FileOutputPathAppOptionProperty property)
+			: base(declVM, property)
+		{
+			// TODO: Extention入力の検証等
+			Extention = TemplateProperty.ToReactivePropertyAsSynchronized(x => x.Extention);
 		}
 	}
 

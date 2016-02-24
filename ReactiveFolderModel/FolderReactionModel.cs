@@ -399,31 +399,7 @@ namespace ReactiveFolder.Models
 
 
 
-		// sourceに入力可能なアクションのタイプを特定するためのメソッド
-
-		public IFolderItemOutputer GetPreviousFolderItemOutputer(ReactiveActionBase source)
-		{
-			if (false == Actions.Contains(source))
-			{
-				return Filter;
-			}
-
-			if (Actions.Count <= 1)
-			{
-				return Filter;
-			}
-
-			var actionPosition = Actions.IndexOf(source);
-			if (actionPosition == 0)
-			{
-				// Filter
-				return Filter;
-			}
-			else
-			{
-				return Actions.ElementAt(actionPosition - 1);
-			}
-		}
+		
 
 
 		public FolderItemType InputType

@@ -53,7 +53,7 @@
 
 
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="IO Type" 
+                        <TextBlock Text="Input Type" 
                                    Style="{StaticResource ListSubheaderText}"
                                    />
 
@@ -70,29 +70,6 @@
                                         <TextBlock>
                                             <Run>Input </Run>
                                             <Run Text="{Binding Mode=OneTime}" />
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-
-                            </ComboBox>
-
-                            <materialDesign:PackIcon Kind="ArrowRight" 
-                                                     Foreground="Black"
-                                                     Margin="16"
-                                                     VerticalAlignment="Center"
-                                                     HorizontalAlignment="Center"
-                                                     />
-
-                            <ComboBox ItemsSource="{x:Static vm:ApplicationPolicyViewModel.FolderItemTypes}"
-                                      SelectedItem="{Binding OutputPathType.Value, Mode=TwoWay}"
-                                      VerticalAlignment="Center"
-                                      Width="200"                                      
-                                      >
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
-                                            <Run>Output </Run>
-                                            <Run Text="{Binding  Mode=OneTime}" />
                                         </TextBlock>
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
@@ -125,7 +102,7 @@
                                 Visibility="{Binding IsInputFile.Value, Converter={StaticResource BoolToVisiblity}}"
                                 >
 
-                        <TextBlock Text="Accept Extentions"
+                        <TextBlock Text="Input Extentions"
                                    Style="{StaticResource ListSubheaderText}"
                                    />
 
@@ -214,67 +191,15 @@
                                 >
                             <TextBlock Text="Add Option" />
                         </Button>
+
+                        <Button Command="{Binding AddOutputOptionDeclarationCommand}"
+                                Width="200"
+                                Margin="0 8"
+                                >
+                            <TextBlock Text="Add Output" />
+                        </Button>
                     </StackPanel>
                     
-                    
-
-
-                    <Grid>
-                        <Button HorizontalAlignment="Right"
-                            ToolTip="Add Function" 
-                            Command="{Binding AddOutputFormatCommand}"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
-                            Margin="16 0"
-                            >
-                            <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
-                        </Button>
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="App Options by Function"
-                                       Style="{StaticResource ListSubheaderText}"
-                               />
-                            <ItemsControl ItemsSource="{Binding AppOutputFormats}"
-                                                  Style="{StaticResource List}"
-                                                  ItemContainerStyle="{StaticResource ListItem}"
-                                                 > 
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid HorizontalAlignment="Stretch">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" />
-                                                <ColumnDefinition Width="48" />
-                                            </Grid.ColumnDefinitions>
-                                            
-                                            
-                                            <Button Grid.Column="0"
-                                                Style="{StaticResource ListButton}"
-                                                Command="{Binding EditOutputFormatCommand}"
-                                                >
-
-                                                <StackPanel Orientation="Vertical">
-                                                    <TextBlock Text="{Binding OutputFormatName.Value}"
-                                                    Style="{StaticResource ListPrimaryText}"
-                                                    />
-                                                    <TextBlock Text="{Binding OptionText.Value}" />
-                                                </StackPanel>
-
-                                            </Button>
-
-                                            <!-- show only at mouseover -->
-                                            <Button Grid.Column="1"
-                                                    Style="{StaticResource MaterialDesignFlatButton}"
-                                                    Command="{Binding RemoveOutputFormatCommand}"
-                                                    >
-                                                <materialDesign:PackIcon Kind="Delete" />
-                                            </Button>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-                        </StackPanel>
-                    </Grid>
-
-
                 </StackPanel>
 
             </DataTemplate>

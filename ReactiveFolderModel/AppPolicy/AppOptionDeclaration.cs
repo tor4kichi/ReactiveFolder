@@ -1,4 +1,5 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
+using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -66,7 +67,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 		[DataMember]
-		protected ObservableCollection<AppOptionProperty> _UserProperties;
+		protected ObservableCollection<AppOptionProperty> _UserProperties { get; set; }
 
 		public ReadOnlyObservableCollection<AppOptionProperty> UserProperties { get; private set; }
 
@@ -74,8 +75,8 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 
-		private AppOptionValueSet _CurrentOptionValueSet;
-		public AppOptionValueSet CurrentOptionValueSet
+		private AppOptionInstance _CurrentOptionValueSet;
+		public AppOptionInstance CurrentOptionValueSet
 		{
 			get
 			{
@@ -84,16 +85,19 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
-		public void UpdateOptionValueSet(AppOptionValueSet optionValueSet)
+		public void UpdateOptionValueSet(AppOptionInstance optionValueSet)
 		{
 			_CurrentOptionValueSet = optionValueSet;
 		}
 
-
-
-		public AppOptionDeclarationBase(int id)
+		public AppOptionDeclarationBase()
 		{
-			Name = "";
+
+		}
+
+		public AppOptionDeclarationBase(string name, int id)
+		{
+			Name = name;
 			Id = id;
 			Order = 0;
 			_UserProperties = new ObservableCollection<AppOptionProperty>();
@@ -106,7 +110,26 @@ namespace ReactiveFolder.Models.AppPolicy
 			UserProperties = new ReadOnlyObservableCollection<AppOptionProperty>(_UserProperties);
 		}
 
-	
+
+		public virtual void Rollback(AppOptionDeclarationBase other)
+		{
+			this.Name = other.Name;
+			this.Order = other.Order;
+			this.OptionTextPattern = other.OptionTextPattern;
+
+			
+			var removePropties = this.UserProperties.ToArray();
+			foreach (var remProp in removePropties)
+			{
+				this._UserProperties.Remove(remProp);
+			}
+
+			foreach (var addProp in other.UserProperties)
+			{
+				this._UserProperties.Add(addProp);
+			}
+			
+		}
 
 		public bool Validate()
 		{
@@ -208,60 +231,167 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 
-		public AppOptionValueSet CreateValueSet()
+		public AppOptionInstance CreateValueSet()
 		{
-			return new AppOptionValueSet()
-			{
-				OptionId = this.Id,
-				Values = _UserProperties
-					.Select(x =>
-						new AppOptionValue()
-						{
-							ValiableName = x.ValiableName,
-							Value = x.DefaultValue
-						}
-					)
-					.ToArray()
-			};
+			var values = _UserProperties
+				.Select(x =>
+					new AppOptionValue()
+					{
+						ValiableName = x.ValiableName,
+						Value = x.DefaultValue
+					}
+				).ToArray();
+
+			return new AppOptionInstance(this.Id, values, this);
 		}
 	}
 	
 
 	[DataContract]
-	public class AppIOPathOptionDeclaration : AppOptionDeclarationBase
+	public class AppInputPathOptionDeclaration : AppOptionDeclarationBase
 	{
-		private IOPathAppOptionProperty IOPathProperty { get; set; }
+		private InputPathAppOptionProperty InputPathProperty { get; set; }
 
-		public AppIOPathOptionDeclaration(string name, int id)
-			: base(id)
+
+		public AppInputPathOptionDeclaration()
+		{ }
+
+		public AppInputPathOptionDeclaration(string name, int id)
+			: base(name, id)
 		{
-			IOPathProperty = new IOPathAppOptionProperty(name);
+			InputPathProperty = new InputPathAppOptionProperty(name);
 
-			_UserProperties.Add(IOPathProperty);
+			_UserProperties.Add(InputPathProperty);
 
-			OptionTextPattern = ToPatternText(IOPathProperty);
+			OptionTextPattern = ToPatternText(InputPathProperty);
 		}
 
 
 		[OnDeserialized]
-		public new void SetValuesOnDeserialized(StreamingContext context)
+		public void OnDeserialized(StreamingContext context)
 		{
-			IOPathProperty = _UserProperties[0] as IOPathAppOptionProperty;
+			InputPathProperty = _UserProperties[0] as InputPathAppOptionProperty;
+		}
+
+
+		public override void Rollback(AppOptionDeclarationBase other)
+		{
+			base.Rollback(other);
+
+			InputPathProperty = _UserProperties[0] as InputPathAppOptionProperty;
+
 		}
 
 	}
 
+	[DataContract]
+	public class AppOutputPathOptionDeclaration : AppOptionDeclaration
+	{
+		[DataMember]
+		private FolderItemType _OutputType;
+		public FolderItemType OutputType
+		{
+			get
+			{
+				return _OutputType;
+			}
+			set
+			{
+				if (SetProperty(ref _OutputType, value))
+				{
+					//
+				}
+			}
+		}
 
 
+
+		public OutputPathAppOptionProperty OutputPathProperty { get; private set; }
+
+
+		public AppOutputPathOptionDeclaration() { }
+
+		public AppOutputPathOptionDeclaration(string name, int id, FolderItemType initialOutputType)
+			: base(name, id)
+		{
+			OutputType = initialOutputType;
+			ResetProperty(initialOutputType);
+		}
+
+		[OnDeserialized]
+		public void OnDeserialized(StreamingContext context)
+		{
+			if (_UserProperties.Count > 0)
+			{
+				OutputPathProperty = _UserProperties[0] as OutputPathAppOptionProperty;
+			}
+		}
+
+
+
+		public override void Rollback(AppOptionDeclarationBase other)
+		{
+			base.Rollback(other);
+
+			OutputPathProperty = _UserProperties[0] as OutputPathAppOptionProperty;
+		}
+
+
+
+		private void ResetProperty(FolderItemType type)
+		{
+			_UserProperties.Remove(OutputPathProperty);
+
+			switch (type)
+			{
+				case FolderItemType.File:
+					OutputPathProperty = new FileOutputPathAppOptionProperty(Name);
+					break;
+				case FolderItemType.Folder:
+					OutputPathProperty = new OutputPathAppOptionProperty(Name);
+					break;
+				default:
+					break;
+			}
+
+			_UserProperties.Add(OutputPathProperty);
+
+			OptionTextPattern = ToPatternText(OutputPathProperty);
+		}
+
+
+
+		public override void AddProperty(AppOptionProperty property)
+		{
+			if (property is OutputPathAppOptionProperty)
+			{
+				throw new Exception();
+			}
+
+			base.AddProperty(property);
+		}
+
+		public override bool RemoveProperty(AppOptionProperty property)
+		{
+			if (property is OutputPathAppOptionProperty)
+			{
+				throw new Exception();
+			}
+
+			return base.RemoveProperty(property);
+		}
+	}
+
+	
 
 
 	[DataContract]
 	public class AppOptionDeclaration : AppOptionDeclarationBase
 	{
+		public AppOptionDeclaration() { }
 
-
-		public AppOptionDeclaration(int id)
-			: base(id)
+		public AppOptionDeclaration(string name, int id)
+			: base(name, id)
 		{
 
 			
@@ -269,15 +399,18 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		
 
-		public void AddProperty(AppOptionProperty property)
+		public virtual void AddProperty(AppOptionProperty property)
 		{
 			_UserProperties.Add(property);
 		}
 
-		public bool RemoveProperty(AppOptionProperty property)
+		public virtual bool RemoveProperty(AppOptionProperty property)
 		{
 			return _UserProperties.Remove(property);
 		}
+
+
+		
 	}
 
 

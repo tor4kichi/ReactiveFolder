@@ -12,8 +12,7 @@ namespace ReactiveFolder.Models.AppPolicy
 	public class ApplicationExecuteSandbox : BindableBase
 	{
 		public ApplicationPolicy Policy { get; private set; }
-		public AppOutputFormat Param { get; private set; }
-
+		public AppOptionInstance[] Options { get; private set; }
 
 		/// <summary>
 		/// use ApplicationPolicy.CreateExecuteSandbox()
@@ -21,10 +20,10 @@ namespace ReactiveFolder.Models.AppPolicy
 		/// <param name="policy"></param>
 		/// <param name="param"></param>
 		/// <param name="context"></param>
-		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppOutputFormat param)
+		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppOptionInstance[] options)
 		{
 			Policy = policy;
-			Param = param;
+			Options = options;
 		}
 
 		public bool Validate(ReactiveStreamContext context)
@@ -37,19 +36,23 @@ namespace ReactiveFolder.Models.AppPolicy
 			if (false == Policy.IsExistApplicationFile)
 			{
 				return false;
-			}			
-
-			if (Param == null)
-			{
-				return false;
 			}
+
+			// TODO: Optionsのチェック
+
+			return true;
+		}
+
+		private bool ValidateExecuteResult(string sourctPath, DirectoryInfo destFolder)
+		{
+			// TODO: 
 
 			return true;
 		}
 
 		public bool Execute(string sourctPath, DirectoryInfo destFolder)
 		{
-			var argumentText = Policy.MakeCommandLineOptionText(sourctPath, destFolder, Param);
+			var argumentText = Policy.MakeCommandLineOptionText(sourctPath, destFolder, Options);
 
 			var processStartInfo = new ProcessStartInfo(Policy.ApplicationPath, argumentText);
 
@@ -76,7 +79,10 @@ namespace ReactiveFolder.Models.AppPolicy
 
 				if (process.WaitForExit((int)Policy.MaxProcessTime.TotalMilliseconds))
 				{
-					return process.ExitCode == 0;
+					if (process.ExitCode != 0)
+					{
+						return false;
+					}
 				}
 				else
 				{
@@ -85,6 +91,9 @@ namespace ReactiveFolder.Models.AppPolicy
 					return false;
 				}
 			}
+
+
+			return ValidateExecuteResult(sourctPath, destFolder);
 		}
 #if DEBUG
 		private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
@@ -100,6 +109,9 @@ namespace ReactiveFolder.Models.AppPolicy
 			Console.WriteLine(e.Data);
 		}
 #endif
+
+
+		
 	}
 
 }

@@ -37,7 +37,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 	[DataContract]
-	public class IOPathAppOptionProperty : AppOptionProperty
+	public class InputPathAppOptionProperty : AppOptionProperty
 	{
 		public override dynamic DefaultValue { get { return ""; } }
 
@@ -48,7 +48,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
-		public IOPathAppOptionProperty(string name)
+		public InputPathAppOptionProperty(string name)
 		{
 			this.ValiableName = name;
 		}
@@ -60,6 +60,86 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public override string ConvertOptionText(dynamic value = null)
 		{
+			return value as string;
+		}
+	}
+
+	[DataContract]
+	public class OutputPathAppOptionProperty : AppOptionProperty
+	{
+		public override dynamic DefaultValue { get { return ""; } }
+
+		public override bool Validate()
+		{
+			return true;
+		}
+
+
+		public OutputPathAppOptionProperty(string name)
+		{
+			this.ValiableName = name;
+		}
+
+		public override bool CanConvertOptionText(dynamic value)
+		{
+			return value is string;
+		}
+
+		public override string ConvertOptionText(dynamic value = null)
+		{
+			return value as string;
+		}
+	}
+
+	[DataContract]
+	public class FileOutputPathAppOptionProperty : OutputPathAppOptionProperty
+	{
+		
+		[DataMember]
+		private string _Extention;
+		public string Extention
+		{
+			get
+			{
+				return _Extention;
+			}
+			set
+			{
+				SetProperty(ref _Extention, value);
+			}
+		}
+
+
+		public bool IsSameInputExtention
+		{
+			get
+			{
+				return String.IsNullOrWhiteSpace(Extention);
+			}
+		}
+		
+
+		public override bool Validate()
+		{
+			return true;
+		}
+
+
+		public FileOutputPathAppOptionProperty(string name)
+			: base(name)
+			
+		{
+			
+		}
+
+		public override bool CanConvertOptionText(dynamic value)
+		{
+			return value is string;
+		}
+
+		public override string ConvertOptionText(dynamic value = null)
+		{
+			// TODO: 拡張子の変更
 			return value as string;
 		}
 	}

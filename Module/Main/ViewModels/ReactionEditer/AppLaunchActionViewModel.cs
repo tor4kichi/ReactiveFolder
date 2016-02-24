@@ -28,7 +28,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public ReactiveProperty<AppPolicyViewModel> AppPolicyVM { get; private set; }
 
 		public ReactiveProperty<string> AppName { get; private set; }
-		public ReactiveProperty<string> OutputFormatName { get; private set; }
 
 
 		public AppLaunchActionViewModel(ActionsEditViewModel editVM, FolderReactionModel reactionModel, AppLaunchReactiveAction appAction, IAppPolicyManager appPolicyManager)
@@ -38,6 +37,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			_AppPolicyManager = appPolicyManager;
 			Action = appAction;
 
+			 // TODO: AppListではなく前段の出力拡張子による実行可能な変換オプション
+			/*
 			// 現在のアクションの前段にあるFilter、またはActionが出力するファイルタイプ・拡張子によってAppListの内容をフィルタする
 			var prevFolderItemOutputer = reactionModel.GetPreviousFolderItemOutputer(Action);
 			var filters = prevFolderItemOutputer.GetFilters();
@@ -46,7 +47,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				// 前段の出力タイプと、
 				.Where(x => x.CheckCanProcessPartOfSupport(prevFolderItemOutputer))
 				.Select(x => new AppPolicyViewModel(Action, x));
-			
+			*/
 
 			
 			AppPolicyVM = new ReactiveProperty<AppPolicyViewModel>();
@@ -61,18 +62,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				}
 			}
 
-			// App変更時のモデルへの書き戻し
-			AppPolicyVM
-				.Where(x => x != null)
-				.Where(x => Action.AppGuid != x.AppGuid)
-				.Subscribe(x =>
-			{
-				Action.AppGuid = x.AppGuid;
-
-				var appPolicy = _AppPolicyManager.FromAppGuid(x.AppGuid);
-				Action.AppOutputFormatId = appPolicy
-					.AppOutputFormats.FirstOrDefault()?.Id ?? AppOutputFormat.IgnoreArgumentId;
-			});
+			
 
 
 			
@@ -87,18 +77,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.Select(x => _AppPolicyManager.FromAppGuid(Action.AppGuid)?.AppName ?? "???")
 				.ToReactiveProperty();
 
-			OutputFormatName =
-				Observable.CombineLatest(
-					Action.ObserveProperty(x => x.AppGuid),
-					Action.ObserveProperty(x => x.AppOutputFormatId),
-					(x, y) =>
-					{
-						var appPolicy = _AppPolicyManager.FromAppGuid(x);
-						var outputFormat = appPolicy?.FindOutputFormat(y) ?? null;
-						return outputFormat?.Name ?? "-";
-					})
-					.ToReactiveProperty();
-					
+			
 		}
 
 
@@ -157,12 +136,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		public Guid AppGuid { get; private set; }
 
-		public ReadOnlyReactiveCollection<AppPolicyOutputFormatViewModel> AppOutputFormatList { get; private set; }
-
-
-		public ReactiveProperty<AppPolicyOutputFormatViewModel> OutputFormatVM { get; private set; }
-
-
 		public ReadOnlyReactiveCollection<AppPolicyOptionViewModel> AppOptions { get; private set; }
 
 
@@ -181,25 +154,6 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			AppGuid = AppPolicy.Guid;
 
 			_CompositeDisposable = new CompositeDisposable();
-
-
-			// App変更時のOutputFormatリストの更新
-			AppOutputFormatList = AppPolicy.AppOutputFormats.ToReadOnlyReactiveCollection(x =>
-				new AppPolicyOutputFormatViewModel(x)
-			)
-			.AddTo(_CompositeDisposable);
-
-
-			OutputFormatVM = new ReactiveProperty<AppPolicyOutputFormatViewModel>(
-				AppOutputFormatList.SingleOrDefault(x => x.AppOutputFormat.Id == ActionModel.AppOutputFormatId)
-				, ReactivePropertyMode.DistinctUntilChanged
-				);
-
-
-			OutputFormatVM.Subscribe(x =>
-			{
-				ActionModel.AppOutputFormatId = x.AppOutputFormat.Id;
-			});
 
 
 			AppOptions = AppPolicy.OptionDeclarations.ToReadOnlyReactiveCollection(x => 
@@ -234,27 +188,5 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 
-	public class AppPolicyOutputFormatViewModel : BindableBase
-	{
-		public static readonly AppPolicyOutputFormatViewModel InvalidAppArgumentVM = new AppPolicyOutputFormatViewModel();
-
-
-
-		public AppOutputFormat AppOutputFormat { get; private set; }
-
-		public string OutputFormatName { get; private set; }
-
-
-		public AppPolicyOutputFormatViewModel()
-		{
-			this.OutputFormatName = "???";
-		}
-
-		public AppPolicyOutputFormatViewModel(AppOutputFormat outputFormat)
-		{
-			this.AppOutputFormat = outputFormat;
-
-			this.OutputFormatName = this.AppOutputFormat?.Name ?? "???";
-		}
-	}
+	
 }

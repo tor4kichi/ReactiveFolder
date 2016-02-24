@@ -11,10 +11,29 @@
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="600">
     <UserControl.Resources>
-        <DataTemplate x:Key="IOPathTemplate" DataType="{x:Type vm:IOPathAppOptionPropertyViewModel}">
+        <DataTemplate x:Key="InputTemplate" DataType="{x:Type vm:InputPathAppOptionPropertyViewModel}">
             <TextBlock Text="[Declaration by ReactiveProperty]"
                        VerticalAlignment="Center"
                        />
+        </DataTemplate>
+
+        <DataTemplate x:Key="OutputTemplate" DataType="{x:Type vm:OutputPathAppOptionPropertyViewModel}">
+           
+        </DataTemplate>
+
+        <DataTemplate x:Key="FileOutputTemplate" DataType="{x:Type vm:FileOutputPathAppOptionPropertyViewModel}">
+            <DockPanel>
+                <TextBlock Text="Extention"
+                       VerticalAlignment="Center"
+                           DockPanel.Dock="Left"
+                       />
+
+                <TextBox Text="{Binding Extention.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                         Width="100"
+                         materialDesign:TextFieldAssist.Hint="ex) .png"
+                         />
+
+            </DockPanel>
         </DataTemplate>
 
         <DataTemplate x:Key="StringListTemplate" DataType="{x:Type vm:StringListAppOptionPropertyViewModel}">
@@ -134,7 +153,9 @@
 
 
         <local:AppOptionPropertyTemplateSelecter x:Key="appOptionPropertyTemplateSelecter"
-                                                 IOPath="{StaticResource IOPathTemplate}"
+                                                 Input="{StaticResource InputTemplate}"
+                                                 Output="{StaticResource OutputTemplate}"
+                                                 FileOutput="{StaticResource FileOutputTemplate}"
                                                  StringList="{StaticResource StringListTemplate}"
                                                  RangeNumber="{StaticResource RangeNumberTemplate}"
                                                  LimitedNumber="{StaticResource LimitedNumberTemplate}"

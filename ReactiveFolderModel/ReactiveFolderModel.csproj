@@ -133,13 +133,13 @@
   <ItemGroup>
     <Compile Include="AppPolicy\AppOptionProperty.cs" />
     <Compile Include="AppPolicy\AppOptionValue.cs" />
-    <Compile Include="AppPolicy\AppOptionValueSet.cs" />
-    <Compile Include="AppPolicy\AppOutputFormat.cs" />
+    <Compile Include="AppPolicy\AppOptionInstance.cs" />
     <Compile Include="AppPolicy\AppExecuteSandbox.cs" />
     <Compile Include="Actions\AppLaunchReactiveAction.cs" />
     <Compile Include="AppPolicy\ApplicationPolicy.cs" />
     <Compile Include="Actions\ReactiveActionBase.cs" />
     <Compile Include="AppPolicy\AppOptionDeclaration.cs" />
+    <Compile Include="AppPolicy\AppOptionInstanceHelper.cs" />
     <Compile Include="AppPolicy\IAppPolicyManager.cs" />
     <Compile Include="Destinations\AbsolutePathReactiveDestination.cs" />
     <Compile Include="Destinations\ChildReactiveDestination.cs" />
@@ -151,7 +151,6 @@
     <Compile Include="Filters\ReactiveFilterHelper.cs" />
     <Compile Include="FolderModel.cs" />
     <Compile Include="FolderReactionModel.cs" />
-    <Compile Include="IFolderItemOutputer.cs" />
     <Compile Include="IFolderReactionMonitorModel.cs" />
     <Compile Include="IReactiveFolderSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
