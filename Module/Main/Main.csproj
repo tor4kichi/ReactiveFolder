@@ -168,8 +168,8 @@
     <Compile Include="Views\ReactionEditer\ActionEditControl.xaml.cs">
       <DependentUpon>ActionEditControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\DialogContent\AppLaunchActionEditDialogContent.xaml.cs">
-      <DependentUpon>AppLaunchActionEditDialogContent.xaml</DependentUpon>
+    <Compile Include="Views\DialogContent\AppOptionSelectDialogContent.xaml.cs">
+      <DependentUpon>AppOptionSelectDialogContent.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ReactionEditer\DestinationEditControl.xaml.cs">
       <DependentUpon>DestinationEditControl.xaml</DependentUpon>
@@ -219,7 +219,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\DialogContent\AppLaunchActionEditDialogContent.xaml">
+    <Page Include="Views\DialogContent\AppOptionSelectDialogContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -304,13 +304,13 @@ namespace Modules.AppPolicy.ViewModels
 		public RangeNumberAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, RangeNumberAppOptionProperty property)
 			: base(declVM, property)
 		{
-			SkipNumberText = new ReactiveProperty<string>(TemplateProperty.SkipNumber.ToString());
+			SkipNumberText = new ReactiveProperty<string>(TemplateProperty.SkipAmount.ToString());
 
 			SkipNumberText
 				.Where(NumberAppOptionPropertyViewModel.CanParseToInt)
 				.Select(x => int.Parse(x))
 				.Where(x => 0 < x)
-				.Subscribe(x => TemplateProperty.SkipNumber = x);
+				.Subscribe(x => TemplateProperty.SkipAmount = x);
 
 			SkipNumberText.SetValidateNotifyError(x =>
 			{

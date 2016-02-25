@@ -249,9 +249,9 @@ namespace ReactiveFolder.Models.AppPolicy
 		public AppOptionDeclaration AddNewOptionDeclaration(string name)
 		{
 			var id = GetNextOptionDeclarationId();
-			var newOption = new AppOptionDeclaration(name, id);
+			var newOption = new AppOptionDeclaration($"OPT", id);
 
-			newOption.Name = $"Option {id}";
+			newOption.Name = name;
 
 			_OptionDeclarations.Add(newOption);
 			return newOption;
@@ -260,9 +260,9 @@ namespace ReactiveFolder.Models.AppPolicy
 		public AppOutputPathOptionDeclaration AddOutputOptionDeclaration(string name)
 		{
 			var id = GetNextOptionDeclarationId();
-			var newOption = new AppOutputPathOptionDeclaration(name, id, FolderItemType.File);
+			var newOption = new AppOutputPathOptionDeclaration("OUT", id, FolderItemType.File);
 
-			newOption.Name = $"Option {id}";
+			newOption.Name = name;
 
 			_OptionDeclarations.Add(newOption);
 			return newOption;

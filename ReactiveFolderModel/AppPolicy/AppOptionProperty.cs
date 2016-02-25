@@ -191,7 +191,6 @@ namespace ReactiveFolder.Models.AppPolicy
 		public int DefaultIndex { get; set; }
 
 
-
 		public StringListOptionProperty()
 		{
 			_List = new ObservableCollection<StringListItem>();
@@ -382,7 +381,7 @@ namespace ReactiveFolder.Models.AppPolicy
 	{
 		[DataMember]
 		private int _SkipNumber;
-		public int SkipNumber
+		public int SkipAmount
 		{
 			get
 			{
@@ -397,7 +396,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public RangeNumberAppOptionProperty()
 		{
-			SkipNumber = 1;
+			SkipAmount = 1;
 		}
 	}
 }

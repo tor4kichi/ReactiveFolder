@@ -165,12 +165,12 @@ namespace Modules.AppPolicy.ViewModels
 				.Subscribe(x => prop.MaxValue = x);
 
 
-			SkipNumberText = new ReactiveProperty<string>(prop.SkipNumber.ToString(), mode: ReactivePropertyMode.DistinctUntilChanged);
+			SkipNumberText = new ReactiveProperty<string>(prop.SkipAmount.ToString(), mode: ReactivePropertyMode.DistinctUntilChanged);
 			SkipNumberText.SetValidateNotifyError(numberValidate);
 			SkipNumberText
 				.Where(NumberOptionValueViewModel.CanParseToInt)
 				.Select(x => int.Parse(x))
-				.Subscribe(x => prop.SkipNumber = x);
+				.Subscribe(x => prop.SkipAmount = x);
 		}
 
 
