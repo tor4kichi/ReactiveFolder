@@ -106,25 +106,35 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 			set
 			{
-				SetProperty(ref _InputPathType, value);
+				if (SetProperty(ref _InputPathType, value))
+				{
+					if (SameInputOutputOption != null)
+					{
+						SameInputOutputOption.OutputType = _InputPathType;
+					}
+				}
 			}
 		}
 
 
 		
 		// TODO: NotifyPropertyChanged
-		public AppInputPathOptionDeclaration InputOption { get; private set; }
+		public AppInputOptionDeclaration InputOption { get; private set; }
 		
-
+		public AppOutputOptionDeclaration SameInputOutputOption { get; private set; }
 
 		[DataMember]
 		public int OptionDeclarationIdSeed { get; private set; }
 
 		[DataMember]
-		private ObservableCollection<AppOptionDeclarationBase> _OptionDeclarations { get; set; }
-		public ReadOnlyObservableCollection<AppOptionDeclarationBase> OptionDeclarations { get; private set; }
+		private ObservableCollection<AppOptionDeclaration> _OptionDeclarations { get; set; }
+		public ReadOnlyObservableCollection<AppOptionDeclaration> OptionDeclarations { get; private set; }
 
-		
+		[DataMember]
+		private ObservableCollection<AppOutputOptionDeclaration> _OutputOptionDeclarations { get; set; }
+		public ReadOnlyObservableCollection<AppOutputOptionDeclaration> OutputOptionDeclarations { get; private set; }
+
+
 
 		[DataMember]
 		private ObservableCollection<string> _AcceptExtentions { get; set; }
@@ -148,18 +158,18 @@ namespace ReactiveFolder.Models.AppPolicy
 			MaxProcessTime = TimeSpan.FromMinutes(1);
 
 			OptionDeclarationIdSeed = 1;
-			_OptionDeclarations = new ObservableCollection<AppOptionDeclarationBase>();
-			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclarationBase>(_OptionDeclarations);
+			_OptionDeclarations = new ObservableCollection<AppOptionDeclaration>();
+			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclaration>(_OptionDeclarations);
+
+			_OutputOptionDeclarations = new ObservableCollection<AppOutputOptionDeclaration>();
+			OutputOptionDeclarations = new ReadOnlyObservableCollection<AppOutputOptionDeclaration>(_OutputOptionDeclarations);
 
 			_AcceptExtentions = new ObservableCollection<string>();
 			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
 
 
-			InputOption = new AppInputPathOptionDeclaration("IN", GetNextOptionDeclarationId());
-			var outputOption = new AppOutputPathOptionDeclaration("OUT", GetNextOptionDeclarationId(), FolderItemType.File);
-
-			_OptionDeclarations.Add(InputOption);
-			_OptionDeclarations.Add(outputOption);
+			InputOption = new AppInputOptionDeclaration("IN", GetNextOptionDeclarationId());
+			SameInputOutputOption = new AppOutputOptionDeclaration("SameInput OutputExtention", GetNextOptionDeclarationId(), FolderItemType.File);
 		}
 
 
@@ -167,8 +177,12 @@ namespace ReactiveFolder.Models.AppPolicy
 		[OnDeserialized]
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
-			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclarationBase>(_OptionDeclarations);
+			OptionDeclarations = new ReadOnlyObservableCollection<AppOptionDeclaration>(_OptionDeclarations);
+			OutputOptionDeclarations = new ReadOnlyObservableCollection<AppOutputOptionDeclaration>(_OutputOptionDeclarations);
 			AcceptExtentions = new ReadOnlyObservableCollection<string>(_AcceptExtentions);
+
+			InputOption = new AppInputOptionDeclaration("IN", GetNextOptionDeclarationId());
+			SameInputOutputOption = new AppOutputOptionDeclaration("SameInput OutputExtention", GetNextOptionDeclarationId(), FolderItemType.File);
 		}
 
 
@@ -246,7 +260,7 @@ namespace ReactiveFolder.Models.AppPolicy
 			return OptionDeclarationIdSeed++;
 		}
 
-		public AppOptionDeclaration AddNewOptionDeclaration(string name)
+		public AppOptionDeclaration AddOptionDeclaration(string name)
 		{
 			var id = GetNextOptionDeclarationId();
 			var newOption = new AppOptionDeclaration($"OPT", id);
@@ -257,33 +271,48 @@ namespace ReactiveFolder.Models.AppPolicy
 			return newOption;
 		}
 
-		public AppOutputPathOptionDeclaration AddOutputOptionDeclaration(string name)
+		public AppOutputOptionDeclaration AddOutputOptionDeclaration(string name)
 		{
 			var id = GetNextOptionDeclarationId();
-			var newOption = new AppOutputPathOptionDeclaration("OUT", id, FolderItemType.File);
+			var newOption = new AppOutputOptionDeclaration("Extention", id, FolderItemType.File);
 
 			newOption.Name = name;
 
-			_OptionDeclarations.Add(newOption);
+			_OutputOptionDeclarations.Add(newOption);
 			return newOption;
 		}
 
-		public bool RemoveOptionDeclaration(AppOptionDeclarationBase optionDecl)
+		public bool RemoveOptionDeclaration(AppOptionDeclaration optionDecl)
 		{
 			return _OptionDeclarations.Remove(optionDecl);
+		}
+
+		public bool RemoveOutputOptionDeclaration(AppOutputOptionDeclaration optionDecl)
+		{
+			return _OutputOptionDeclarations.Remove(optionDecl);
 		}
 
 
 		public AppOptionDeclarationBase FindOptionDeclaration(int optionDeclId)
 		{
-			return _OptionDeclarations.SingleOrDefault(x => x.Id == optionDeclId);
+			return GetAllDeclarations().SingleOrDefault(x => x.Id == optionDeclId);
 		}
 
 
-		public IEnumerable<AppOutputPathOptionDeclaration> GetOutputOptionDeclarations()
+		public IEnumerable<AppOptionDeclarationBase> GetAllDeclarations()
 		{
-			return OptionDeclarations.Where(x => x is AppOutputPathOptionDeclaration)
-				.Select(x => x as AppOutputPathOptionDeclaration);
+			yield return InputOption;
+			yield return SameInputOutputOption;
+
+			foreach (var opt in OptionDeclarations)
+			{
+				yield return opt;
+			}
+
+			foreach (var opt in OutputOptionDeclarations)
+			{
+				yield return opt;
+			}
 		}
 
 
@@ -291,7 +320,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		{
 			get
 			{
-				return GetOutputOptionDeclarations().Count() > 0;
+				return OutputOptionDeclarations.Count > 0;
 			}
 		}
 
@@ -302,13 +331,14 @@ namespace ReactiveFolder.Models.AppPolicy
 		/// <returns></returns>
 		public IEnumerable<string> GetOutputExtentions()
 		{
-			var outputOptions = GetOutputOptionDeclarations()
+			var outputOptions = OutputOptionDeclarations
 				.Where(x => x.OutputType == FolderItemType.File);
 
 			if (outputOptions.Count() != 0)
 			{
 				return outputOptions
-					.Select(x => x.OutputPathProperty as FileOutputPathAppOptionProperty)
+					.Where(x => x.OutputPathProperty is FileOutputAppOptionProperty)
+					.Select(x => x.OutputPathProperty as FileOutputAppOptionProperty)
 					.Select(x => x.Extention)
 					.Distinct();
 			}
@@ -319,59 +349,14 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
-		public string MakeCommandLineOptionText(string inputPath, DirectoryInfo outputDir, AppOptionInstance[] options)
-		{
 
-			// Note: コマンドライン引数として使用するオプションを一つのリストにまとめて
-			// オプションからコマンドライン引数の文字列を生成します。
-
-
-			// input
-			var inputValueSet = options.FindInputInstance();
-			inputValueSet.Values[0].Value = inputPath;
-
-
-			// output
-			var outputValueInstanceList = options.FindOutputOptionInstances();
-
-			foreach(var outputValueInstance in outputValueInstanceList)
-			{
-				var decl = outputValueInstance.OptionDeclaration as AppOutputPathOptionDeclaration;
-				var valueSet = outputValueInstance;
-
-				string output = null;
-				switch (decl.OutputType)
-				{
-					case FolderItemType.File:
-						var fileOutputProperty = decl.OutputPathProperty as FileOutputPathAppOptionProperty;
-						output = Path.Combine(outputDir.FullName, Path.GetFileName(inputPath));
-						output = Path.ChangeExtension(output, fileOutputProperty.Extention);
-						break;
-					case FolderItemType.Folder:
-						output = Path.Combine(outputDir.FullName, Path.GetFileNameWithoutExtension(inputPath));
-						break;
-					default:
-						break;
-				}
-
-				valueSet.Values[0].Value = output;
-			}
-			
-
-
-			
-			// finalize
-			return AppOptionsToArgumentText(options);
-		}
-
-	
-
-		private string AppOptionsToArgumentText(IEnumerable<AppOptionInstance> optionValues)
+		public string AppOptionsToArgumentText(IEnumerable<AppOptionInstance> optionValues)
 		{
 			// TODO: ValuesをDeclarations に渡してValidation CanGenerate
 
+			var decls = GetAllDeclarations().ToArray();
 
-			var arguments = optionValues.Join(OptionDeclarations,
+			var arguments = optionValues.Join(decls,
 				(x) => x.OptionId,
 				(y) => y.Id,
 				(x, y) => new { Decl = y, ValueSet = x }
@@ -427,6 +412,18 @@ namespace ReactiveFolder.Models.AppPolicy
 			foreach (var addOptionDecl in backup.OptionDeclarations)
 			{
 				this._OptionDeclarations.Add(addOptionDecl);
+			}
+
+			// OptionDeclaration
+			var remOutputOptionDecls = this.OutputOptionDeclarations.ToArray();
+			foreach (var remOutputOptionDecl in remOutputOptionDecls)
+			{
+				this.RemoveOutputOptionDeclaration(remOutputOptionDecl);
+			}
+
+			foreach (var addOutputOptionDecl in backup.OutputOptionDeclarations)
+			{
+				this._OutputOptionDeclarations.Add(addOutputOptionDecl);
 			}
 		}
 	}

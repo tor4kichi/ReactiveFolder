@@ -28,6 +28,11 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
+
+		public AppOptionProperty(string valiableName)
+		{
+			ValiableName = valiableName;
+		}
 		abstract public dynamic DefaultValue { get; }
 
 		abstract public bool Validate();
@@ -35,37 +40,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		abstract public string ConvertOptionText(dynamic value = null);
 	}
 
-
 	[DataContract]
-	public class InputPathAppOptionProperty : AppOptionProperty
-	{
-		public override dynamic DefaultValue { get { return ""; } }
-
-
-		public override bool Validate()
-		{
-			return true;
-		}
-
-
-		public InputPathAppOptionProperty(string name)
-		{
-			this.ValiableName = name;
-		}
-
-		public override bool CanConvertOptionText(dynamic value)
-		{
-			return value is string;
-		}
-
-		public override string ConvertOptionText(dynamic value = null)
-		{
-			return value as string;
-		}
-	}
-
-	[DataContract]
-	public class OutputPathAppOptionProperty : AppOptionProperty
+	abstract public class PathAppOptionProperty : AppOptionProperty
 	{
 		public override dynamic DefaultValue { get { return ""; } }
 
@@ -75,26 +51,70 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
-		public OutputPathAppOptionProperty(string name)
-		{
-			this.ValiableName = name;
-		}
-
 		public override bool CanConvertOptionText(dynamic value)
 		{
 			return value is string;
 		}
 
-		public override string ConvertOptionText(dynamic value = null)
+		public PathAppOptionProperty(string name)
+			: base(name)
 		{
-			return value as string;
 		}
 	}
 
+
+
 	[DataContract]
-	public class FileOutputPathAppOptionProperty : OutputPathAppOptionProperty
+	public class InputAppOptionProperty : PathAppOptionProperty
 	{
+		public override dynamic DefaultValue { get { return ""; } }
+
+
 		
+
+		public InputAppOptionProperty(string name)
+			: base(name)
+		{
+		}
+
+		
+
+		public override string ConvertOptionText(dynamic value = null)
+		{
+			var str = (string)value;
+			return str;
+		}
+	}
+
+	[DataContract]
+	public class FolderOutputAppOptionProperty : PathAppOptionProperty
+	{
+	
+
+		public FolderOutputAppOptionProperty(string name)
+			: base(name)
+		{
+		}
+
+		
+
+		public override string ConvertOptionText(dynamic value = null)
+		{
+			var str = (string)value;
+
+			// 入力がファイルパスなら拡張子を取り除いてフォルダパスに変換
+			if (Path.HasExtension(str))
+			{
+				str = Path.GetFileNameWithoutExtension(str);
+			}
+
+			return str;
+		}
+	}
+
+	[DataContract]
+	public class FileOutputAppOptionProperty : PathAppOptionProperty
+	{
 		[DataMember]
 		private string _Extention;
 		public string Extention
@@ -119,28 +139,24 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 		
 
-		public override bool Validate()
-		{
-			return true;
-		}
-
-
-		public FileOutputPathAppOptionProperty(string name)
+		
+		public FileOutputAppOptionProperty(string name)
 			: base(name)
 			
 		{
-			
+			Extention = "";
 		}
 
-		public override bool CanConvertOptionText(dynamic value)
-		{
-			return value is string;
-		}
-
+		
 		public override string ConvertOptionText(dynamic value = null)
 		{
-			// TODO: 拡張子の変更
-			return value as string;
+			var str = (string)value;
+			if (false == IsSameInputExtention)
+			{
+				str = Path.ChangeExtension(str, Extention);
+			}
+
+			return str;
 		}
 	}
 
@@ -191,7 +207,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		public int DefaultIndex { get; set; }
 
 
-		public StringListOptionProperty()
+		public StringListOptionProperty(string valiableName)
+			: base(valiableName)
 		{
 			_List = new ObservableCollection<StringListItem>();
 
@@ -294,7 +311,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		public int DefaultNumber { get; set; }
 
 
-		public NumberAppOptionProperty()
+		public NumberAppOptionProperty(string valiableName)
+			: base(valiableName)
 		{
 			DefaultNumber = 0;
 		}
@@ -355,7 +373,8 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
-		public LimitedNumberAppOptionProerty()
+		public LimitedNumberAppOptionProerty(string valiableName)
+			: base(valiableName)
 		{
 			_MinValue = 0;
 			_MaxValue = 100;
@@ -380,21 +399,22 @@ namespace ReactiveFolder.Models.AppPolicy
 	public class RangeNumberAppOptionProperty : LimitedNumberAppOptionProerty
 	{
 		[DataMember]
-		private int _SkipNumber;
+		private int _SkipAmount;
 		public int SkipAmount
 		{
 			get
 			{
-				return _SkipNumber;
+				return _SkipAmount;
 			}
 			set
 			{
-				SetProperty(ref _SkipNumber, value);
+				SetProperty(ref _SkipAmount, value);
 			}
 		}
 
 
-		public RangeNumberAppOptionProperty()
+		public RangeNumberAppOptionProperty(string valiableName)
+			: base(valiableName)
 		{
 			SkipAmount = 1;
 		}

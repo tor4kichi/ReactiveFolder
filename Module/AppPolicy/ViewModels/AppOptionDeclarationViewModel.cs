@@ -33,8 +33,8 @@ namespace Modules.AppPolicy.ViewModels
 
 		public List<AddablePropertyListItem> AddableProperties { get; private set; }
 
-		public bool CanPropertyCustmize { get; private set; }
-
+		public bool IsDisplayOptionTextPattern { get; private set; }
+		public bool IsDisplayProperty { get; private set; }
 
 		public AppOptionDeclarationViewModel(ApplicationPolicyViewModel appPolicyVM, AppOptionDeclarationBase decl)
 		{
@@ -51,11 +51,16 @@ namespace Modules.AppPolicy.ViewModels
 
 			Order = Declaration.ToReactivePropertyAsSynchronized(x => x.Order,
 				convert: (model) => model.ToString(),
-				convertBack: (vm) => int.Parse(vm)
+				convertBack: (vm) => int.Parse(vm),
+				ignoreValidationErrorValue: true
 			)
 				.AddTo(_CompositeDisposable);
 
 			Order.SetValidateNotifyError(x => {
+				if (String.IsNullOrWhiteSpace(x))
+				{
+					return "Input Number";
+				}
 				int temp;
 				return int.TryParse(x, out temp) ? null : "Number Only";
 			});
@@ -76,7 +81,13 @@ namespace Modules.AppPolicy.ViewModels
 				.Select(x => new AddablePropertyListItem(this, x.ToString(), x))
 				.ToList();
 
-			CanPropertyCustmize = decl is AppOptionDeclaration;
+
+
+
+
+			var isInputOption = decl is AppInputOptionDeclaration;
+			IsDisplayOptionTextPattern = !isInputOption;
+			IsDisplayProperty = !isInputOption;
 		}
 
 		private DelegateCommand _EditDeclarationCommand;
@@ -104,7 +115,7 @@ namespace Modules.AppPolicy.ViewModels
 						AppPolicyVM.RemoveDeclaration(this.Declaration);
 					}
 					, 
-					() => Declaration is AppOptionDeclaration
+					() => false == (Declaration is AppInputOptionDeclaration)
 					));
 			}
 		}
@@ -133,7 +144,7 @@ namespace Modules.AppPolicy.ViewModels
 			if (Declaration is AppOptionDeclaration)
 			{
 				(Declaration as AppOptionDeclaration)
-					.AddProperty(propertyType.ToOptionProperty());
+					.AddProperty(propertyType.ToOptionProperty("name"));
 			}
 		}
 	}
@@ -181,18 +192,18 @@ namespace Modules.AppPolicy.ViewModels
 
 	public static class AddableAppOptionPropertyTypeHelper
 	{
-		public static AppOptionProperty ToOptionProperty(this AddableAppOptionPropertyType propType)
+		public static AppOptionProperty ToOptionProperty(this AddableAppOptionPropertyType propType, string valiableName)
 		{
 			switch (propType)
 			{
 				case AddableAppOptionPropertyType.StringList:
-					return new StringListOptionProperty();
+					return new StringListOptionProperty(valiableName);
 				case AddableAppOptionPropertyType.Number:
-					return new NumberAppOptionProperty();
+					return new NumberAppOptionProperty(valiableName);
 				case AddableAppOptionPropertyType.LimitedNumber:
-					return new LimitedNumberAppOptionProerty();
+					return new LimitedNumberAppOptionProerty(valiableName);
 				case AddableAppOptionPropertyType.RangeNumber:
-					return new RangeNumberAppOptionProperty();
+					return new RangeNumberAppOptionProperty(valiableName);
 				default:
 					throw new NotSupportedException();
 			}

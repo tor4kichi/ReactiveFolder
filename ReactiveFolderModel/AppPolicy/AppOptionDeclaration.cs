@@ -215,7 +215,12 @@ namespace ReactiveFolder.Models.AppPolicy
 
 				if (OptionTextPattern.Contains(patternedValiableName))
 				{
-					var convertedOptionText = prop.ConvertOptionText(val);
+					var convertedOptionText = prop.ConvertOptionText(val.Value);
+
+					if (prop is PathAppOptionProperty)
+					{
+						convertedOptionText = $"\"{convertedOptionText}\"";
+                    }
 
 					outputtext = outputtext.Replace(patternedValiableName, convertedOptionText);
 				}
@@ -231,7 +236,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 
-		public AppOptionInstance CreateValueSet()
+		public AppOptionInstance CreateInstance()
 		{
 			var values = _UserProperties
 				.Select(x =>
@@ -248,18 +253,18 @@ namespace ReactiveFolder.Models.AppPolicy
 	
 
 	[DataContract]
-	public class AppInputPathOptionDeclaration : AppOptionDeclarationBase
+	public class AppInputOptionDeclaration : AppOptionDeclarationBase
 	{
-		private InputPathAppOptionProperty InputPathProperty { get; set; }
+		private InputAppOptionProperty InputPathProperty { get; set; }
 
 
-		public AppInputPathOptionDeclaration()
+		public AppInputOptionDeclaration()
 		{ }
 
-		public AppInputPathOptionDeclaration(string name, int id)
+		public AppInputOptionDeclaration(string name, int id)
 			: base(name, id)
 		{
-			InputPathProperty = new InputPathAppOptionProperty(name);
+			InputPathProperty = new InputAppOptionProperty(name);
 
 			_UserProperties.Add(InputPathProperty);
 
@@ -270,7 +275,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		[OnDeserialized]
 		public void OnDeserialized(StreamingContext context)
 		{
-			InputPathProperty = _UserProperties[0] as InputPathAppOptionProperty;
+			InputPathProperty = _UserProperties[0] as InputAppOptionProperty;
 		}
 
 
@@ -278,14 +283,14 @@ namespace ReactiveFolder.Models.AppPolicy
 		{
 			base.Rollback(other);
 
-			InputPathProperty = _UserProperties[0] as InputPathAppOptionProperty;
+			InputPathProperty = _UserProperties[0] as InputAppOptionProperty;
 
 		}
 
 	}
 
 	[DataContract]
-	public class AppOutputPathOptionDeclaration : AppOptionDeclaration
+	public class AppOutputOptionDeclaration : AppOptionDeclaration
 	{
 		[DataMember]
 		private FolderItemType _OutputType;
@@ -306,12 +311,12 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 
-		public OutputPathAppOptionProperty OutputPathProperty { get; private set; }
+		public AppOptionProperty OutputPathProperty { get; private set; }
 
 
-		public AppOutputPathOptionDeclaration() { }
+		public AppOutputOptionDeclaration() { }
 
-		public AppOutputPathOptionDeclaration(string name, int id, FolderItemType initialOutputType)
+		public AppOutputOptionDeclaration(string name, int id, FolderItemType initialOutputType)
 			: base(name, id)
 		{
 			OutputType = initialOutputType;
@@ -323,7 +328,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		{
 			if (_UserProperties.Count > 0)
 			{
-				OutputPathProperty = _UserProperties[0] as OutputPathAppOptionProperty;
+				OutputPathProperty = _UserProperties[0];
 			}
 		}
 
@@ -333,7 +338,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		{
 			base.Rollback(other);
 
-			OutputPathProperty = _UserProperties[0] as OutputPathAppOptionProperty;
+			OutputPathProperty = UserProperties[0];
 		}
 
 
@@ -345,10 +350,10 @@ namespace ReactiveFolder.Models.AppPolicy
 			switch (type)
 			{
 				case FolderItemType.File:
-					OutputPathProperty = new FileOutputPathAppOptionProperty(Name);
+					OutputPathProperty = new FileOutputAppOptionProperty(Name);
 					break;
 				case FolderItemType.Folder:
-					OutputPathProperty = new OutputPathAppOptionProperty(Name);
+					OutputPathProperty = new FolderOutputAppOptionProperty(Name);
 					break;
 				default:
 					break;
@@ -363,7 +368,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public override void AddProperty(AppOptionProperty property)
 		{
-			if (property is OutputPathAppOptionProperty)
+			if (property is FolderOutputAppOptionProperty)
 			{
 				throw new Exception();
 			}
@@ -373,7 +378,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public override bool RemoveProperty(AppOptionProperty property)
 		{
-			if (property is OutputPathAppOptionProperty)
+			if (property is FolderOutputAppOptionProperty)
 			{
 				throw new Exception();
 			}

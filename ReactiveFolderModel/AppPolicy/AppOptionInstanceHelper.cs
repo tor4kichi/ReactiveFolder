@@ -12,15 +12,15 @@ namespace ReactiveFolder.Models.AppPolicy
 			this IEnumerable<AppOptionInstance> valueSetList)
 		{
 			return valueSetList.SingleOrDefault(x => 
-				x.OptionDeclaration is AppInputPathOptionDeclaration
+				x.OptionDeclaration is AppInputOptionDeclaration
 				);
 		}
 
-		public static IEnumerable<AppOptionInstance> FindOutputOptionInstances(
+		public static AppOptionInstance FindOutputOptionInstance(
 			this IEnumerable<AppOptionInstance> optionInstances)
 		{
-			return optionInstances.Where(x => 
-				x.OptionDeclaration is AppOutputPathOptionDeclaration
+			return optionInstances.SingleOrDefault(x => 
+				x.OptionDeclaration is AppOutputOptionDeclaration
 				);
 		}
 	}

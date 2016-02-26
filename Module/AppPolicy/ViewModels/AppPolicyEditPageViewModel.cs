@@ -326,6 +326,8 @@ namespace Modules.AppPolicy.ViewModels
 
 
 		// オプションのプロトタイプ宣言
+		public AppOptionDeclarationViewModel InputDeclaration { get; private set; }
+		public ReadOnlyReactiveCollection<AppOptionDeclarationViewModel> OutputOptionDeclarations { get; private set; }
 		public ReadOnlyReactiveCollection<AppOptionDeclarationViewModel> OptionDeclarations { get; private set; }
 
 
@@ -375,7 +377,12 @@ namespace Modules.AppPolicy.ViewModels
 				.AddTo(_CompositeDisposable);
 
 
+			InputDeclaration = new AppOptionDeclarationViewModel(this, AppPolicy.InputOption);
 
+			OutputOptionDeclarations = AppPolicy.OutputOptionDeclarations.ToReadOnlyReactiveCollection(
+				x => new AppOptionDeclarationViewModel(this, x)
+				)
+				.AddTo(_CompositeDisposable);
 
 			OptionDeclarations = AppPolicy.OptionDeclarations.ToReadOnlyReactiveCollection(
 				x => new AppOptionDeclarationViewModel(this, x)
@@ -438,7 +445,7 @@ namespace Modules.AppPolicy.ViewModels
 				return _AddOptionDeclarationCommand
 					?? (_AddOptionDeclarationCommand = new DelegateCommand(() =>
 					{
-						var decl = AppPolicy.AddNewOptionDeclaration("Option");
+						var decl = AppPolicy.AddOptionDeclaration("Option");
 
 						// 編集ダイアログで開く
 						OpenOptionDeclarationEditDialog(decl);
@@ -493,12 +500,23 @@ namespace Modules.AppPolicy.ViewModels
 			tempVM.Dispose();
 		}
 
-		
+
 
 		internal void RemoveDeclaration(AppOptionDeclarationBase declaration)
 		{
 			// TODO: AppOptionDeclarationの削除確認ダイアログの表示
-			AppPolicy.RemoveOptionDeclaration(declaration);
+			if (declaration is AppOptionDeclaration)
+			{
+				AppPolicy.RemoveOptionDeclaration(declaration as AppOptionDeclaration);
+			}
+			else if (declaration is AppOutputOptionDeclaration)
+			{
+				AppPolicy.RemoveOptionDeclaration(declaration as AppOutputOptionDeclaration);
+			}
+			else
+			{
+				throw new NotSupportedException("can not remove AppInputOptionDeclaration");
+			}
 		}
 
 		public void Dispose()

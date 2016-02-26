@@ -647,7 +647,7 @@ namespace ReactiveFolder.Models
 		}
 		
 
-		public void Execute()
+		public void Execute(bool forceEnable = false)
 		{
 			ResetWorkingFolder();
 
@@ -657,7 +657,7 @@ namespace ReactiveFolder.Models
 			}
 
 
-			if (false == IsEnable)
+			if (!forceEnable && false == IsEnable)
 			{
 				return;
 			}

@@ -297,7 +297,7 @@ namespace Modules.Main.ViewModels
 				return _TestCommand
 					?? (_TestCommand = new DelegateCommand(() =>
 					{
-						Reaction.Execute();
+						Reaction.Execute(forceEnable:true);
 					}
 					));
 			}

@@ -23,6 +23,29 @@
             <DataTemplate x:Key="AppPolicyTemplate">
                 <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16">
 
+                    <StackPanel.Resources>
+                        <DataTemplate x:Key="AppOptionDeclrationTemplate"
+                            DataType="{x:Type vm:AppOptionDeclarationViewModel}">
+                            <DockPanel>
+                                <Button Command="{Binding RemoveDeclarationCommand}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Foreground="Red"
+                                                DockPanel.Dock="Right"
+                                                >
+                                    <materialDesign:PackIcon Kind="Close" />
+                                </Button>
+
+                                <Button Command="{Binding EditDeclarationCommand}"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            >
+                                    <TextBlock Text="{Binding Name.Value}" />
+                                </Button>
+
+                            </DockPanel>
+                        </DataTemplate>
+                    </StackPanel.Resources>
+
+
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Display Name" 
                                    Style="{StaticResource ListSubheaderText}"
@@ -151,6 +174,49 @@
                         </ItemsControl>
 
                     </StackPanel>
+
+                    
+                    
+                    
+                    <!-- Input Option -->
+                    
+                    <StackPanel Orientation="Vertical">
+
+                        <TextBlock Text="Input Option"
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
+
+                        <ContentControl Content="{Binding InputDeclaration}"
+                                        ContentTemplate="{StaticResource AppOptionDeclrationTemplate}"
+                                        />
+
+                    </StackPanel>
+
+                    
+                    
+                    
+                    <!-- Output Option Declaration -->
+
+                    <StackPanel Orientation="Vertical">
+
+                        <TextBlock Text="Output Options"
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
+
+                        <ItemsControl ItemsSource="{Binding OutputOptionDeclarations}"
+                                      ItemTemplate="{StaticResource AppOptionDeclrationTemplate}"
+                                      >
+                        </ItemsControl>
+
+                        <Button Command="{Binding AddOutputOptionDeclarationCommand}"
+                                Width="200"
+                                Margin="0 8"
+                                >
+                            <TextBlock Text="Add Output" />
+                        </Button>
+                    </StackPanel>
+
+                    
                     
                     
                     
@@ -158,31 +224,13 @@
 
                     <StackPanel Orientation="Vertical">
 
-                        <TextBlock Text="Options Declaration"
+                        <TextBlock Text="Options"
                                    Style="{StaticResource ListSubheaderText}"
                                    />
 
-                        <ItemsControl ItemsSource="{Binding OptionDeclarations}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type vm:AppOptionDeclarationViewModel}">
-                                    <DockPanel>
-                                        <Button Command="{Binding RemoveDeclarationCommand}"
-                                                Style="{StaticResource MaterialDesignFlatButton}"
-                                                Foreground="Red"
-                                                DockPanel.Dock="Right"
-                                                >
-                                            <materialDesign:PackIcon Kind="Close" />
-                                        </Button>
-                                        
-                                        <Button Command="{Binding EditDeclarationCommand}"
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                            >
-                                            <TextBlock Text="{Binding Name.Value}" />
-                                        </Button>
-
-                                    </DockPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
+                        <ItemsControl ItemsSource="{Binding OptionDeclarations}"
+                                      ItemTemplate="{StaticResource AppOptionDeclrationTemplate}"
+                                      >
                         </ItemsControl>
 
                         <Button Command="{Binding AddOptionDeclarationCommand}"
@@ -192,12 +240,6 @@
                             <TextBlock Text="Add Option" />
                         </Button>
 
-                        <Button Command="{Binding AddOutputOptionDeclarationCommand}"
-                                Width="200"
-                                Margin="0 8"
-                                >
-                            <TextBlock Text="Add Output" />
-                        </Button>
                     </StackPanel>
                     
                 </StackPanel>

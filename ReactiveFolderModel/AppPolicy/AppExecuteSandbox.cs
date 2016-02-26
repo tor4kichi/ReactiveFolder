@@ -1,4 +1,5 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
+using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,8 +12,11 @@ namespace ReactiveFolder.Models.AppPolicy
 {
 	public class ApplicationExecuteSandbox : BindableBase
 	{
-		public ApplicationPolicy Policy { get; private set; }
+		public ApplicationPolicy AppPolicy { get; private set; }
 		public AppOptionInstance[] Options { get; private set; }
+
+		public string ResultPath { get; private set; }
+		public FolderItemType OutputPathType { get; private set; }
 
 		/// <summary>
 		/// use ApplicationPolicy.CreateExecuteSandbox()
@@ -22,18 +26,18 @@ namespace ReactiveFolder.Models.AppPolicy
 		/// <param name="context"></param>
 		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppOptionInstance[] options)
 		{
-			Policy = policy;
+			AppPolicy = policy;
 			Options = options;
 		}
 
 		public bool Validate(ReactiveStreamContext context)
 		{
-			if (Policy == null)
+			if (AppPolicy == null)
 			{
 				return false;
 			}
 
-			if (false == Policy.IsExistApplicationFile)
+			if (false == AppPolicy.IsExistApplicationFile)
 			{
 				return false;
 			}
@@ -43,18 +47,30 @@ namespace ReactiveFolder.Models.AppPolicy
 			return true;
 		}
 
-		private bool ValidateExecuteResult(string sourctPath, DirectoryInfo destFolder)
+		private bool ValidateExecuteResult()
 		{
-			// TODO: 
-
-			return true;
+			if (OutputPathType == FolderItemType.File)
+			{
+				return File.Exists(ResultPath);
+			}
+			else if (OutputPathType == FolderItemType.Folder)
+			{
+				return Directory.Exists(ResultPath);
+			}
+			else
+			{
+				return false;
+			}
 		}
 
-		public bool Execute(string sourctPath, DirectoryInfo destFolder)
-		{
-			var argumentText = Policy.MakeCommandLineOptionText(sourctPath, destFolder, Options);
 
-			var processStartInfo = new ProcessStartInfo(Policy.ApplicationPath, argumentText);
+		
+
+		public bool Execute(string inputPath, DirectoryInfo destFolder)
+		{
+			var argumentText = MakeArgumentText(inputPath, destFolder);
+
+			var processStartInfo = new ProcessStartInfo(AppPolicy.ApplicationPath, argumentText);
 
 			processStartInfo.WorkingDirectory = destFolder.FullName;
 
@@ -77,7 +93,7 @@ namespace ReactiveFolder.Models.AppPolicy
 				process.BeginErrorReadLine();
 #endif
 
-				if (process.WaitForExit((int)Policy.MaxProcessTime.TotalMilliseconds))
+				if (process.WaitForExit((int)AppPolicy.MaxProcessTime.TotalMilliseconds))
 				{
 					if (process.ExitCode != 0)
 					{
@@ -93,8 +109,47 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 
 
-			return ValidateExecuteResult(sourctPath, destFolder);
+			return ValidateExecuteResult();
+
+
 		}
+
+		private string MakeArgumentText(string inputPath, DirectoryInfo destFolder)
+		{
+			// Note: コマンドライン引数として使用するオプションを一つのリストにまとめて
+			// オプションからコマンドライン引数の文字列を生成します。
+			var finalOptions = Options.ToList();
+
+			// input
+			var inputOptionInstance = AppPolicy.InputOption.CreateInstance();
+			inputOptionInstance.Values[0].Value = inputPath;
+			finalOptions.Add(inputOptionInstance);
+
+
+			// output
+			var outputValueInstance = finalOptions.FindOutputOptionInstance();
+
+			if (outputValueInstance == null)
+			{
+				outputValueInstance = AppPolicy.SameInputOutputOption.CreateInstance();
+				finalOptions.Add(outputValueInstance);
+			}
+
+			var outputPath = Path.Combine(destFolder.FullName, Path.GetFileName(inputPath));
+			outputValueInstance.Values[0].Value = outputPath;
+
+
+			var decl = outputValueInstance.OptionDeclaration as AppOutputOptionDeclaration;			
+			ResultPath = (string)decl.OutputPathProperty.ConvertOptionText(outputPath);
+
+			OutputPathType = (decl as AppOutputOptionDeclaration).OutputType;
+
+
+			var argumentText = AppPolicy.AppOptionsToArgumentText(finalOptions);
+
+			return argumentText;
+		}
+
 #if DEBUG
 		private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
 		{
@@ -109,6 +164,7 @@ namespace ReactiveFolder.Models.AppPolicy
 			Console.WriteLine(e.Data);
 		}
 #endif
+
 
 
 		

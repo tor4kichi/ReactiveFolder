@@ -21,17 +21,17 @@ namespace Modules.AppPolicy.ViewModels
 	{
 		public static AppOptionPropertyViewModel ToAppOptionPropertyVM(this AppOptionProperty property, AppOptionDeclarationViewModel declVM)
 		{
-			if (property is InputPathAppOptionProperty)
+			if (property is InputAppOptionProperty)
 			{
-				return new InputPathAppOptionPropertyViewModel(declVM, property as InputPathAppOptionProperty);
+				return new InputAppOptionPropertyViewModel(declVM, property as InputAppOptionProperty);
 			}
-			else if (property is FileOutputPathAppOptionProperty)
+			else if (property is FileOutputAppOptionProperty)
 			{
-				return new FileOutputPathAppOptionPropertyViewModel(declVM, property as FileOutputPathAppOptionProperty);
+				return new FileOutputAppOptionPropertyViewModel(declVM, property as FileOutputAppOptionProperty);
 			}
-			else if (property is OutputPathAppOptionProperty)
+			else if (property is FolderOutputAppOptionProperty)
 			{
-				return new OutputPathAppOptionPropertyViewModel(declVM, property as OutputPathAppOptionProperty);
+				return new FolderOutputAppOptionPropertyViewModel(declVM, property as FolderOutputAppOptionProperty);
 			}
 			else if (property is StringListOptionProperty)
 			{
@@ -84,7 +84,7 @@ namespace Modules.AppPolicy.ViewModels
 						DeclarationVM.RemoveProperty(Property);
 					}
 					,
-					() => false == (Property is InputPathAppOptionProperty)
+					() => false == (Property is InputAppOptionProperty)
 					));
 			}
 		}
@@ -103,29 +103,29 @@ namespace Modules.AppPolicy.ViewModels
 	}
 
 
-	public class InputPathAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<InputPathAppOptionProperty>
+	public class InputAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<InputAppOptionProperty>
 	{
-		public InputPathAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, InputPathAppOptionProperty property)
+		public InputAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, InputAppOptionProperty property)
 			: base(declVM, property)
 		{
 
 		}
 	}
 
-	public class OutputPathAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<OutputPathAppOptionProperty>
+	public class FolderOutputAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<FolderOutputAppOptionProperty>
 	{
-		public OutputPathAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, OutputPathAppOptionProperty property)
+		public FolderOutputAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, FolderOutputAppOptionProperty property)
 			: base(declVM, property)
 		{
 		}
 	}
 
-	public class FileOutputPathAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<FileOutputPathAppOptionProperty>
+	public class FileOutputAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<FileOutputAppOptionProperty>
 	{
 		public ReactiveProperty<string> Extention { get; private set; }
 
 
-		public FileOutputPathAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, FileOutputPathAppOptionProperty property)
+		public FileOutputAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, FileOutputAppOptionProperty property)
 			: base(declVM, property)
 		{
 			// TODO: Extention入力の検証等
@@ -237,6 +237,8 @@ namespace Modules.AppPolicy.ViewModels
 
 	public class LimitedNumberAppOptionPropertyViewModel : TemplatedAppOptionPropertyViewModel<LimitedNumberAppOptionProerty>
 	{
+		public ReactiveProperty<string> DefaultNumberText { get; private set; }
+
 		public ReactiveProperty<string> MaxValueText { get; private set; }
 
 		public ReactiveProperty<string> MinValueText { get; private set; }
@@ -244,6 +246,16 @@ namespace Modules.AppPolicy.ViewModels
 		public LimitedNumberAppOptionPropertyViewModel(AppOptionDeclarationViewModel declVM, LimitedNumberAppOptionProerty property)
 			: base(declVM, property)
 		{
+			DefaultNumberText = new ReactiveProperty<string>(TemplateProperty.ConvertOptionText(TemplateProperty.DefaultValue));
+
+			DefaultNumberText
+				.Where(NumberAppOptionPropertyViewModel.CanParseToInt)
+				.Select(x => int.Parse(x))
+				.Where(x => TemplateProperty.CanConvertOptionText(x))
+				.Subscribe(x => TemplateProperty.DefaultNumber = x);
+
+			DefaultNumberText.SetValidateNotifyError(NumberAppOptionPropertyViewModel.NumberValidate);
+
 			MaxValueText = new ReactiveProperty<string>(TemplateProperty.MaxValue.ToString());
 
 			MaxValueText

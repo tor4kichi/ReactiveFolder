@@ -182,7 +182,7 @@ namespace ReactiveFolder.Models.Actions
 
 				if (sandbox.Execute(sourcePath, tempOutputFolder))
 				{
-					context.SetNextWorkingPath(sourcePath);
+					context.SetNextWorkingPath(sandbox.ResultPath);
 				}
 				else
 				{

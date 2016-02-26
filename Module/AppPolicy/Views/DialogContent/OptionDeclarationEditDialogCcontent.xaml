@@ -5,23 +5,24 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Modules.AppPolicy.Views.DialogContent"
              xmlns:vm="clr-namespace:Modules.AppPolicy.ViewModels"
+             xmlns:mybehavior="clr-namespace:ReactiveFolderStyles.Behaviors;assembly=ReactiveFolderStyles"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="600">
     <UserControl.Resources>
-        <DataTemplate x:Key="InputTemplate" DataType="{x:Type vm:InputPathAppOptionPropertyViewModel}">
+        <DataTemplate x:Key="InputTemplate" DataType="{x:Type vm:InputAppOptionPropertyViewModel}">
             <TextBlock Text="[Declaration by ReactiveProperty]"
                        VerticalAlignment="Center"
                        />
         </DataTemplate>
 
-        <DataTemplate x:Key="OutputTemplate" DataType="{x:Type vm:OutputPathAppOptionPropertyViewModel}">
+        <DataTemplate x:Key="OutputTemplate" DataType="{x:Type vm:FolderOutputAppOptionPropertyViewModel}">
            
         </DataTemplate>
 
-        <DataTemplate x:Key="FileOutputTemplate" DataType="{x:Type vm:FileOutputPathAppOptionPropertyViewModel}">
+        <DataTemplate x:Key="FileOutputTemplate" DataType="{x:Type vm:FileOutputAppOptionPropertyViewModel}">
             <DockPanel>
                 <TextBlock Text="Extention"
                        VerticalAlignment="Center"
@@ -195,6 +196,7 @@
                     <TextBox Text="{Binding Order.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              DockPanel.Dock="Right"
                              Width="200"
+                             mybehavior:TextBoxHelper.IsNumeric="True"
                              />
 
                     <TextBlock Text="Order"
@@ -203,7 +205,9 @@
                                />
                 </DockPanel>
                 
-                <DockPanel Margin="0 8">
+                <DockPanel Margin="0 8"
+                           Visibility="{Binding IsDisplayOptionTextPattern, Converter={StaticResource BoolToVisibility}}"
+                           >
                     <TextBox Text="{Binding OptionTextPattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              DockPanel.Dock="Right"
                              Width="200"
@@ -218,7 +222,7 @@
 
 
                 <DockPanel Margin="0 8"
-                           Visibility="{Binding CanPropertyCustmize, Converter={StaticResource BoolToVisibility}}"
+                           Visibility="{Binding IsDisplayProperty, Converter={StaticResource BoolToVisibility}}"
                            >
                     
                     <!-- TODO: FloationActionButon に変更 -->
@@ -248,7 +252,9 @@
                 
                 
                 
-                <DockPanel Margin="0 8">
+                <DockPanel Margin="0 8"
+                           Visibility="{Binding IsDisplayProperty, Converter={StaticResource BoolToVisibility}}"
+                           >
 
                     <ItemsControl ItemsSource="{Binding Properties}">
                         <ItemsControl.ItemTemplate>

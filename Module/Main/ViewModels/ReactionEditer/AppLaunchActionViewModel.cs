@@ -42,18 +42,24 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			OptionInstance = optionInstance;
 
 			AppPolicy = appAction.GetAppPolicy();
+			if (AppPolicy != null)
+			{
+				AppName = AppPolicy.AppName;
+				AppGuid = AppPolicy.Guid;
 
-			AppName = AppPolicy.AppName;
-			AppGuid = AppPolicy.Guid;
+				OptionName = OptionInstance.OptionDeclaration.Name;
 
-			OptionName = OptionInstance.OptionDeclaration.Name;
-
-			OptionValues = OptionInstance.Values.Join(OptionInstance.OptionDeclaration.UserProperties,
-				(x) => x.ValiableName,
-				(y) => y.ValiableName,
-				(x, y) => AppOptionValueViewModelHelper.CreateAppOptionValueVM(x, y)
-				)
-				.ToList();
+				OptionValues = OptionInstance.Values.Join(OptionInstance.OptionDeclaration.UserProperties,
+					(x) => x.ValiableName,
+					(y) => y.ValiableName,
+					(x, y) => AppOptionValueViewModelHelper.CreateAppOptionValueVM(x, y)
+					)
+					.ToList();
+			}
+			else
+			{
+				AppName = "<App not found>";
+			}
 		}
 
 
@@ -82,17 +88,17 @@ namespace Modules.Main.ViewModels.ReactionEditer
 	{
 		public static AppOptionValueViewModel CreateAppOptionValueVM(AppOptionValue val, AppOptionProperty prop)
 		{
-			if (prop is InputPathAppOptionProperty)
+			if (prop is InputAppOptionProperty)
 			{
-				return new InputOptionValueViewModel(val, prop as InputPathAppOptionProperty);
+				return new InputOptionValueViewModel(val, prop as InputAppOptionProperty);
 			}
-			else if (prop is FileOutputPathAppOptionProperty)
+			else if (prop is FileOutputAppOptionProperty)
 			{
-				return new FileOutputOptionValueViewModel(val, prop as FileOutputPathAppOptionProperty);
+				return new FileOutputOptionValueViewModel(val, prop as FileOutputAppOptionProperty);
 			}
-			else if (prop is OutputPathAppOptionProperty)
+			else if (prop is FolderOutputAppOptionProperty)
 			{
-				return new OutputOptionValueViewModel(val, prop as OutputPathAppOptionProperty);
+				return new OutputOptionValueViewModel(val, prop as FolderOutputAppOptionProperty);
 			}
 			else if (prop is StringListOptionProperty)
 			{
@@ -147,29 +153,29 @@ namespace Modules.Main.ViewModels.ReactionEditer
 	}
 
 
-	public class InputOptionValueViewModel : TemplatedAppOptionValueViewModel<InputPathAppOptionProperty>
+	public class InputOptionValueViewModel : TemplatedAppOptionValueViewModel<InputAppOptionProperty>
 	{
-		public InputOptionValueViewModel(AppOptionValue val, InputPathAppOptionProperty property)
+		public InputOptionValueViewModel(AppOptionValue val, InputAppOptionProperty property)
 			: base(val, property)
 		{
 
 		}
 	}
 
-	public class OutputOptionValueViewModel : TemplatedAppOptionValueViewModel<OutputPathAppOptionProperty>
+	public class OutputOptionValueViewModel : TemplatedAppOptionValueViewModel<FolderOutputAppOptionProperty>
 	{
-		public OutputOptionValueViewModel(AppOptionValue val, OutputPathAppOptionProperty property)
+		public OutputOptionValueViewModel(AppOptionValue val, FolderOutputAppOptionProperty property)
 			: base(val, property)
 		{
 
 		}
 	}
 
-	public class FileOutputOptionValueViewModel : TemplatedAppOptionValueViewModel<FileOutputPathAppOptionProperty>
+	public class FileOutputOptionValueViewModel : TemplatedAppOptionValueViewModel<FileOutputAppOptionProperty>
 	{
 		public string Extention { get; private set; }
 
-		public FileOutputOptionValueViewModel(AppOptionValue val, FileOutputPathAppOptionProperty property)
+		public FileOutputOptionValueViewModel(AppOptionValue val, FileOutputAppOptionProperty property)
 			: base(val, property)
 		{
 			Extention = TemplateProperty.Extention;

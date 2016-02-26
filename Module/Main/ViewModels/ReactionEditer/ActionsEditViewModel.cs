@@ -103,7 +103,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 							var actionModel = new AppLaunchReactiveAction();
 							actionModel.AppGuid = opt.AppPolicy.Guid;
 
-							var optionInstance = opt.Declaration.CreateValueSet();
+							var optionInstance = opt.Declaration.CreateInstance();
 							actionModel.AddAppOptionInstance(optionInstance);
 
 
@@ -156,8 +156,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			Options = AppPolicyManager.Policies.SelectMany(x => 
 			{
 				return x.OptionDeclarations
-				.Where(y => false == (y is AppInputPathOptionDeclaration))
-				.Select(y => new AppOptionListItemViewModel(x, y));
+					.Concat(x.OutputOptionDeclarations)
+					.Select(y => new AppOptionListItemViewModel(x, y));
 			})
 			.ToList();
 

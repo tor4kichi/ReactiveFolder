@@ -39,15 +39,15 @@ namespace Modules.AppPolicy.Views.DialogContent
 
 		public override DataTemplate SelectTemplate(object item, DependencyObject container)
 		{
-			if (item is ViewModels.InputPathAppOptionPropertyViewModel)
+			if (item is ViewModels.InputAppOptionPropertyViewModel)
 			{
 				return Input;
 			}
-			else if (item is ViewModels.FileOutputPathAppOptionPropertyViewModel)
+			else if (item is ViewModels.FileOutputAppOptionPropertyViewModel)
 			{
 				return FileOutput;
 			}
-			else if (item is ViewModels.OutputPathAppOptionPropertyViewModel)
+			else if (item is ViewModels.FolderOutputAppOptionPropertyViewModel)
 			{
 				return Output;
 			}
