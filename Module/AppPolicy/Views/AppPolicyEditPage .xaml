@@ -23,6 +23,29 @@
             <DataTemplate x:Key="AppPolicyTemplate">
                 <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16">
 
+                    <StackPanel.Resources>
+                        <DataTemplate x:Key="AppOptionDeclrationTemplate"
+                            DataType="{x:Type vm:AppOptionDeclarationViewModel}">
+                            <DockPanel>
+                                <Button Command="{Binding RemoveDeclarationCommand}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Foreground="Red"
+                                                DockPanel.Dock="Right"
+                                                >
+                                    <materialDesign:PackIcon Kind="Close" />
+                                </Button>
+
+                                <Button Command="{Binding EditDeclarationCommand}"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            >
+                                    <TextBlock Text="{Binding Name.Value}" />
+                                </Button>
+
+                            </DockPanel>
+                        </DataTemplate>
+                    </StackPanel.Resources>
+
+
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Display Name" 
                                    Style="{StaticResource ListSubheaderText}"
@@ -53,7 +76,7 @@
 
 
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="IO Type" 
+                        <TextBlock Text="Input Type" 
                                    Style="{StaticResource ListSubheaderText}"
                                    />
 
@@ -76,33 +99,11 @@
 
                             </ComboBox>
 
-                            <materialDesign:PackIcon Kind="ArrowRight" 
-                                                     Foreground="Black"
-                                                     Margin="16"
-                                                     VerticalAlignment="Center"
-                                                     HorizontalAlignment="Center"
-                                                     />
-
-                            <ComboBox ItemsSource="{x:Static vm:ApplicationPolicyViewModel.FolderItemTypes}"
-                                      SelectedItem="{Binding OutputPathType.Value, Mode=TwoWay}"
-                                      VerticalAlignment="Center"
-                                      Width="200"                                      
-                                      >
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
-                                            <Run>Output </Run>
-                                            <Run Text="{Binding  Mode=OneTime}" />
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-
-                            </ComboBox>
-
                         </StackPanel>
                     </StackPanel>
 
 
+                    <!-- 
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Default Option Text" 
                                    Style="{StaticResource ListSubheaderText}"
@@ -118,13 +119,13 @@
                         </StackPanel>
                         
                     </StackPanel>
-
+                    -->
 
                     <StackPanel Orientation="Vertical" 
                                 Visibility="{Binding IsInputFile.Value, Converter={StaticResource BoolToVisiblity}}"
                                 >
 
-                        <TextBlock Text="Accept Extentions"
+                        <TextBlock Text="Input Extentions"
                                    Style="{StaticResource ListSubheaderText}"
                                    />
 
@@ -173,67 +174,74 @@
                         </ItemsControl>
 
                     </StackPanel>
+
                     
                     
+                    
+                    <!-- Input Option -->
+                    
+                    <StackPanel Orientation="Vertical">
 
+                        <TextBlock Text="Input Option"
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
 
+                        <ContentControl Content="{Binding InputDeclaration}"
+                                        ContentTemplate="{StaticResource AppOptionDeclrationTemplate}"
+                                        />
 
-                    <Grid>
-                        <Button HorizontalAlignment="Right"
-                            ToolTip="Add Function" 
-                            Command="{Binding AddArgumentCommand}"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
-                            Margin="16 0"
-                            >
-                            <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
+                    </StackPanel>
+
+                    
+                    
+                    
+                    <!-- Output Option Declaration -->
+
+                    <StackPanel Orientation="Vertical">
+
+                        <TextBlock Text="Output Options"
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
+
+                        <ItemsControl ItemsSource="{Binding OutputOptionDeclarations}"
+                                      ItemTemplate="{StaticResource AppOptionDeclrationTemplate}"
+                                      >
+                        </ItemsControl>
+
+                        <Button Command="{Binding AddOutputOptionDeclarationCommand}"
+                                Width="200"
+                                Margin="0 8"
+                                >
+                            <TextBlock Text="Add Output" />
                         </Button>
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="App Options by Function"
-                                       Style="{StaticResource ListSubheaderText}"
-                               />
-                            <ItemsControl ItemsSource="{Binding AppArguments}"
-                                                  Style="{StaticResource List}"
-                                                  ItemContainerStyle="{StaticResource ListItem}"
-                                                 > 
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid HorizontalAlignment="Stretch">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" />
-                                                <ColumnDefinition Width="48" />
-                                            </Grid.ColumnDefinitions>
-                                            
-                                            
-                                            <Button Grid.Column="0"
-                                                Style="{StaticResource ListButton}"
-                                                Command="{Binding EditArgumentCommand}"
-                                                >
+                    </StackPanel>
 
-                                                <StackPanel Orientation="Vertical">
-                                                    <TextBlock Text="{Binding ArgumentName.Value}"
-                                                    Style="{StaticResource ListPrimaryText}"
-                                                    />
-                                                    <TextBlock Text="{Binding OptionText.Value}" />
-                                                </StackPanel>
+                    
+                    
+                    
+                    
+                    <!-- Option Declaration -->
 
-                                            </Button>
+                    <StackPanel Orientation="Vertical">
 
-                                            <!-- show only at mouseover -->
-                                            <Button Grid.Column="1"
-                                                    Style="{StaticResource MaterialDesignFlatButton}"
-                                                    Command="{Binding RemoveArgumentCommand}"
-                                                    >
-                                                <materialDesign:PackIcon Kind="Delete" />
-                                            </Button>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                        <TextBlock Text="Options"
+                                   Style="{StaticResource ListSubheaderText}"
+                                   />
 
-                        </StackPanel>
-                    </Grid>
+                        <ItemsControl ItemsSource="{Binding OptionDeclarations}"
+                                      ItemTemplate="{StaticResource AppOptionDeclrationTemplate}"
+                                      >
+                        </ItemsControl>
 
+                        <Button Command="{Binding AddOptionDeclarationCommand}"
+                                Width="200"
+                                Margin="0 8"
+                                >
+                            <TextBlock Text="Add Option" />
+                        </Button>
 
+                    </StackPanel>
+                    
                 </StackPanel>
 
             </DataTemplate>
@@ -314,6 +322,7 @@
             <materialDesign:DialogHost Identifier="AppPolicyEditDialogHost"
                                  HorizontalAlignment="Center" VerticalAlignment="Center"
                                        Margin="8 40"
+                                       Width="500"
                                        >
 
                 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
+using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,9 +12,11 @@ namespace ReactiveFolder.Models.AppPolicy
 {
 	public class ApplicationExecuteSandbox : BindableBase
 	{
-		public ApplicationPolicy Policy { get; private set; }
-		public AppArgument Param { get; private set; }
+		public ApplicationPolicy AppPolicy { get; private set; }
+		public AppOptionInstance[] Options { get; private set; }
 
+		public string ResultPath { get; private set; }
+		public FolderItemType OutputPathType { get; private set; }
 
 		/// <summary>
 		/// use ApplicationPolicy.CreateExecuteSandbox()
@@ -21,37 +24,53 @@ namespace ReactiveFolder.Models.AppPolicy
 		/// <param name="policy"></param>
 		/// <param name="param"></param>
 		/// <param name="context"></param>
-		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppArgument param)
+		internal ApplicationExecuteSandbox(ApplicationPolicy policy, AppOptionInstance[] options)
 		{
-			Policy = policy;
-			Param = param;
+			AppPolicy = policy;
+			Options = options;
 		}
 
 		public bool Validate(ReactiveStreamContext context)
 		{
-			if (Policy == null)
+			if (AppPolicy == null)
 			{
 				return false;
 			}
 
-			if (false == Policy.IsExistApplicationFile)
-			{
-				return false;
-			}			
-
-			if (Param == null)
+			if (false == AppPolicy.IsExistApplicationFile)
 			{
 				return false;
 			}
+
+			// TODO: Optionsのチェック
 
 			return true;
 		}
 
-		public bool Execute(string sourctPath, DirectoryInfo destFolder)
+		private bool ValidateExecuteResult()
 		{
-			var argumentText = Policy.MakeArgumentsText(sourctPath, destFolder, Param);
+			if (OutputPathType == FolderItemType.File)
+			{
+				return File.Exists(ResultPath);
+			}
+			else if (OutputPathType == FolderItemType.Folder)
+			{
+				return Directory.Exists(ResultPath);
+			}
+			else
+			{
+				return false;
+			}
+		}
 
-			var processStartInfo = new ProcessStartInfo(Policy.ApplicationPath, argumentText);
+
+		
+
+		public bool Execute(string inputPath, DirectoryInfo destFolder)
+		{
+			var argumentText = MakeArgumentText(inputPath, destFolder);
+
+			var processStartInfo = new ProcessStartInfo(AppPolicy.ApplicationPath, argumentText);
 
 			processStartInfo.WorkingDirectory = destFolder.FullName;
 
@@ -74,9 +93,12 @@ namespace ReactiveFolder.Models.AppPolicy
 				process.BeginErrorReadLine();
 #endif
 
-				if (process.WaitForExit((int)Policy.MaxProcessTime.TotalMilliseconds))
+				if (process.WaitForExit((int)AppPolicy.MaxProcessTime.TotalMilliseconds))
 				{
-					return process.ExitCode == 0;
+					if (process.ExitCode != 0)
+					{
+						return false;
+					}
 				}
 				else
 				{
@@ -85,7 +107,49 @@ namespace ReactiveFolder.Models.AppPolicy
 					return false;
 				}
 			}
+
+
+			return ValidateExecuteResult();
+
+
 		}
+
+		private string MakeArgumentText(string inputPath, DirectoryInfo destFolder)
+		{
+			// Note: コマンドライン引数として使用するオプションを一つのリストにまとめて
+			// オプションからコマンドライン引数の文字列を生成します。
+			var finalOptions = Options.ToList();
+
+			// input
+			var inputOptionInstance = AppPolicy.InputOption.CreateInstance();
+			inputOptionInstance.Values[0].Value = inputPath;
+			finalOptions.Add(inputOptionInstance);
+
+
+			// output
+			var outputValueInstance = finalOptions.FindOutputOptionInstance();
+
+			if (outputValueInstance == null)
+			{
+				outputValueInstance = AppPolicy.SameInputOutputOption.CreateInstance();
+				finalOptions.Add(outputValueInstance);
+			}
+
+			var outputPath = Path.Combine(destFolder.FullName, Path.GetFileName(inputPath));
+			outputValueInstance.Values[0].Value = outputPath;
+
+
+			var decl = outputValueInstance.OptionDeclaration as AppOutputOptionDeclaration;			
+			ResultPath = (string)decl.OutputPathProperty.ConvertOptionText(outputPath);
+
+			OutputPathType = (decl as AppOutputOptionDeclaration).OutputType;
+
+
+			var argumentText = AppPolicy.AppOptionsToArgumentText(finalOptions);
+
+			return argumentText;
+		}
+
 #if DEBUG
 		private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
 		{
@@ -100,6 +164,10 @@ namespace ReactiveFolder.Models.AppPolicy
 			Console.WriteLine(e.Data);
 		}
 #endif
+
+
+
+		
 	}
 
 }

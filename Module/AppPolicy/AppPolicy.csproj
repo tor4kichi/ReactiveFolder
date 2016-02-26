@@ -132,12 +132,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="ViewModels\AppOptionDeclarationViewModel.cs" />
+    <Compile Include="ViewModels\AppOptionPropertyViewModel.cs" />
+    <Compile Include="ViewModels\AppOptionValueViewModel.cs" />
     <Compile Include="ViewModels\AppPolicyEditPageViewModel.cs" />
     <Compile Include="ViewModels\AppPolicyListPageViewModel.cs" />
     <Compile Include="ViewModels\PageViewModelBase.cs" />
-    <Compile Include="Views\AppPolicyArgumentEditDialog.xaml.cs">
-      <DependentUpon>AppPolicyArgumentEditDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\AppPolicyEditPage .xaml.cs">
       <DependentUpon>AppPolicyEditPage .xaml</DependentUpon>
     </Compile>
@@ -146,6 +146,9 @@
     </Compile>
     <Compile Include="Views\DeleteConfirmDialog.xaml.cs">
       <DependentUpon>DeleteConfirmDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DialogContent\OptionDeclarationEditDialogCcontent.xaml.cs">
+      <DependentUpon>OptionDeclarationEditDialogCcontent.xaml</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -163,10 +166,6 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Page Include="Views\AppPolicyArgumentEditDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\AppPolicyEditPage .xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -176,6 +175,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\DeleteConfirmDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DialogContent\OptionDeclarationEditDialogCcontent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

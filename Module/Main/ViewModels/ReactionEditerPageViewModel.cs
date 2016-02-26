@@ -257,10 +257,22 @@ namespace Modules.Main.ViewModels
 		{
 			var prevModel = FileSerializeHelper.FromJson<FolderReactionModel>(RollbackData);
 
-			if (prevModel.WorkFolder.FullName != Reaction.WorkFolder.FullName)
+
+			if (Reaction.WorkFolder == null)
 			{
-				return true;
+				// 再設定された時に反応させるため、入力フォルダがクリアされた段階では何もしない
+				return false;
 			}
+
+			if (prevModel.WorkFolder != null)
+			{
+
+				if (prevModel.WorkFolder.FullName != Reaction.WorkFolder.FullName)
+				{
+					return true;
+				}
+			}
+
 			if (prevModel.Destination.AbsoluteFolderPath != Reaction.Destination.AbsoluteFolderPath)
 			{
 				return true;
@@ -285,7 +297,7 @@ namespace Modules.Main.ViewModels
 				return _TestCommand
 					?? (_TestCommand = new DelegateCommand(() =>
 					{
-						Reaction.Execute();
+						Reaction.Execute(forceEnable:true);
 					}
 					));
 			}

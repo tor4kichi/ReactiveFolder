@@ -87,8 +87,8 @@ namespace Modules.AppPolicy.ViewModels
 				CanSaveSubscriber = Observable.Merge(
 						AppPolicy.PropertyChangedAsObservable().ToUnit(),
 						AppPolicy.AcceptExtentions.CollectionChangedAsObservable().ToUnit(),
-						AppPolicy.AppParams.CollectionChangedAsObservable().ToUnit(),
-						AppPolicy.AppParams.ObserveElementPropertyChanged().ToUnit()
+						AppPolicy.OptionDeclarations.CollectionChangedAsObservable().ToUnit(),
+						AppPolicy.OptionDeclarations.ObserveElementPropertyChanged().ToUnit()
 					)
 					.Subscribe(_ =>
 					{
@@ -311,25 +311,24 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReactiveProperty<string> AppName { get; private set; }
 
-		
+
+
 		public ReactiveProperty<FolderItemType> InputPathType { get; private set; }
-
-		public ReactiveProperty<FolderItemType> OutputPathType { get; private set; }
-
-		public ReactiveProperty<string> DefaultOptionText { get; private set; }
-
-		public ReactiveProperty<string> ExtentionText { get; private set; }
 
 		public ReactiveProperty<bool> IsInputFile { get; private set; }
 
-		public ReactiveProperty<bool> IsOutputFile { get; private set; }
+
+
+		public ReactiveProperty<string> ExtentionText { get; private set; }
 
 		// 入力可能なファイル拡張子（複数）
 		public ReadOnlyReactiveCollection<string> AcceptExtentions { get; private set; }
 
-		// 機能定義（複数）
-		public ReadOnlyReactiveCollection<AppPolicyArgumentViewModel> AppArguments { get; private set; }
 
+		// オプションのプロトタイプ宣言
+		public AppOptionDeclarationViewModel InputDeclaration { get; private set; }
+		public ReadOnlyReactiveCollection<AppOptionDeclarationViewModel> OutputOptionDeclarations { get; private set; }
+		public ReadOnlyReactiveCollection<AppOptionDeclarationViewModel> OptionDeclarations { get; private set; }
 
 
 		public ApplicationPolicyViewModel(ApplicationPolicy appPolicy)
@@ -346,42 +345,26 @@ namespace Modules.AppPolicy.ViewModels
 				.AddTo(_CompositeDisposable);
 
 
-			DefaultOptionText = AppPolicy
-				.ToReactivePropertyAsSynchronized(x => x.DefaultOptionText)
-				.AddTo(_CompositeDisposable);
-
 			InputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.InputPathType)
-				.AddTo(_CompositeDisposable);
-
-			OutputPathType = AppPolicy.ToReactivePropertyAsSynchronized(x => x.OutputPathType)
 				.AddTo(_CompositeDisposable);
 
 			IsInputFile = InputPathType.Select(x => x == FolderItemType.File)
 				.ToReactiveProperty()
 				.AddTo(_CompositeDisposable);
 
-			IsOutputFile = OutputPathType.Select(x => x == FolderItemType.File)
-				.ToReactiveProperty()
+
+
+			ExtentionText = new ReactiveProperty<string>("")
 				.AddTo(_CompositeDisposable);
 
 			AcceptExtentions = appPolicy.AcceptExtentions
 				.ToReadOnlyReactiveCollection()
 				.AddTo(_CompositeDisposable);
 
-			AppArguments = AppPolicy.AppParams.ToReadOnlyReactiveCollection(
-				x => new AppPolicyArgumentViewModel(this, AppPolicy, x)
-				)
-				.AddTo(_CompositeDisposable);
-
-			ExtentionText = new ReactiveProperty<string>("")
-				.AddTo(_CompositeDisposable);
-
-
 			AddAcceptExtentionCommand = ExtentionText
 				.Select(x => AppPolicy.CanAddAcceptExtention(x))
 				.ToReactiveCommand()
 				.AddTo(_CompositeDisposable);
-
 
 			AddAcceptExtentionCommand
 				.Select(x => ExtentionText.Value)
@@ -392,6 +375,21 @@ namespace Modules.AppPolicy.ViewModels
 					ExtentionText.Value = "";
 				})
 				.AddTo(_CompositeDisposable);
+
+
+			InputDeclaration = new AppOptionDeclarationViewModel(this, AppPolicy.InputOption);
+
+			OutputOptionDeclarations = AppPolicy.OutputOptionDeclarations.ToReadOnlyReactiveCollection(
+				x => new AppOptionDeclarationViewModel(this, x)
+				)
+				.AddTo(_CompositeDisposable);
+
+			OptionDeclarations = AppPolicy.OptionDeclarations.ToReadOnlyReactiveCollection(
+				x => new AppOptionDeclarationViewModel(this, x)
+				)
+				.AddTo(_CompositeDisposable);
+
+
 		}
 
 
@@ -421,25 +419,7 @@ namespace Modules.AppPolicy.ViewModels
 
 
 		public ReactiveCommand AddAcceptExtentionCommand { get; private set; }
-/*
-		private DelegateCommand _AddAcceptExtentionCommand;
-		public DelegateCommand AddAcceptExtentionCommand
-		{
-			get
-			{
-				return _AddAcceptExtentionCommand
-					?? (_AddAcceptExtentionCommand = new DelegateCommand(() =>
-					{
-						AppPolicy.AddAcceptExtention(ExtentionText.Value);
 
-						ExtentionText.Value = "";
-					},
-					
-					() => AppPolicy.CanAddAcceptExtention(ExtentionText.Value)
-					));
-			}
-		}
-*/
 
 		private DelegateCommand<string> _RemoveAcceptExtentionCommand;
 		public DelegateCommand<string> RemoveAcceptExtentionCommand
@@ -456,164 +436,105 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
-		private DelegateCommand _AddArgumentCommand;
-		public DelegateCommand AddArgumentCommand
+		
+		private DelegateCommand _AddOptionDeclarationCommand;
+		public DelegateCommand AddOptionDeclarationCommand
 		{
 			get
 			{
-				return _AddArgumentCommand
-					?? (_AddArgumentCommand = new DelegateCommand(() =>
+				return _AddOptionDeclarationCommand
+					?? (_AddOptionDeclarationCommand = new DelegateCommand(() =>
 					{
-						var newArg = AppPolicy.AddNewArgument();
+						var decl = AppPolicy.AddOptionDeclaration("Option");
 
-						var vm = new AppPolicyArgumentViewModel(this, AppPolicy, newArg);
-
-						OpenArgumentEditDialog(vm);
+						// 編集ダイアログで開く
+						OpenOptionDeclarationEditDialog(decl);
 					}));
 			}
 		}
 
-		
 
-
-
-
-		public async void OpenArgumentEditDialog(AppPolicyArgumentViewModel argumentVM)
+		private DelegateCommand _AddOutputOptionDeclarationCommand;
+		public DelegateCommand AddOutputOptionDeclarationCommand
 		{
-			var tempVM = new AppPolicyArgumentViewModel(this, AppPolicy, 
-				new AppArgument(-1)
-				{
-					Name = argumentVM.Argument.Name,
-					OptionText = argumentVM.Argument.OptionText,
-					Description = argumentVM.Argument.Description,
-					OutputExtention = argumentVM.Argument.OutputExtention
-				}
-			);
+			get
+			{
+				return _AddOutputOptionDeclarationCommand
+					?? (_AddOutputOptionDeclarationCommand = new DelegateCommand(() =>
+					{
+						var decl = AppPolicy.AddOutputOptionDeclaration("Output Option");
 
-			var view = new Views.AppPolicyArgumentEditDialog()
+						// 編集ダイアログで開く
+						OpenOptionDeclarationEditDialog(decl);
+					}));
+			}
+		}
+
+
+
+
+
+		public async void OpenOptionDeclarationEditDialog<T>(T decl)
+			where T : AppOptionDeclarationBase
+		{
+			var backupDecl = FileSerializeHelper.ToJson(decl);
+
+			AppOptionDeclarationViewModel tempVM = new AppOptionDeclarationViewModel(this, decl);
+
+
+			var view = new Views.DialogContent.OptionDeclarationEditDialogCcontent()
 			{
 				DataContext = tempVM
 			};
 
 			var result = await DialogHost.Show(view, "AppPolicyEditDialogHost");
 
-			if (result != null && ((bool)result) == true)
+			if (result == null || ((bool)result) == false)
 			{
-				// 変更を適用する
-				var tempArg = tempVM.Argument;
-				argumentVM.Argument.Name			= tempArg.Name;
-				argumentVM.Argument.OptionText		= tempArg.OptionText;
-				argumentVM.Argument.Description		= tempArg.Description;
-				argumentVM.Argument.OutputExtention = tempArg.OutputExtention;
+				// ロールバック
+				var rollbackModel = FileSerializeHelper.FromJson<T>(backupDecl);
+
+				decl.Rollback(rollbackModel);
 			}
 
 			tempVM.Dispose();
 		}
 
 
-		public void RemoveArgument(AppPolicyArgumentViewModel argumentVM)
+
+		internal void RemoveDeclaration(AppOptionDeclarationBase declaration)
 		{
-			// TODO: AppArgumentの削除 確認ダイアログの表示
-			AppPolicy.RemoveArgument(argumentVM.Argument);
+			// TODO: AppOptionDeclarationの削除確認ダイアログの表示
+			if (declaration is AppOptionDeclaration)
+			{
+				AppPolicy.RemoveOptionDeclaration(declaration as AppOptionDeclaration);
+			}
+			else if (declaration is AppOutputOptionDeclaration)
+			{
+				AppPolicy.RemoveOptionDeclaration(declaration as AppOutputOptionDeclaration);
+			}
+			else
+			{
+				throw new NotSupportedException("can not remove AppInputOptionDeclaration");
+			}
 		}
 
 		public void Dispose()
 		{
 			_CompositeDisposable.Dispose();
 		}
+
+		
 	}
 
 
 
+	
 
 
 
+	
 
 
-
-
-
-
-
-	public class AppPolicyArgumentViewModel : BindableBase, IDisposable
-	{
-		public ApplicationPolicyViewModel AppPolicyVM { get; private set; }
-		public ApplicationPolicy AppPolicy { get; private set; }
-
-		public AppArgument Argument { get; private set; }
-
-
-		public ReactiveProperty<string> ArgumentName { get; private set; }
-		public ReactiveProperty<string> Description { get; private set; }
-		public ReactiveProperty<string> OptionText { get; private set; }
-		public ReactiveProperty<string> OutputExtention { get; private set; }
-
-		public ReactiveProperty<string> FinalOptionText { get; private set; }
-
-		public AppPolicyArgumentViewModel(ApplicationPolicyViewModel appPolicyVM, ApplicationPolicy appPolicy, AppArgument argument)
-		{
-			this.AppPolicyVM = appPolicyVM;
-			this.AppPolicy = appPolicy;
-			this.Argument = argument;
-
-			ArgumentName = this.Argument.ToReactivePropertyAsSynchronized(x => x.Name);
-			Description = this.Argument.ToReactivePropertyAsSynchronized(x => x.Description);
-			OptionText = this.Argument.ToReactivePropertyAsSynchronized(x => x.OptionText);
-			OutputExtention = this.Argument.ToReactivePropertyAsSynchronized(x => x.OutputExtention);
-
-
-			FinalOptionText = Observable.Merge(
-				AppPolicyVM.InputPathType.ToUnit(),
-				AppPolicyVM.OutputPathType.ToUnit(),
-				AppPolicyVM.DefaultOptionText.ToUnit(),
-				OptionText.ToUnit(),
-				OutputExtention.ToUnit()
-				)
-				.Select(_ =>
-				{
-					var ext = AppPolicy.AcceptExtentions.FirstOrDefault() ?? ".ext";
-					var dummyInput = "dummyFolder/filename" + ext;
-					var dummyFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-					return AppPolicy.MakeArgumentsText(dummyInput, new DirectoryInfo(dummyFolder), Argument);
-				})
-				.ToReactiveProperty();
-		}
-
-		private DelegateCommand _EditArgumentCommand;
-		public DelegateCommand EditArgumentCommand
-		{
-			get
-			{
-				return _EditArgumentCommand
-					?? (_EditArgumentCommand = new DelegateCommand(() =>
-					{
-						AppPolicyVM.OpenArgumentEditDialog(this);
-					}));
-			}
-		}
-
-		private DelegateCommand _RemoveArgumentCommand;
-		public DelegateCommand RemoveArgumentCommand
-		{
-			get
-			{
-				return _RemoveArgumentCommand
-					?? (_RemoveArgumentCommand = new DelegateCommand(() =>
-					{
-						AppPolicyVM.RemoveArgument(this);
-					}));
-			}
-		}
-
-
-		public void Dispose()
-		{
-			ArgumentName.Dispose();
-			Description.Dispose();
-			OptionText.Dispose();
-			OutputExtention.Dispose();
-
-			FinalOptionText.Dispose();
-		}
-	}
+	
 }

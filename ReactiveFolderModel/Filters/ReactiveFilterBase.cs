@@ -18,7 +18,7 @@ namespace ReactiveFolder.Models
 	}
 
 	[DataContract]
-	abstract public class ReactiveFilterBase : ReactiveBranchingStreamBase, IFolderItemOutputer
+	abstract public class ReactiveFilterBase : ReactiveBranchingStreamBase
 	{
 		abstract public FolderItemType OutputItemType { get; }
 

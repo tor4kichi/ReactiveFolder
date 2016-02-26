@@ -18,9 +18,9 @@ namespace Modules.Main.Views.DialogContent
 	/// <summary>
 	/// AppLaunchActionEditDialogContent.xaml の相互作用ロジック
 	/// </summary>
-	public partial class AppLaunchActionEditDialogContent : UserControl
+	public partial class AppOptionSelectDialogContent : UserControl
 	{
-		public AppLaunchActionEditDialogContent()
+		public AppOptionSelectDialogContent()
 		{
 			InitializeComponent();
 		}

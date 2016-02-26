@@ -16,113 +16,49 @@ using System.Threading.Tasks;
 
 namespace Modules.Main.ViewModels.ReactionEditer
 {
+	
 
 	public class AppLaunchActionViewModel : ActionViewModelBase
 	{
 		public ActionsEditViewModel EditVM { get; private set; }
-		private IAppPolicyManager _AppPolicyManager;
+
 		public AppLaunchReactiveAction Action { get; private set; }
+		public ApplicationPolicy AppPolicy { get; private set; }
+		public AppOptionInstance OptionInstance { get; private set; }
 
-		public IEnumerable<AppPolicyViewModel> AppList { get; private set; }
+		public Guid AppGuid { get; private set; }
 
-		public ReactiveProperty<AppPolicyViewModel> AppPolicyVM { get; private set; }
+		public string AppName { get; private set; }
 
-		public ReactiveProperty<string> AppName { get; private set; }
-		public ReactiveProperty<string> ArgumentName { get; private set; }
+		public string OptionName { get; private set; }
 
+		public List<AppOptionValueViewModel> OptionValues { get; private set; }
 
-		public AppLaunchActionViewModel(ActionsEditViewModel editVM, FolderReactionModel reactionModel, AppLaunchReactiveAction appAction, IAppPolicyManager appPolicyManager)
+		public AppLaunchActionViewModel(ActionsEditViewModel editVM, FolderReactionModel reactionModel, AppLaunchReactiveAction appAction, AppOptionInstance optionInstance)
 			 : base(reactionModel)
 		{
 			EditVM = editVM;
-			_AppPolicyManager = appPolicyManager;
 			Action = appAction;
+			OptionInstance = optionInstance;
 
-			// 現在のアクションの前段にあるFilter、またはActionが出力するファイルタイプ・拡張子によってAppListの内容をフィルタする
-			var prevFolderItemOutputer = reactionModel.GetPreviousFolderItemOutputer(Action);
-			var filters = prevFolderItemOutputer.GetFilters();
-
-			AppList = appPolicyManager.Policies
-				// 前段の出力タイプと、
-				.Where(x => x.CheckCanProcessPartOfSupport(prevFolderItemOutputer))
-				.Select(x => new AppPolicyViewModel(Action, x));
-			
-
-			
-			AppPolicyVM = new ReactiveProperty<AppPolicyViewModel>();
-			
-			var currentAppPolicy = _AppPolicyManager.FromAppGuid(Action.AppGuid);
-			if (currentAppPolicy != null)
+			AppPolicy = appAction.GetAppPolicy();
+			if (AppPolicy != null)
 			{
-				var vm = AppList.SingleOrDefault(x => x.AppGuid == Action.AppGuid);
-				if (vm != null)
-				{
-					AppPolicyVM.Value = vm;
-				}
+				AppName = AppPolicy.AppName;
+				AppGuid = AppPolicy.Guid;
+
+				OptionName = OptionInstance.OptionDeclaration.Name;
+
+				OptionValues = OptionInstance.Values.Join(OptionInstance.OptionDeclaration.UserProperties,
+					(x) => x.ValiableName,
+					(y) => y.ValiableName,
+					(x, y) => AppOptionValueViewModelHelper.CreateAppOptionValueVM(x, y)
+					)
+					.ToList();
 			}
-
-			// App変更時のモデルへの書き戻し
-			AppPolicyVM
-				.Where(x => x != null)
-				.Where(x => Action.AppGuid != x.AppGuid)
-				.Subscribe(x =>
+			else
 			{
-				Action.AppGuid = x.AppGuid;
-
-				var appPolicy = _AppPolicyManager.FromAppGuid(x.AppGuid);
-				Action.AppArgumentId = appPolicy
-					.AppParams.FirstOrDefault()?.Id ?? AppArgument.IgnoreArgumentId;
-			});
-
-
-			
-
-
-
-
-
-
-
-			AppName = Action.ObserveProperty(x => x.AppGuid)
-				.Select(x => _AppPolicyManager.FromAppGuid(Action.AppGuid)?.AppName ?? "???")
-				.ToReactiveProperty();
-
-			ArgumentName =
-				Observable.CombineLatest(
-					Action.ObserveProperty(x => x.AppGuid),
-					Action.ObserveProperty(x => x.AppArgumentId),
-					(x, y) =>
-					{
-						var appPolicy = _AppPolicyManager.FromAppGuid(x);
-						var arg = appPolicy?.FindArgument(y) ?? null;
-						return arg?.Name ?? "-";
-					})
-					.ToReactiveProperty();
-					
-		}
-
-
-		private DelegateCommand<string> _SelectAppCommand;
-		public DelegateCommand<string> SelectAppCommand
-		{
-			get
-			{
-				return _SelectAppCommand
-					?? (_SelectAppCommand = new DelegateCommand<string>((x) =>
-					{
-					}));
-			}
-		}
-
-		private DelegateCommand<string> _SelectAppOptionCommand;
-		public DelegateCommand<string> SelectAppOptionCommand
-		{
-			get
-			{
-				return _SelectAppOptionCommand
-					?? (_SelectAppOptionCommand = new DelegateCommand<string>((x) =>
-					{
-					}));
+				AppName = "<App not found>";
 			}
 		}
 
@@ -142,92 +78,248 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					}));
 			}
 		}
-
 	}
 
 
-	public class AppPolicyViewModel : BindableBase, IDisposable
+	
+
+
+	public static class AppOptionValueViewModelHelper
 	{
-		public static readonly AppPolicyViewModel InvalidAppPolicyVM = new AppPolicyViewModel();
-
-		public AppLaunchReactiveAction ActionModel { get; private set; }
-		public ApplicationPolicy AppPolicy { get; private set; }
-
-		public string AppName { get; private set; }
-
-		public Guid AppGuid { get; private set; }
-
-		public ReadOnlyReactiveCollection<AppPolicyArgumentViewModel> AppArgumentList { get; private set; }
-
-
-		public ReactiveProperty<AppPolicyArgumentViewModel> ArgumentVM { get; private set; }
-
-
-		public CompositeDisposable _CompositeDisposable;
-
-		internal AppPolicyViewModel()
+		public static AppOptionValueViewModel CreateAppOptionValueVM(AppOptionValue val, AppOptionProperty prop)
 		{
-			AppName = "?????";
+			if (prop is InputAppOptionProperty)
+			{
+				return new InputOptionValueViewModel(val, prop as InputAppOptionProperty);
+			}
+			else if (prop is FileOutputAppOptionProperty)
+			{
+				return new FileOutputOptionValueViewModel(val, prop as FileOutputAppOptionProperty);
+			}
+			else if (prop is FolderOutputAppOptionProperty)
+			{
+				return new OutputOptionValueViewModel(val, prop as FolderOutputAppOptionProperty);
+			}
+			else if (prop is StringListOptionProperty)
+			{
+				return new StringListOptionValueViewModel(val, prop as StringListOptionProperty);
+			}
+			else if (prop is RangeNumberAppOptionProperty)
+			{
+				return new RangeNumberOptionValueViewModel(val, prop as RangeNumberAppOptionProperty);
+			}
+			else if (prop is LimitedNumberAppOptionProerty)
+			{
+				return new LimitedNumberOptionValueViewModel(val, prop as LimitedNumberAppOptionProerty);
+			}
+			else if (prop is NumberAppOptionProperty)
+			{
+				return new NumberOptionValueViewModel(val, prop as NumberAppOptionProperty);
+			}
+			else
+			{
+				throw new NotSupportedException("cant create AppOptionValueViewModel.");
+			}
+		}
+	}
+
+	abstract public class AppOptionValueViewModel : BindableBase
+	{
+		public AppOptionValue OptionValue { get; private set; }
+		public AppOptionProperty OptionProperty { get; private set; }
+
+		public string PropertyName { get; private set; }
+
+		public AppOptionValueViewModel(AppOptionValue val, AppOptionProperty property)
+		{
+			OptionValue = val;
+			OptionProperty = property;
+
+			PropertyName = OptionProperty.ValiableName;
+		}
+	}
+
+
+	abstract public class TemplatedAppOptionValueViewModel<T> : AppOptionValueViewModel
+		where T : AppOptionProperty
+	{
+		public T TemplateProperty { get; private set; }
+
+		public TemplatedAppOptionValueViewModel(AppOptionValue val, T templatedProperty)
+			: base(val, templatedProperty)
+		{
+			TemplateProperty = templatedProperty;
+		}
+	}
+
+
+	public class InputOptionValueViewModel : TemplatedAppOptionValueViewModel<InputAppOptionProperty>
+	{
+		public InputOptionValueViewModel(AppOptionValue val, InputAppOptionProperty property)
+			: base(val, property)
+		{
+
+		}
+	}
+
+	public class OutputOptionValueViewModel : TemplatedAppOptionValueViewModel<FolderOutputAppOptionProperty>
+	{
+		public OutputOptionValueViewModel(AppOptionValue val, FolderOutputAppOptionProperty property)
+			: base(val, property)
+		{
+
+		}
+	}
+
+	public class FileOutputOptionValueViewModel : TemplatedAppOptionValueViewModel<FileOutputAppOptionProperty>
+	{
+		public string Extention { get; private set; }
+
+		public FileOutputOptionValueViewModel(AppOptionValue val, FileOutputAppOptionProperty property)
+			: base(val, property)
+		{
+			Extention = TemplateProperty.Extention;
+		}
+	}
+
+
+	public class StringListOptionValueViewModel : TemplatedAppOptionValueViewModel<StringListOptionProperty>
+	{
+
+		public List<string> List { get; private set; }
+
+		public ReactiveProperty<int> SelectedValue { get; private set; }
+
+		public string SelectedItemValue
+		{
+			get
+			{
+				return TemplateProperty.List[SelectedValue.Value].Value;
+			}
 		}
 
-		public AppPolicyViewModel(AppLaunchReactiveAction actionModel, ApplicationPolicy appPolicy)
+
+		public StringListOptionValueViewModel(AppOptionValue val, StringListOptionProperty property)
+			: base(val, property)
 		{
-			this.ActionModel = actionModel;
-			this.AppPolicy = appPolicy;
-			AppName = AppPolicy.AppName;
-			AppGuid = AppPolicy.Guid;
+			List = TemplateProperty.List.Select(x => x.Label).ToList();
 
-			_CompositeDisposable = new CompositeDisposable();
-
-
-			// App変更時のArgumentリストの更新
-			AppArgumentList = AppPolicy.AppParams.ToReadOnlyReactiveCollection(x =>
-				new AppPolicyArgumentViewModel(x)
-			)
-			.AddTo(_CompositeDisposable);
-
-
-			ArgumentVM = new ReactiveProperty<AppPolicyArgumentViewModel>(
-				AppArgumentList.SingleOrDefault(x => x.AppArgument.Id == ActionModel.AppArgumentId)
-				, ReactivePropertyMode.DistinctUntilChanged
-				);
-
-
-			ArgumentVM.Subscribe(x =>
+			SelectedValue = new ReactiveProperty<int>((int)OptionValue.Value);
+			SelectedValue.Subscribe(x =>
 			{
-				ActionModel.AppArgumentId = x.AppArgument.Id;
+				OptionValue.Value = x;
+			});
+		}
+	}
+
+	public class NumberOptionValueViewModel : TemplatedAppOptionValueViewModel<NumberAppOptionProperty>
+	{
+		public ReactiveProperty<string> NumberText { get; private set; }
+
+		public NumberOptionValueViewModel(AppOptionValue val, NumberAppOptionProperty property)
+			: base(val, property)
+		{
+			NumberText = new ReactiveProperty<string>(((int)val.Value).ToString());
+
+			NumberText
+				.Where(x =>
+				{
+					int temp;
+					return int.TryParse(x, out temp);
+				})
+				.Select(x => int.Parse(x))
+				.Subscribe(x => val.Value = x);
+
+			NumberText.SetValidateNotifyError(x =>
+			{
+				if (String.IsNullOrWhiteSpace(x))
+				{
+					return "Input Number";
+				}
+
+				int temp;
+				if (false == int.TryParse(x, out temp))
+				{
+					return "Number Only";
+				}
+
+				return null;
 			});
 
 		}
-
-		public void Dispose()
-		{
-			_CompositeDisposable?.Dispose();
-			_CompositeDisposable = null;
-		}
 	}
 
-	public class AppPolicyArgumentViewModel : BindableBase
+	public class LimitedNumberOptionValueViewModel : TemplatedAppOptionValueViewModel<LimitedNumberAppOptionProerty>
 	{
-		public static readonly AppPolicyArgumentViewModel InvalidAppArgumentVM = new AppPolicyArgumentViewModel();
+		public ReactiveProperty<string> NumberText { get; private set; }
 
 
-
-		public AppArgument AppArgument { get; private set; }
-
-		public string ArgumentName { get; private set; }
-
-
-		public AppPolicyArgumentViewModel()
+		public LimitedNumberOptionValueViewModel(AppOptionValue val, LimitedNumberAppOptionProerty property)
+			: base(val, property)
 		{
-			this.ArgumentName = "???";
-		}
+			NumberText = new ReactiveProperty<string>(((int)val.Value).ToString());
 
-		public AppPolicyArgumentViewModel(AppArgument arg)
-		{
-			this.AppArgument = arg;
+			NumberText
+				.Where(x =>
+				{
+					int temp;
+					return int.TryParse(x, out temp);
+				})
+				.Select(x => int.Parse(x))
+				.Subscribe(x => val.Value = x);
 
-			this.ArgumentName = this.AppArgument?.Name ?? "???";
+			NumberText.SetValidateNotifyError(x =>
+			{
+				if (String.IsNullOrWhiteSpace(x))
+				{
+					return "Input Number";
+				}
+
+				int temp;
+				if (false == int.TryParse(x, out temp))
+				{
+					return "Number Only";
+				}
+
+				if (false == (TemplateProperty.MinValue <= temp && temp <= TemplateProperty.MaxValue))
+				{
+					return $"Number Out of Range";
+				}
+
+				return null;
+			});
+
 		}
 	}
+
+	public class RangeNumberOptionValueViewModel : TemplatedAppOptionValueViewModel<RangeNumberAppOptionProperty>
+	{
+
+		public ReactiveProperty<int> CurrentValue { get; private set; }
+
+		public int MaxValue { get; private set; }
+		public int MinValue { get; private set; }
+
+		public int SkipAmount { get; private set; }
+
+		public RangeNumberOptionValueViewModel(AppOptionValue val, RangeNumberAppOptionProperty property)
+			: base(val, property)
+		{
+			CurrentValue = new ReactiveProperty<int>((int)val.Value);
+
+			CurrentValue.Subscribe(x => val.Value = x);
+
+			MaxValue = TemplateProperty.MaxValue;
+			MinValue = TemplateProperty.MinValue;
+			SkipAmount = TemplateProperty.SkipAmount;
+		}
+	}
+
+
+
+	
+
+
+
+	
 }

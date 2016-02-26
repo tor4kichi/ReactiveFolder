@@ -4,6 +4,7 @@ using ReactiveFolder.Models.Filters;
 using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -55,18 +56,28 @@ namespace ReactiveFolder.Models.Actions
 
 
 		[DataMember]
-		private int _AppArgumentId;
-		public int AppArgumentId
+		private int _AppOutputFormatId;
+		public int AppOutputFormatId
 		{
 			get
 			{
-				return _AppArgumentId;
+				return _AppOutputFormatId;
 			}
 			set
 			{
-				SetProperty(ref _AppArgumentId, value);
+				if (SetProperty(ref _AppOutputFormatId, value))
+				{
+					_AdditionalOptions.Clear();
+				}
 			}
 		}
+
+
+		[DataMember]
+		private ObservableCollection<AppOptionInstance> _AdditionalOptions { get; set; }
+
+		public ReadOnlyObservableCollection<AppOptionInstance> AdditionalOptions { get; private set; }
+
 
 
 		public ApplicationPolicy GetAppPolicy()
@@ -86,13 +97,52 @@ namespace ReactiveFolder.Models.Actions
 		{
 			get
 			{
-				return GetAppPolicy()?.OutputPathType ?? FolderItemType.File;
+				var appPolicy = GetAppPolicy();
+				if (appPolicy?.HasOutputDeclaration ?? false)
+				{
+					if (appPolicy.GetOutputExtentions().Count() > 0)
+					{
+						return FolderItemType.File;
+					}
+					else
+					{
+						return FolderItemType.Folder;
+					}
+				}
+				else
+				{
+					return FolderItemType.File;
+				}
 			}
 		}
 
+
 		public AppLaunchReactiveAction()
 		{
-			
+			_AdditionalOptions = new ObservableCollection<AppOptionInstance>();
+
+			AdditionalOptions = new ReadOnlyObservableCollection<AppOptionInstance>(_AdditionalOptions);
+		}
+
+		[OnDeserialized]
+		public void SetValuesOnDeserialized(StreamingContext context)
+		{
+			AdditionalOptions = new ReadOnlyObservableCollection<AppOptionInstance>(_AdditionalOptions);
+
+			var appPolicy = GetAppPolicy();
+
+			if (appPolicy != null)
+			{
+				foreach (var option in AdditionalOptions)
+				{
+					option.ResetDeclaration(appPolicy);
+				}
+			}
+			else
+			{
+				// Note: appPolicyが削除されている？ 
+				// Validateで失敗するように
+			}
 		}
 
 
@@ -100,62 +150,69 @@ namespace ReactiveFolder.Models.Actions
 		{
 			var result = new ValidationResult();
 
-			var sandbox = CreateSandbox();
 
-			if (sandbox == null)
+			if (false == CanCreateSandbox())
 			{
-				result.AddMessage("AppLaunchReactiveAction:Invalid AppName or AppArgumentName");
+				result.AddMessage("AppLaunchReactiveAction:Invalid AppName:guid is " + AppGuid);
 				return result;
 			}
+
+
+			var sandbox = CreateSandbox();
 
 			if (false == sandbox.Validate(GenerateTempStreamContext()))
 			{
 				result.AddMessage("Invalid AppLaunchReactiveAction, due to diffarent IO file/folder type.");
-			}
+			}			
 
 			return result;
 		}
 
 
-		public override void Update(string sourcePath, DirectoryInfo destFolder)
+		public override void Execute(ReactiveStreamContext context)
 		{
-			var sandbox = CreateSandbox();
+			// TODO: SourcePathのファイルが存在しなかったら終了
 
-			if (sandbox == null)
-			{
-				throw new Exception("");
-			}
+			var sourcePath = context.SourcePath;
+			var tempOutputFolder = context.TempOutputFolder;
 
 			try
 			{
-				var path = sandbox.Execute(sourcePath, destFolder);
+				var sandbox = CreateSandbox();
+
+				if (sandbox.Execute(sourcePath, tempOutputFolder))
+				{
+					context.SetNextWorkingPath(sandbox.ResultPath);
+				}
+				else
+				{
+					context.Failed("Timeout または 実行に失敗");
+				} 
 			}
 			catch (Exception e)
 			{
-				System.Diagnostics.Debug.WriteLine("外部アプリの実行に失敗しました.");
-				System.Diagnostics.Debug.WriteLine(e.Message);
+				context.Failed("ReactiveStreamFailed on Update", e);
 			}
 		}
+
+		public bool CanCreateSandbox()
+		{
+			return AppPolicyFactory.FromAppGuid(AppGuid) != null;
+		}
+
 
 		public ApplicationExecuteSandbox CreateSandbox()
 		{
 			var appPolicy = AppPolicyFactory.FromAppGuid(AppGuid);
 			if (appPolicy == null)
 			{
-				return null;
+				throw new Exception("");
 			}
 
-			var appParam = appPolicy.FindArgument(this.AppArgumentId);
-
-			if (appPolicy == null || appParam == null)
-			{
-				return null;
-			}
-
-			return appPolicy.CreateExecuteSandbox(appParam);
+			return appPolicy.CreateExecuteSandbox(AdditionalOptions.ToArray());
 		}
 
-		public override IEnumerable<string> GetFilters()
+		public IEnumerable<string> GetFilters()
 		{
 			var appPolicy = GetAppPolicy();
 			if (appPolicy != null)
@@ -180,7 +237,24 @@ namespace ReactiveFolder.Models.Actions
 			var cast = other as AppLaunchReactiveAction;
 
 			return this.AppGuid == cast.AppGuid &&
-				this.AppArgumentId == cast.AppArgumentId;
+				this.AppOutputFormatId == cast.AppOutputFormatId;
+		}
+
+
+
+		public void AddAppOptionInstance(AppOptionInstance instance)
+		{
+			_AdditionalOptions.Add(instance);
+
+			ValidatePropertyChanged();
+		}
+
+		public void RemoveAppOptionInstance(AppOptionInstance instance)
+		{
+			if (_AdditionalOptions.Remove(instance))
+			{
+				ValidatePropertyChanged();
+			}
 		}
 	}
 	

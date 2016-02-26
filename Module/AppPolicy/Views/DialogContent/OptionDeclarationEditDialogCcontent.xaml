@@ -1,0 +1,338 @@
+﻿<UserControl x:Class="Modules.AppPolicy.Views.DialogContent.OptionDeclarationEditDialogCcontent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Modules.AppPolicy.Views.DialogContent"
+             xmlns:vm="clr-namespace:Modules.AppPolicy.ViewModels"
+             xmlns:mybehavior="clr-namespace:ReactiveFolderStyles.Behaviors;assembly=ReactiveFolderStyles"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="600">
+    <UserControl.Resources>
+        <DataTemplate x:Key="InputTemplate" DataType="{x:Type vm:InputAppOptionPropertyViewModel}">
+            <TextBlock Text="[Declaration by ReactiveProperty]"
+                       VerticalAlignment="Center"
+                       />
+        </DataTemplate>
+
+        <DataTemplate x:Key="OutputTemplate" DataType="{x:Type vm:FolderOutputAppOptionPropertyViewModel}">
+           
+        </DataTemplate>
+
+        <DataTemplate x:Key="FileOutputTemplate" DataType="{x:Type vm:FileOutputAppOptionPropertyViewModel}">
+            <DockPanel>
+                <TextBlock Text="Extention"
+                       VerticalAlignment="Center"
+                           DockPanel.Dock="Left"
+                       />
+
+                <TextBox Text="{Binding Extention.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                         Width="100"
+                         materialDesign:TextFieldAssist.Hint="ex) .png"
+                         />
+
+            </DockPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StringListTemplate" DataType="{x:Type vm:StringListAppOptionPropertyViewModel}">
+            <StackPanel Orientation="Vertical">
+                <ItemsControl ItemsSource="{Binding StringList}">
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:StringListItemViewModel}">
+
+                            <StackPanel Orientation="Vertical">
+                                <DockPanel>
+                                    <StackPanel Orientation="Horizontal"
+                                                DockPanel.Dock="Left"
+                                                >
+
+                                        <TextBox Text="{Binding Label.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Width="100"
+                                                 materialDesign:TextFieldAssist.Hint="Lebel"
+                                             />
+
+                                        <Border Margin="8 0" />
+
+                                        <TextBox Text="{Binding Value.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Width="100"
+                                                 materialDesign:TextFieldAssist.Hint="value"
+                                             />
+                                    </StackPanel>
+                                    
+                                    <Button Command="{Binding RemoveStringListItemCommand}" 
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        DockPanel.Dock="Right"
+                                        Margin="8 0 0 0"
+                                            Width="80"
+                                        >
+                                        <materialDesign:PackIcon Kind="Close" />
+                                    </Button>
+                                </DockPanel>
+
+                            </StackPanel>
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Button Content="Add Item" 
+                        Command="{Binding AddStringListItemCommand}"
+                        Width="100"
+                        />
+            </StackPanel>
+
+        </DataTemplate>
+        
+        <DataTemplate x:Key="NumberTemplate" DataType="{x:Type vm:NumberAppOptionPropertyViewModel}">
+            <DockPanel>
+                <TextBlock Text="Default Number"
+                           DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           />
+                <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Right"
+                                >
+                    <TextBox Text="{Binding DefaultNumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Width="60"
+                         />
+                </StackPanel>
+            </DockPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="LimitedNumberTemplate" DataType="{x:Type vm:LimitedNumberAppOptionPropertyViewModel}">
+            <StackPanel Orientation="Vertical">
+
+                <ContentControl Content="{Binding}" ContentTemplate="{StaticResource NumberTemplate}" />
+
+                <DockPanel>
+                    <TextBlock Text="Min/Max"
+                               DockPanel.Dock="Left"
+                               VerticalAlignment="Center"
+                           />
+                    
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Right"
+
+                                >
+                        <TextBox Text="{Binding MinValueText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="60"
+                                 />
+                        <TextBlock Text="～"
+                                   Margin="8 0" 
+                                   VerticalAlignment="Center"
+                                   />
+                        <TextBox Text="{Binding MaxValueText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="60"
+                                 />
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="RangeNumberTemplate" DataType="{x:Type vm:RangeNumberAppOptionPropertyViewModel}">
+            <StackPanel Orientation="Vertical">
+
+                <ContentControl Content="{Binding}" ContentTemplate="{StaticResource LimitedNumberTemplate}" />
+
+                <DockPanel>
+                    <TextBlock Text="Skip Amount"
+                               DockPanel.Dock="Left"
+                               VerticalAlignment="Center"
+                           />
+                    <StackPanel 
+                        HorizontalAlignment="Right"
+                        >
+                        <TextBox Text="{Binding SkipNumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Width="60"
+                             />
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+        </DataTemplate>
+
+
+        <local:AppOptionPropertyTemplateSelecter x:Key="appOptionPropertyTemplateSelecter"
+                                                 Input="{StaticResource InputTemplate}"
+                                                 Output="{StaticResource OutputTemplate}"
+                                                 FileOutput="{StaticResource FileOutputTemplate}"
+                                                 StringList="{StaticResource StringListTemplate}"
+                                                 RangeNumber="{StaticResource RangeNumberTemplate}"
+                                                 LimitedNumber="{StaticResource LimitedNumberTemplate}"
+                                                 Number="{StaticResource NumberTemplate}"
+                                                 />
+
+    </UserControl.Resources>
+    
+    
+    
+    
+    
+    
+    
+    <Grid MinWidth="500">
+        <StackPanel Orientation="Vertical" Margin="16">
+
+            <StackPanel Margin="16">
+                <TextBlock Text="OptionDecl"
+                           Margin="0 8"
+                           Style="{StaticResource MaterialDesignTitleTextBlock}"
+                           Foreground="{StaticResource PrimaryHueMidBrush}"
+                           />
+
+                <DockPanel Margin="0 8">
+                    <TextBox Text="{Binding Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             DockPanel.Dock="Right"
+                             Width="200"
+                             />
+
+                    <TextBlock Text="Name" 
+                               VerticalAlignment="Center"
+                               />
+                </DockPanel>
+
+                <DockPanel Margin="0 8">
+                    <TextBox Text="{Binding Order.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             DockPanel.Dock="Right"
+                             Width="200"
+                             mybehavior:TextBoxHelper.IsNumeric="True"
+                             />
+
+                    <TextBlock Text="Order"
+                               VerticalAlignment="Center"
+                               ToolTip="text placement order on Commandline options"
+                               />
+                </DockPanel>
+                
+                <DockPanel Margin="0 8"
+                           Visibility="{Binding IsDisplayOptionTextPattern, Converter={StaticResource BoolToVisibility}}"
+                           >
+                    <TextBox Text="{Binding OptionTextPattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             DockPanel.Dock="Right"
+                             Width="200"
+                             />
+
+                    <TextBlock Text="Option Text"
+                               VerticalAlignment="Center"
+                               />
+                </DockPanel>
+
+
+
+
+                <DockPanel Margin="0 8"
+                           Visibility="{Binding IsDisplayProperty, Converter={StaticResource BoolToVisibility}}"
+                           >
+                    
+                    <!-- TODO: FloationActionButon に変更 -->
+                    <StackPanel DockPanel.Dock="Right"
+                                Orientation="Horizontal">
+                        <ComboBox x:Name="AddablePropertiesComboBox" ItemsSource="{Binding AddableProperties}" 
+                          DisplayMemberPath="PropertyTypeLabel"
+                                  
+                                  MinWidth="100"
+                          >
+                        </ComboBox>
+
+                        <Border Margin="4 0" />
+
+                        <Button Content="Add" 
+                                Command="{Binding ElementName=AddablePropertiesComboBox, Path=SelectedItem.AddPropertyCommand}"
+                                Width="100"
+                                />
+
+                    </StackPanel>
+
+                    <TextBlock Text="Option Valiables"
+                               VerticalAlignment="Center"
+                               />
+
+                </DockPanel>
+                
+                
+                
+                <DockPanel Margin="0 8"
+                           Visibility="{Binding IsDisplayProperty, Converter={StaticResource BoolToVisibility}}"
+                           >
+
+                    <ItemsControl ItemsSource="{Binding Properties}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+
+                                    <DockPanel Margin="0 16"
+                                                        >
+
+                                        <Button Command="{Binding RemovePropertyCommand}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Foreground="Red"
+                                                Margin="0"
+                                                >
+                                            <materialDesign:PackIcon Kind="Delete">
+                                                
+                                            </materialDesign:PackIcon>
+                                        </Button>
+                                        
+                                        <StackPanel Orientation="Horizontal"
+                                                                    VerticalAlignment="Top"
+                                                                    DockPanel.Dock="Left"
+                                                            Margin="8 0"
+                                                            >
+                                            <TextBlock Text="%" VerticalAlignment="Bottom" />
+                                            <TextBox Text="{Binding ValiableName.Value}" 
+                                                 Margin="4 0"
+                                                 Width="60"
+                                                     VerticalAlignment="Center"
+                                                             />
+                                            <TextBlock Text="%" VerticalAlignment="Bottom" />
+                                        </StackPanel>
+
+                                        <Border Margin="8 8 0 0">
+                                            <ContentControl Content="{Binding}"
+                                                        ContentTemplateSelector="{StaticResource appOptionPropertyTemplateSelecter}"
+                                                        />
+                                        </Border>
+
+                                    </DockPanel>
+
+                                    
+                                    <Border BorderBrush="{StaticResource MaterialDesignDivider}"
+                                            BorderThickness="0 1 0 0"
+                                            />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        
+                    </ItemsControl>
+                </DockPanel>
+
+                
+
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                        
+                                        Margin="0 8 8 0"
+                                        Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
+                    <Button.CommandParameter>
+                        <system:Boolean>True</system:Boolean>
+                    </Button.CommandParameter>
+                    Apply and Close
+                </Button>
+                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                        IsDefault="True"
+                                        IsCancel="True"
+                                        Margin="0 8 8 0"
+                                        Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
+                    <Button.CommandParameter>
+                        <system:Boolean>False</system:Boolean>
+                    </Button.CommandParameter>
+                    Cancel
+                </Button>
+            </StackPanel>
+        </StackPanel>
+
+    </Grid>
+</UserControl>
