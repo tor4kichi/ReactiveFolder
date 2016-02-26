@@ -70,7 +70,7 @@ namespace ReactiveFolder.Models.AppPolicy
 			{
 				return _ApplicationPath;
 			}
-			set
+			private set
 			{
 				if (SetProperty(ref _ApplicationPath, value))
 				{
@@ -79,6 +79,23 @@ namespace ReactiveFolder.Models.AppPolicy
 				}
 			}
 		}
+
+		[DataMember]
+		public string ApplicationCheckSum { get; private set; }
+
+		internal void ResetApplicationPath(AppSecurityInfo appSecurityInfo)
+		{
+			ApplicationPath = appSecurityInfo.ApplicationPath;
+			ApplicationCheckSum = appSecurityInfo.CheckSum;
+		}
+
+		internal void ClearApplicationPath()
+		{
+			ApplicationPath = "";
+			ApplicationCheckSum = null;
+		}
+
+
 
 		[DataMember]
 		private TimeSpan _MaxProcessTime;
@@ -93,6 +110,8 @@ namespace ReactiveFolder.Models.AppPolicy
 				SetProperty(ref _MaxProcessTime, value);
 			}
 		}
+
+
 
 		
 
@@ -373,9 +392,16 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 		
 
-		public ApplicationExecuteSandbox CreateExecuteSandbox(AppOptionInstance[] options)
+		public ApplicationExecuteSandbox CreateExecuteSandbox(IAppPolicyManager manager, AppOptionInstance[] options)
 		{
-			return new ApplicationExecuteSandbox(this, options);
+			if (manager.Security.IsAuthorized(this))
+			{
+				return new ApplicationExecuteSandbox(this, options);
+			}
+			else
+			{
+				return null;
+			}
 		}
 		
 

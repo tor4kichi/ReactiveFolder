@@ -34,6 +34,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		public List<AppOptionValueViewModel> OptionValues { get; private set; }
 
+
 		public AppLaunchActionViewModel(ActionsEditViewModel editVM, FolderReactionModel reactionModel, AppLaunchReactiveAction appAction, AppOptionInstance optionInstance)
 			 : base(reactionModel)
 		{
@@ -41,7 +42,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			Action = appAction;
 			OptionInstance = optionInstance;
 
-			AppPolicy = appAction.GetAppPolicy();
+			AppPolicy = appAction.AppPolicy;
 			if (AppPolicy != null)
 			{
 				AppName = AppPolicy.AppName;

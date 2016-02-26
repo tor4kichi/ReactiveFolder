@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:local="clr-namespace:Modules.AppPolicy.Views"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
@@ -54,7 +55,8 @@
                             <TextBox Text="{Binding AppName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                      MinWidth="200"
                                      Margin="8 0"
-                                     />
+                                     >
+                            </TextBox>
                         </StackPanel>
                     </StackPanel>
                     
@@ -63,13 +65,57 @@
                                    Style="{StaticResource ListSubheaderText}"
                                    />
                         <DockPanel Margin="8 0">
+
+                            <materialDesign:PackIcon 
+                                    VerticalAlignment="Center"
+                                    Margin="8 0"
+                                    DockPanel.Dock="Left"
+                                    >
+                                <materialDesign:PackIcon.Style>
+                                    <Style TargetType="{x:Type materialDesign:PackIcon}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="NotSelected">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="InformationOutline"/>
+                                                    <Setter Property="ToolTip" Value="Select application" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="Missing">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="Alert"/>
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                    <Setter Property="ToolTip" Value="Missing application aile" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="NotAuthorized">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="Alert"/>
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                    <Setter Property="ToolTip" Value="Not authorized application" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="Ready">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="Check"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}"/>
+                                                    <Setter Property="ToolTip" Value="Ready to execute application" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+
+                                    </Style>
+                                </materialDesign:PackIcon.Style>
+                            </materialDesign:PackIcon>
+
                             <Button Content="Change"
                                     Command="{Binding ChangeApplicationPathCommand}"
                                     DockPanel.Dock="Right"
                                     />
                             <TextBlock Text="{Binding ApplicationPath.Value}" 
                                        VerticalAlignment="Center"
-                                                     />
+                                                     >
+                            </TextBlock>
+                            
 
                         </DockPanel>
                     </StackPanel>

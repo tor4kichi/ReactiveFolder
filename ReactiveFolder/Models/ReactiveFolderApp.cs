@@ -18,13 +18,26 @@ namespace ReactiveFolder.Models
 
 		public static readonly string DefaultGlobalSettingSavePath =
 			new DirectoryInfo(
-			Path.Combine(
+				Path.Combine(
 					Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
 					"ReactiveFolder"
 				)
 			).FullName;
 
-		
+
+		public static readonly string AppDataSaveFolder =
+			new DirectoryInfo(
+				Path.Combine(
+					Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+					"ReactiveFolder"
+				)
+			).FullName;
+
+		public static readonly string AppPolicySecuritySavePath =
+			Path.Combine(
+				AppDataSaveFolder,
+				"authorized.json"
+				);
 
 
 
@@ -43,6 +56,15 @@ namespace ReactiveFolder.Models
 
 		public ReactiveFolderApp()
 		{
+			// AppData
+			var appDataSaveFolder = new DirectoryInfo(AppDataSaveFolder);
+			if (false == appDataSaveFolder.Exists)
+			{
+				appDataSaveFolder.Create();
+			}
+
+
+
 			Settings = new ReactiveFolderSettings();
 
 			LoadGlobalSettings();
@@ -96,20 +118,15 @@ namespace ReactiveFolder.Models
 		/// </summary>
 		static AppPolicyManager InitializeAppLaunchAction(string policySaveFolderPath)
 		{
+			var security = new AppPolicy.AppPolicySecurity(AppPolicySecuritySavePath);
+
+
 			var policySaveFolderInfo = new DirectoryInfo(policySaveFolderPath);
 
 			AppPolicyManager appPolicyManager = null;
 			if (policySaveFolderInfo.Exists)
 			{
-				appPolicyManager = AppPolicyManager.Load(policySaveFolderInfo);
-			}
-			else
-			{
-				policySaveFolderInfo.Create();
-
-				appPolicyManager = AppPolicyManager.CreateNew(policySaveFolderInfo);
-
-				// Note: デフォルトで配置するPolicyの準備
+				appPolicyManager = AppPolicyManager.Load(policySaveFolderInfo, security);
 			}
 
 			AppLaunchReactiveAction.SetAppPolicyManager(appPolicyManager);
@@ -137,4 +154,6 @@ namespace ReactiveFolder.Models
 
 
 	}
+
+	
 }

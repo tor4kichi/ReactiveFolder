@@ -135,6 +135,10 @@ namespace ReactiveFolder.Models.Util
 			where T : class
 			
 		{
+			if (fileInfo == null || false == fileInfo.Exists)
+			{
+				return null;
+			}
 			var format = ExtentionToContentFormat(fileInfo.Extension);
 			
 			T returnObj = null;
@@ -209,8 +213,6 @@ namespace ReactiveFolder.Models.Util
 				case ".json": return ContentFormat.Json;
 
 				case ".meta": return ContentFormat.Json;
-
-				case ".pathtinode": return ContentFormat.Xml;
 
 				default:
 					throw new NotSupportedException(ext);

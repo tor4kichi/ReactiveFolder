@@ -9,7 +9,8 @@ namespace ReactiveFolder.Models.AppPolicy
 {
 	public interface IAppPolicyManager
 	{
-	
+		AppPolicySecurity Security { get; }
+
 		ReadOnlyObservableCollection<ApplicationPolicy> Policies { get; }
 
 		bool HasAppPolicy(ApplicationPolicy policy);

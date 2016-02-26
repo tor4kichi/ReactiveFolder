@@ -20,23 +20,23 @@ namespace ReactiveFolder.Models.Actions
 	[DataContract]
 	public class AppLaunchReactiveAction : ReactiveActionBase
 	{
-		private static IAppPolicyManager _AppPolicyFactory;
-		public static IAppPolicyManager AppPolicyFactory
+		private static IAppPolicyManager _AppPolicyManager;
+		public static IAppPolicyManager AppPolicyManager
 		{
 			get
 			{
-				if (_AppPolicyFactory == null)
+				if (_AppPolicyManager == null)
 				{
 					throw new Exception("AppLaunchReactiveAction want implemeted IAppPolicyFactory");
 				}
 
-				return _AppPolicyFactory;
+				return _AppPolicyManager;
 			}
 		}
 
-		public static void SetAppPolicyManager(IAppPolicyManager factory)
+		public static void SetAppPolicyManager(IAppPolicyManager manager)
 		{
-			_AppPolicyFactory = factory;
+			_AppPolicyManager = manager;
 		}
 
 
@@ -55,22 +55,16 @@ namespace ReactiveFolder.Models.Actions
 		}
 
 
-		[DataMember]
-		private int _AppOutputFormatId;
-		public int AppOutputFormatId
+		private ApplicationPolicy _AppPolicy;
+		public ApplicationPolicy AppPolicy
 		{
 			get
 			{
-				return _AppOutputFormatId;
-			}
-			set
-			{
-				if (SetProperty(ref _AppOutputFormatId, value))
-				{
-					_AdditionalOptions.Clear();
-				}
+				return _AppPolicy
+					?? (_AppPolicy = GetAppPolicy());
 			}
 		}
+
 
 
 		[DataMember]
@@ -80,9 +74,9 @@ namespace ReactiveFolder.Models.Actions
 
 
 
-		public ApplicationPolicy GetAppPolicy()
+		private ApplicationPolicy GetAppPolicy()
 		{
-			return AppPolicyFactory.FromAppGuid(AppGuid);
+			return AppPolicyManager.FromAppGuid(AppGuid);
 		}
 
 		public override FolderItemType InputItemType
@@ -127,15 +121,19 @@ namespace ReactiveFolder.Models.Actions
 		[OnDeserialized]
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
+			if (_AdditionalOptions == null)
+			{
+				_AdditionalOptions = new ObservableCollection<AppOptionInstance>();
+			}
+
+
 			AdditionalOptions = new ReadOnlyObservableCollection<AppOptionInstance>(_AdditionalOptions);
 
-			var appPolicy = GetAppPolicy();
-
-			if (appPolicy != null)
+			if (AppPolicy != null)
 			{
 				foreach (var option in AdditionalOptions)
 				{
-					option.ResetDeclaration(appPolicy);
+					option.ResetDeclaration(AppPolicy);
 				}
 			}
 			else
@@ -150,6 +148,17 @@ namespace ReactiveFolder.Models.Actions
 		{
 			var result = new ValidationResult();
 
+			if (AppPolicy == null)
+			{
+				result.AddMessage("AppPolicy Deleted.");
+				return result;
+			}
+
+			if (false == AppPolicyManager.Security.IsAuthorized(AppPolicy))
+			{
+				result.AddMessage("AppPolicy is not Authorized.");
+				return result;
+			}
 
 			if (false == CanCreateSandbox())
 			{
@@ -197,27 +206,26 @@ namespace ReactiveFolder.Models.Actions
 
 		public bool CanCreateSandbox()
 		{
-			return AppPolicyFactory.FromAppGuid(AppGuid) != null;
+			return AppPolicy != null && AppPolicyManager.Security.IsAuthorized(AppPolicy);
 		}
 
 
 		public ApplicationExecuteSandbox CreateSandbox()
 		{
-			var appPolicy = AppPolicyFactory.FromAppGuid(AppGuid);
+			var appPolicy = AppPolicyManager.FromAppGuid(AppGuid);
 			if (appPolicy == null)
 			{
 				throw new Exception("");
 			}
 
-			return appPolicy.CreateExecuteSandbox(AdditionalOptions.ToArray());
+			return appPolicy.CreateExecuteSandbox(AppPolicyManager, AdditionalOptions.ToArray());
 		}
 
 		public IEnumerable<string> GetFilters()
 		{
-			var appPolicy = GetAppPolicy();
-			if (appPolicy != null)
+			if (AppPolicy != null)
 			{
-				return appPolicy.AcceptExtentions;
+				return AppPolicy.AcceptExtentions;
 			}
 			else
 			{
@@ -236,8 +244,7 @@ namespace ReactiveFolder.Models.Actions
 
 			var cast = other as AppLaunchReactiveAction;
 
-			return this.AppGuid == cast.AppGuid &&
-				this.AppOutputFormatId == cast.AppOutputFormatId;
+			return this.AppGuid == cast.AppGuid;
 		}
 
 

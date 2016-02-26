@@ -78,7 +78,7 @@ namespace Modules.AppPolicy.ViewModels
 				var policy = base.ApplicationPolicyFromNavigationParameters(navigationContext.Parameters);
 
 				AppPolicy = policy;
-				AppPolicyVM.Value = new ApplicationPolicyViewModel(policy);
+				AppPolicyVM.Value = new ApplicationPolicyViewModel(this, _AppPolicyManager, policy);
 
 				BackupAppPolicyModel();
 
@@ -305,6 +305,8 @@ namespace Modules.AppPolicy.ViewModels
 
 		private CompositeDisposable _CompositeDisposable;
 
+		public AppPolicyEditPageViewModel EditPageVM { get; private set; }
+		public IAppPolicyManager AppPolicyManager { get; private set; }
 		public ApplicationPolicy AppPolicy { get; private set; }
 
 		public ReactiveProperty<string> ApplicationPath { get; private set; }
@@ -331,8 +333,13 @@ namespace Modules.AppPolicy.ViewModels
 		public ReadOnlyReactiveCollection<AppOptionDeclarationViewModel> OptionDeclarations { get; private set; }
 
 
-		public ApplicationPolicyViewModel(ApplicationPolicy appPolicy)
+		public ReactiveProperty<ApplicationPathState> AppPathState { get; private set; }
+
+
+		public ApplicationPolicyViewModel(AppPolicyEditPageViewModel editPageVM, IAppPolicyManager manager, ApplicationPolicy appPolicy)
 		{
+			EditPageVM = editPageVM;
+			AppPolicyManager = manager;
 			AppPolicy = appPolicy;
 
 			_CompositeDisposable = new CompositeDisposable();
@@ -389,7 +396,35 @@ namespace Modules.AppPolicy.ViewModels
 				)
 				.AddTo(_CompositeDisposable);
 
+			AppPathState = Observable.Merge(
+					AppPolicyManager.Security.AuthorizedApplicationPathList.CollectionChangedAsObservable()
+						.Where(x => AppPolicyManager.Security.IsAuthorized(AppPolicy)).ToUnit(),
+					AppPolicy.ObserveProperty(x => x.ApplicationPath).ToUnit(),
+					AppPolicy.ObserveProperty(x => x.ApplicationCheckSum).ToUnit()
+					)
+					.Select(x => 
+					{
+						if (String.IsNullOrEmpty(AppPolicy.ApplicationPath))
+						{
+							return ApplicationPathState.NotSelected;
+						}
+						else if (false == File.Exists(AppPolicy.ApplicationPath))
+						{
+							return ApplicationPathState.Missing;
+						}
+						else if (false == AppPolicyManager.Security.IsAuthorized(AppPolicy))
+						{
+							return ApplicationPathState.NotAuthorized;
+						}
+						else
+						{
+							return ApplicationPathState.Ready;
+						}
+					})
+				.ToReactiveProperty();
 
+			AppPathState.Subscribe()
+				.AddTo(_CompositeDisposable);
 		}
 
 
@@ -411,7 +446,17 @@ namespace Modules.AppPolicy.ViewModels
 
 						if (result != null && ((bool)result) == true)
 						{
-							AppPolicy.ApplicationPath = dialog.FileName;
+
+
+
+							// Note: 
+
+							AppPolicyManager.Security.AuthorizeApplication(AppPolicy, dialog.FileName);
+
+							EditPageVM.SaveCommand.Execute();
+
+
+
 						}
 					}));
 			}
@@ -529,7 +574,13 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
-	
+	public enum ApplicationPathState
+	{
+		NotSelected,
+		Missing,
+		NotAuthorized,
+		Ready,
+	}
 
 
 
