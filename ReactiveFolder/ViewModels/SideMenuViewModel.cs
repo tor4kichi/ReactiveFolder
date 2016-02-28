@@ -21,6 +21,13 @@ namespace ReactiveFolder.ViewModels
 
 		public List<MenuItemViewModel> BottomMenuItems { get; private set; }
 
+
+		public SideMenuViewModel()
+		{
+			TopMenuItems = new List<MenuItemViewModel>();
+			BottomMenuItems = new List<MenuItemViewModel>();
+		}
+
 		public SideMenuViewModel(IRegionManager regionManagar)
 		{
 			_RegionManager = regionManagar;
@@ -45,7 +52,7 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.ViewList,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					_RegionManager.RequestNavigate("MainRegion", nameof(Modules.Main.Views.FolderListPage));
+					_RegionManager.RequestNavigate("MainRegion", nameof(Modules.Main.Views.FolderReactionManagePage));
 				})
 			});
 

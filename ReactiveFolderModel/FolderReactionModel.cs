@@ -294,6 +294,8 @@ namespace ReactiveFolder.Models
 			FileUpdateTiming = new FileUpdateReactiveTiming();
 			FileUpdateTiming.SetParentReactionModel(this);
 
+			Filter = new FileReactiveFilter();
+
 			Destination = new AbsolutePathReactiveDestination();
 			Destination.SetParentReactionModel(this);
 			

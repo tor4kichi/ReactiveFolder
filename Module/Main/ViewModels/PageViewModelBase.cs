@@ -31,7 +31,7 @@ namespace Modules.Main.ViewModels
 		{
 			var param = new NavigationParameters();
 			param.Add("path", folderModel.Folder.FullName);
-			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.FolderListPage), param);
+			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.FolderReactionManagePage), param);
 		}
 
 
@@ -53,37 +53,6 @@ namespace Modules.Main.ViewModels
 
 			return folderModel;
 		}
-
-
-
-
-
-
-		public void NavigationToReactionEditerPage(FolderReactionModel reaction)
-		{
-			var param = new NavigationParameters();
-			param.Add("guid", reaction.Guid);
-			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.ReactionEditerPage), param);
-		}
-
-		protected FolderReactionModel ReactionModelFromNavigationParameters(NavigationParameters param)
-		{
-			var guid = (Guid)param["guid"];
-			if (guid == null)
-			{
-				throw new Exception("NavigationParameters not contains key <path>.");
-			}
-
-			var reaction = _MonitorModel.FindReaction(guid);
-			if (reaction == null)
-			{
-				throw new Exception("not exists FolderReactionModel. guid is " + guid.ToString());
-			}
-
-			return reaction;
-		}
-
-		
-		
+				
 	}
 }

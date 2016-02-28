@@ -22,10 +22,10 @@ namespace Modules.Main
 
 		public void Initialize()
 		{
-			_regionManager.RegisterViewWithRegion("MainRegion", typeof(FolderListPage));
-			_regionManager.RegisterViewWithRegion("MainRegion", typeof(ReactionEditerPage));
+			_regionManager.RegisterViewWithRegion("MainRegion", typeof(FolderReactionManagePage));
+			_regionManager.RegisterViewWithRegion("MainRegion", typeof(ReactionEditControl));
 
-			_regionManager.RequestNavigate("MainRegion", nameof(FolderListPage));
+			_regionManager.RequestNavigate("MainRegion", nameof(FolderReactionManagePage));
 		}
 	}
 }
