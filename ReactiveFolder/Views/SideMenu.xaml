@@ -10,52 +10,53 @@
              xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="600"
+             d:DesignHeight="500" d:DesignWidth="60"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
-    <Grid Background="{StaticResource PrimaryHueDarkForegroundBrush}" 
-          HorizontalAlignment="Stretch"
-          VerticalAlignment="Stretch"
-         Width="300"
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="MenuContentTemplate">
+            <Border Margin="0 8">
+                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                        Command="{Binding MenuItemSelectedCommand}"
+                        ToolTip="{Binding Title}"
+                        >
+                    <materialDesign:PackIcon Kind="{Binding Kind, Mode=OneTime}"
+                                             Foreground="{StaticResource PrimaryHueDarkForegroundBrush}"
+                                             Width="24"
+                                             Height="24"
+                                             />
+                </Button>
+            </Border>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource PrimaryHueMidBrush}" 
           >
-        <StackPanel Orientation="Vertical">
+        <DockPanel>
 
-            <Grid Height="48">
-                <TextBlock 
-                HorizontalAlignment="Center" VerticalAlignment="Center">
-                ReactiveFolder
-                </TextBlock>
-            </Grid>
-
-            <Border Grid.Column="1" Grid.Row="2" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="0 0 0 0" />
-
-            <ItemsControl ItemsSource="{x:Static vm:SideMenuViewModel.MenuItems}"
-                           Margin="32 8"
+            <StackPanel DockPanel.Dock="Top"
+                Orientation="Vertical">
+                <ItemsControl ItemsSource="{Binding TopMenuItems}"
+                              ItemTemplate="{StaticResource MenuContentTemplate}"
+                           Margin="0 8"
                           >
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button
-                            Style="{StaticResource MaterialDesignFlatButton}"
-                            HorizontalAlignment="Left"
-                             >
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="PreviewMouseUp">
-                                    <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ItemsControl}, Path=DataContext.MenuItemSelectedCommand}"
-                                                           CommandParameter="{Binding Title}"
-                                                           />
-                                    <i:InvokeCommandAction Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
+                </ItemsControl>
+            </StackPanel>
 
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Title}" />
-                            </StackPanel>
+            <StackPanel DockPanel.Dock="Bottom"
+                Orientation="Vertical">
+                <ItemsControl ItemsSource="{Binding BottomMenuItems}"
+                           Margin="0 8"
+                              ItemTemplate="{StaticResource MenuContentTemplate}"
+                          >
+                </ItemsControl>
+            </StackPanel>
 
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            
-        </StackPanel>
-    </Grid>
+            <Border />
+
+
+        </DockPanel>
+    </Border>
 </UserControl>
