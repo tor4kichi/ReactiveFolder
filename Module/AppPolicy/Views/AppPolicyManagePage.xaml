@@ -36,9 +36,10 @@
 
                 <!-- Top Buttons -->
 
-                <Border Height="32" DockPanel.Dock="Top">
+                <Border Height="40" DockPanel.Dock="Top"
+                        >
 
-                    <DockPanel VerticalAlignment="Center" Margin="8 0" >
+                    <DockPanel VerticalAlignment="Center" Margin="8 8 8 0" >
 
 
                         <!--
@@ -49,17 +50,18 @@
                         </Button>
                         -->
                         <materialDesign:PopupBox 
-                                         PlacementMode="BottomAndAlignLeftEdges"                                                                      
+                                         PlacementMode="BottomAndAlignCentres"                                                                      
                                          DockPanel.Dock="Right"
-                                         ToolTip="">
-                            <materialDesign:PopupBox.ToggleCheckedContent>
+                                         >
+                            <materialDesign:PopupBox.ToggleContent>
                                 <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
-                            </materialDesign:PopupBox.ToggleCheckedContent>
+                            </materialDesign:PopupBox.ToggleContent>
+                            
                             <StackPanel>
                                 <Button Command="{Binding AddAppPolicyCommand}">
                                     <DockPanel>
                                         <materialDesign:PackIcon Kind="File" Width="24" Height="24" DockPanel.Dock="Left" />
-                                        <TextBlock Text="Create New AppPolicy" VerticalAlignment="Center" />
+                                        <TextBlock Text="Create New" VerticalAlignment="Center" />
                                     </DockPanel>
                                 </Button>
                                 <Button Command="{Binding ImportAppPolicyCommand}">

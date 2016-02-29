@@ -39,29 +39,30 @@
                 <!-- Top Buttons -->
                 <Border Height="40" DockPanel.Dock="Top">
 
-                    <DockPanel VerticalAlignment="Center" Margin="8 0" >
-
-                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" >
-
-                            <Button Command="{Binding RefreshCommand}"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                >
-                                <materialDesign:PackIcon Kind="Refresh" />
-                            </Button>
-                        </StackPanel>
+                    <DockPanel VerticalAlignment="Center" Margin="8 8 8 0" >
 
                         <StackPanel DockPanel.Dock="Right">
                             <materialDesign:PopupBox 
-                                        PlacementMode="BottomAndAlignRightEdges"                                 
+                                        PlacementMode="BottomAndAlignCentres"                                 
                                         Margin="0"
-                                        ToolTip="">
+                                        >
+
+                                <materialDesign:PopupBox.ToggleContent>
+                                    <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
+                                </materialDesign:PopupBox.ToggleContent>
+                                
                                 <StackPanel>
-                                    <Button ToolTip="Add Reaction" Command="{Binding AddReactionCommand}">
-                                        <materialDesign:PackIcon Kind="File" Width="24" Height="24" />
+                                    <Button Command="{Binding AddReactionCommand}">
+                                        <DockPanel>
+                                            <materialDesign:PackIcon Kind="File" Width="24" Height="24" DockPanel.Dock="Left" />
+                                            <TextBlock Text="Create" VerticalAlignment="Center" />
+                                        </DockPanel>
                                     </Button>
-                                    <Button
-                                    ToolTip="Import Reaction" Command="{Binding ImportReactionCommand}">
-                                        <materialDesign:PackIcon Kind="Import" Width="24" Height="24" />
+                                    <Button Command="{Binding ImportReactionCommand}">
+                                        <DockPanel>
+                                            <materialDesign:PackIcon Kind="Import" Width="24" Height="24" DockPanel.Dock="Left" />
+                                            <TextBlock Text="Import" VerticalAlignment="Center" />
+                                        </DockPanel>
                                     </Button>
                                 </StackPanel>
                             </materialDesign:PopupBox>
@@ -79,7 +80,7 @@
                                   VerticalScrollBarVisibility="Auto"
                                   Width="300"
                                   >
-                        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="24 16"
+                        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0 16"
                                 
                                 
                                     >
