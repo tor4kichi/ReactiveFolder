@@ -154,7 +154,7 @@ namespace ReactiveFolder.Models.Actions
 				return result;
 			}
 
-			if (false == AppPolicyManager.Security.IsAuthorized(AppPolicy))
+			if (false == AppPolicyManager.Security.IsAuthorized(AppPolicy.ApplicationPath))
 			{
 				result.AddMessage("AppPolicy is not Authorized.");
 				return result;
@@ -206,7 +206,7 @@ namespace ReactiveFolder.Models.Actions
 
 		public bool CanCreateSandbox()
 		{
-			return AppPolicy != null && AppPolicyManager.Security.IsAuthorized(AppPolicy);
+			return AppPolicy != null && AppPolicyManager.Security.IsAuthorized(AppPolicy.ApplicationPath);
 		}
 
 

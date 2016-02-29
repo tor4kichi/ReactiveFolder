@@ -19,8 +19,8 @@ namespace Modules.AppPolicy
 
 		public void Initialize()
 		{
-			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyListPage));
-			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyEditPage));
+			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyManagePage));
+			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyEditControl));
 
 //			_regionManager.RequestNavigate("MainRegion", nameof(Views.AppPolicyListPage));
 		}
@@ -32,14 +32,14 @@ namespace Modules.AppPolicy
 	{
 		public static void NavigateToAppPolicyListPage(this IRegionManager regionManager)
 		{
-			regionManager.RequestNavigate("MainRegion", nameof(AppPolicy.Views.AppPolicyListPage));
+			regionManager.RequestNavigate("MainRegion", nameof(AppPolicy.Views.AppPolicyManagePage));
 		}
 
 		public static void NavigateToAppPolicyEditPage(this IRegionManager regionManager, Guid appGuid)
 		{
 			var param = new NavigationParameters();
 			param.Add("guid", appGuid);
-			regionManager.RequestNavigate("MainRegion", nameof(AppPolicy.Views.AppPolicyEditPage), param);
+			regionManager.RequestNavigate("MainRegion", nameof(AppPolicy.Views.AppPolicyEditControl), param);
 		}
 	}
 

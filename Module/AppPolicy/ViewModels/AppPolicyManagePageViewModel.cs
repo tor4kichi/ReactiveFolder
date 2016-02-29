@@ -13,10 +13,12 @@ using System.IO;
 using ReactiveFolder.Models.AppPolicy;
 using Microsoft.Win32;
 using ReactiveFolder.Models.Util;
+using ReactiveFolderStyles.DialogContent;
+using MaterialDesignThemes.Wpf;
 
 namespace Modules.AppPolicy.ViewModels
 {
-	public class AppPolicyListPageViewModel : PageViewModelBase, INavigationAware
+	public class AppPolicyManagePageViewModel : PageViewModelBase, INavigationAware
 	{
 
 		public IRegionNavigationService NavigationService;
@@ -26,12 +28,16 @@ namespace Modules.AppPolicy.ViewModels
 		public static ReadOnlyReactiveCollection<AppPolicyListItemViewModel> AppPolicies { get; private set; }
 
 
+		public ReactiveProperty<AppPolicyEditControlViewModel> AppPolicyEditVM { get; private set; }
 
-		public AppPolicyListPageViewModel(IRegionManager regionManager, IAppPolicyManager appPolicyManager)
+
+		public AppPolicyManagePageViewModel(IRegionManager regionManager, IAppPolicyManager appPolicyManager)
 			: base(regionManager, appPolicyManager)
 		{
 			AppPolicies = _AppPolicyManager.Policies
 				.ToReadOnlyReactiveCollection(x => new AppPolicyListItemViewModel(this, x));
+
+			AppPolicyEditVM = new ReactiveProperty<AppPolicyEditControlViewModel>();
 		}
 
 
@@ -43,20 +49,30 @@ namespace Modules.AppPolicy.ViewModels
 		public void OnNavigatedFrom(NavigationContext navigationContext)
 		{
 			// nothing to do.
+			if (AppPolicyEditVM.Value != null)
+			{
+				AppPolicyEditVM.Value.Save();
+			}
 		}
 
 		public void OnNavigatedTo(NavigationContext navigationContext)
 		{
 			NavigationService = navigationContext.NavigationService;
 
-			
 		}
 
 
 
 		public void ShowAppPolicyEditPage(ApplicationPolicy appPolicy)
 		{
-			base.NavigationToAppPolicyEditPage(appPolicy.Guid);
+			if (AppPolicyEditVM.Value != null)
+			{
+				AppPolicyEditVM.Value.Dispose();
+			}
+
+			// TODO: アプリポリシーに関連するリアクションは止めるべき？
+
+			AppPolicyEditVM.Value = new AppPolicyEditControlViewModel(appPolicy, _RegionManager, _AppPolicyManager);
 		}
 
 
@@ -91,31 +107,12 @@ namespace Modules.AppPolicy.ViewModels
 				return _AddAppPolicyCommand
 					?? (_AddAppPolicyCommand = new DelegateCommand(() =>
 					{
-						// ファイル選択ダイアログでexe等のアプリファイルのパスを選択してもらう
-						var dialog = new OpenFileDialog();
-
-						dialog.Multiselect = false;
-						dialog.Title = "ReactiveFolder: Select application.";
-
-						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
-
-						var result = dialog.ShowDialog();
-
-						if (result.HasValue && result.Value)
-						{
-							var path = dialog.FileName;
-							var name = dialog.SafeFileName;
-
-							// パスが確認されたらApplicationPolicyを作成してReactiveFolderアプリ空間内に
-							// アプリポリシーファイルを作成させる
-
-							var newAppPolicy = new ApplicationPolicy(path);
-							_AppPolicyManager.AddAppPolicy(newAppPolicy);
+						var newAppPolicy = new ApplicationPolicy();
+						_AppPolicyManager.AddAppPolicy(newAppPolicy);
 
 
-							// Edit画面へ
-							ShowAppPolicyEditPage(newAppPolicy);
-						}
+						// Edit画面へ
+						ShowAppPolicyEditPage(newAppPolicy);
 
 
 					}));
@@ -193,12 +190,45 @@ namespace Modules.AppPolicy.ViewModels
 					}));
 			}
 		}
+
+
+		internal async void DeleteAppPolicy(ApplicationPolicy appPolicy)
+		{
+			var result = await ShowAppPolicyDeleteConfirmDialog();
+
+			if (result != null && ((bool)result) == true)
+			{
+				_AppPolicyManager.RemoveAppPolicy(appPolicy);
+
+
+				if (AppPolicyEditVM.Value?.AppPolicy == appPolicy)
+				{
+					AppPolicyEditVM.Value = null;
+				}
+			}
+
+		}
+
+		public async Task<bool?> ShowAppPolicyDeleteConfirmDialog()
+		{
+			var view = new DeleteConfirmDialogContent()
+			{
+				DataContext = new DeleteConfirmDialogContentViewModel()
+				{
+					Title = "Delete AppPolicy?"
+				}
+			};
+
+
+
+			return (bool?)await DialogHost.Show(view, "AppPolicyEditDialogHost");
+		}
 	}
 
 
 	public class AppPolicyListItemViewModel : BindableBase
 	{
-		public AppPolicyListPageViewModel PageVM { get; private set; }
+		public AppPolicyManagePageViewModel PageVM { get; private set; }
 		public ApplicationPolicy AppPolicy { get; private set; }
 
 
@@ -207,7 +237,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		// TODO: アイコン画像
 
-		public AppPolicyListItemViewModel(AppPolicyListPageViewModel pageVM, ApplicationPolicy appPolicy)
+		public AppPolicyListItemViewModel(AppPolicyManagePageViewModel pageVM, ApplicationPolicy appPolicy)
 		{
 			PageVM = pageVM;
 			AppPolicy = appPolicy;
@@ -227,6 +257,72 @@ namespace Modules.AppPolicy.ViewModels
 					?? (_SelectAppCommand = new DelegateCommand(() =>
 					{
 						PageVM.ShowAppPolicyEditPage(AppPolicy);
+					}));
+			}
+		}
+
+		private DelegateCommand _DeleteCommand;
+		public DelegateCommand DeleteCommand
+		{
+			get
+			{
+				return _DeleteCommand
+					?? (_DeleteCommand = new DelegateCommand(() =>
+					{
+						PageVM.DeleteAppPolicy(AppPolicy);
+					}));
+			}
+		}
+
+		private DelegateCommand _ExportCommand;
+		public DelegateCommand ExportCommand
+		{
+			get
+			{
+				return _ExportCommand
+					?? (_ExportCommand = new DelegateCommand(() =>
+					{
+						var appPolicy = this.AppPolicy;
+						var appPolicyManager = PageVM._AppPolicyManager;
+						// 出力先のファイル名を取得
+						var dialog = new SaveFileDialog();
+
+						dialog.Title = "ReactiveFolder - select export application policy file";
+						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+						dialog.AddExtension = true;
+						dialog.FileName = appPolicy.AppName;
+						dialog.Filter = $"App Policy|*{appPolicyManager.PolicyFileExtention}|Json|*.json|All|*.*";
+						dialog.DefaultExt = appPolicyManager.PolicyFileExtention;
+
+
+						var result = dialog.ShowDialog();
+
+
+						if (result != null && ((bool)result) == true)
+						{
+							var destFilePath = dialog.FileName;
+							var destFileInfo = new FileInfo(destFilePath);
+
+							try
+							{
+								if (destFileInfo.Exists)
+								{
+									destFileInfo.Delete();
+								}
+
+								FileSerializeHelper.Save(destFileInfo, AppPolicy);
+							}
+							catch
+							{
+								System.Diagnostics.Debug.WriteLine("failed export Application Policy.");
+								System.Diagnostics.Debug.WriteLine("  to :" + destFilePath);
+							}
+						}
+
+
+
+						// 
 					}));
 			}
 		}

@@ -19,29 +19,7 @@ namespace ReactiveFolder.Models.AppPolicy
 	[DataContract]
 	public class ApplicationPolicy : BindableBase
 	{
-		public static ApplicationPolicy Create(string applicationPath)
-		{
-			if (String.IsNullOrWhiteSpace(applicationPath))
-			{
-				throw new Exception(nameof(applicationPath) + " " + nameof(String.IsNullOrWhiteSpace));
-			}
 
-			var fileInfo = new FileInfo(applicationPath);
-
-			if (false == fileInfo.Exists)
-			{
-				System.Diagnostics.Debug.WriteLine(applicationPath + " is invalid application path.");
-				return null;
-			}
-
-			if (fileInfo.Extension != ".exe")
-			{
-				System.Diagnostics.Debug.WriteLine(applicationPath + " is not executable application.");
-				return null;
-			}
-
-			return new ApplicationPolicy(applicationPath);
-		}
 
 
 		[DataMember]
@@ -70,31 +48,30 @@ namespace ReactiveFolder.Models.AppPolicy
 			{
 				return _ApplicationPath;
 			}
-			private set
+			set
 			{
+				// ファイルパスの正規化
+				if (false == String.IsNullOrEmpty(value))
+				{
+					var info = new FileInfo(value);
+
+					if (false == info.Exists)
+					{
+						throw new FileNotFoundException("file path can not assign to ApplicationPath", value);
+					}
+
+					value = info.FullName;
+				}
+
 				if (SetProperty(ref _ApplicationPath, value))
 				{
-					_AppName = null;
-					OnPropertyChanged(nameof(AppName));
+					if (string.IsNullOrWhiteSpace(AppName) && false == string.IsNullOrEmpty(_ApplicationPath))
+					{
+						AppName = Path.GetFileNameWithoutExtension(_ApplicationPath);
+					}
 				}
 			}
 		}
-
-		[DataMember]
-		public string ApplicationCheckSum { get; private set; }
-
-		internal void ResetApplicationPath(AppSecurityInfo appSecurityInfo)
-		{
-			ApplicationPath = appSecurityInfo.ApplicationPath;
-			ApplicationCheckSum = appSecurityInfo.CheckSum;
-		}
-
-		internal void ClearApplicationPath()
-		{
-			ApplicationPath = "";
-			ApplicationCheckSum = null;
-		}
-
 
 
 		[DataMember]
@@ -167,10 +144,10 @@ namespace ReactiveFolder.Models.AppPolicy
 		/// 
 		/// </summary>
 		/// <param name="applicationPath"></param>
-		public ApplicationPolicy(string applicationPath)
+		public ApplicationPolicy()
 		{
-			ApplicationPath = applicationPath;
-			AppName = Path.GetFileNameWithoutExtension(ApplicationPath);
+			ApplicationPath = "";
+			AppName = "";
 
 			Guid = Guid.NewGuid();
 
@@ -394,7 +371,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		public ApplicationExecuteSandbox CreateExecuteSandbox(IAppPolicyManager manager, AppOptionInstance[] options)
 		{
-			if (manager.Security.IsAuthorized(this))
+			if (manager.Security.IsAuthorized(this.ApplicationPath))
 			{
 				return new ApplicationExecuteSandbox(this, options);
 			}

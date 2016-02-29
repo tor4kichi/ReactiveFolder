@@ -42,7 +42,7 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.Apps,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					_RegionManager.RequestNavigate("MainRegion", nameof(Modules.AppPolicy.Views.AppPolicyListPage));
+					_RegionManager.RequestNavigate("MainRegion", nameof(Modules.AppPolicy.Views.AppPolicyManagePage));
 				})
 			});
 

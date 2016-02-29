@@ -16,29 +16,28 @@ namespace ReactiveFolder.Models.AppPolicy
 	{
 		public string SavePath { get; private set; }
 
-		private ObservableCollection<AppSecurityInfo> _AuthorizedApplicationPathList { get; set; }
+		private ObservableCollection<AppAuthorication> _AppAuthoricationList { get; set; }
 
-		public ReadOnlyObservableCollection<AppSecurityInfo> AuthorizedApplicationPathList { get; private set; }
+		public ReadOnlyObservableCollection<AppAuthorication> AppAuthoricationList { get; private set; }
 
 
 		public AppPolicySecurity(string savePath)
 		{
 			SavePath = savePath;
 
-			_AuthorizedApplicationPathList = new ObservableCollection<AppSecurityInfo>();
-			AuthorizedApplicationPathList = new ReadOnlyObservableCollection<AppSecurityInfo>(_AuthorizedApplicationPathList);
+			_AppAuthoricationList = new ObservableCollection<AppAuthorication>();
+			AppAuthoricationList = new ReadOnlyObservableCollection<AppAuthorication>(_AppAuthoricationList);
 
 			Load();
 		}
 
 
-		public bool IsAuthorized(ApplicationPolicy policy)
+		public bool IsAuthorized(string path)
 		{
-			var info = new FileInfo(policy.ApplicationPath);
-			var app = AuthorizedApplicationPathList.SingleOrDefault(x => x.ApplicationPath == policy.ApplicationPath);
-			if (app != null)
+			var alreadyAuth = _AppAuthoricationList.SingleOrDefault(x => x.ApplicationPath == path);
+			if (alreadyAuth != null)
 			{
-				return app.CheckSum == policy.ApplicationCheckSum;
+				return alreadyAuth.IsValid;
 			}
 			else
 			{
@@ -46,46 +45,51 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
-		public void AuthorizeApplication(ApplicationPolicy policy, string path)
+		public void AuthorizeApplication(string path)
 		{
 			var info = new FileInfo(path);
 			if (info.Exists)
 			{
-				UnauthorizeApplication(policy);
-
-				var securityInfo = new AppSecurityInfo(path);
-				_AuthorizedApplicationPathList.Add(securityInfo);
-
-				policy.ResetApplicationPath(securityInfo);
-
-				OnPropertyChanged(nameof(AuthorizedApplicationPathList));
-
-				Save();
-			}
-		}
-
-		public void UnauthorizeApplication(ApplicationPolicy policy)
-		{
-			if (IsAuthorized(policy))
-			{
-				var app = _AuthorizedApplicationPathList.SingleOrDefault(x => x.ApplicationPath == policy.ApplicationPath);
-
-				if (app != null)
+				var alreadyAuthorized = _AppAuthoricationList.SingleOrDefault(x => x.ApplicationPath == path);
+				if (alreadyAuthorized != null)
 				{
-					_AuthorizedApplicationPathList.Remove(app);
-
-					OnPropertyChanged(nameof(AuthorizedApplicationPathList));
+					alreadyAuthorized.UpdateAuth();
 
 					Save();
 				}
+				else
+				{
+					var securityInfo = new AppAuthorication(path);
+					_AppAuthoricationList.Add(securityInfo);
 
-				policy.ClearApplicationPath();
+					OnPropertyChanged(nameof(AppAuthoricationList));
+
+					Save();
+				}
+			}
+		}
+
+		public void UnauthorizeApplication(string path)
+		{
+			if (IsAuthorized(path))
+			{
+				var app = _AppAuthoricationList.SingleOrDefault(x => x.ApplicationPath == path);
+
+				if (app != null)
+				{
+					_AppAuthoricationList.Remove(app);
+
+					OnPropertyChanged(nameof(AppAuthoricationList));
+
+					Save();
+				}
 			}
 		}
 
 		public void ClearAuthorizedApplicationList()
 		{
-			_AuthorizedApplicationPathList.Clear();
+			_AppAuthoricationList.Clear();
+
 			Save();
 		}
 
@@ -96,11 +100,11 @@ namespace ReactiveFolder.Models.AppPolicy
 			{
 				if (File.Exists(SavePath))
 				{
-					var list = FileSerializeHelper.LoadAsync<AppSecurityInfo[]>(SavePath);
+					var list = FileSerializeHelper.LoadAsync<AppAuthorication[]>(SavePath);
 
 					foreach (var authorizedApp in list)
 					{
-						_AuthorizedApplicationPathList.Add(authorizedApp);
+						_AppAuthoricationList.Add(authorizedApp);
 					}
 				}
 			}
@@ -115,17 +119,17 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		private void Save()
 		{
-			var data = _AuthorizedApplicationPathList.ToArray();
+			var data = _AppAuthoricationList.ToArray();
 
 			FileSerializeHelper.Save(SavePath, data);
 		}
 	}
 
 	[DataContract]
-	public class AppSecurityInfo
+	public class AppAuthorication
 	{
 		[DataMember]
-		public DateTime Time { get; private set; }
+		public DateTime FileLastUpdate { get; private set; }
 
 		[DataMember]
 		public string CheckSum { get; private set; }
@@ -133,30 +137,95 @@ namespace ReactiveFolder.Models.AppPolicy
 		[DataMember]
 		public string ApplicationPath { get; private set; }
 
-		public AppSecurityInfo() { }
 
-		public AppSecurityInfo(string path)
+
+		private FileInfo _FileInfo;
+		public FileInfo FileInfo
 		{
-			Time = DateTime.Now;
-			ApplicationPath = path;
-			CheckSum = CreateCheckSum(ApplicationPath);
+			get
+			{
+				return _FileInfo
+					?? (_FileInfo = new FileInfo(ApplicationPath));
+			}
 		}
 
-		private string CreateCheckSum(string path)
+
+
+
+		public AppAuthorication() { }
+
+		public AppAuthorication(string path)
 		{
-			var fileInfo = new FileInfo(path);
+			ApplicationPath = path;
+
+			UpdateAuth();
+		}
+
+
+
+
+
+
+		internal void UpdateAuth()
+		{
+			FileLastUpdate = FileInfo.LastWriteTime;
+			CheckSum = CreateCheckSum(FileInfo);
+		}
+
+
+
+
+
+
+		// TODO: ファイル更新がされていたらCheckSumを再度取得して、異なっていたら承認済みを取り消す
+
+		private bool Validate()
+		{
+			FileInfo.Refresh();
+
+			if (false == FileInfo.Exists)
+			{
+				return false;
+			}
+
+			if (FileInfo.LastWriteTime != FileLastUpdate)
+			{
+				var newCheckSum = CreateCheckSum(FileInfo);
+				if (CheckSum != newCheckSum)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		public bool IsValid
+		{
+			get
+			{
+				return Validate();
+			}
+		}
+
+
+
+
+
+
+		public static string CreateCheckSum(FileInfo info)
+		{
 			byte[] hashedBytes;
-			using (var readStream = fileInfo.OpenRead())
+			using (var readStream = info.OpenRead())
 			{
 				hashedBytes = SHA256Cng.Create().ComputeHash(readStream);
 			}
 
-			return hashedBytes.Aggregate(new StringBuilder(), (sb, x) => 
+			return hashedBytes.Aggregate(new StringBuilder(), (sb, x) =>
 				sb.Append(x.ToString("x2"))
 			)
 			.ToString();
 		}
-
 
 	}
 }
