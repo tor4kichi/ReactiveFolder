@@ -132,72 +132,83 @@
                                       >
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Button Style="{StaticResource ListButton}"
-                                            Command="{Binding OpenReactionCommand}"
-                                            HorizontalContentAlignment="Stretch"
-                                            Height="40"
-                                            Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
-                                            >
+                                        <Border x:Name="Border" >
+                                            <Button Style="{StaticResource ListButton}"
+                                                Command="{Binding OpenReactionCommand}"
+                                                HorizontalContentAlignment="Stretch"
+                                                Height="40"
+                                                Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
+                                                >
 
-                                            <Button.ContextMenu>
-                                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                                    <MenuItem Header="Export" Command="{Binding ExportCommand}"></MenuItem>
-                                                    <Separator />
-                                                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
-                                                </ContextMenu>
-                                            </Button.ContextMenu>
+                                                <Button.ContextMenu>
+                                                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                        <MenuItem Header="Export" Command="{Binding ExportCommand}"></MenuItem>
+                                                        <Separator />
+                                                        <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
 
                                             
-                                            <DockPanel>
+                                                <DockPanel VerticalAlignment="Center">
 
-                                                <materialDesign:PackIcon Kind="File"
-                                                                     Style="{StaticResource ListPrimaryIcon}"
-                                                                     DockPanel.Dock="Left"
-                                                                    />
-
-
-
-                                                <!-- Validationで失敗している時に表示するアイコン -->
-                                                <materialDesign:PackIcon Visibility="{Binding IsInvalid, Converter={StaticResource BoolToVisibility}}"
-                                                                     Kind="Alert"
-                                                                     Style="{StaticResource ListSecondaryIcon}"
-                                                                     Foreground="Red"
-                                                                     VerticalAlignment="Center"
-                                                                     HorizontalAlignment="Right"
-                                                                     ToolTip="Invalid reaction"
-                                                                     DockPanel.Dock="Right"
-                                                                     Background="Transparent"
-                                                                     />
-
-                                                <!-- アクティブではない時に表示するアイコン -->
-                                                <materialDesign:PackIcon Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}"
-                                                                     Kind="InformationOutline"
-                                                                     Style="{StaticResource ListSecondaryIcon}"
-                                                                     VerticalAlignment="Center"
-                                                                     HorizontalAlignment="Right"
-                                                                     ToolTip="Inactive reaction"
-                                                                     DockPanel.Dock="Right"
-                                                                     Background="Transparent"
-                                                                     />
+                                                    <materialDesign:PackIcon Kind="File"
+                                                                         Style="{StaticResource ListPrimaryIcon}"
+                                                                         DockPanel.Dock="Left"
+                                                                        />
 
 
-                                                <StackPanel Orientation="Vertical" Margin="0 2">
-                                                    <TextBlock Text="{Binding Name}"
-                                                        Style="{StaticResource ListPrimaryText}"
-                                                        />
-                                                    <!--
-                                                    <Border Margin="0 2 0 0" />
 
-                                                    <TextBlock Text="{Binding FilePath}"
-                                                        Style="{StaticResource ListSecondaryText}"
-                                                        />
-                                                    -->
-                                                </StackPanel>
-                                            </DockPanel>
+                                                    <!-- Validationで失敗している時に表示するアイコン -->
+                                                    <materialDesign:PackIcon Visibility="{Binding IsInvalid, Converter={StaticResource BoolToVisibility}}"
+                                                                         Kind="Alert"
+                                                                         Style="{StaticResource ListSecondaryIcon}"
+                                                                         Foreground="Red"
+                                                                         VerticalAlignment="Center"
+                                                                         HorizontalAlignment="Right"
+                                                                         ToolTip="Invalid reaction"
+                                                                         DockPanel.Dock="Right"
+                                                                         Background="Transparent"
+                                                                         />
+
+                                                    <!-- アクティブではない時に表示するアイコン -->
+                                                    <materialDesign:PackIcon Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}"
+                                                                         Kind="InformationOutline"
+                                                                         Style="{StaticResource ListSecondaryIcon}"
+                                                                         VerticalAlignment="Center"
+                                                                         HorizontalAlignment="Right"
+                                                                         ToolTip="Inactive reaction"
+                                                                         DockPanel.Dock="Right"
+                                                                         Background="Transparent"
+                                                                         />
 
 
-                                        </Button>
+                                                    <StackPanel Orientation="Vertical" Margin="0 2">
+                                                        <TextBlock Text="{Binding Name}"
+                                                            Style="{StaticResource ListPrimaryText}"
+                                                            />
+                                                        <!--
+                                                        <Border Margin="0 2 0 0" />
+
+                                                        <TextBlock Text="{Binding FilePath}"
+                                                            Style="{StaticResource ListSecondaryText}"
+                                                            />
+                                                        -->
+                                                    </StackPanel>
+                                                </DockPanel>
+
+
+                                            </Button>
+                                        </Border>
+                                        
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialDesignSelection}" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                        
                                     </DataTemplate>
+                                    
+                                    
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </StackPanel>

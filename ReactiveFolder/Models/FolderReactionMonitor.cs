@@ -155,7 +155,7 @@ namespace ReactiveFolder.Models
 
 		private void RecursiveFolder(FolderModel folder, Action<FolderReactionModel> act)
 		{
-			foreach (var reaction in folder.Models)
+			foreach (var reaction in folder.Reactions)
 			{
 				act(reaction);
 			}

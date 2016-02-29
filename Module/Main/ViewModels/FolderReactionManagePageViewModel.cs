@@ -17,6 +17,7 @@ using Microsoft.Win32;
 using ReactiveFolder.Models.Util;
 using ReactiveFolder.Models.AppPolicy;
 using MaterialDesignThemes.Wpf;
+using System.Reactive.Linq;
 
 namespace Modules.Main.ViewModels
 {
@@ -65,6 +66,7 @@ namespace Modules.Main.ViewModels
 
 			ReactionEditControl = new ReactiveProperty<ReactionEditControlViewModel>();
 
+			Initialize(_MonitorModel.RootFolder);
 		}
 
 
@@ -88,7 +90,7 @@ namespace Modules.Main.ViewModels
 		public void OnNavigatedTo(NavigationContext navigationContext)
 		{
 			NavigationService = navigationContext.NavigationService;
-
+			/*
 			if (navigationContext.Parameters.Count() == 0)
 			{
 				Initialize(_MonitorModel.RootFolder);
@@ -98,6 +100,7 @@ namespace Modules.Main.ViewModels
 				var folderModel = FolderModelFromNavigationParameters(navigationContext.Parameters);
 				Initialize(folderModel);
 			}
+			*/
 		}
 
 
@@ -108,13 +111,11 @@ namespace Modules.Main.ViewModels
 
 			FolderName.Value = CurrentFolder.Folder.Name;
 
-			ReactionItems = CurrentFolder.Models
+			ReactionItems = CurrentFolder.Reactions
 				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(this, x));
-			OnPropertyChanged(nameof(ReactionItems));
 
 			FolderItems = CurrentFolder.Children
 				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(this, x));
-			OnPropertyChanged(nameof(FolderItems));
 
 			if (folder == _MonitorModel.RootFolder)
 			{
@@ -180,21 +181,21 @@ namespace Modules.Main.ViewModels
 				return _AddReactionCommand
 					?? (_AddReactionCommand = new DelegateCommand(() =>
 					{
-						var desktop = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
 						var reaction = new FolderReactionModel();
 
 						reaction.Name = "TypeYourReactionNameHere";
 
 						reaction.Filter = new ReactiveFolder.Models.Filters.FileReactiveFilter();
 
-						// save
-						CurrentFolder.AddReaction(reaction);
-
-						// 
-						_MonitorModel.StartMonitoring(reaction);
-
-						ShowReaction(reaction);
+						// AddReaction中で非同期での保存処理が走る
+						Task.Run(() => 
+						{
+							CurrentFolder.AddReaction(reaction);
+						})
+						.ContinueWith(x => 
+						{
+							ShowReaction(reaction);
+						});
 					}));
 			}
 		}
@@ -262,6 +263,19 @@ namespace Modules.Main.ViewModels
 				_MonitorModel.StopMonitoring(reaction);
 
 				ReactionEditControl.Value = new ReactionEditControlViewModel(this, _RegionManager, _MonitorModel, AppPolicyManager, reaction);
+
+
+				foreach(var item in ReactionItems.Where(x => x.Reaction != reaction))
+				{
+					item.IsSelected = false;
+				}
+
+				var reac = ReactionItems.SingleOrDefault(x => x.Reaction == reaction);
+				if (reac != null)
+				{
+					reac.IsSelected = true;
+				}
+
 			}
 		}
 

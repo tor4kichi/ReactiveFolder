@@ -73,6 +73,17 @@ namespace Modules.AppPolicy.ViewModels
 			// TODO: アプリポリシーに関連するリアクションは止めるべき？
 
 			AppPolicyEditVM.Value = new AppPolicyEditControlViewModel(appPolicy, _RegionManager, _AppPolicyManager);
+
+			foreach(var listItem in AppPolicies.Where(x => x.AppPolicy != appPolicy))
+			{
+				listItem.IsSelected = false;
+			}
+
+			var selectedListItem = AppPolicies.SingleOrDefault(x => x.AppPolicy == appPolicy);
+			if (selectedListItem != null)
+			{
+				selectedListItem.IsSelected = true;
+			}
 		}
 
 
@@ -108,13 +119,15 @@ namespace Modules.AppPolicy.ViewModels
 					?? (_AddAppPolicyCommand = new DelegateCommand(() =>
 					{
 						var newAppPolicy = new ApplicationPolicy();
-						_AppPolicyManager.AddAppPolicy(newAppPolicy);
 
-
-						// Edit画面へ
-						ShowAppPolicyEditPage(newAppPolicy);
-
-
+						Task.Run(() =>
+						{
+							_AppPolicyManager.AddAppPolicy(newAppPolicy);
+						})
+						.ContinueWith(x => 
+						{
+							ShowAppPolicyEditPage(newAppPolicy);
+						});
 					}));
 			}
 		}
@@ -235,6 +248,20 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReactiveProperty<string> AppName { get; private set; }
 
+		private bool _IsSelected;
+		public bool IsSelected
+		{
+			get
+			{
+				return _IsSelected;
+			}
+			set
+			{
+				SetProperty(ref _IsSelected, value);
+			}
+		}
+		
+
 		// TODO: アイコン画像
 
 		public AppPolicyListItemViewModel(AppPolicyManagePageViewModel pageVM, ApplicationPolicy appPolicy)
@@ -244,6 +271,8 @@ namespace Modules.AppPolicy.ViewModels
 
 			AppName = AppPolicy.ObserveProperty(x => x.AppName)
 				.ToReactiveProperty();
+
+			IsSelected = false;
 		}
 
 

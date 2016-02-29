@@ -95,34 +95,43 @@
                                       >
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Button Style="{StaticResource ListButton}"
-                                            Command="{Binding SelectAppCommand}"
-                                            Height="40"
-                                            Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
-                                            >
+                                        <Border x:Name="Border">
+                                            <Button Style="{StaticResource ListButton}"
+                                                Command="{Binding SelectAppCommand}"
+                                                Height="40"
+                                                Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
+                                                >
 
-                                            <Button.ContextMenu>
-                                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                                    <MenuItem Header="Export" Command="{Binding ExportCommand}"></MenuItem>
-                                                    <Separator />
-                                                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
-                                                </ContextMenu>
-                                            </Button.ContextMenu>
+                                                <Button.ContextMenu>
+                                                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                        <MenuItem Header="Export" Command="{Binding ExportCommand}"></MenuItem>
+                                                        <Separator />
+                                                        <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
 
 
-                                            <StackPanel Orientation="Horizontal">
-                                                <materialDesign:PackIcon Kind="Apps"
-                                                                        Style="{StaticResource ListPrimaryIcon}"
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="Apps"
+                                                                            Style="{StaticResource ListPrimaryIcon}"
                                                                  
-                                                                        />
-                                                <StackPanel Orientation="Vertical">
-                                                    <TextBlock Text="{Binding AppName.Value}"
-                                                            Style="{StaticResource ListPrimaryText}"
-                                                            />
-                                                </StackPanel>
+                                                                            />
+                                                    <StackPanel Orientation="Vertical">
+                                                        <TextBlock Text="{Binding AppName.Value}"
+                                                                Style="{StaticResource ListPrimaryText}"
+                                                                />
+                                                    </StackPanel>
 
-                                            </StackPanel>
-                                        </Button>
+                                                </StackPanel>
+                                            </Button>
+                                        </Border>
+
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialDesignSelection}" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                        
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
