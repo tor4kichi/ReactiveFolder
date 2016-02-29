@@ -206,7 +206,6 @@
                 </DockPanel>
                 
                 <DockPanel Margin="0 8"
-                           Visibility="{Binding IsDisplayOptionTextPattern, Converter={StaticResource BoolToVisibility}}"
                            >
                     <TextBox Text="{Binding OptionTextPattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              DockPanel.Dock="Right"
@@ -222,28 +221,32 @@
 
 
                 <DockPanel Margin="0 8"
-                           Visibility="{Binding IsDisplayProperty, Converter={StaticResource BoolToVisibility}}"
                            >
                     
                     <!-- TODO: FloationActionButon に変更 -->
-                    <StackPanel DockPanel.Dock="Right"
-                                Orientation="Horizontal">
-                        <ComboBox x:Name="AddablePropertiesComboBox" ItemsSource="{Binding AddableProperties}" 
-                          DisplayMemberPath="PropertyTypeLabel"
+                    <Border
+                        DockPanel.Dock="Right"
+                        Visibility="{Binding CanAddProperty, Converter={StaticResource BoolToVisibility}}"
+                        >
+                        <StackPanel Orientation="Horizontal">
+                            
+                            <ComboBox x:Name="AddablePropertiesComboBox" ItemsSource="{Binding AddableProperties}" 
+                              DisplayMemberPath="PropertyTypeLabel"
                                   
-                                  MinWidth="100"
-                          >
-                        </ComboBox>
+                                      MinWidth="100"
+                              >
+                            </ComboBox>
 
-                        <Border Margin="4 0" />
+                            <Border Margin="4 0" />
 
-                        <Button Content="Add" 
-                                Command="{Binding ElementName=AddablePropertiesComboBox, Path=SelectedItem.AddPropertyCommand}"
-                                Width="100"
-                                />
+                            <Button Content="Add" 
+                                    Command="{Binding ElementName=AddablePropertiesComboBox, Path=SelectedItem.AddPropertyCommand}"
+                                    Width="100"
+                                    />
 
-                    </StackPanel>
-
+                        </StackPanel>
+                    </Border>
+                    
                     <TextBlock Text="Option Valiables"
                                VerticalAlignment="Center"
                                />
@@ -253,7 +256,6 @@
                 
                 
                 <DockPanel Margin="0 8"
-                           Visibility="{Binding IsDisplayProperty, Converter={StaticResource BoolToVisibility}}"
                            >
 
                     <ItemsControl ItemsSource="{Binding Properties}">
@@ -263,7 +265,6 @@
 
                                     <DockPanel Margin="0 16"
                                                         >
-
                                         <Button Command="{Binding RemovePropertyCommand}"
                                                 Style="{StaticResource MaterialDesignFlatButton}"
                                                 Foreground="Red"

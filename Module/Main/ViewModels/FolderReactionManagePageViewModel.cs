@@ -15,14 +15,19 @@ using ReactiveFolderStyles;
 using System.Diagnostics;
 using Microsoft.Win32;
 using ReactiveFolder.Models.Util;
+using ReactiveFolder.Models.AppPolicy;
+using MaterialDesignThemes.Wpf;
+using System.Reactive.Linq;
 
 namespace Modules.Main.ViewModels
 {
-	public class FolderListPageViewModel : PageViewModelBase, INavigationAware
+	public class FolderReactionManagePageViewModel : PageViewModelBase, INavigationAware
 	{
 		public IRegionNavigationService NavigationService;
 
 		private IEventAggregator _EventAggregator;
+
+		public IAppPolicyManager AppPolicyManager { get; private set; }
 
 		public FolderModel CurrentFolder { get; private set; }
 
@@ -36,10 +41,14 @@ namespace Modules.Main.ViewModels
 
 		public ReactiveProperty<bool> CanGoBack { get; private set; }
 
-		public FolderListPageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IEventAggregator ea)
+
+		public ReactiveProperty<ReactionEditControlViewModel> ReactionEditControl { get; private set; }
+
+		public FolderReactionManagePageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IEventAggregator ea, IAppPolicyManager appPolicyManager)
 			: base(regionManager, monitor)
 		{
 			_EventAggregator = ea;
+			AppPolicyManager = appPolicyManager;
 
 			FolderName = new ReactiveProperty<string>("");
 			/*
@@ -54,6 +63,10 @@ namespace Modules.Main.ViewModels
 			PreviousFolderName = "";
 
 			CanGoBack = new ReactiveProperty<bool>(false);
+
+			ReactionEditControl = new ReactiveProperty<ReactionEditControlViewModel>();
+
+			Initialize(_MonitorModel.RootFolder);
 		}
 
 
@@ -64,13 +77,20 @@ namespace Modules.Main.ViewModels
 
 		public void OnNavigatedFrom(NavigationContext navigationContext)
 		{
-			// nothing to do.
+			ExitEdit();
+		}
+
+		public async Task<bool?> ShowReactionEditCloseConfirmDialog()
+		{
+			var view = new Views.DialogContent.ReactionSaveAndBackConfirmDialogContent();
+
+			return (bool?)await DialogHost.Show(view, "ReactionEditCommonDialogHost");
 		}
 
 		public void OnNavigatedTo(NavigationContext navigationContext)
 		{
 			NavigationService = navigationContext.NavigationService;
-
+			/*
 			if (navigationContext.Parameters.Count() == 0)
 			{
 				Initialize(_MonitorModel.RootFolder);
@@ -80,6 +100,7 @@ namespace Modules.Main.ViewModels
 				var folderModel = FolderModelFromNavigationParameters(navigationContext.Parameters);
 				Initialize(folderModel);
 			}
+			*/
 		}
 
 
@@ -90,13 +111,11 @@ namespace Modules.Main.ViewModels
 
 			FolderName.Value = CurrentFolder.Folder.Name;
 
-			ReactionItems = CurrentFolder.Models
+			ReactionItems = CurrentFolder.Reactions
 				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(this, x));
-			OnPropertyChanged(nameof(ReactionItems));
 
 			FolderItems = CurrentFolder.Children
 				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(this, x));
-			OnPropertyChanged(nameof(FolderItems));
 
 			if (folder == _MonitorModel.RootFolder)
 			{
@@ -120,28 +139,67 @@ namespace Modules.Main.ViewModels
 		}
 
 
-		private DelegateCommand _BackOrOpenMenuCommand;
-		public DelegateCommand BackOrOpenMenuCommand
+
+
+		internal void ShowReaction(FolderReactionModel reaction)
 		{
-			get
+			SetupEdit(reaction);
+		}
+
+
+		private void SetupEdit(FolderReactionModel reaction)
+		{
+			if (reaction != ReactionEditControl.Value?.Reaction)
 			{
-				return _BackOrOpenMenuCommand
-					?? (_BackOrOpenMenuCommand = new DelegateCommand(() =>
-					{
-						if (NavigationService.Journal.CanGoBack)
-						{
-							NavigationService.Journal.GoBack();
-						}
-						else
-						{
-							_EventAggregator.GetEvent<PubSubEvent<ReactiveFolderPageType>>()
-								.Publish(ReactiveFolderPageType.ReactiveFolder);
-						}
-					}
-					
-					));
+				ExitEdit();
+
+				// リアクションのモニタリングを止める
+				_MonitorModel.StopMonitoring(reaction);
+
+
+				// VMを設定
+				ReactionEditControl.Value = new ReactionEditControlViewModel(this, _RegionManager, _MonitorModel, AppPolicyManager, reaction);
+
+
+				// リスト表示を更新
+				var reac = ReactionItems.SingleOrDefault(x => x.Reaction == reaction);
+				if (reac != null)
+				{
+					reac.IsSelected = true;
+				}
+			}
+
+		}
+
+		private void ExitEdit()
+		{
+			if (ReactionEditControl.Value != null)
+			{
+				var reaction = ReactionEditControl.Value.Reaction;
+
+				ReactionEditControl.Value.Save();
+
+
+				// リスト表示を更新
+				foreach (var item in ReactionItems)
+				{
+					item.IsSelected = false;
+				}
+
+
+				// VMを解放
+				ReactionEditControl.Value.Dispose();
+				ReactionEditControl.Value = null;
+
+				// リアクションのモニタリングを再開させる
+				_MonitorModel.StartMonitoring(reaction);
 			}
 		}
+
+
+
+
+
 
 		private DelegateCommand _RefreshCommand;
 		public DelegateCommand RefreshCommand
@@ -185,22 +243,21 @@ namespace Modules.Main.ViewModels
 				return _AddReactionCommand
 					?? (_AddReactionCommand = new DelegateCommand(() =>
 					{
-						var desktop = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
 						var reaction = new FolderReactionModel();
 
 						reaction.Name = "TypeYourReactionNameHere";
 
 						reaction.Filter = new ReactiveFolder.Models.Filters.FileReactiveFilter();
 
-						// save
-						CurrentFolder.AddReaction(reaction);
-
-						// 
-						_MonitorModel.StartMonitoring(reaction);
-
-						// move to Reaction editer page.
-						NavigationToReactionEditerPage(reaction);
+						// AddReaction中で非同期での保存処理が走る
+						Task.Run(() => 
+						{
+							CurrentFolder.AddReaction(reaction);
+						})
+						.ContinueWith(x => 
+						{
+							ShowReaction(reaction);
+						});
 					}));
 			}
 		}
@@ -259,6 +316,8 @@ namespace Modules.Main.ViewModels
 
 
 
+		
+
 		private DelegateCommand _RemoveThisFolderCommand;
 		public DelegateCommand RemoveThisFolderCommand
 		{
@@ -296,7 +355,36 @@ namespace Modules.Main.ViewModels
 		}
 
 
-		
+
+		internal async void DeleteFolderReactionFile(FolderReactionModel reaction)
+		{
+			// 確認ダイアログを表示
+			var result = await ShowReactionDeleteConfirmDialog();
+
+			// 削除
+			if (result != null && result.HasValue && result.Value == true)
+			{
+				_MonitorModel.StopMonitoring(reaction);
+
+				var reactionSaveFoler = _MonitorModel.FindReactionParentFolder(reaction);
+				reactionSaveFoler.RemoveReaction(reaction.Guid);
+
+
+				var currentReaction = this.ReactionEditControl.Value?.Reaction;
+				if (currentReaction == reaction)
+				{
+					this.ReactionEditControl.Value = null;
+				}
+
+			}
+		}
+
+		public async Task<bool?> ShowReactionDeleteConfirmDialog()
+		{
+			var view = new Views.DialogContent.DeleteReactionConfirmDialogContent();
+
+			return (bool?)await DialogHost.Show(view, "ReactionEditCommonDialogHost");
+		}
 	}
 
 

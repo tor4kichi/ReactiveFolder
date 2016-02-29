@@ -1,5 +1,4 @@
-﻿using Modules.Main.ViewModels.ReactionEditer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,41 +13,40 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Modules.Main.Views
+namespace Modules.AppPolicy.Views
 {
 	/// <summary>
-	/// ReactionEditerPage.xaml の相互作用ロジック
+	/// AppPolicyListPage.xaml の相互作用ロジック
 	/// </summary>
-	public partial class ReactionEditerPage : UserControl
+	public partial class AppPolicyManagePage : UserControl
 	{
-		public ReactionEditerPage()
+		public AppPolicyManagePage()
 		{
 			InitializeComponent();
 		}
 	}
 
 
-	public class FilterContentDataTemplateSelector : DataTemplateSelector
+	public class AppPolicyEditTemplateSelecter : DataTemplateSelector
 	{
-		public DataTemplate FileTemplate { get; set; }
-		public DataTemplate FolderTemplate { get; set; }
+		public DataTemplate AppPolicyEditTemplate { get; set; }
 		public DataTemplate EmptyTemplate { get; set; }
-
 
 		public override DataTemplate SelectTemplate(object item, DependencyObject container)
 		{
-			if (item is FileFilterViewModel)
-			{
-				return FileTemplate;
-			}
-			else if (item is FolderFilterViewModel)
-			{
-				return FolderTemplate;
-			}
-			else
+			if (item == null)
 			{
 				return EmptyTemplate;
 			}
+			else if (item is ViewModels.AppPolicyEditControlViewModel)
+			{
+				return AppPolicyEditTemplate;
+			}
+			else
+			{
+				return base.SelectTemplate(item, container);
+			}
 		}
+
 	}
 }

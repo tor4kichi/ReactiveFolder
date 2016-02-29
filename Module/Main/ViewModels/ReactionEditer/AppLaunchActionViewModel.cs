@@ -60,6 +60,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 			else
 			{
 				AppName = "<App not found>";
+				OptionName = "";
+				OptionValues = new List<AppOptionValueViewModel>();
 			}
 		}
 

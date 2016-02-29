@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Modules.AppPolicy.Views.AppPolicyEditPage"
+﻿<UserControl x:Class="Modules.AppPolicy.Views.AppPolicyEditControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -13,14 +13,12 @@
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="600"
-             prism:ViewModelLocator.AutoWireViewModel="True"
              >
-    <DockPanel>
+    <DockPanel MaxWidth="800">
         
 
         <DockPanel.Resources>
-            <BooleanToVisibilityConverter x:Key="BoolToVisiblity" />
-
+ 
             <DataTemplate x:Key="AppPolicyTemplate">
                 <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16">
 
@@ -46,7 +44,7 @@
                         </DataTemplate>
                     </StackPanel.Resources>
 
-
+                    
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Display Name" 
                                    Style="{StaticResource ListSubheaderText}"
@@ -60,6 +58,8 @@
                         </StackPanel>
                     </StackPanel>
                     
+                    
+                    
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Application Path" 
                                    Style="{StaticResource ListSubheaderText}"
@@ -71,6 +71,7 @@
                                     Margin="8 0"
                                     DockPanel.Dock="Left"
                                     >
+                                
                                 <materialDesign:PackIcon.Style>
                                     <Style TargetType="{x:Type materialDesign:PackIcon}">
                                         <Style.Triggers>
@@ -101,10 +102,19 @@
                                                     <Setter Property="ToolTip" Value="Ready to execute application" />
                                                 </DataTrigger.Setters>
                                             </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="{x:Null}">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="Check" />
+                                                    <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}"/>
+                                                    <Setter Property="ToolTip" Value="Ready to execute application" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
                                         </Style.Triggers>
 
                                     </Style>
                                 </materialDesign:PackIcon.Style>
+
                             </materialDesign:PackIcon>
 
                             <Button Content="Change"
@@ -149,26 +159,8 @@
                     </StackPanel>
 
 
-                    <!-- 
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Default Option Text" 
-                                   Style="{StaticResource ListSubheaderText}"
-                                   />
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
-                            <TextBox Text="{Binding DefaultOptionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                     MinWidth="200"
-                                     materialDesign:TextFieldAssist.Hint="-i %IN% -o %OUT%"
-                                     ToolTip="%IN% %OUT%, both of replace to file/folder name, depends from IO Type settings."
-                                    DockPanel.Dock="Right"
-                                                     />
-                            
-                        </StackPanel>
-                        
-                    </StackPanel>
-                    -->
-
                     <StackPanel Orientation="Vertical" 
-                                Visibility="{Binding IsInputFile.Value, Converter={StaticResource BoolToVisiblity}}"
+                                Visibility="{Binding IsInputFile.Value, Converter={StaticResource BoolToVisibility}}"
                                 >
 
                         <TextBlock Text="Input Extentions"
@@ -197,8 +189,6 @@
 
 
                         </StackPanel>
-
-                        <!-- TODO: Extentionが追加されたときにアニメーションを実行する -->
                         
                         <ItemsControl ItemsSource="{Binding AcceptExtentions}">
                             <ItemsControl.ItemTemplate>
@@ -298,53 +288,30 @@
         <!-- Top Buttons -->
         <DockPanel DockPanel.Dock="Top">
 
-            <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
-                                          Mode="PrimaryMid" DockPanel.Dock="Top">
+            <Border DockPanel.Dock="Top">
 
                 <StackPanel>
                     <DockPanel VerticalAlignment="Center" Margin="8" >
 
-                        <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
-                            Style="{StaticResource AppbarButton}"
-                            >
-                            <materialDesign:PackIcon Kind="ArrowLeft"  />
-                        </Button>
-
-                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                             <Button Command="{Binding SaveCommand}"
-                                    Style="{StaticResource AppbarButton}"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
                                     >
                                 <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save" />
                             </Button>
-
-                            <materialDesign:PopupBox 
-                                             PlacementMode="BottomAndAlignRightEdges">
-                                <StackPanel>
-                                    <Button Command="{Binding ExportCommand}">
-                                        <DockPanel>
-                                            <materialDesign:PackIcon Kind="Export" DockPanel.Dock="Left" />
-                                            <Border Margin="8 0 0 0" />
-                                            <TextBlock Text="Export" />
-                                        </DockPanel>
-                                    </Button>
-                                    <Button Command="{Binding DeleteCommand}">
-                                        <DockPanel>
-                                            <materialDesign:PackIcon Kind="Delete" DockPanel.Dock="Left" />
-                                            <Border Margin="8 0 0 0" />
-                                            <TextBlock Text="Delete" />
-                                        </DockPanel>
-                                    </Button>
-                                </StackPanel>
-                            </materialDesign:PopupBox>
                         </StackPanel>
 
-                        <TextBlock Text="Edit Application Policy"
-                               FontSize="22"
-                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            
+
+                            
+                        </StackPanel>
+
+                        <Border />
                     </DockPanel>
                 </StackPanel>
 
-            </materialDesign:ColorZone>
+            </Border>
         </DockPanel>
         
         <Grid>
@@ -352,28 +319,17 @@
             
 
             <ScrollViewer HorizontalScrollBarVisibility="Hidden">
-
-                <ContentControl Content="{Binding AppPolicyVM.Value}"
+                
+                <ContentControl Content="{Binding AppPolicyVM}"
                                 ContentTemplate="{StaticResource AppPolicyTemplate}"
                                 HorizontalContentAlignment="Stretch"
                                 VerticalContentAlignment="Stretch"
                                 >
                 </ContentControl>
-              
-
-
-               
+                
             </ScrollViewer>
 
-            <materialDesign:DialogHost Identifier="AppPolicyEditDialogHost"
-                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Margin="8 40"
-                                       Width="500"
-                                       >
-
-                
-            </materialDesign:DialogHost>
-
+            
                
              
         </Grid>

@@ -33,8 +33,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		public List<AddablePropertyListItem> AddableProperties { get; private set; }
 
-		public bool IsDisplayOptionTextPattern { get; private set; }
-		public bool IsDisplayProperty { get; private set; }
+		public bool CanAddProperty { get; private set; }
 
 		public AppOptionDeclarationViewModel(ApplicationPolicyViewModel appPolicyVM, AppOptionDeclarationBase decl)
 		{
@@ -86,8 +85,7 @@ namespace Modules.AppPolicy.ViewModels
 
 
 			var isInputOption = decl is AppInputOptionDeclaration;
-			IsDisplayOptionTextPattern = !isInputOption;
-			IsDisplayProperty = !isInputOption;
+			CanAddProperty = !isInputOption;
 		}
 
 		private DelegateCommand _EditDeclarationCommand;
