@@ -13,67 +13,45 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
     <DockPanel>
-        <!-- Top Buttons -->
-        <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
-                                        Mode="PrimaryMid" DockPanel.Dock="Top"
+        <!-- Left Buttons -->
+        <Border DockPanel.Dock="Left"
                                   >
 
-            <StackPanel Orientation="Vertical"
-                        Margin="8 0" 
-                        >
-                <Border Height="48"
-                    >
-                    <DockPanel VerticalAlignment="Center"
-                               >
-
-                        <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
-                            Style="{StaticResource AppbarButton}"
-                            >
-                            <materialDesign:PackIcon Kind="ArrowLeft"  />
-                        </Button>
-
-                        <TextBlock Text="About"
-                                FontSize="22"
-                                HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </DockPanel>
-
-                </Border>
-                
+            
 
 
-                <!-- tabs -->
-                <Border 
-                    HorizontalAlignment="Stretch"
-                    >
-                    <ListBox ItemsSource="{Binding Tabs}"
+            <!-- tabs -->
+            <Border VerticalAlignment="Center"
+                HorizontalAlignment="Stretch"
+                >
+                <ListBox ItemsSource="{Binding Tabs}"
                     SelectedItem="{Binding SelectedTab.Value}"
                     SelectionMode="Single"
                         HorizontalAlignment="Center"
                     >
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" ></StackPanel>
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" ></StackPanel>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
 
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border MinWidth="150" MinHeight="50">
-                                    <TextBlock Text="{Binding Title}" 
-                                        Foreground="{StaticResource PrimaryHueMidForegroundBrush}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontSize="15"
-                                    />
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border MinWidth="150" MinHeight="30">
+                                <TextBlock Text="{Binding Title}" 
+                                    Foreground="{StaticResource PrimaryHueMidBrush}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontSize="15"
+                                />
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-                </Border>
+            </Border>
                     
-            </StackPanel>
-        </materialDesign:ColorZone>
+        </Border>
 
       
 
@@ -144,7 +122,7 @@
                             <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel Orientation="Vertical"  Margin="24">
 
-                                    <TextBlock Text="ReactiveFolderは以下に挙げるライブラリやソフトウェアを抜きにしては到底作り得ませんでした。"
+                                    <TextBlock Text="ReactiveFolderは以下のライブラリやソフトウェアを利用して作られました。"
                                            TextWrapping="Wrap"
                                                Margin="0 8"
                                            />
