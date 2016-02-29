@@ -16,10 +16,12 @@
 
     <UserControl.Resources>
         <DataTemplate x:Key="MenuContentTemplate">
-            <Border Margin="0 8">
+            <Border x:Name="Border" Margin="0 8" >
                 <Button Style="{StaticResource MaterialDesignFlatButton}"
                         Command="{Binding MenuItemSelectedCommand}"
                         ToolTip="{Binding Title}"
+                        Margin="0"
+                        Height="48"
                         >
                     <materialDesign:PackIcon Kind="{Binding Kind, Mode=OneTime}"
                                              Foreground="{StaticResource PrimaryHueDarkForegroundBrush}"
@@ -28,6 +30,13 @@
                                              />
                 </Button>
             </Border>
+            
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialDesignSelection}" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+            
         </DataTemplate>
 
     </UserControl.Resources>
@@ -44,8 +53,8 @@
                 <StackPanel DockPanel.Dock="Top"
                     Orientation="Vertical">
                     <ItemsControl ItemsSource="{Binding TopMenuItems}"
-                                  ItemTemplate="{StaticResource MenuContentTemplate}"
-                               Margin="0 8"
+                              ItemTemplate="{StaticResource MenuContentTemplate}"
+                              Margin="0 8"
                               >
                     </ItemsControl>
                 </StackPanel>
@@ -53,8 +62,8 @@
                 <StackPanel DockPanel.Dock="Bottom"
                     Orientation="Vertical">
                     <ItemsControl ItemsSource="{Binding BottomMenuItems}"
-                               Margin="0 8"
-                                  ItemTemplate="{StaticResource MenuContentTemplate}"
+                              ItemTemplate="{StaticResource MenuContentTemplate}"
+                              Margin="0 8"
                               >
                     </ItemsControl>
                 </StackPanel>

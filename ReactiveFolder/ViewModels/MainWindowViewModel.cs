@@ -11,33 +11,51 @@ using Reactive.Bindings.Extensions;
 using ReactiveFolderStyles;
 using Prism.Commands;
 using ReactiveFolder.Models;
+using Prism.Regions;
 
 namespace ReactiveFolder.ViewModels
 {
 	public class MainWindowViewModel : BindableBase, IDisposable
 	{
-		public ReactiveProperty<bool> IsOpenSideMenu { get; private set; }
+		public ReactiveFolderApp App { get; private set; }
+		public IRegionManager _RegionManager;
+
 
 
 		private IFolderReactionMonitorModel _Monitor;
 		private CompositeDisposable _CompositeDisposable;
 
-		public MainWindowViewModel(IEventAggregator ea, IFolderReactionMonitorModel monitor)
+		public MainWindowViewModel(ReactiveFolderApp app, IEventAggregator ea, IFolderReactionMonitorModel monitor, IRegionManager regionManagar)
 		{
+			App = app;
 			_Monitor = monitor;
+			_RegionManager = regionManagar;
 
 			_CompositeDisposable = new CompositeDisposable();
 
-			IsOpenSideMenu = new ReactiveProperty<bool>(false)
-				 .AddTo(_CompositeDisposable);
-
-			ea.GetEvent<PubSubEvent<ReactiveFolderPageType>>()
+			App.ObserveProperty(x => x.PageType)
 				.Subscribe(x =>
 				{
-					IsOpenSideMenu.Value = true;
-				}
-				)
-			.AddTo(_CompositeDisposable);
+					switch (x)
+					{
+						case AppPageType.AppPolicyManage:
+							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.AppPolicy.Views.AppPolicyManagePage));
+							break;
+						case AppPageType.ReactionManage:
+							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.Main.Views.FolderReactionManagePage));
+							break;
+						case AppPageType.Settings:
+							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.Settings.Views.SettingsPage));
+							break;
+						case AppPageType.About:
+							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.About.Views.AboutPage));
+							break;
+						default:
+							break;
+					}
+				})
+				.AddTo(_CompositeDisposable);
+				
 		}
 
 		public void Dispose()
@@ -63,26 +81,6 @@ namespace ReactiveFolder.ViewModels
 					));
 
 			}
-		}
-
-		private DelegateCommand _CloseSideMenuCommand;
-		public DelegateCommand CloseSideMenuCommand
-		{
-			get
-			{
-				return _CloseSideMenuCommand
-					?? (_CloseSideMenuCommand = new DelegateCommand(() =>
-						CloseSideMenu()
-					));
-
-			}
-		}
-
-
-
-		public void CloseSideMenu()
-		{
-			IsOpenSideMenu.Value = false;
 		}
 	}
 }

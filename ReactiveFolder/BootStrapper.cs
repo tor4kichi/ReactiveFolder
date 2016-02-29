@@ -44,6 +44,8 @@ namespace ReactiveFolder
 
 			this.Container.RegisterInstance<IReactiveFolderSettings>(app.Settings);
 
+			this.Container.RegisterInstance<ReactiveFolderApp>(app);
+
 			// イベント管理
 			var ea = new EventAggregator();
 			this.Container.RegisterInstance<IEventAggregator>(ea);

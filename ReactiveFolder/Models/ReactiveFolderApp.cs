@@ -7,10 +7,11 @@ using ReactiveFolder.Properties;
 using System.IO;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.Util;
+using Microsoft.Practices.Prism.Mvvm;
 
 namespace ReactiveFolder.Models
 {
-	public class ReactiveFolderApp 
+	public class ReactiveFolderApp : BindableBase
 	{
 		public const string APP_POLICY_FOLDER_NAME = "app_policy";
 		public const string REACTION_FOLDER_NAME = "reaction";
@@ -39,6 +40,18 @@ namespace ReactiveFolder.Models
 				"authorized.json"
 				);
 
+		private AppPageType _PageType;
+		public AppPageType PageType
+		{
+			get
+			{
+				return _PageType;
+			}
+			set
+			{
+				SetProperty(ref _PageType, value);
+			}
+		}
 
 
 
@@ -56,6 +69,8 @@ namespace ReactiveFolder.Models
 
 		public ReactiveFolderApp()
 		{
+			PageType = AppPageType.ReactionManage;
+
 			// AppData
 			var appDataSaveFolder = new DirectoryInfo(AppDataSaveFolder);
 			if (false == appDataSaveFolder.Exists)
@@ -155,5 +170,14 @@ namespace ReactiveFolder.Models
 
 	}
 
+
+	public enum AppPageType
+	{
+		ReactionManage,
+		AppPolicyManage,
+
+		Settings,
+		About,
+	}
 	
 }
