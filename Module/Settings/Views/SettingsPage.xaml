@@ -13,24 +13,24 @@
              >
     <DockPanel>
         <!-- Top Buttons -->
-        <DockPanel DockPanel.Dock="Top">
-            <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
-                                       Height="48"
-                                          Mode="PrimaryMid" DockPanel.Dock="Top">
+        <DockPanel DockPanel.Dock="Left" Width="300">
+            <Border DockPanel.Dock="Top">
 
-                <DockPanel VerticalAlignment="Center" Margin="8" >
-
-                    <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
-                            Style="{StaticResource AppbarButton}"
-                            >
-                        <materialDesign:PackIcon Kind="ArrowLeft"  />
-                    </Button>
+                <DockPanel Margin="24 16" >
 
                     <TextBlock Text="Settings"
                                FontSize="22"
-                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                               
+                                />
                 </DockPanel>
-            </materialDesign:ColorZone>
+
+            </Border>
+
+
+
+            <Border>
+                
+            </Border>
         </DockPanel>
 
 
