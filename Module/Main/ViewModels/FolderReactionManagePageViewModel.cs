@@ -77,7 +77,7 @@ namespace Modules.Main.ViewModels
 
 		public void OnNavigatedFrom(NavigationContext navigationContext)
 		{
-			ResumeMonitor();
+			ExitEdit();
 		}
 
 		public async Task<bool?> ShowReactionEditCloseConfirmDialog()
@@ -137,6 +137,68 @@ namespace Modules.Main.ViewModels
 
 
 		}
+
+
+
+
+		internal void ShowReaction(FolderReactionModel reaction)
+		{
+			SetupEdit(reaction);
+		}
+
+
+		private void SetupEdit(FolderReactionModel reaction)
+		{
+			if (reaction != ReactionEditControl.Value?.Reaction)
+			{
+				ExitEdit();
+
+				// リアクションのモニタリングを止める
+				_MonitorModel.StopMonitoring(reaction);
+
+
+				// VMを設定
+				ReactionEditControl.Value = new ReactionEditControlViewModel(this, _RegionManager, _MonitorModel, AppPolicyManager, reaction);
+
+
+				// リスト表示を更新
+				var reac = ReactionItems.SingleOrDefault(x => x.Reaction == reaction);
+				if (reac != null)
+				{
+					reac.IsSelected = true;
+				}
+			}
+
+		}
+
+		private void ExitEdit()
+		{
+			if (ReactionEditControl.Value != null)
+			{
+				var reaction = ReactionEditControl.Value.Reaction;
+
+				ReactionEditControl.Value.Save();
+
+
+				// リスト表示を更新
+				foreach (var item in ReactionItems)
+				{
+					item.IsSelected = false;
+				}
+
+
+				// VMを解放
+				ReactionEditControl.Value.Dispose();
+				ReactionEditControl.Value = null;
+
+				// リアクションのモニタリングを再開させる
+				_MonitorModel.StartMonitoring(reaction);
+			}
+		}
+
+
+
+
 
 
 		private DelegateCommand _RefreshCommand;
@@ -254,43 +316,7 @@ namespace Modules.Main.ViewModels
 
 
 
-		internal void ShowReaction(FolderReactionModel reaction)
-		{
-			if (reaction != ReactionEditControl.Value?.Reaction)
-			{
-				ResumeMonitor();
-
-				_MonitorModel.StopMonitoring(reaction);
-
-				ReactionEditControl.Value = new ReactionEditControlViewModel(this, _RegionManager, _MonitorModel, AppPolicyManager, reaction);
-
-
-				foreach(var item in ReactionItems.Where(x => x.Reaction != reaction))
-				{
-					item.IsSelected = false;
-				}
-
-				var reac = ReactionItems.SingleOrDefault(x => x.Reaction == reaction);
-				if (reac != null)
-				{
-					reac.IsSelected = true;
-				}
-
-			}
-		}
-
-		private void ResumeMonitor()
-		{
-			if (ReactionEditControl.Value != null)
-			{
-				ReactionEditControl.Value.Save();
-
-				_MonitorModel.StartMonitoring(ReactionEditControl.Value.Reaction);
-
-				ReactionEditControl.Value.Dispose();
-			}
-		}
-
+		
 
 		private DelegateCommand _RemoveThisFolderCommand;
 		public DelegateCommand RemoveThisFolderCommand

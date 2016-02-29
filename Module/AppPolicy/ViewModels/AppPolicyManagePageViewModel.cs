@@ -15,13 +15,14 @@ using Microsoft.Win32;
 using ReactiveFolder.Models.Util;
 using ReactiveFolderStyles.DialogContent;
 using MaterialDesignThemes.Wpf;
+using ReactiveFolder.Models.Actions;
 
 namespace Modules.AppPolicy.ViewModels
 {
 	public class AppPolicyManagePageViewModel : PageViewModelBase, INavigationAware
 	{
-
-		public IRegionNavigationService NavigationService;
+		public IFolderReactionMonitorModel Monitor { get; private set; }
+		public IRegionNavigationService NavigationService { get; private set; }
 
 
 
@@ -31,9 +32,10 @@ namespace Modules.AppPolicy.ViewModels
 		public ReactiveProperty<AppPolicyEditControlViewModel> AppPolicyEditVM { get; private set; }
 
 
-		public AppPolicyManagePageViewModel(IRegionManager regionManager, IAppPolicyManager appPolicyManager)
+		public AppPolicyManagePageViewModel(IRegionManager regionManager, IAppPolicyManager appPolicyManager, IFolderReactionMonitorModel monitor)
 			: base(regionManager, appPolicyManager)
 		{
+			Monitor = monitor;
 			AppPolicies = _AppPolicyManager.Policies
 				.ToReadOnlyReactiveCollection(x => new AppPolicyListItemViewModel(this, x));
 
@@ -51,7 +53,7 @@ namespace Modules.AppPolicy.ViewModels
 			// nothing to do.
 			if (AppPolicyEditVM.Value != null)
 			{
-				AppPolicyEditVM.Value.Save();
+				ExitEdit();
 			}
 		}
 
@@ -65,27 +67,76 @@ namespace Modules.AppPolicy.ViewModels
 
 		public void ShowAppPolicyEditPage(ApplicationPolicy appPolicy)
 		{
-			if (AppPolicyEditVM.Value != null)
+			if (AppPolicyEditVM.Value?.AppPolicy != appPolicy)
 			{
-				AppPolicyEditVM.Value.Dispose();
+				if (AppPolicyEditVM.Value != null)
+				{
+					ExitEdit();
+				}
+
+				SetupEdit(appPolicy);
+			}
+		}
+
+
+		public void SetupEdit(ApplicationPolicy appPolicy)
+		{
+			try
+			{
+				// 関連するリアクションの動作を止める
+				var relativeReactions = Monitor.RootFolder.Reactions.Where(x => x.Actions.Any(y => (y as AppLaunchReactiveAction)?.AppPolicy == appPolicy));
+
+				foreach (var reaction in relativeReactions)
+				{
+					Monitor.StopMonitoring(reaction);
+				}
+
+				// VMを設定
+				AppPolicyEditVM.Value = new AppPolicyEditControlViewModel(appPolicy, _RegionManager, _AppPolicyManager);
+
+
+				// リスト表示を更新
+				var selectedListItem = AppPolicies.SingleOrDefault(x => x.AppPolicy == appPolicy);
+				if (selectedListItem != null)
+				{
+					selectedListItem.IsSelected = true;
+				}
+			}
+			catch(Exception e)
+			{
+				ExitEdit();
 			}
 
-			// TODO: アプリポリシーに関連するリアクションは止めるべき？
 
-			AppPolicyEditVM.Value = new AppPolicyEditControlViewModel(appPolicy, _RegionManager, _AppPolicyManager);
 
-			foreach(var listItem in AppPolicies.Where(x => x.AppPolicy != appPolicy))
+
+		}
+
+		public void ExitEdit()
+		{
+			var appPolicy = AppPolicyEditVM.Value?.AppPolicy;
+
+			AppPolicyEditVM.Value?.Save();
+
+
+			// リスト表示を更新
+			foreach (var listItem in AppPolicies)
 			{
 				listItem.IsSelected = false;
 			}
 
-			var selectedListItem = AppPolicies.SingleOrDefault(x => x.AppPolicy == appPolicy);
-			if (selectedListItem != null)
+			// VMを解放
+			AppPolicyEditVM.Value?.Dispose();
+			AppPolicyEditVM.Value = null;
+
+			// 関連するリアクションの動作を再開させる
+			var relativeReactions = Monitor.RootFolder.Reactions.Where(x => x.Actions.Any(y => (y as AppLaunchReactiveAction)?.AppPolicy == appPolicy));
+
+			foreach (var reaction in relativeReactions)
 			{
-				selectedListItem.IsSelected = true;
+				Monitor.StartMonitoring(reaction);
 			}
 		}
-
 
 
 		private DelegateCommand _BackCommand;
