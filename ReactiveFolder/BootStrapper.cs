@@ -16,11 +16,21 @@ using ReactiveFolder.Properties;
 using ReactiveFolder.Models.AppPolicy;
 using Prism.Events;
 using ReactiveFolder.Models.Timings;
+using ReactiveFolderStyles;
 
 namespace ReactiveFolder
 {
 	class Bootstrapper : UnityBootstrapper
 	{
+
+		public string[] Args { get; private set; }
+
+		public Bootstrapper(string[] args)
+		{
+			Args = args;
+		}
+
+
 		protected override DependencyObject CreateShell()
 		{
 			return Container.Resolve<MainWindow>();
@@ -61,7 +71,32 @@ namespace ReactiveFolder
 #if DEBUG
 			App.Current.MainWindow.Show();
 #endif
-			
+			// TODO: アプリ引数を評価
+			if (Args.Count() > 0)
+			{
+				var arg = Args[0];
+
+				if (String.IsNullOrWhiteSpace(arg))
+				{
+					return;
+				}
+
+				if (System.IO.Path.IsPathRooted(arg))
+				{
+
+					if (false == System.IO.File.Exists(arg))
+					{
+						return;
+					}
+
+					var ea = this.Container.Resolve<IEventAggregator>();
+					var e = ea.GetEvent<PubSubEvent<ShowInstantActionPageEventPayload>>();
+					e.Publish(new ShowInstantActionPageEventPayload()
+					{
+						WorkingPath = arg
+					});
+				}
+			}
 		}
 
 		protected override void ConfigureModuleCatalog()
@@ -74,6 +109,7 @@ namespace ReactiveFolder
 			moduleCatalog.AddModule(typeof(Modules.AppPolicy.AppPolicyModule));
 			moduleCatalog.AddModule(typeof(Modules.Settings.SettingsModule));
 			moduleCatalog.AddModule(typeof(Modules.About.AboutModule));
+			moduleCatalog.AddModule(typeof(Modules.InstantAction.InstantActionModule));
 
 
 		}

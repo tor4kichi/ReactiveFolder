@@ -272,6 +272,10 @@
       <Project>{98736a13-f8cd-4b8d-8ad1-be8e8d8e631f}</Project>
       <Name>AppPolicy</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Module\InstantAction\InstantAction.csproj">
+      <Project>{e94dce91-1b7e-4753-8673-6fd851e905ae}</Project>
+      <Name>InstantAction</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Module\Main\Main.csproj">
       <Project>{6d937b5e-c4a4-4dd8-949d-54c6dae8f30a}</Project>
       <Name>Main</Name>

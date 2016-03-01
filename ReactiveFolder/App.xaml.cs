@@ -45,8 +45,9 @@ namespace ReactiveFolder
 			// タスクトレイアイコン
 			this._NotifyIcon = new NotifyIconWrapper();
 
+			
 			// Prismのアプリ立ち上げ作法に則る
-			Bootstrapper bs = new Bootstrapper();
+			Bootstrapper bs = new Bootstrapper(e.Args);
 			bs.Run();
 
 		}

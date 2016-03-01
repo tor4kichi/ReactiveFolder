@@ -50,6 +50,9 @@ namespace ReactiveFolder.ViewModels
 						case AppPageType.About:
 							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.About.Views.AboutPage));
 							break;
+						case AppPageType.InstantAction:
+							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.InstantAction.Views.InstantActionPage));
+							break;
 						default:
 							break;
 					}

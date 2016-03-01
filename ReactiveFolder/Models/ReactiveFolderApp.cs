@@ -175,6 +175,7 @@ namespace ReactiveFolder.Models
 	{
 		ReactionManage,
 		AppPolicyManage,
+		InstantAction,
 
 		Settings,
 		About,
