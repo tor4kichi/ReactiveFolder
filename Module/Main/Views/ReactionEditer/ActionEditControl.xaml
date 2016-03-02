@@ -8,6 +8,7 @@
              xmlns:vm="clr-namespace:Modules.Main.ViewModels"
              xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
              xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
+             xmlns:commonvm="clr-namespace:ReactiveFolderStyles.ViewModels;assembly=ReactiveFolderStyles"
              xmlns:prism="http://prismlibrary.com/"             
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:dd="clr-namespace:WPFBehaviorLibrary.DragDropBehavior;assembly=WPFBehaviorLibrary"
@@ -17,14 +18,14 @@
 
     <UserControl.Resources>
 
-        <DataTemplate DataType="{x:Type editervm:InputOptionValueViewModel}">
+        <DataTemplate DataType="{x:Type commonvm:InputOptionValueViewModel}">
             <TextBlock Text="Input" />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type editervm:OutputOptionValueViewModel}">
+        <DataTemplate DataType="{x:Type commonvm:OutputOptionValueViewModel}">
             <TextBlock Text="Output" />
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type editervm:FileOutputOptionValueViewModel}">
+        <DataTemplate DataType="{x:Type commonvm:FileOutputOptionValueViewModel}">
             <DockPanel>
                 <TextBlock Text="{Binding Extention}"
                            HorizontalAlignment="Right"
@@ -33,7 +34,7 @@
             </DockPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type editervm:StringListOptionValueViewModel}">
+        <DataTemplate DataType="{x:Type commonvm:StringListOptionValueViewModel}">
             <DockPanel>
                 <ComboBox ItemsSource="{Binding List}"
                       SelectedIndex="{Binding SelectedValue.Value}"
@@ -45,7 +46,7 @@
             </DockPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type editervm:NumberOptionValueViewModel}">
+        <DataTemplate DataType="{x:Type commonvm:NumberOptionValueViewModel}">
             <DockPanel>
                 <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                      Width="200"
@@ -55,7 +56,7 @@
             </DockPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type editervm:LimitedNumberOptionValueViewModel}">
+        <DataTemplate DataType="{x:Type commonvm:LimitedNumberOptionValueViewModel}">
             <DockPanel>
                 <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                      Width="200"
@@ -66,7 +67,7 @@
             </DockPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type editervm:RangeNumberOptionValueViewModel}">
+        <DataTemplate DataType="{x:Type commonvm:RangeNumberOptionValueViewModel}">
 
             <StackPanel 
                 Orientation="Horizontal"

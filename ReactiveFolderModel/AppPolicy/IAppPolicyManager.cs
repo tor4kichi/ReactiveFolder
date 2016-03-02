@@ -23,6 +23,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		string SaveFolderPath { get; }
 		string GetSaveFilePath(ApplicationPolicy policy);
 
+		IEnumerable<ApplicationPolicy> FindAppPolicyOnAcceptExtentions(IEnumerable<string> extentions);
 	}
 
 	public static class AppPolicyManagerHelper

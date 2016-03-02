@@ -154,7 +154,12 @@ namespace ReactiveFolder.Models
 			{
 				fileInfo.Delete();
 			}
-		}		
+		}
 
+
+		public IEnumerable<ApplicationPolicy> FindAppPolicyOnAcceptExtentions(IEnumerable<string> extentions)
+		{
+			return this.Policies.Where(x => x.CheckCanAcceptExntentions(extentions));
+		}
 	}
 }

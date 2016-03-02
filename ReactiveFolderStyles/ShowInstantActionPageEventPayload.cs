@@ -8,6 +8,6 @@ namespace ReactiveFolderStyles
 {
 	public class ShowInstantActionPageEventPayload 
 	{
-		public string WorkingPath { get; set; }
+		public string[] FilePaths { get; set; }
 	}
 }

@@ -120,7 +120,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\InstantActionModel.cs" />
     <Compile Include="ViewModels\InstantActionPageViewModel.cs" />
+    <Compile Include="Views\ActionSelectStepControl.xaml.cs">
+      <DependentUpon>ActionSelectStepControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FileSelectStepContent.xaml.cs">
+      <DependentUpon>FileSelectStepContent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FinishingStepContent.xaml.cs">
+      <DependentUpon>FinishingStepContent.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\InstantActionPage.xaml.cs">
       <DependentUpon>InstantActionPage.xaml</DependentUpon>
     </Compile>
@@ -133,6 +143,18 @@
       <DependentUpon>UserControl1.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\ActionSelectStepControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FileSelectStepContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FinishingStepContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\InstantActionPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

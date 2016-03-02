@@ -13,7 +13,67 @@
              d:DesignHeight="800" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="stempEmptyTemplate">
+            <TextBlock Text="empty" />
+        </DataTemplate>
+
+
+        <DataTemplate x:Key="FileSelectStepTemplate">
+            <local:FileSelectStepContent />
+        </DataTemplate>
+
+        <DataTemplate x:Key="ActionSelectStepTemplate">
+            <local:ActionSelectStepControl />
+        </DataTemplate>
+
+        <DataTemplate x:Key="FinishingStepTemplate">
+            <local:FinishingStepContent />
+        </DataTemplate>
+
+        <local:InstantActionStepDataTemplateSelecter x:Key="actionInstantStepTemplateSelecter" 
+                                                     EmptyTemplate="{StaticResource stempEmptyTemplate}"
+                                                     FileSelectTemplate="{StaticResource FileSelectStepTemplate}"
+                                                     ActionSelectTemplate="{StaticResource ActionSelectStepTemplate}"
+                                                     FinishingTemplate="{StaticResource FinishingStepTemplate}"
+                                                     />
+
+    </UserControl.Resources>
     <Grid>
-        <TextBlock Text="Instant Action" />
+        <Border Margin="32">
+            <ContentControl Content="{Binding InstantActionVM.Value}">
+                <ContentControl.ContentTemplate>
+                    <DataTemplate>
+
+                        <DockPanel>
+
+                            <Border DockPanel.Dock="Bottom">
+                                <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        >
+                                    <Button Content="Back"
+                                            Command="{Binding GoBackCommand}"
+                                            Width="200"
+                                            Margin="8 0"
+                                        />
+
+                                    <Button Content="Continue"
+                                            Command="{Binding GoNextCommand}"
+                                            Width="200"
+                                        />
+
+                                </StackPanel>
+                            </Border>
+
+                            <ContentControl Content="{Binding}"
+                                    ContentTemplateSelector="{StaticResource actionInstantStepTemplateSelecter}"
+                                    />
+
+                        </DockPanel>
+                    </DataTemplate>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
+        </Border>
     </Grid>
 </UserControl>

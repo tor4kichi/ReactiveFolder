@@ -71,32 +71,28 @@ namespace ReactiveFolder
 #if DEBUG
 			App.Current.MainWindow.Show();
 #endif
-			// TODO: アプリ引数を評価
-			if (Args.Count() > 0)
+
+
+
+
+			var filePaths = Args.Where(x => false == String.IsNullOrWhiteSpace(x))
+				.Where(x => System.IO.Path.IsPathRooted(x))
+				.Where(x => System.IO.File.Exists(x))
+				.ToArray();
+
+			if (filePaths.Count() > 0)
 			{
-				var arg = Args[0];
-
-				if (String.IsNullOrWhiteSpace(arg))
+				var ea = this.Container.Resolve<IEventAggregator>();
+				var e = ea.GetEvent<PubSubEvent<ShowInstantActionPageEventPayload>>();
+				e.Publish(new ShowInstantActionPageEventPayload()
 				{
-					return;
-				}
-
-				if (System.IO.Path.IsPathRooted(arg))
-				{
-
-					if (false == System.IO.File.Exists(arg))
-					{
-						return;
-					}
-
-					var ea = this.Container.Resolve<IEventAggregator>();
-					var e = ea.GetEvent<PubSubEvent<ShowInstantActionPageEventPayload>>();
-					e.Publish(new ShowInstantActionPageEventPayload()
-					{
-						WorkingPath = arg
-					});
-				}
+					FilePaths = filePaths
+				});
 			}
+
+
+
+
 		}
 
 		protected override void ConfigureModuleCatalog()

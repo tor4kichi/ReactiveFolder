@@ -33,7 +33,7 @@ namespace Modules.InstantAction
 
 			e.Subscribe(x =>
 			{
-				var param = ViewModels.InstantActionPageViewModel.MakeNavigationParamWithTargetFile(x.WorkingPath);
+				var param = ViewModels.InstantActionPageViewModel.MakeNavigationParamWithTargetFile(x.FilePaths);
 
 				_regionManager.RequestNavigate("MainRegion", nameof(Views.InstantActionPage), param);
 			});
