@@ -42,7 +42,7 @@
 
                 <DockPanel>
 
-                    <StackPanel Orientation="Vertical"
+                    <StackPanel Orientation="Horizontal"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center"
                             MinWidth="350"
@@ -54,13 +54,16 @@
 
                         <TextBlock Text="File('s) Drop in here"
                                    Style="{StaticResource MaterialDesignHeadlineTextBlock}"
-                               HorizontalAlignment="Center"
-                               FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="18"
+                                   
                                />
 
                         <TextBlock Text="or" 
                                HorizontalAlignment="Center"
-                               Margin="0 16"
+                               VerticalAlignment="Center"
+                               Margin="32 0"
                                />
 
                         <Button Content="Select File" 
