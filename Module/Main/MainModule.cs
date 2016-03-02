@@ -28,15 +28,6 @@ namespace Modules.Main
 		{
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(FolderReactionManagePage));
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(ReactionEditControl));
-
-			_regionManager.RequestNavigate("MainRegion", nameof(FolderReactionManagePage));
-
-			var e = _EveentAggregator.GetEvent<PubSubEvent<ShowInstantActionPageEventPayload>>();
-
-			e.Subscribe(x =>
-			{
-
-			});
 		}
 	}
 }

@@ -41,6 +41,11 @@ namespace ReactiveFolder
 		{
 			base.ConfigureContainer();
 
+			// イベント管理
+			var ea = new EventAggregator();
+			this.Container.RegisterInstance<IEventAggregator>(ea);
+
+
 			var app = new ReactiveFolderApp();
 
 			// リアクションモニターのインスタンスを生成＆DIコンテナに登録
@@ -56,9 +61,6 @@ namespace ReactiveFolder
 
 			this.Container.RegisterInstance<ReactiveFolderApp>(app);
 
-			// イベント管理
-			var ea = new EventAggregator();
-			this.Container.RegisterInstance<IEventAggregator>(ea);
 		}
 
 		protected override void InitializeShell()
@@ -72,7 +74,7 @@ namespace ReactiveFolder
 			App.Current.MainWindow.Show();
 #endif
 
-
+			
 
 
 			var filePaths = Args.Where(x => false == String.IsNullOrWhiteSpace(x))

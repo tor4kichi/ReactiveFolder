@@ -27,7 +27,7 @@ namespace Modules.InstantAction
 		{
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.InstantActionPage));
 
-//			_regionManager.RequestNavigate("MainRegion", nameof(FolderReactionManagePage));
+			_regionManager.RequestNavigate("MainRegion", nameof(Views.InstantActionPage));
 
 			var e = _EveentAggregator.GetEvent<PubSubEvent<ShowInstantActionPageEventPayload>>();
 

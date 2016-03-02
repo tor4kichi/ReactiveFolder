@@ -1,0 +1,85 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:ReactiveFolderStyles.Views"
+                    xmlns:vm="clr-namespace:ReactiveFolderStyles.ViewModels"
+                    xmlns:mybehavior="clr-namespace:ReactiveFolderStyles.Behaviors"
+                    >
+
+    <DataTemplate DataType="{x:Type vm:InputOptionValueViewModel}">
+        <TextBlock Text="Input" />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:OutputOptionValueViewModel}">
+        <TextBlock Text="Output" />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:FileOutputOptionValueViewModel}">
+        <DockPanel>
+            <TextBlock Text="{Binding Extention}"
+                           HorizontalAlignment="Right"
+                           />
+
+        </DockPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:StringListOptionValueViewModel}">
+        <DockPanel>
+            <ComboBox ItemsSource="{Binding List}"
+                      SelectedIndex="{Binding SelectedValue.Value}"
+                      Width="200"
+                      HorizontalAlignment="Right"
+                      >
+            </ComboBox>
+        </DockPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:NumberOptionValueViewModel}">
+        <DockPanel>
+            <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                     Width="200"
+                     HorizontalAlignment="Right"
+                     mybehavior:TextBoxHelper.IsNumeric="True"
+                     />
+        </DockPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:LimitedNumberOptionValueViewModel}">
+        <DockPanel>
+            <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                     Width="200"
+                     HorizontalAlignment="Right"
+                     mybehavior:TextBoxHelper.IsNumeric="True"
+                     />
+
+        </DockPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:RangeNumberOptionValueViewModel}">
+
+        <StackPanel 
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                >
+
+            <TextBlock Text="{Binding CurrentValue.Value}" 
+                           Margin="8 0"
+                           />
+
+            <Slider Value="{Binding CurrentValue.Value}"
+                    Maximum="{Binding MaxValue, Mode=OneTime}"
+                    Minimum="{Binding MinValue, Mode=OneTime}"
+                    SmallChange="{Binding SkipAmount, Mode=OneTime}"
+                    LargeChange="{Binding SkipAmount, Mode=OneTime}"
+                    TickFrequency="{Binding SkipAmount, Mode=OneTime}" 
+                    IsSnapToTickEnabled="True"
+                    TickPlacement="BottomRight"
+                    MinWidth="200"
+                    MaxWidth="300"
+                    HorizontalAlignment="Right"
+                    >
+
+            </Slider>
+        </StackPanel>
+
+    </DataTemplate>
+
+</ResourceDictionary>

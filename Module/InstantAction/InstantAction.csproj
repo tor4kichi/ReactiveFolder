@@ -114,6 +114,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WPFBehaviorLibrary">
+      <HintPath>..\..\packages\WPFBehaviorLibrary 0.2\WPFBehaviorLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="WPFFolderBrowser, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\WPFFolderBrowser.1.0.2\lib\WPFFolderBrowser.dll</HintPath>
       <Private>True</Private>

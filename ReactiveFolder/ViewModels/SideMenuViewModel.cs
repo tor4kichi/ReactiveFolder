@@ -104,9 +104,9 @@ namespace ReactiveFolder.ViewModels
 
 			TopMenuItems = new List<MenuItemViewModel>()
 			{
-				AppPolicyManageListItem,
+				InstantActionListItem,
 				ReactionManageListItem,
-				InstantActionListItem
+				AppPolicyManageListItem,
 			};
 
 			BottomMenuItems = new List<MenuItemViewModel>()

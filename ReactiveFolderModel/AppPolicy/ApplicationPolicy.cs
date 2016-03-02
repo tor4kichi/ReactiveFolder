@@ -356,7 +356,7 @@ namespace ReactiveFolder.Models.AppPolicy
 
 			// innerExtsがouterExtsの全てを含んでいればtrue
 
-			return outerExts.All(outerExt => innerExts.Contains(outerExt));
+			return outerExts.All(outerExt => innerExts.Any(innerExt => outerExt.EndsWith(innerExt)));
 		}
 
 

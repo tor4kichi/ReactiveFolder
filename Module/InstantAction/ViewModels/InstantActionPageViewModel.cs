@@ -328,13 +328,13 @@ namespace Modules.InstantAction.ViewModels
 
 			// Actions
 			// SelectedAppOptionsの追加に合わせてActionsを変更
-			AppOptions.ObserveElementProperty(x => x.IsSelected)
+			AppOptions.ObserveElementProperty(x => x.IsSelected, isPushCurrentValueAtFirst:false)
 				.Select(pack => pack.Instance)
 				.Subscribe(ToggleAction); 
 
 
 			ActionVMs = new ObservableCollection<InstantAppOptionInstanceViewModel>(
-				instantAction.Actions.Select(x => new InstantAppOptionInstanceViewModel(x))
+				instantAction.Actions.Select(x => new InstantAppOptionInstanceViewModel(this, x))
 				);
 		}
 
@@ -344,19 +344,23 @@ namespace Modules.InstantAction.ViewModels
 			if (appOption.IsSelected)
 			{
 				// Actionsに追加
-				if (appOption._CachedAction == null)
+				if (appOption._CachedActionVM == null)
 				{
 					var action = InstantActionModel.CreateOneOptionAppLaunchAction(appOption.AppPolicy.Guid, appOption.Declaration);
-					appOption._CachedAction = action;
+					appOption._CachedActionVM = new InstantAppOptionInstanceViewModel(this, action);
 				}
 
-				InstantAction.Actions.Add(appOption._CachedAction);
-				//						ActionVMs.Add(new InstantAppOptionInstanceViewModel())
+				InstantAction.Actions.Add(appOption._CachedActionVM.AppLaunchAction);
+
+				ActionVMs.Add(appOption._CachedActionVM);
 			}
 			else
 			{
-				InstantAction.Actions.Remove(appOption._CachedAction);
+				InstantAction.Actions.Remove(appOption._CachedActionVM.AppLaunchAction);
+				ActionVMs.Remove(appOption._CachedActionVM);
 			}
+
+			RaiseCanGoNextChanged();
 		}
 
 
@@ -369,7 +373,7 @@ namespace Modules.InstantAction.ViewModels
 
 		public override bool CanGoNext
 		{
-			get { return true; }
+			get { return InstantAction.Actions.Count > 0; }
 		}
 
 		protected override InstantActionStepViewModel GetPreviewStep()
@@ -382,12 +386,23 @@ namespace Modules.InstantAction.ViewModels
 			return new FinishingInstantActionStepViewModel(PageVM, InstantAction);
 		}
 
+		internal void RemoveAction(AppLaunchReactiveAction action)
+		{
+			var appOption = AppOptions.SingleOrDefault(x =>
+				x.AppPolicy.Guid == action.AppGuid &&
+				x.Declaration.Id == action.AdditionalOptions[0].OptionId);
+
+			if (appOption != null)
+			{
+				appOption.IsSelected = false;
+			}
+		}
 	}
 
 
 	public class ToggleSelectableInstantAppOptionViewModel : BindableBase
 	{
-		public AppLaunchReactiveAction _CachedAction { get; set; }
+		public InstantAppOptionInstanceViewModel _CachedActionVM { get; set; }
 
 		public InstantAppOption AppOption { get; private set; }
 
@@ -421,11 +436,17 @@ namespace Modules.InstantAction.ViewModels
 		}
 
 
+		public string AppName { get; private set; }
+
+		public string OptionName { get; private set; }
 		
 
 		public ToggleSelectableInstantAppOptionViewModel(InstantAppOption appOption)
 		{
 			AppOption = appOption;
+			AppName = AppPolicy.AppName;
+			OptionName = Declaration.Name;
+
 		}
 
 		private DelegateCommand _ToggleSelectCommand;
@@ -440,18 +461,57 @@ namespace Modules.InstantAction.ViewModels
 					}));
 			}
 		}
+
 	}
 
 
 	public class InstantAppOptionInstanceViewModel : BindableBase
 	{
+		public ActionsSelectInstantActionStepViewModel ActionSelectStepVM { get; private set; }
+
+		public AppLaunchReactiveAction AppLaunchAction { get; private set; }
+		public AppOptionInstance OptionInstance { get; private set; }
+
 		public List<AppOptionValueViewModel> OptionValues { get; private set; }
 
 
-		public InstantAppOptionInstanceViewModel(AppLaunchReactiveAction action)
+		public string AppName { get; private set; }
+		public Guid AppGuid { get; private set; } 
+
+		public string OptionName { get; private set; }
+
+		public InstantAppOptionInstanceViewModel(ActionsSelectInstantActionStepViewModel parentVM, AppLaunchReactiveAction action)
 		{
-			var inst = action.AdditionalOptions[0];
+			ActionSelectStepVM = parentVM;
+
+			AppLaunchAction = action;
+			OptionInstance = action.AdditionalOptions[0];
+			var appPolicy = action.AppPolicy;
+
+
+			AppName = appPolicy.AppName;
+			AppGuid = appPolicy.Guid;
+
+			OptionName = OptionInstance.OptionDeclaration.Name;
+
+			OptionValues = OptionInstance.FromAppOptionInstance()
+				.ToList();
 		}
+
+		private DelegateCommand _RemoveActionCommand;
+		public DelegateCommand RemoveActionCommand
+		{
+			get
+			{
+				return _RemoveActionCommand
+					?? (_RemoveActionCommand = new DelegateCommand(() =>
+					{
+						ActionSelectStepVM.RemoveAction(AppLaunchAction);
+					}));
+			}
+		}
+
+		
 	}
 
 

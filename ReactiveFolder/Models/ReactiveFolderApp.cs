@@ -13,6 +13,9 @@ namespace ReactiveFolder.Models
 {
 	public class ReactiveFolderApp : BindableBase
 	{
+		public const AppPageType InitialPage = AppPageType.InstantAction;
+
+
 		public const string APP_POLICY_FOLDER_NAME = "app_policy";
 		public const string REACTION_FOLDER_NAME = "reaction";
 		public const string UPDATE_RECORD_FOLDER_NAME = "update_record";
@@ -69,7 +72,7 @@ namespace ReactiveFolder.Models
 
 		public ReactiveFolderApp()
 		{
-			PageType = AppPageType.ReactionManage;
+			PageType = InitialPage;
 
 			// AppData
 			var appDataSaveFolder = new DirectoryInfo(AppDataSaveFolder);

@@ -18,84 +18,6 @@
 
     <UserControl.Resources>
 
-        <DataTemplate DataType="{x:Type commonvm:InputOptionValueViewModel}">
-            <TextBlock Text="Input" />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type commonvm:OutputOptionValueViewModel}">
-            <TextBlock Text="Output" />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type commonvm:FileOutputOptionValueViewModel}">
-            <DockPanel>
-                <TextBlock Text="{Binding Extention}"
-                           HorizontalAlignment="Right"
-                           />
-
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type commonvm:StringListOptionValueViewModel}">
-            <DockPanel>
-                <ComboBox ItemsSource="{Binding List}"
-                      SelectedIndex="{Binding SelectedValue.Value}"
-                      Width="200"
-                      HorizontalAlignment="Right"
-                      
-                      >
-                </ComboBox>
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type commonvm:NumberOptionValueViewModel}">
-            <DockPanel>
-                <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                     Width="200"
-                     HorizontalAlignment="Right"
-                     mybehavior:TextBoxHelper.IsNumeric="True"
-                     />
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type commonvm:LimitedNumberOptionValueViewModel}">
-            <DockPanel>
-                <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                     Width="200"
-                     HorizontalAlignment="Right"
-                     mybehavior:TextBoxHelper.IsNumeric="True"
-                     />
-
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type commonvm:RangeNumberOptionValueViewModel}">
-
-            <StackPanel 
-                Orientation="Horizontal"
-                HorizontalAlignment="Right"
-                >
-
-                <TextBlock Text="{Binding CurrentValue.Value}" 
-                           Margin="8 0"
-                           />
-                
-                <Slider Value="{Binding CurrentValue.Value}"
-                    Maximum="{Binding MaxValue, Mode=OneTime}"
-                    Minimum="{Binding MinValue, Mode=OneTime}"
-                    SmallChange="{Binding SkipAmount, Mode=OneTime}"
-                    LargeChange="{Binding SkipAmount, Mode=OneTime}"
-                    TickFrequency="{Binding SkipAmount, Mode=OneTime}" 
-                    IsSnapToTickEnabled="True"
-                    TickPlacement="BottomRight"
-                    MinWidth="200"
-                    MaxWidth="300"
-                    HorizontalAlignment="Right"
-                    >
-
-                </Slider>
-            </StackPanel>
-
-        </DataTemplate>
-
         <DataTemplate x:Key="ActionListItemTemplate">
             <DockPanel
                 Margin="0 8"
@@ -162,6 +84,7 @@
                                                            FontSize="10"
                                                            />
 
+                                                <!-- DataTemplate using ReactiveFolderStyle/Views/AppOptionTemplate.xaml -->
                                                 <ContentPresenter Content="{Binding}"
                                                                   Margin="16 2 0 0"
                                                                   />
