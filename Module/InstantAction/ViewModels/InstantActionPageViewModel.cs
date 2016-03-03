@@ -8,6 +8,7 @@ using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolderStyles.Models;
 using ReactiveFolderStyles.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace Modules.InstantAction.ViewModels
 	public class InstantActionPageViewModel : BindableBase, INavigationAware
 	{
 		public IAppPolicyManager AppPolicyManger { get; private set; }
-
+		public IInstantActionManager InstantActionManager { get; private set; }
 
 		public IRegionNavigationService NavigationService;
 
@@ -36,9 +37,10 @@ namespace Modules.InstantAction.ViewModels
 
 		public ReactiveProperty<InstantActionStepViewModel> InstantActionVM { get; private set; }
 
-		public InstantActionPageViewModel(IAppPolicyManager appPolicyManager)
+		public InstantActionPageViewModel(IAppPolicyManager appPolicyManager, IInstantActionManager instantActionManager)
 		{
 			AppPolicyManger = appPolicyManager;
+			InstantActionManager = instantActionManager;
 
 			InstantActionVM = new ReactiveProperty<InstantActionStepViewModel>();
 		}
@@ -58,6 +60,7 @@ namespace Modules.InstantAction.ViewModels
 			NavigationService = navigationContext.NavigationService;
 
 			Model = new InstantActionModel(AppPolicyManger);
+			Model.OutputFolderPath = InstantActionManager.TempSaveFolder;
 
 			try
 			{
@@ -206,6 +209,28 @@ namespace Modules.InstantAction.ViewModels
 			GoNextCommand.RaiseCanExecuteChanged();
 		}
 
+
+
+
+
+		private DelegateCommand<string[]> _FileDropedCommand;
+		public DelegateCommand<string[]> FileDropedCommand
+		{
+			get
+			{
+				return _FileDropedCommand
+					?? (_FileDropedCommand = new DelegateCommand<string[]>((filePaths) =>
+					{
+						foreach (var filePath in filePaths)
+						{
+							InstantAction.AddTargetFile(filePath);
+						}
+
+						RaiseCanGoNextChanged();
+					}));
+			}
+		}
+
 	}
 
 	public class FileSelectInstantActionStepViewModel : InstantActionStepViewModel
@@ -258,23 +283,7 @@ namespace Modules.InstantAction.ViewModels
 			}
 		}
 
-		private DelegateCommand<string[]> _FileDropedCommand;
-		public DelegateCommand<string[]> FileDropedCommand
-		{
-			get
-			{
-				return _FileDropedCommand
-					?? (_FileDropedCommand = new DelegateCommand<string[]>((filePaths) =>
-					{
-						foreach (var filePath in filePaths)
-						{
-							InstantAction.AddTargetFile(filePath);
-						}
-
-						RaiseCanGoNextChanged();
-					}));
-			}
-		}
+		
 
 
 		private DelegateCommand<string> _RemoveTargetCommand;
@@ -524,10 +533,101 @@ namespace Modules.InstantAction.ViewModels
 
 	public class FinishingInstantActionStepViewModel : InstantActionStepViewModel
 	{
+		public ReadOnlyReactiveCollection<ProcessingFileViewModel> Files { get; private set; }
+
+		public ReactiveProperty<string> OutputFolderPath { get; private set; }
+
+		public ReactiveProperty<int> FileCount { get; private set; }
+		public ReactiveProperty<int> ProcessedCount { get; private set; }
+		public ReactiveProperty<int> FailedCount { get; private set; }
+
+
+
+		public ReactiveProperty<bool> IsAllChecked { get; private set; }
+
+
+		/// <summary>
+		/// VM内からIsAllCheckedを操作した時に処理をスキップするためのフラグ
+		/// </summary>
+		private bool NowWorkingFileSelection = false;
+
+
+
+		private object _InstantActionProcessLock = new object();
+
+
+
+
+
 		public FinishingInstantActionStepViewModel(InstantActionPageViewModel pageVM, InstantActionModel instantAction)
 			: base(pageVM, instantAction)
 		{
+			Files = InstantAction.TargetFiles.ToReadOnlyReactiveCollection(x =>
+				new ProcessingFileViewModel(InstantAction, x)
+				);
+
+			OutputFolderPath = InstantAction.ObserveProperty(x => x.OutputFolderPath)
+				.ToReactiveProperty();
+
+			FileCount = InstantAction.TargetFiles.CollectionChangedAsObservable().ToUnit()
+				.Select(_ => InstantAction.TargetFiles.Count)
+				.ToReactiveProperty(InstantAction.TargetFiles.Count);
+
+			ProcessedCount = Observable.Merge(
+				InstantAction.TargetFiles.CollectionChangedAsObservable().ToUnit(),
+				InstantAction.TargetFiles.ObserveElementProperty(x => x.ProcessState).ToUnit()
+				)
+				.Select(_ =>
+				{
+					return InstantAction.TargetFiles.Where(x => x.IsComplete).Count();
+				})
+				.ToReactiveProperty();
+
+			FailedCount = ProcessedCount.Select(x => FileCount.Value - x)
+				.ToReactiveProperty();
+
+			IsAllChecked = new ReactiveProperty<bool>(false);
+
+			IsAllChecked.Subscribe(_ => 
+			{
+				if (NowWorkingFileSelection) { return; }
+
+				var allCheck = ! Files.Any(x => x.IsSelected == true);
+
+				foreach (var file in Files)
+				{
+					file.IsSelected = allCheck;
+				}
+			});
+
+			Files.ObserveElementProperty(x => x.IsSelected)
+				.Subscribe(_ => 
+				{
+					NowWorkingFileSelection = true;
+
+					IsAllChecked.Value = Files.Any(x => x.IsSelected == true);
+
+					NowWorkingFileSelection = false;
+				});
+
+			InstantAction.TargetFiles.ObserveAddChanged()
+				.Subscribe(x => 
+				{
+					Task.Run(() =>
+					{
+						lock (_InstantActionProcessLock)
+						{
+							if (x.IsReady)
+							{
+								InstantAction.Execute(x);
+							}
+						}
+					});
+				});
+
+			StartProcess();
 		}
+
 
 
 		public override bool CanGoPreview
@@ -544,6 +644,152 @@ namespace Modules.InstantAction.ViewModels
 		protected override InstantActionStepViewModel GetPreviewStep()
 		{
 			return new ActionsSelectInstantActionStepViewModel(PageVM, InstantAction);
+		}
+
+
+		private DelegateCommand _ChangeSaveFolderCommand;
+		public DelegateCommand ChangeSaveFolderCommand
+		{
+			get
+			{
+				return _ChangeSaveFolderCommand
+					?? (_ChangeSaveFolderCommand = new DelegateCommand(() =>
+					{
+						var folderDialog = new WPFFolderBrowser.WPFFolderBrowserDialog();
+						folderDialog.Title = "";
+						folderDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+						var result = folderDialog.ShowDialog();
+						if (result.HasValue && result.Value == true)
+						{
+							InstantAction.OutputFolderPath = folderDialog.FileName;
+						}
+
+					}));
+			}
+		}
+
+		
+
+
+		private DelegateCommand _AllFilePathCopyToClipboardCommand;
+		public DelegateCommand AllFilePathCopyToClipboardCommand
+		{
+			get
+			{
+				return _AllFilePathCopyToClipboardCommand
+					?? (_AllFilePathCopyToClipboardCommand = new DelegateCommand(() =>
+					{
+						System.Collections.Specialized.StringCollection files =
+							new System.Collections.Specialized.StringCollection();
+						foreach (var fileVM in Files)
+						{
+							files.Add(fileVM.TargetFile.FilePath);
+						}
+
+						Clipboard.SetFileDropList(files);
+
+					}));
+			}
+		}
+
+		private DelegateCommand _SelectedFilePathCopyToClipboardCommand;
+		public DelegateCommand SelectedFilePathCopyToClipboardCommand
+		{
+			get
+			{
+				return _SelectedFilePathCopyToClipboardCommand
+					?? (_SelectedFilePathCopyToClipboardCommand = new DelegateCommand(() =>
+					{
+						System.Collections.Specialized.StringCollection files =
+							new System.Collections.Specialized.StringCollection();
+						foreach (var fileVM in Files.Where(x => x.IsSelected))
+						{
+							files.Add(fileVM.TargetFile.FilePath);
+						}
+
+						Clipboard.SetFileDropList(files);
+							
+					}));
+			}
+		}
+
+
+		private DelegateCommand _CreateReactionCommand;
+		public DelegateCommand CreateReactionCommand
+		{
+			get
+			{
+				return _CreateReactionCommand
+					?? (_CreateReactionCommand = new DelegateCommand(() =>
+					{
+
+					}));
+			}
+		}
+
+		private DelegateCommand _DoneCommand;
+		public DelegateCommand DoneCommand
+		{
+			get
+			{
+				return _DoneCommand
+					?? (_DoneCommand = new DelegateCommand(() =>
+					{
+
+					}));
+			}
+		}
+
+		
+		public void StartProcess()
+		{
+			// TODO: 
+			Task.Run(() =>
+			{
+				foreach (var file in InstantAction.TargetFiles.Where(x => x.IsReady))
+				{
+					lock (_InstantActionProcessLock)
+					{
+						InstantAction.Execute(file);
+					}
+				}
+			});
+		}
+		
+	}
+
+
+	public class ProcessingFileViewModel : BindableBase
+	{
+		public InstantActionModel InstantAction { get; private set; }
+		public InstantActionTargetFile TargetFile { get; private set; }
+
+		private bool _IsSelected;
+		public bool IsSelected
+		{
+			get
+			{
+				return _IsSelected;
+			}
+			set
+			{
+				SetProperty(ref _IsSelected, value);
+			}
+		}
+
+		public ReactiveProperty<FileProcessState> ProcessState { get; private set; }
+
+		public string FilePath { get; private set; }
+
+		public ProcessingFileViewModel(InstantActionModel instantAction, InstantActionTargetFile targetFile)
+		{
+			InstantAction = instantAction;
+			TargetFile = targetFile;
+
+			FilePath = targetFile.FilePath;
+			ProcessState = targetFile.ObserveProperty(x => x.ProcessState)
+				.ToReactiveProperty();
 		}
 	}
 }

@@ -68,6 +68,7 @@
 
                             <ContentControl Content="{Binding}"
                                     ContentTemplateSelector="{StaticResource actionInstantStepTemplateSelecter}"
+                                    Margin="0 0 0 16"
                                     />
 
                         </DockPanel>

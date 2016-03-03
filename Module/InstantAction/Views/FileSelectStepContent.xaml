@@ -11,7 +11,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <DockPanel>
-        <Border DockPanel.Dock="Top">
+        <Border DockPanel.Dock="Top"
+                Margin="0 0 0 16"
+                >
             <TextBlock Text="ファイル選択" 
                        Style="{StaticResource MaterialDesignHeadlineTextBlock}"
                        Foreground="{StaticResource PrimaryHueMidBrush}"
@@ -19,7 +21,7 @@
                        />
         </Border>
 
-        <Border Margin="32">
+        <Border>
             <Border BorderThickness="2"
                     mybehavior:AcceptFileDrop.PreviewDropCommand="{Binding FileDropedCommand}"
                     AllowDrop="True"

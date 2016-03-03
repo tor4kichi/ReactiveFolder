@@ -17,6 +17,7 @@ using ReactiveFolder.Models.AppPolicy;
 using Prism.Events;
 using ReactiveFolder.Models.Timings;
 using ReactiveFolderStyles;
+using ReactiveFolderStyles.Models;
 
 namespace ReactiveFolder
 {
@@ -56,6 +57,8 @@ namespace ReactiveFolder
 
 			// ファイル更新タイミング記録管理の〃
 			this.Container.RegisterInstance<IFileUpdateRecordManager>(app.UpdateRecordManager);
+
+			this.Container.RegisterInstance<IInstantActionManager>(app.InstantActionManager);
 
 			this.Container.RegisterInstance<IReactiveFolderSettings>(app.Settings);
 

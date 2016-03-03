@@ -124,7 +124,9 @@
     
     
     <DockPanel>
-        <Border DockPanel.Dock="Top">
+        <Border DockPanel.Dock="Top"
+                Margin="0 0 0 16"
+                >
             <TextBlock Text="処理方法を選択" 
                        Style="{StaticResource MaterialDesignHeadlineTextBlock}"
                        Foreground="{StaticResource PrimaryHueMidBrush}"
@@ -132,7 +134,7 @@
                        />
         </Border>
 
-        <DockPanel Margin="32">
+        <DockPanel>
             <Border
                 DockPanel.Dock="Left"
                 >

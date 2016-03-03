@@ -3,14 +3,173 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:local="clr-namespace:Modules.InstantAction.Views"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
              xmlns:vm="clr-namespace:Modules.InstantAction.ViewModels"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mybehavior="clr-namespace:ReactiveFolderStyles.Behaviors;assembly=ReactiveFolderStyles"             
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
+             d:DesignHeight="800" d:DesignWidth="960">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top"
+                Margin="0 0 0 16"
+                >
+            <TextBlock Text="実行" 
+                       Style="{StaticResource MaterialDesignHeadlineTextBlock}"
+                       Foreground="{StaticResource PrimaryHueMidBrush}"
+                       DockPanel.Dock="Left"
+                       />
+
+            <Button Content="Create Reaction"
+                    Command="{Binding CreateReactionCommand}"
+                    Width="200"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                                />
             
-    </Grid>
+            <Border />
+        </DockPanel>
+
+        <DockPanel>
+
+            <Border DockPanel.Dock="Top">
+                <DockPanel Margin="0 8">
+
+                    <Button Content="Change" DockPanel.Dock="Right"
+                                Command="{Binding ChangeSaveFolderCommand}"
+                                Width="200"
+                                >
+
+                    </Button>
+                    <TextBlock 
+                            VerticalAlignment="Center"
+                            >
+                            <Run Text="出力先フォルダ：" />
+                            <Run Text="{Binding OutputFolderPath.Value, Mode=OneWay}" />
+
+                    </TextBlock>
+
+                </DockPanel>
+                
+                
+            </Border>
+
+            <DockPanel>
+                <Border DockPanel.Dock="Bottom">
+                    <DockPanel Margin="0 8" >
+
+
+                        <StackPanel DockPanel.Dock="Right">
+                            <Button Content="Copy Files"
+                                Command="{Binding AllFilePathCopyToClipboardCommand}"
+                                Width="200"
+                                />
+
+                        </StackPanel>
+
+                        <DockPanel>
+
+                            <StackPanel Orientation="Horizontal"
+                                    Margin="8 0"
+                                    >
+                                <TextBlock Margin="8 0" VerticalAlignment="Center">
+                                <Run Text="Success: " />
+                                <Run Text="{Binding ProcessedCount.Value}" />
+                                </TextBlock>
+
+                                <TextBlock Margin="8 0" VerticalAlignment="Center">
+                                <Run Text="Failed: " />
+                                <Run Text="{Binding FailedCount.Value}" />
+                                </TextBlock>
+
+                            </StackPanel>
+                            <ProgressBar Minimum="0"
+                                     Maximum="{Binding FileCount.Value}"
+                                     Value="{Binding ProcessedCount.Value}"
+                                     Margin="32 0"
+                                     >
+
+                            </ProgressBar>
+                        </DockPanel>
+
+                    </DockPanel>
+                </Border>
+
+                <Border BorderThickness="2"
+                    mybehavior:AcceptFileDrop.PreviewDropCommand="{Binding FileDropedCommand}"
+                    AllowDrop="True"
+                    IsHitTestVisible="True"
+                    Background="Transparent"
+                        Margin="0 8"
+                    >
+                    <Border.BorderBrush>
+                        <VisualBrush>
+                            <VisualBrush.Visual>
+                                <Rectangle StrokeDashArray="2 2"
+                                      Stroke="DarkGray"
+                                      StrokeThickness="2"
+                                      RadiusX="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=CornerRadius.TopRight}"
+                                      RadiusY="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=CornerRadius.BottomLeft}"
+                                      Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualWidth}"
+                                      Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualHeight}"/>
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Border.BorderBrush>
+                    <DockPanel >
+                        <Border DockPanel.Dock="Bottom">
+                            <TextBlock Text="You can more file Drop in here." 
+                                       Foreground="Gray"
+                                       Margin="8"
+                                       HorizontalAlignment="Center"
+                                       />
+                        </Border>
+
+                        <DataGrid ItemsSource="{Binding Files}" 
+                              AutoGenerateColumns="False"
+                              SelectionMode="Extended"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              Margin="8 0"
+                              SelectionUnit="FullRow"
+                           >
+                            <DataGrid.ItemContainerStyle>
+                                <Style TargetType="{x:Type DataGridRow}">
+                                    <Setter Property="IsSelected"
+                                    Value="{Binding IsSelected, Mode=TwoWay}" />
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="true">
+                                            <Setter Property="Background" Value="{DynamicResource MaterialDesignSelection}" />
+                                        </DataTrigger>
+
+                                    </Style.Triggers>
+                                </Style>
+
+                            </DataGrid.ItemContainerStyle>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn>
+                                    <DataGridTemplateColumn.Header>
+                                        <CheckBox IsChecked="{Binding DataContext.IsAllChecked.Value, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                          >
+                                        </CheckBox>
+                                    </DataGridTemplateColumn.Header>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="File Path" Binding="{Binding FilePath}"
+                                        IsReadOnly="True"
+                                        />
+                                <DataGridTextColumn Header="State" Binding="{Binding ProcessState.Value}" 
+                                        IsReadOnly="True"
+                                        />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                    
+                </Border>
+            </DockPanel>
+            
+        </DockPanel>
+    </DockPanel>
 </UserControl>

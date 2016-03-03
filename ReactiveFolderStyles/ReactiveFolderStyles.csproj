@@ -118,6 +118,7 @@
     <Compile Include="DialogContent\SaveAndBackConfirmDialogContent.xaml.cs">
       <DependentUpon>SaveAndBackConfirmDialogContent.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\IInstantActionManager.cs" />
     <Compile Include="OpenSideMenuEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

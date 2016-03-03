@@ -49,7 +49,37 @@ namespace Modules.InstantAction.Models
 
 		public ObservableCollection<AppLaunchReactiveAction> Actions { get; private set; }
 
-		public string OutputFolderPath { get; private set; }
+		/// <summary>
+		/// 処理実行中に出力先フォルダが変更された場合に対応する
+		/// </summary>
+		private object _OutputFolderPathLock = new object();
+
+		private string _OutputFolderPath;
+		public string OutputFolderPath
+		{
+			get
+			{
+				return _OutputFolderPath;
+			}
+			set
+			{
+				lock(_OutputFolderPathLock)
+				{
+					if (SetProperty(ref _OutputFolderPath, value))
+					{
+						// TargetFilesのOutputFolderを書き換える
+						foreach (var file in TargetFiles)
+						{
+							file.OutputFolderPath = OutputFolderPath;
+						}
+					}
+				}
+			}
+		}
+
+
+		
+
 
 
 		public InstantActionModel(IAppPolicyManager appPolicyManager)
@@ -81,7 +111,16 @@ namespace Modules.InstantAction.Models
 				return;
 			}
 
-			TargetFiles.Add(new InstantActionTargetFile(path));
+
+
+			lock (_OutputFolderPathLock)
+			{
+				var targetFile = new InstantActionTargetFile(path);
+				targetFile.OutputFolderPath = this.OutputFolderPath;
+				TargetFiles.Add(targetFile);
+			}
+
+
 		}
 
 
@@ -127,34 +166,58 @@ namespace Modules.InstantAction.Models
 
 		public void Execute(InstantActionTargetFile targetFile)
 		{
-			var reaction = new FolderReactionModel();
-
-			var dir = new DirectoryInfo(Path.GetDirectoryName(targetFile.FilePath));
-			var context = new ReactiveStreamContext(dir, targetFile.FilePath);
-
-			var dest = new AbsolutePathReactiveDestination();
-			dest.AbsoluteFolderPath = ""; // TODO: 出力先
-
-			var streams = Actions.Cast<ReactiveStraightStreamBase>().ToList();
-			streams.Add(dest);
-
-			foreach (var action in streams)
+			lock (_OutputFolderPathLock)
 			{
-				if (false == context.IsRunnning)
+				var reaction = new FolderReactionModel();
+
+				var dir = new DirectoryInfo(Path.GetDirectoryName(targetFile.FilePath));
+				using (var context = new ReactiveStreamContext(dir, targetFile.FilePath))
 				{
-					break;
+					var dest = new AbsolutePathReactiveDestination();
+
+					if (false == String.IsNullOrEmpty(this.OutputFolderPath) &&
+						Directory.Exists(this.OutputFolderPath)
+						)
+					{
+						dest.AbsoluteFolderPath = this.OutputFolderPath;
+					}
+					else
+					{
+						targetFile.Failed();
+						return;
+					}
+
+
+					var streams = Actions.Cast<ReactiveStraightStreamBase>().ToList();
+					streams.Add(dest);
+
+					foreach (var action in streams)
+					{
+						if (false == context.IsRunnning)
+						{
+							break;
+						}
+
+						action.Execute(context);
+					}
+
+
+
+					if (context.IsCompleted)
+					{
+						targetFile.Complete(context.OutputPath);
+					}
+					else
+					{
+						targetFile.Failed();
+					}
+
 				}
-
-				action.Execute(context);
-			}
-
-
-
-			if (context.IsCompleted)
-			{
-				targetFile.OutputPath = context.OutputPath;
 			}
 		}
+
+
+
 
 		/// <summary>
 		/// 一つのオプションだけを扱うアプリ起動アクションを作成する。
@@ -181,6 +244,7 @@ namespace Modules.InstantAction.Models
 	{
 		public string FilePath { get; private set; }
 
+
 		private string _OutputPath;
 		public string OutputPath
 		{
@@ -188,29 +252,160 @@ namespace Modules.InstantAction.Models
 			{
 				return _OutputPath;
 			}
-			set
+			private set
 			{
 				SetProperty(ref _OutputPath, value);
-
-				OnPropertyChanged(nameof(IsComplete));
 			}
 		}
 
+		private string _OutputFolderPath;
+		public string OutputFolderPath
+		{
+			get
+			{
+				return _OutputFolderPath;
+			}
+			set
+			{
+				if (SetProperty(ref _OutputFolderPath, value))
+				{
+					ChangeOutputFolder();
+				}
+			}
+		}
+
+		private FileProcessState _ProcessState;
+		public FileProcessState ProcessState
+		{
+			get
+			{
+				return _ProcessState;
+			}
+			private set
+			{
+				if (SetProperty(ref _ProcessState, value))
+				{
+					OnPropertyChanged(nameof(IsReady));
+					OnPropertyChanged(nameof(IsWaitForProcess));
+					OnPropertyChanged(nameof(IsNowProcessing));
+					OnPropertyChanged(nameof(IsComplete));
+					OnPropertyChanged(nameof(IsFailed));
+				}
+			}
+		}
+
+		public bool IsReady
+		{
+			get
+			{
+				return ProcessState == FileProcessState.Ready;
+			}
+		}
+
+		public bool IsWaitForProcess
+		{
+			get
+			{
+				return ProcessState == FileProcessState.WaitForProcess;
+			}
+		}
+
+		public bool IsNowProcessing
+		{
+			get
+			{
+				return ProcessState == FileProcessState.NowProcessing;
+			}
+		}
 
 		public bool IsComplete
 		{
 			get
 			{
-				return false == String.IsNullOrWhiteSpace(_OutputPath);
+				return ProcessState == FileProcessState.Complete &&
+					false == String.IsNullOrWhiteSpace(_OutputPath);
 			}
 		}
+
+		public bool IsFailed
+		{
+			get
+			{
+				return ProcessState == FileProcessState.Failed;
+			}
+		}
+
+		public void Ready()
+		{
+			OutputPath = "";
+			ProcessState = FileProcessState.Ready;
+		}
+
+		public void WaitForProcess()
+		{
+			ProcessState = FileProcessState.WaitForProcess;
+		}
+
+		public void NowProcessing()
+		{
+			ProcessState = FileProcessState.NowProcessing;
+		}
+
+		public void Complete (string path)
+		{
+			OutputPath = path;
+			ProcessState = FileProcessState.Complete;
+		}
+
+		
+		public void Failed()
+		{
+			ProcessState = FileProcessState.Failed;
+		}
+
 
 		public InstantActionTargetFile(string path)
 		{
 			FilePath = path;
+
+			ProcessState = FileProcessState.Ready;
 		}
 
 
+		private void ChangeOutputFolder()
+		{
+			if (IsComplete &&
+				false == String.IsNullOrEmpty(OutputPath) &&
+				File.Exists(OutputPath))
+			{
+				var sourceFile = new FileInfo(OutputPath);
+				var destFilePath = Path.Combine(OutputFolderPath, sourceFile.Name);
+
+
+				// TODO: すでにファイルが存在する場合
+				try
+				{
+					sourceFile.MoveTo(destFilePath);
+					OutputPath = sourceFile.FullName;
+				}
+				catch
+				{
+					Failed();
+				}
+
+			}
+		}
+
+	}
+
+
+	public enum FileProcessState
+	{
+		Ready,
+		WaitForProcess,
+		NowProcessing,
+		Complete,
+		Failed,
 	}
 
 	public class InstantAppOption 
