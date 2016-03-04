@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ using System.Windows;
 
 namespace Modules.InstantAction.ViewModels
 {
-	public class InstantActionPageViewModel : BindableBase, INavigationAware
+	public class InstantActionPageViewModel : BindableBase, INavigationAware, IDisposable
 	{
 		public IAppPolicyManager AppPolicyManger { get; private set; }
 		public IInstantActionManager InstantActionManager { get; private set; }
@@ -44,6 +45,7 @@ namespace Modules.InstantAction.ViewModels
 			InstantActionManager = instantActionManager;
 
 			InstantActionVM = new ReactiveProperty<InstantActionStepViewModel>();
+				
 		}
 
 		public bool IsNavigationTarget(NavigationContext navigationContext)
@@ -60,8 +62,11 @@ namespace Modules.InstantAction.ViewModels
 		{
 			NavigationService = navigationContext.NavigationService;
 
-			Model = new InstantActionModel(AppPolicyManger);
-			Model.OutputFolderPath = InstantActionManager.TempSaveFolder;
+			if (Model == null)
+			{
+				Model = new InstantActionModel(AppPolicyManger);
+				Model.OutputFolderPath = InstantActionManager.TempSaveFolder;
+			}
 
 			try
 			{
@@ -101,38 +106,47 @@ namespace Modules.InstantAction.ViewModels
 			return param;
 		}
 
-		internal void ChangeStemp(InstantActionStepViewModel step)
+		internal void ChangeStep(InstantActionStepViewModel step)
 		{
 			if (step == null)
 			{
 				throw new Exception();
 			}
 
-			InstantActionVM.Value = step;
+			if (InstantActionVM.Value != step)
+			{
+				InstantActionVM.Value?.Dispose();
+
+				InstantActionVM.Value = step;
+			}
 		}
 
 		internal void ShowFileSelectStep()
 		{
-			InstantActionVM.Value = new FileSelectInstantActionStepViewModel(this, Model);
-
+			ChangeStep(new FileSelectInstantActionStepViewModel(this, Model));
 		}
 
 		internal void ShowActioinSelectStep()
 		{
-			InstantActionVM.Value = new ActionsSelectInstantActionStepViewModel(this, Model);
+			ChangeStep(new ActionsSelectInstantActionStepViewModel(this, Model));
 
 		}
 		internal void ShowFinishingStep()
 		{
-			InstantActionVM.Value = new FinishingInstantActionStepViewModel(this, Model);
-
+			ChangeStep(new FinishingInstantActionStepViewModel(this, Model));
 		}
 
+		public void Dispose()
+		{
+			InstantActionVM.Value?.Dispose();
+		}
 	}
 
 
-	abstract public class InstantActionStepViewModel : BindableBase
+	abstract public class InstantActionStepViewModel : BindableBase, IDisposable
 	{
+		protected CompositeDisposable _CompositeDisposable;
+
 		public InstantActionPageViewModel PageVM { get; private set; }
 		public InstantActionModel InstantAction { get; private set; }
 
@@ -140,6 +154,8 @@ namespace Modules.InstantAction.ViewModels
 		{
 			PageVM = pageVM;
 			InstantAction = instantAction;
+
+			_CompositeDisposable = new CompositeDisposable();
 		}
 
 		private InstantActionStepViewModel _PreviousStep;
@@ -176,7 +192,7 @@ namespace Modules.InstantAction.ViewModels
 				return _GoBackCommand
 					?? (_GoBackCommand = new DelegateCommand(() =>
 					{
-						PageVM.ChangeStemp(PreviewStep);
+						PageVM.ChangeStep(PreviewStep);
 					},
 						() => CanGoPreview					
 					));
@@ -190,7 +206,7 @@ namespace Modules.InstantAction.ViewModels
 				return _GoNextCommand
 					?? (_GoNextCommand = new DelegateCommand(() =>
 					{
-						PageVM.ChangeStemp(NextStep);
+						PageVM.ChangeStep(NextStep);
 					},
 						() => CanGoNext
 					));
@@ -210,9 +226,10 @@ namespace Modules.InstantAction.ViewModels
 			GoNextCommand.RaiseCanExecuteChanged();
 		}
 
-
-
-
+		public void Dispose()
+		{
+			_CompositeDisposable.Dispose();
+		}
 
 		private DelegateCommand<string[]> _FileDropedCommand;
 		public DelegateCommand<string[]> FileDropedCommand
@@ -245,7 +262,8 @@ namespace Modules.InstantAction.ViewModels
 		public FileSelectInstantActionStepViewModel(InstantActionPageViewModel pageVM, InstantActionModel instantAction)
 			: base(pageVM, instantAction)
 		{
-			Files = instantAction.TargetFiles.ToReadOnlyReactiveCollection(x => x.FilePath);
+			Files = instantAction.TargetFiles.ToReadOnlyReactiveCollection(x => x.FilePath)
+				.AddTo(_CompositeDisposable);
 		}
 
 
@@ -340,6 +358,9 @@ namespace Modules.InstantAction.ViewModels
 				instantAction.Actions.Select(x => new InstantAppOptionInstanceViewModel(this, x))
 				);
 
+			
+				
+
 			foreach (var appOption in AppOptions)
 			{
 				var vm = ActionVMs.SingleOrDefault(x => x.AppGuid == appOption.AppPolicy.Guid && x.OptionInstance.OptionDeclaration == appOption.Declaration);
@@ -354,10 +375,10 @@ namespace Modules.InstantAction.ViewModels
 			// SelectedAppOptionsの追加に合わせてActionsを変更
 			AppOptions.ObserveElementProperty(x => x.IsSelected, isPushCurrentValueAtFirst:false)
 				.Select(pack => pack.Instance)
-				.Subscribe(ToggleAction); 
+				.Subscribe(ToggleAction) 
+				.AddTo(_CompositeDisposable);
 
 
-			
 		}
 
 		// Note: 利用したいオプションとして選択用オプションとしては表示をOFFに
@@ -423,7 +444,6 @@ namespace Modules.InstantAction.ViewModels
 				var vm = ActionVMs.Single(x => x.AppLaunchAction == action);
 				ActionVMs.Remove(vm);
 				InstantAction.RemoveAction(action);
-				
 			}
 		}
 	}
@@ -491,6 +511,7 @@ namespace Modules.InstantAction.ViewModels
 			}
 		}
 
+		
 	}
 
 
@@ -525,6 +546,8 @@ namespace Modules.InstantAction.ViewModels
 
 			OptionValues = OptionInstance.FromAppOptionInstance()
 				.ToList();
+
+			
 		}
 
 		private DelegateCommand _RemoveActionCommand;
@@ -584,14 +607,17 @@ namespace Modules.InstantAction.ViewModels
 		{
 			Files = InstantAction.TargetFiles.ToReadOnlyReactiveCollection(x =>
 				new ProcessingFileViewModel(InstantAction, x)
-				);
+				)
+				.AddTo(_CompositeDisposable);
 
 			OutputFolderPath = InstantAction.ObserveProperty(x => x.OutputFolderPath)
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 
 			FileCount = InstantAction.TargetFiles.CollectionChangedAsObservable().ToUnit()
 				.Select(_ => InstantAction.TargetFiles.Count)
-				.ToReactiveProperty(InstantAction.TargetFiles.Count);
+				.ToReactiveProperty(InstantAction.TargetFiles.Count)
+				.AddTo(_CompositeDisposable);
 
 			ProcessedCount = Observable.Merge(
 				InstantAction.TargetFiles.CollectionChangedAsObservable().ToUnit(),
@@ -601,12 +627,15 @@ namespace Modules.InstantAction.ViewModels
 				{
 					return InstantAction.TargetFiles.Where(x => x.IsComplete).Count();
 				})
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 
 			FailedCount = ProcessedCount.Select(x => FileCount.Value - x)
-				.ToReactiveProperty();
+				.ToReactiveProperty()
+				.AddTo(_CompositeDisposable);
 
-			IsAllChecked = new ReactiveProperty<bool>(false);
+			IsAllChecked = new ReactiveProperty<bool>(false)
+				.AddTo(_CompositeDisposable);
 
 			IsAllChecked.Subscribe(_ => 
 			{
@@ -618,7 +647,8 @@ namespace Modules.InstantAction.ViewModels
 				{
 					file.IsSelected = allCheck;
 				}
-			});
+			})
+				.AddTo(_CompositeDisposable);
 
 			Files.ObserveElementProperty(x => x.IsSelected)
 				.Subscribe(_ => 
@@ -628,7 +658,8 @@ namespace Modules.InstantAction.ViewModels
 					IsAllChecked.Value = Files.Any(x => x.IsSelected == true);
 
 					NowWorkingFileSelection = false;
-				});
+				})
+				.AddTo(_CompositeDisposable);
 
 			InstantAction.TargetFiles.ObserveAddChanged()
 				.Subscribe(x => 
@@ -643,7 +674,8 @@ namespace Modules.InstantAction.ViewModels
 							}
 						}
 					});
-				});
+				})
+				.AddTo(_CompositeDisposable);
 
 			StartProcess();
 		}
@@ -822,7 +854,7 @@ namespace Modules.InstantAction.ViewModels
 	}
 
 
-	public class ProcessingFileViewModel : BindableBase
+	public class ProcessingFileViewModel : BindableBase, IDisposable
 	{
 		public InstantActionModel InstantAction { get; private set; }
 		public InstantActionTargetFile TargetFile { get; private set; }
@@ -857,6 +889,12 @@ namespace Modules.InstantAction.ViewModels
 
 			Message = TargetFile.ObserveProperty(x => x.ProcessMessage)
 				.ToReactiveProperty();
+		}
+
+		public void Dispose()
+		{
+			ProcessState.Dispose();
+			Message.Dispose();
 		}
 	}
 }
