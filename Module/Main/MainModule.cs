@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ReactiveFolder.Models;
 using Prism.Events;
 using ReactiveFolderStyles;
+using ReactiveFolderStyles.Events;
 
 namespace Modules.Main
 {
@@ -27,7 +28,26 @@ namespace Modules.Main
 		public void Initialize()
 		{
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(FolderReactionManagePage));
-			_regionManager.RegisterViewWithRegion("MainRegion", typeof(ReactionEditControl));
+
+
+
+			var openReactionManageEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenReactionManageEventPayload>>();
+			openReactionManageEvent.Subscribe(x =>
+			{
+				_regionManager.RequestNavigate("MainRegion", nameof(FolderReactionManagePage));
+			}
+			, keepSubscriberReferenceAlive: true);
+
+
+
+			var openReactionEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenReactionEventPayload>>();
+			openReactionEvent.Subscribe(x => 
+			{
+				var parameter = ViewModels.FolderReactionManagePageViewModel.CreateOpenReactionParameter(x.ReactionGuid);
+
+				_regionManager.RequestNavigate("MainRegion", nameof(FolderReactionManagePage), parameter);
+			}
+			, keepSubscriberReferenceAlive:true);
 		}
 	}
 }

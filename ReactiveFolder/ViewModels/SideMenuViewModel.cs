@@ -5,6 +5,7 @@ using Prism.Regions;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
+using ReactiveFolderStyles.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace ReactiveFolder.ViewModels
 	{
 		public IRegionManager _RegionManager;
 
-		public ReactiveFolderApp App { get; private set; }
+		public PageManager PageManager { get; private set; }
 
 
 
@@ -40,9 +41,9 @@ namespace ReactiveFolder.ViewModels
 			BottomMenuItems = new List<MenuItemViewModel>();
 		}
 
-		public SideMenuViewModel(ReactiveFolderApp app, IRegionManager regionManagar)
+		public SideMenuViewModel(PageManager page, IRegionManager regionManagar)
 		{
-			App = app;
+			PageManager = page;
 			_RegionManager = regionManagar;
 
 			
@@ -54,7 +55,7 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.Apps,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					App.PageType = AppPageType.AppPolicyManage;
+					PageManager.OpenPage(AppPageType.AppPolicyManage);
 				})
 			};
 
@@ -64,7 +65,7 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.ViewList,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					App.PageType = AppPageType.ReactionManage;
+					PageManager.OpenPage(AppPageType.ReactionManage);
 				})
 			};
 
@@ -74,7 +75,7 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.Run,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					App.PageType = AppPageType.InstantAction;
+					PageManager.OpenPage(AppPageType.InstantAction);
 				})
 			};
 
@@ -87,7 +88,7 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.Settings,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					App.PageType = AppPageType.Settings;
+					PageManager.OpenPage(AppPageType.Settings);
 				})
 			};
 
@@ -97,7 +98,7 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.CommentQuestionOutline,
 				MenuItemSelectedCommand = new DelegateCommand(() => 
 				{
-					App.PageType = AppPageType.About;
+					PageManager.OpenPage(AppPageType.About);
 				})
 			};
 
@@ -117,7 +118,7 @@ namespace ReactiveFolder.ViewModels
 
 
 
-			App.ObserveProperty(x => x.PageType)
+			PageManager.ObserveProperty(x => x.PageType)
 				.Subscribe(x =>
 				{
 					var allMenuItems = TopMenuItems.Concat(BottomMenuItems);

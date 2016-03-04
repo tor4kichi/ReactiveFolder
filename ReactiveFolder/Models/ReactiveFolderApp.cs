@@ -8,6 +8,8 @@ using System.IO;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.Util;
 using Microsoft.Practices.Prism.Mvvm;
+using ReactiveFolderStyles.Models;
+using Prism.Events;
 
 namespace ReactiveFolder.Models
 {
@@ -73,9 +75,12 @@ namespace ReactiveFolder.Models
 
 		public InstantActionManager InstantActionManager { get; private set; }
 
-		public ReactiveFolderApp()
+		public PageManager PageManager { get; private set; }
+
+
+		public ReactiveFolderApp(IEventAggregator ea)
 		{
-			PageType = InitialPage;
+			PageManager = new PageManager(ea);
 
 			// AppData
 			var appDataSaveFolder = new DirectoryInfo(AppDataSaveFolder);
@@ -110,10 +115,13 @@ namespace ReactiveFolder.Models
 			InstantActionManager = new InstantActionManager();
 			InstantActionManager.SaveFolder = Path.Combine(Settings.SaveFolder, INSTANT_ACTION_FOLDER_NAME);
 			InstantActionManager.TempSaveFolder = Path.Combine(Settings.SaveFolder, INSTANT_ACTION_TEMP_FOLDER_NAME);
-
-
 		}
 
+
+		public void OpenInitialPage()
+		{
+			PageManager.OpenPage(InitialPage);
+		}
 
 
 		public void SaveGlobalSettings()
@@ -181,14 +189,5 @@ namespace ReactiveFolder.Models
 	}
 
 
-	public enum AppPageType
-	{
-		ReactionManage,
-		AppPolicyManage,
-		InstantAction,
-
-		Settings,
-		About,
-	}
 	
 }

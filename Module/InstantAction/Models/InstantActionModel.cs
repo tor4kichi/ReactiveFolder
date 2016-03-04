@@ -39,6 +39,32 @@ namespace Modules.InstantAction.Models
 				OutputFolderPath = instantAction.OutputFolderPath
 			};
 		}
+
+		public static FolderReactionModel CreateReaction(InstantActionSaveModel instantActionSaveModel)
+		{
+			var reaction = new FolderReactionModel();
+
+
+			var extentions = instantActionSaveModel.TargetFiles.Select(x => Path.GetExtension(x))
+				.Distinct()
+				.Select(x => "*" + x);
+
+			foreach (var ext in extentions)
+			{
+				reaction.Filter.AddIncludeFilter(ext);
+			}
+
+
+			foreach (var action in instantActionSaveModel.Actions)
+			{
+				reaction.AddAction(action);
+			}
+
+			reaction.Destination.AbsoluteFolderPath = instantActionSaveModel.OutputFolderPath;
+
+
+			return reaction;
+		}
 	}
 
 	public class InstantActionModel : BindableBase

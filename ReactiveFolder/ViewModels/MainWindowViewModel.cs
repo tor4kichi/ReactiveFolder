@@ -12,53 +12,44 @@ using ReactiveFolderStyles;
 using Prism.Commands;
 using ReactiveFolder.Models;
 using Prism.Regions;
+using ReactiveFolderStyles.Models;
+using System.Windows;
+using Prism.Interactivity.InteractionRequest;
+using ReactiveFolderStyles.Events;
 
 namespace ReactiveFolder.ViewModels
 {
 	public class MainWindowViewModel : BindableBase, IDisposable
 	{
-		public ReactiveFolderApp App { get; private set; }
+		public PageManager PageManager { get; private set; }
 		public IRegionManager _RegionManager;
 
+		public InteractionRequest<Notification> MessageRequest { get; private set; }
 
 
 		private IFolderReactionMonitorModel _Monitor;
 		private CompositeDisposable _CompositeDisposable;
 
-		public MainWindowViewModel(ReactiveFolderApp app, IEventAggregator ea, IFolderReactionMonitorModel monitor, IRegionManager regionManagar)
+		public MainWindowViewModel(PageManager pageManager, IEventAggregator ea, IFolderReactionMonitorModel monitor, IRegionManager regionManagar)
 		{
-			App = app;
+			PageManager = pageManager;
 			_Monitor = monitor;
 			_RegionManager = regionManagar;
 
+			MessageRequest = new InteractionRequest<Notification>();
+
 			_CompositeDisposable = new CompositeDisposable();
 
-			App.ObserveProperty(x => x.PageType)
-				.Subscribe(x =>
+
+			var e = ea.GetEvent<PubSubEvent<TaskbarIconBalloonMessageEventPayload>>();
+			e.Subscribe(x =>
+			{
+				MessageRequest.Raise(new Notification()
 				{
-					switch (x)
-					{
-						case AppPageType.AppPolicyManage:
-							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.AppPolicy.Views.AppPolicyManagePage));
-							break;
-						case AppPageType.ReactionManage:
-							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.Main.Views.FolderReactionManagePage));
-							break;
-						case AppPageType.Settings:
-							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.Settings.Views.SettingsPage));
-							break;
-						case AppPageType.About:
-							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.About.Views.AboutPage));
-							break;
-						case AppPageType.InstantAction:
-							_RegionManager.RequestNavigate("MainRegion", nameof(Modules.InstantAction.Views.InstantActionPage));
-							break;
-						default:
-							break;
-					}
-				})
-				.AddTo(_CompositeDisposable);
-				
+					Title = x.Title,
+					Content = x.Message
+				});
+			});
 		}
 
 		public void Dispose()
@@ -75,12 +66,57 @@ namespace ReactiveFolder.ViewModels
 				return _WindowActivatedCommand
 					?? (_WindowActivatedCommand = new DelegateCommand(() =>
 						{
-							_Monitor.RootFolder.UpdateReactionModels();
-							_Monitor.RootFolder.UpdateChildren();
+//							_Monitor.RootFolder.UpdateReactionModels();
+//							_Monitor.RootFolder.UpdateChildren();
 
 
 							
 						}
+					));
+
+			}
+		}
+
+		private DelegateCommand _OpenWindowCommand;
+		public DelegateCommand OpenWindowCommand
+		{
+			get
+			{
+				return _OpenWindowCommand
+					?? (_OpenWindowCommand = new DelegateCommand(() =>
+					{
+						ShowWindow(App.Current.MainWindow);
+					}
+					));
+
+			}
+		}
+
+
+		private void ShowWindow(Window win)
+		{
+			// ウィンドウ表示&最前面に持ってくる
+			if (win.WindowState == System.Windows.WindowState.Minimized)
+				win.WindowState = System.Windows.WindowState.Normal;
+
+			win.Show();
+			win.Activate();
+			// タスクバーでの表示をする
+			win.ShowInTaskbar = true;
+		}
+
+		private DelegateCommand _ExitApplicationCommand;
+		public DelegateCommand ExitApplicationCommand
+		{
+			get
+			{
+				return _ExitApplicationCommand
+					?? (_ExitApplicationCommand = new DelegateCommand(() =>
+					{
+						App.Current.Shutdown();
+
+						
+					}
 					));
 
 			}

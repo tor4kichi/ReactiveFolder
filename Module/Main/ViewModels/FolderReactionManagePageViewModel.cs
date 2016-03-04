@@ -90,20 +90,35 @@ namespace Modules.Main.ViewModels
 		public void OnNavigatedTo(NavigationContext navigationContext)
 		{
 			NavigationService = navigationContext.NavigationService;
-			/*
-			if (navigationContext.Parameters.Count() == 0)
+
+			Initialize(_MonitorModel.RootFolder);
+
+
+			if (navigationContext.Parameters.Count() > 0)
 			{
-				Initialize(_MonitorModel.RootFolder);
+				try
+				{
+					var reactionGuid = (Guid)navigationContext.Parameters["guid"];
+
+					ShowReaction(_MonitorModel.RootFolder.FindReaction(reactionGuid));
+				}
+				catch
+				{
+					Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
+				}
 			}
-			else
-			{
-				var folderModel = FolderModelFromNavigationParameters(navigationContext.Parameters);
-				Initialize(folderModel);
-			}
-			*/
+			
 		}
 
 
+
+		public static NavigationParameters CreateOpenReactionParameter(Guid reactionGuid)
+		{
+			var parameters = new NavigationParameters();
+
+			parameters.Add("guid", reactionGuid);
+			return parameters;
+		}
 
 		private void Initialize(FolderModel folder)
 		{

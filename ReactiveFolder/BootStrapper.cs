@@ -23,7 +23,7 @@ namespace ReactiveFolder
 {
 	class Bootstrapper : UnityBootstrapper
 	{
-
+		public ReactiveFolderApp ReactiveFolderApp { get; private set; }
 		public string[] Args { get; private set; }
 
 		public Bootstrapper(string[] args)
@@ -47,22 +47,26 @@ namespace ReactiveFolder
 			this.Container.RegisterInstance<IEventAggregator>(ea);
 
 
-			var app = new ReactiveFolderApp();
+			ReactiveFolderApp = new ReactiveFolderApp(ea);
 
 			// リアクションモニターのインスタンスを生成＆DIコンテナに登録
-			this.Container.RegisterInstance<IFolderReactionMonitorModel>(app.ReactionMonitor);
+			this.Container.RegisterInstance<IFolderReactionMonitorModel>(ReactiveFolderApp.ReactionMonitor);
 
 			// アプリ起動ポリシー管理の〃
-			this.Container.RegisterInstance<IAppPolicyManager>(app.AppPolicyManager);
+			this.Container.RegisterInstance<IAppPolicyManager>(ReactiveFolderApp.AppPolicyManager);
 
 			// ファイル更新タイミング記録管理の〃
-			this.Container.RegisterInstance<IFileUpdateRecordManager>(app.UpdateRecordManager);
+			this.Container.RegisterInstance<IFileUpdateRecordManager>(ReactiveFolderApp.UpdateRecordManager);
 
-			this.Container.RegisterInstance<IInstantActionManager>(app.InstantActionManager);
+			this.Container.RegisterInstance<IInstantActionManager>(ReactiveFolderApp.InstantActionManager);
 
-			this.Container.RegisterInstance<IReactiveFolderSettings>(app.Settings);
+			this.Container.RegisterInstance<IReactiveFolderSettings>(ReactiveFolderApp.Settings);
 
-			this.Container.RegisterInstance<ReactiveFolderApp>(app);
+			this.Container.RegisterInstance<PageManager>(ReactiveFolderApp.PageManager);
+
+			this.Container.RegisterInstance<ReactiveFolderApp>(ReactiveFolderApp);
+
+			
 
 		}
 
@@ -70,35 +74,9 @@ namespace ReactiveFolder
 		{
 			base.InitializeShell();
 
-			
 			App.Current.MainWindow = (Window)this.Shell;
-
-#if DEBUG
-			App.Current.MainWindow.Show();
-#endif
-
-			
-
-
-			var filePaths = Args.Where(x => false == String.IsNullOrWhiteSpace(x))
-				.Where(x => System.IO.Path.IsPathRooted(x))
-				.Where(x => System.IO.File.Exists(x))
-				.ToArray();
-
-			if (filePaths.Count() > 0)
-			{
-				var ea = this.Container.Resolve<IEventAggregator>();
-				var e = ea.GetEvent<PubSubEvent<ShowInstantActionPageEventPayload>>();
-				e.Publish(new ShowInstantActionPageEventPayload()
-				{
-					FilePaths = filePaths
-				});
-			}
-
-
-
-
 		}
+
 
 		protected override void ConfigureModuleCatalog()
 		{
@@ -118,6 +96,29 @@ namespace ReactiveFolder
 		protected override void InitializeModules()
 		{
 			base.InitializeModules();
+
+			var filePaths = Args.Where(x => false == String.IsNullOrWhiteSpace(x))
+				.Where(x => System.IO.Path.IsPathRooted(x))
+				.Where(x => System.IO.File.Exists(x))
+				.ToArray();
+
+			if (filePaths.Count() > 0)
+			{
+				ReactiveFolderApp.PageManager.OpenInstantActionWithDefaultFiles(filePaths);
+			}
+			else
+			{
+				ReactiveFolderApp.OpenInitialPage();
+			}
+
+
+			
+
+#if DEBUG
+			App.Current.MainWindow.Show();
+#endif
+
+
 		}
 	}
 }

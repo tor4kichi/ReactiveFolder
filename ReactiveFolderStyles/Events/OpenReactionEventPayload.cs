@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReactiveFolderStyles
+namespace ReactiveFolderStyles.Events
 {
-	public class ShowInstantActionPageEventPayload 
+	public class OpenReactionEventPayload
 	{
-		public string[] FilePaths { get; set; }
+		public Guid ReactionGuid { get; set; }
 	}
 }

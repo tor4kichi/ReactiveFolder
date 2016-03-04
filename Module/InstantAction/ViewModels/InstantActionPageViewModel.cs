@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using Modules.InstantAction.Models;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
 using Reactive.Bindings;
@@ -8,6 +9,7 @@ using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolderStyles.Events;
 using ReactiveFolderStyles.Models;
 using ReactiveFolderStyles.ViewModels;
 using System;
@@ -26,8 +28,10 @@ namespace Modules.InstantAction.ViewModels
 {
 	public class InstantActionPageViewModel : BindableBase, INavigationAware, IDisposable
 	{
+		private IEventAggregator _EventAggregator;
 		public IAppPolicyManager AppPolicyManger { get; private set; }
 		public IInstantActionManager InstantActionManager { get; private set; }
+		public IFolderReactionMonitorModel Monitor { get; private set; }
 
 		public IRegionNavigationService NavigationService;
 
@@ -39,14 +43,26 @@ namespace Modules.InstantAction.ViewModels
 
 		public ReactiveProperty<InstantActionStepViewModel> InstantActionVM { get; private set; }
 
-		public InstantActionPageViewModel(IAppPolicyManager appPolicyManager, IInstantActionManager instantActionManager)
+		public InstantActionPageViewModel(IEventAggregator ea, IAppPolicyManager appPolicyManager, IInstantActionManager instantActionManager, IFolderReactionMonitorModel monitor)
 		{
+			_EventAggregator = ea;
 			AppPolicyManger = appPolicyManager;
 			InstantActionManager = instantActionManager;
+			Monitor = monitor;
 
 			InstantActionVM = new ReactiveProperty<InstantActionStepViewModel>();
 				
 		}
+
+
+
+		public void Dispose()
+		{
+			InstantActionVM.Value?.Dispose();
+		}
+
+
+
 
 		public bool IsNavigationTarget(NavigationContext navigationContext)
 		{
@@ -106,6 +122,11 @@ namespace Modules.InstantAction.ViewModels
 			return param;
 		}
 
+
+
+
+
+
 		internal void ChangeStep(InstantActionStepViewModel step)
 		{
 			if (step == null)
@@ -136,9 +157,25 @@ namespace Modules.InstantAction.ViewModels
 			ChangeStep(new FinishingInstantActionStepViewModel(this, Model));
 		}
 
-		public void Dispose()
+
+
+
+
+		internal void CreateReaction()
 		{
-			InstantActionVM.Value?.Dispose();
+			var saveModel = InstantActionSaveModel.CreateFromInstantActionModel(Model);
+			var reaction = InstantActionSaveModel.CreateReaction(saveModel);
+			Monitor.RootFolder.AddReaction(reaction);
+
+			reaction.Name = "from InstantAction";
+
+			var openReactionEvent = _EventAggregator.GetEvent<PubSubEvent<OpenReactionEventPayload>>();
+
+			openReactionEvent.Publish(new OpenReactionEventPayload()
+			{
+				ReactionGuid = reaction.Guid
+			});
+			
 		}
 	}
 
@@ -817,7 +854,7 @@ namespace Modules.InstantAction.ViewModels
 				return _CreateReactionCommand
 					?? (_CreateReactionCommand = new DelegateCommand(() =>
 					{
-
+						PageVM.CreateReaction();
 					}));
 			}
 		}
