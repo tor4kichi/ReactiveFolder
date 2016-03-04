@@ -76,6 +76,8 @@ namespace ReactiveFolder.Models
 			SourcePath = OriginalPath;
 
 			Status = ReactiveStreamStatus.Running;
+
+			FailedMessage = new List<string>();
 		}
 
 
@@ -126,6 +128,8 @@ namespace ReactiveFolder.Models
 			Status = ReactiveStreamStatus.Failed;
 
 			FailedCuaseException = e;
+
+			FailedMessage.Add(message);
 		}
 
 		public void Complete(string outputItemPath)

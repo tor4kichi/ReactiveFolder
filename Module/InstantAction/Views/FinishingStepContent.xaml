@@ -133,11 +133,33 @@
                               CanUserDeleteRows="False"
                               Margin="8 0"
                               SelectionUnit="FullRow"
+                              Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
                            >
+                            <DataGrid.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                    <MenuItem Header="Copy Files"
+                                              ToolTip="Selected files copy to clipboard, if State 'Complete'."
+                                              Command="{Binding SelectedFilePathCopyToClipboardCommand}"
+                                              />
+                                    <MenuItem Header="Open with Default App"
+                                              Command="{Binding OpenWithDefaultAppCommand}"
+                                              />
+
+                                    <Separator />
+                                    
+                                    <MenuItem Header="Remove Files"
+                                              Command="{Binding DeleteSelectedCommand}"
+                                              ToolTip="Selected files remove from this Process. (not influence to storage.)"
+                                              />
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
                             <DataGrid.ItemContainerStyle>
                                 <Style TargetType="{x:Type DataGridRow}">
+
+                                    <Setter Property="ToolTip" Value="{Binding Message.Value, Mode=OneWay}" />
+
                                     <Setter Property="IsSelected"
-                                    Value="{Binding IsSelected, Mode=TwoWay}" />
+                                        Value="{Binding IsSelected, Mode=TwoWay}" />
 
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsSelected}" Value="true">

@@ -13,6 +13,7 @@ using ReactiveFolderStyles.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -296,7 +297,7 @@ namespace Modules.InstantAction.ViewModels
 					{
 						var removeTarget = InstantAction.TargetFiles.Single(x => x.FilePath == filePath);
 
-						InstantAction.TargetFiles.Remove(removeTarget);
+						InstantAction.RemoveTargetFile(removeTarget);
 
 						RaiseCanGoNextChanged();
 					}));
@@ -335,6 +336,20 @@ namespace Modules.InstantAction.ViewModels
 				.Select(x => new ToggleSelectableInstantAppOptionViewModel(x))
 				);
 
+			ActionVMs = new ObservableCollection<InstantAppOptionInstanceViewModel>(
+				instantAction.Actions.Select(x => new InstantAppOptionInstanceViewModel(this, x))
+				);
+
+			foreach (var appOption in AppOptions)
+			{
+				var vm = ActionVMs.SingleOrDefault(x => x.AppGuid == appOption.AppPolicy.Guid && x.OptionInstance.OptionDeclaration == appOption.Declaration);
+				if (vm != null)
+				{
+					appOption.IsSelected = true;
+					appOption._CachedActionVM = vm;
+				}
+			}
+
 			// Actions
 			// SelectedAppOptionsの追加に合わせてActionsを変更
 			AppOptions.ObserveElementProperty(x => x.IsSelected, isPushCurrentValueAtFirst:false)
@@ -342,9 +357,7 @@ namespace Modules.InstantAction.ViewModels
 				.Subscribe(ToggleAction); 
 
 
-			ActionVMs = new ObservableCollection<InstantAppOptionInstanceViewModel>(
-				instantAction.Actions.Select(x => new InstantAppOptionInstanceViewModel(this, x))
-				);
+			
 		}
 
 		// Note: 利用したいオプションとして選択用オプションとしては表示をOFFに
@@ -359,13 +372,13 @@ namespace Modules.InstantAction.ViewModels
 					appOption._CachedActionVM = new InstantAppOptionInstanceViewModel(this, action);
 				}
 
-				InstantAction.Actions.Add(appOption._CachedActionVM.AppLaunchAction);
+				InstantAction.AddAction(appOption._CachedActionVM.AppLaunchAction);
 
 				ActionVMs.Add(appOption._CachedActionVM);
 			}
 			else
 			{
-				InstantAction.Actions.Remove(appOption._CachedActionVM.AppLaunchAction);
+				InstantAction.RemoveAction(appOption._CachedActionVM.AppLaunchAction);
 				ActionVMs.Remove(appOption._CachedActionVM);
 			}
 
@@ -404,6 +417,13 @@ namespace Modules.InstantAction.ViewModels
 			if (appOption != null)
 			{
 				appOption.IsSelected = false;
+			}
+			else
+			{
+				var vm = ActionVMs.Single(x => x.AppLaunchAction == action);
+				ActionVMs.Remove(vm);
+				InstantAction.RemoveAction(action);
+				
 			}
 		}
 	}
@@ -684,7 +704,7 @@ namespace Modules.InstantAction.ViewModels
 							new System.Collections.Specialized.StringCollection();
 						foreach (var fileVM in Files)
 						{
-							files.Add(fileVM.TargetFile.FilePath);
+							files.Add(fileVM.TargetFile.OutputPath);
 						}
 
 						Clipboard.SetFileDropList(files);
@@ -705,11 +725,53 @@ namespace Modules.InstantAction.ViewModels
 							new System.Collections.Specialized.StringCollection();
 						foreach (var fileVM in Files.Where(x => x.IsSelected))
 						{
-							files.Add(fileVM.TargetFile.FilePath);
+							files.Add(fileVM.TargetFile.OutputPath);
 						}
 
 						Clipboard.SetFileDropList(files);
 							
+					}));
+			}
+		}
+
+
+		private DelegateCommand _DeleteSelectedCommand;
+		public DelegateCommand DeleteSelectedCommand
+		{
+			get
+			{
+				return _DeleteSelectedCommand
+					?? (_DeleteSelectedCommand = new DelegateCommand(() =>
+					{
+						var selectedFiles = Files.Where(x => x.IsSelected)
+							.Select(x => x.TargetFile);
+
+						foreach (var targetFile in selectedFiles)
+						{
+							InstantAction.RemoveTargetFile(targetFile);
+						}
+					}));
+			}
+		}
+
+		private DelegateCommand _OpenWithDefaultAppCommand;
+		public DelegateCommand OpenWithDefaultAppCommand
+		{
+			get
+			{
+				return _OpenWithDefaultAppCommand
+					?? (_OpenWithDefaultAppCommand = new DelegateCommand(() =>
+					{
+						var selectedFiles = Files.Where(x => x.IsSelected)
+							.Select(x => x.TargetFile);
+
+						foreach (var targetFile in selectedFiles)
+						{
+							if (targetFile.IsComplete)
+							{
+								Process.Start(targetFile.OutputPath);
+							}
+						}
 					}));
 			}
 		}
@@ -782,6 +844,8 @@ namespace Modules.InstantAction.ViewModels
 
 		public string FilePath { get; private set; }
 
+		public ReactiveProperty<string> Message { get; private set; }
+
 		public ProcessingFileViewModel(InstantActionModel instantAction, InstantActionTargetFile targetFile)
 		{
 			InstantAction = instantAction;
@@ -789,6 +853,9 @@ namespace Modules.InstantAction.ViewModels
 
 			FilePath = targetFile.FilePath;
 			ProcessState = targetFile.ObserveProperty(x => x.ProcessState)
+				.ToReactiveProperty();
+
+			Message = TargetFile.ObserveProperty(x => x.ProcessMessage)
 				.ToReactiveProperty();
 		}
 	}

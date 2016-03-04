@@ -195,7 +195,7 @@ namespace ReactiveFolder.Models.Actions
 				}
 				else
 				{
-					context.Failed("Timeout または 実行に失敗");
+					context.Failed("Execute failed or timeout");
 				} 
 			}
 			catch (Exception e)

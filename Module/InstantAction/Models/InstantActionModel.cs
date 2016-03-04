@@ -6,6 +6,7 @@ using ReactiveFolder.Models.Destinations;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -45,9 +46,12 @@ namespace Modules.InstantAction.Models
 		public IAppPolicyManager AppPolicyManager { get; set; }
 
 
-		public ObservableCollection<InstantActionTargetFile> TargetFiles { get; private set; }
+		private ObservableCollection<InstantActionTargetFile> _TargetFiles { get; set; }
+		public ReadOnlyObservableCollection<InstantActionTargetFile> TargetFiles { get; private set; }
 
-		public ObservableCollection<AppLaunchReactiveAction> Actions { get; private set; }
+
+		private ObservableCollection<AppLaunchReactiveAction> _Actions { get; set; }
+		public ReadOnlyObservableCollection<AppLaunchReactiveAction> Actions { get; private set; }
 
 		/// <summary>
 		/// 処理実行中に出力先フォルダが変更された場合に対応する
@@ -68,7 +72,7 @@ namespace Modules.InstantAction.Models
 					if (SetProperty(ref _OutputFolderPath, value))
 					{
 						// TargetFilesのOutputFolderを書き換える
-						foreach (var file in TargetFiles)
+						foreach (var file in _TargetFiles)
 						{
 							file.OutputFolderPath = OutputFolderPath;
 						}
@@ -81,13 +85,14 @@ namespace Modules.InstantAction.Models
 		
 
 
-
 		public InstantActionModel(IAppPolicyManager appPolicyManager)
 		{
 			AppPolicyManager = appPolicyManager;
 
-			TargetFiles = new ObservableCollection<InstantActionTargetFile>();
-			Actions = new ObservableCollection<AppLaunchReactiveAction>();
+			_TargetFiles = new ObservableCollection<InstantActionTargetFile>();
+			TargetFiles = new ReadOnlyObservableCollection<InstantActionTargetFile>(_TargetFiles);
+			_Actions = new ObservableCollection<AppLaunchReactiveAction>();
+			Actions = new ReadOnlyObservableCollection<AppLaunchReactiveAction>(_Actions);
 			OutputFolderPath = "";
 		}
 
@@ -96,8 +101,8 @@ namespace Modules.InstantAction.Models
 		{
 			var instantAction = new InstantActionModel(appPolicyManager);
 
-			instantAction.TargetFiles.AddRange(saveModel.TargetFiles.Select(x => new InstantActionTargetFile(x)));
-			instantAction.Actions.AddRange(saveModel.Actions);
+			instantAction._TargetFiles.AddRange(saveModel.TargetFiles.Select(x => new InstantActionTargetFile(x)));
+			instantAction._Actions.AddRange(saveModel.Actions);
 			instantAction.OutputFolderPath = saveModel.OutputFolderPath;
 
 			return instantAction;
@@ -106,7 +111,7 @@ namespace Modules.InstantAction.Models
 
 		public void AddTargetFile(string path)
 		{
-			if (TargetFiles.Any(x => x.FilePath == path))
+			if (_TargetFiles.Any(x => x.FilePath == path))
 			{
 				return;
 			}
@@ -117,16 +122,46 @@ namespace Modules.InstantAction.Models
 			{
 				var targetFile = new InstantActionTargetFile(path);
 				targetFile.OutputFolderPath = this.OutputFolderPath;
-				TargetFiles.Add(targetFile);
+				_TargetFiles.Add(targetFile);
 			}
 
 
 		}
 
 
+		public void RemoveTargetFile(InstantActionTargetFile targetFile)
+		{
+			_TargetFiles.Remove(targetFile);
+		}
+
+
+		public void AddAction(AppLaunchReactiveAction action)
+		{
+			_Actions.Add(action);
+
+			ResetTargetFileProcessState();
+		}
+
+		public void RemoveAction(AppLaunchReactiveAction action)
+		{
+			_Actions.Remove(action);
+
+			ResetTargetFileProcessState();
+		}
+
+
+		private void ResetTargetFileProcessState()
+		{
+			foreach (var targetFile in _TargetFiles)
+			{
+				targetFile.Ready();
+			}
+		}
+
+
 		public InstantAppOption[] GenerateAppOptions()
 		{
-			var extentions = TargetFiles
+			var extentions = _TargetFiles
 				.Select(x => x.FilePath)
 				.Where(x => Path.HasExtension(x))
 				.Select(x => Path.GetExtension(x))
@@ -183,12 +218,12 @@ namespace Modules.InstantAction.Models
 					}
 					else
 					{
-						targetFile.Failed();
+						targetFile.Failed("File process failed, due to OutputFolder not exist.");
 						return;
 					}
 
 
-					var streams = Actions.Cast<ReactiveStraightStreamBase>().ToList();
+					var streams = _Actions.Cast<ReactiveStraightStreamBase>().ToList();
 					streams.Add(dest);
 
 					foreach (var action in streams)
@@ -209,11 +244,20 @@ namespace Modules.InstantAction.Models
 					}
 					else
 					{
-						targetFile.Failed();
+						if (context.FailedMessage.Count > 0)
+						{
+							targetFile.Failed("Failed due to " + context.FailedMessage[0]);
+						}
+						else
+						{
+							targetFile.Failed("Failed");
+						}
 					}
 
 				}
 			}
+
+			
 		}
 
 
@@ -294,6 +338,20 @@ namespace Modules.InstantAction.Models
 			}
 		}
 
+
+		private string _ProcessMessage;
+		public string ProcessMessage
+		{
+			get
+			{
+				return _ProcessMessage;
+			}
+			set
+			{
+				SetProperty(ref _ProcessMessage, value);
+			}
+		}
+
 		public bool IsReady
 		{
 			get
@@ -339,6 +397,7 @@ namespace Modules.InstantAction.Models
 		{
 			OutputPath = "";
 			ProcessState = FileProcessState.Ready;
+			ProcessMessage = "";
 		}
 
 		public void WaitForProcess()
@@ -358,9 +417,10 @@ namespace Modules.InstantAction.Models
 		}
 
 		
-		public void Failed()
+		public void Failed(string message = "")
 		{
 			ProcessState = FileProcessState.Failed;
+			ProcessMessage = message;
 		}
 
 
@@ -368,7 +428,7 @@ namespace Modules.InstantAction.Models
 		{
 			FilePath = path;
 
-			ProcessState = FileProcessState.Ready;
+			Ready();
 		}
 
 
@@ -381,16 +441,29 @@ namespace Modules.InstantAction.Models
 				var sourceFile = new FileInfo(OutputPath);
 				var destFilePath = Path.Combine(OutputFolderPath, sourceFile.Name);
 
-
+				var destFileInfo = new FileInfo(destFilePath);
 				// TODO: すでにファイルが存在する場合
 				try
 				{
-					sourceFile.MoveTo(destFilePath);
+					if (destFileInfo.Exists)
+					{
+						if (destFileInfo.FullName == this.FilePath)
+						{
+							Failed("Failed due to same file path on both of Input and Output.");
+							return;
+						}
+						else
+						{
+							destFileInfo.Delete();
+						}
+					}
+
+					sourceFile.MoveTo(destFileInfo.FullName);
 					OutputPath = sourceFile.FullName;
 				}
 				catch
 				{
-					Failed();
+					Failed("Failed on output file move to OutputFolder");
 				}
 
 			}
