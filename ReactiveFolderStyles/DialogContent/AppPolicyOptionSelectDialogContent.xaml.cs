@@ -31,17 +31,28 @@ namespace ReactiveFolderStyles.DialogContent
 	public class AppPolicyOptionSelectDialogContentViewModel : BindableBase
 	{
 
-		public List<AppPolicyOptionSelectItem> SelectItems { get; private set; }
+		public List<AppPolicyOptionSelectItem> Options { get; private set; }
+		public List<AppPolicyOptionSelectItem> OutputOptions { get; private set; }
 
 
 		public IEnumerable<AppPolicyOptionSelectItem> GetSelectedItems()
 		{
-			return SelectItems.Where(x => x.IsSelected);
+			var outputSelected = OutputOptions.SingleOrDefault(x => x.IsSelected);
+			if (outputSelected != null)
+			{
+				yield return outputSelected;
+			}
+
+			foreach (var opt in Options.Where(x => x.IsSelected))
+			{
+				yield return opt;
+			}
 		}
 
-		public AppPolicyOptionSelectDialogContentViewModel(IEnumerable<AppPolicyOptionSelectItem> items)
+		public AppPolicyOptionSelectDialogContentViewModel(IEnumerable<AppPolicyOptionSelectItem> options, IEnumerable<AppPolicyOptionSelectItem> outputOptions)
 		{
-			SelectItems = items.ToList();
+			Options = options.ToList();
+			OutputOptions = outputOptions.ToList();
 		}
 	}
 

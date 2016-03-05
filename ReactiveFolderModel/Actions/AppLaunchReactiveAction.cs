@@ -248,9 +248,30 @@ namespace ReactiveFolder.Models.Actions
 		}
 
 
-
+		/// <summary>
+		/// AdditionalOptionsにオプションインスタンスを追加します。
+		/// 出力オプションのインスタンスを追加する時に、AdditionalOptionsに一つしか存在しないよう既存の出力オプションが除外されます。
+		/// </summary>
+		/// <see cref="ApplicationPolicy.OutputOptionDeclarations"/>
+		/// <param name="instance"></param>
 		public void AddAppOptionInstance(AppOptionInstance instance)
 		{
+			
+			if (AppPolicy.OutputOptionDeclarations.Contains(instance.OptionDeclaration))
+			{
+				var alreadyOutputOption = AdditionalOptions.SingleOrDefault(x => AppPolicy.OutputOptionDeclarations.Any(y => x.OptionDeclaration == y));
+
+				if (alreadyOutputOption != null)
+				{
+					if (instance.OptionDeclaration == alreadyOutputOption.OptionDeclaration)
+					{
+						return;
+					}
+
+					_AdditionalOptions.Remove(alreadyOutputOption);
+				}
+			}
+
 			_AdditionalOptions.Add(instance);
 
 			ValidatePropertyChanged();

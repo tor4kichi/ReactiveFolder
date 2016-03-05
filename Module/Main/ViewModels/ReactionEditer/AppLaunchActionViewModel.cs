@@ -93,16 +93,28 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					?? (_SelectAppOptionCommand = new DelegateCommand(async () =>
 					{
 						var appPolicy = Action.AppPolicy;
-						var decls = appPolicy.OptionDeclarations.Concat(appPolicy.OutputOptionDeclarations)
-							.Where(x => Action.AdditionalOptions.All(addedOption => x != addedOption.OptionDeclaration));
-						
-						var items = decls.Select(x => new AppPolicyOptionSelectItem()
-						{
-							OptionName = x.Name,
-							OptionId = x.Id
-						});
+						var optionDecls = appPolicy.OptionDeclarations
+							.Where(x => Action.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
+						var outputOptionDecls = appPolicy.OutputOptionDeclarations
+							.Where(x => Action.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
 
-						var dialogVM = new AppPolicyOptionSelectDialogContentViewModel(items);
+
+
+						var optionItems = optionDecls.Select(x =>
+							new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectItem()
+							{
+								OptionName = x.Name,
+								OptionId = x.Id
+							});
+
+						var outputOptionItems = outputOptionDecls.Select(x =>
+							new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectItem()
+							{
+								OptionName = x.Name,
+								OptionId = x.Id
+							});
+
+						var dialogVM = new AppPolicyOptionSelectDialogContentViewModel(optionItems, outputOptionItems);
 
 						var result = await ShowSelectAppOptionDialog(dialogVM);
 						if (result != null && ((bool)result) == true)

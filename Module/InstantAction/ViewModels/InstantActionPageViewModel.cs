@@ -555,19 +555,29 @@ namespace Modules.InstantAction.ViewModels
 						var appPolicy = AppLaunchAction.AppPolicy;
 
 						// 未追加のオプションを取得
-						var decls = appPolicy.OptionDeclarations.Concat(appPolicy.OutputOptionDeclarations)
+						var optionDecls = appPolicy.OptionDeclarations
+							.Where(x => AppLaunchAction.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
+						var outputOptionDecls = appPolicy.OutputOptionDeclarations
 							.Where(x => AppLaunchAction.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
 
 
 
-						var items = decls.Select(x =>
+						var optionItems = optionDecls.Select(x =>
 							new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectItem()
 							{
 								OptionName = x.Name,
 								OptionId = x.Id
 							});
 
-						var selectDialogVM = new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectDialogContentViewModel(items);
+						var outputOptionItems = outputOptionDecls.Select(x =>
+							new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectItem()
+							{
+								OptionName = x.Name,
+								OptionId = x.Id
+							});
+
+
+						var selectDialogVM = new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectDialogContentViewModel(optionItems, outputOptionItems);
 
 						var view = new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectDialogContent()
 						{
