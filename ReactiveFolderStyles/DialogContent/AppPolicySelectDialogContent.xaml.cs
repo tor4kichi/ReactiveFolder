@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Modules.InstantAction.Views.DialogContent
+namespace ReactiveFolderStyles.DialogContent
 {
 	/// <summary>
 	/// AppPolicySelectDialogContent.xaml の相互作用ロジック

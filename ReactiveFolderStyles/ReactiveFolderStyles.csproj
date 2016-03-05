@@ -126,6 +126,12 @@
     <Compile Include="Behaviors\AcceptDrop.cs" />
     <Compile Include="Behaviors\HyperLinkExtention.cs" />
     <Compile Include="Behaviors\TextBoxHelper.cs" />
+    <Compile Include="DialogContent\AppPolicyOptionSelectDialogContent.xaml.cs">
+      <DependentUpon>AppPolicyOptionSelectDialogContent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DialogContent\AppPolicySelectDialogContent.xaml.cs">
+      <DependentUpon>AppPolicySelectDialogContent.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DialogContent\DeleteConfirmDialogContent.xaml.cs">
       <DependentUpon>DeleteConfirmDialogContent.xaml</DependentUpon>
     </Compile>
@@ -157,6 +163,7 @@
     </Compile>
     <Compile Include="Events\OpenInstantActionWithFilesEventPayload.cs" />
     <Compile Include="Util\KnownFolders.cs" />
+    <Compile Include="ViewModels\AppOptionInstanceViewModel.cs" />
     <Compile Include="ViewModels\AppOptionValueViewModel.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -173,6 +180,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="DialogContent\AppPolicyOptionSelectDialogContent.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DialogContent\AppPolicySelectDialogContent.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="DialogContent\DeleteConfirmDialogContent.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -128,12 +128,6 @@
     <Compile Include="Views\ActionSelectStepControl.xaml.cs">
       <DependentUpon>ActionSelectStepControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\DialogContent\AppPolicyOptionSelectDialogContent.xaml.cs">
-      <DependentUpon>AppPolicyOptionSelectDialogContent.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\DialogContent\AppPolicySelectDialogContent.xaml.cs">
-      <DependentUpon>AppPolicySelectDialogContent.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\FileSelectStepContent.xaml.cs">
       <DependentUpon>FileSelectStepContent.xaml</DependentUpon>
     </Compile>
@@ -153,14 +147,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\ActionSelectStepControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\DialogContent\AppPolicyOptionSelectDialogContent.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\DialogContent\AppPolicySelectDialogContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -212,7 +198,9 @@
       <Name>ReactiveFolderStyles</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Views\DialogContent\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

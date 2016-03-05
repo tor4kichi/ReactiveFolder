@@ -1,10 +1,12 @@
-﻿using Microsoft.Practices.Prism.Commands;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.Mvvm;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolderStyles.DialogContent;
 using ReactiveFolderStyles.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -23,23 +25,19 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		public AppLaunchReactiveAction Action { get; private set; }
 		public ApplicationPolicy AppPolicy { get; private set; }
-		public AppOptionInstance OptionInstance { get; private set; }
 
 		public Guid AppGuid { get; private set; }
 
 		public string AppName { get; private set; }
 
-		public string OptionName { get; private set; }
-
-		public List<AppOptionValueViewModel> OptionValues { get; private set; }
+		public ReadOnlyReactiveCollection<AppOptionInstanceViewModel> UsingOptions { get; private set; }
 
 
-		public AppLaunchActionViewModel(ActionsEditViewModel editVM, FolderReactionModel reactionModel, AppLaunchReactiveAction appAction, AppOptionInstance optionInstance)
+		public AppLaunchActionViewModel(ActionsEditViewModel editVM, FolderReactionModel reactionModel, AppLaunchReactiveAction appAction)
 			 : base(reactionModel)
 		{
 			EditVM = editVM;
 			Action = appAction;
-			OptionInstance = optionInstance;
 
 			AppPolicy = appAction.AppPolicy;
 			if (AppPolicy != null)
@@ -47,16 +45,13 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				AppName = AppPolicy.AppName;
 				AppGuid = AppPolicy.Guid;
 
-				OptionName = OptionInstance.OptionDeclaration.Name;
-
-				OptionValues = OptionInstance.FromAppOptionInstance()
-					.ToList();
+				UsingOptions = Action.AdditionalOptions.ToReadOnlyReactiveCollection(x =>
+					new AppOptionInstanceViewModel(Action, x)
+					);
 			}
 			else
 			{
 				AppName = "<App not found>";
-				OptionName = "";
-				OptionValues = new List<AppOptionValueViewModel>();
 			}
 		}
 
@@ -76,18 +71,72 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					}));
 			}
 		}
+
+
+		public async Task<object> ShowSelectAppOptionDialog(AppPolicyOptionSelectDialogContentViewModel vm)
+		{
+			var view = new AppPolicyOptionSelectDialogContent()
+			{
+				DataContext = vm
+			};
+
+			return await DialogHost.Show(view, "ReactionEditCommonDialogHost");
+		}
+
+
+		private DelegateCommand _SelectAppOptionCommand;
+		public DelegateCommand SelectAppOptionCommand
+		{
+			get
+			{
+				return _SelectAppOptionCommand
+					?? (_SelectAppOptionCommand = new DelegateCommand(async () =>
+					{
+						var appPolicy = Action.AppPolicy;
+						var decls = appPolicy.OptionDeclarations.Concat(appPolicy.OutputOptionDeclarations)
+							.Where(x => Action.AdditionalOptions.All(addedOption => x != addedOption.OptionDeclaration));
+						
+						var items = decls.Select(x => new AppPolicyOptionSelectItem()
+						{
+							OptionName = x.Name,
+							OptionId = x.Id
+						});
+
+						var dialogVM = new AppPolicyOptionSelectDialogContentViewModel(items);
+
+						var result = await ShowSelectAppOptionDialog(dialogVM);
+						if (result != null && ((bool)result) == true)
+						{
+							foreach (var item in dialogVM.GetSelectedItems())
+							{
+								var decl = appPolicy.FindOptionDeclaration(item.OptionId);
+								var instance = decl.CreateInstance();
+
+								Action.AddAppOptionInstance(instance);
+							}
+
+						}
+
+					}));
+			}
+		}
 	}
 
 
-	
-
-
-	
-
 
 	
 
 
 
-	
+
+
+
+
+
+
+
+
+
+
+
 }

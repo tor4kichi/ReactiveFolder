@@ -13,55 +13,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="600">
     <UserControl.Resources>
-        <DataTemplate x:Key="appLaunchActionInstanceOptionTemplate">
-            <DockPanel>
-                <Border DockPanel.Dock="Top">
-                    <TextBlock Text="{Binding OptionName}" />
-                </Border>
-
-                <Border DockPanel.Dock="Right">
-                    <Button Command="{Binding RemoveOptionCommand}"
-                            Style="{StaticResource MaterialDesignFlatButton}"
-                            >
-                        <materialDesign:PackIcon Kind="Close" />
-                    </Button>
-                </Border>
-
-                <Border>
-
-                    <ItemsControl ItemsSource="{Binding OptionValues}"
-                                      DockPanel.Dock="Right"
-                                      >
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="ContentTemplate">
-                                    <Setter.Value>
-                                        <DataTemplate>
-                                            <DockPanel
-                                                    >
-
-                                                <TextBlock Text="{Binding PropertyName}" 
-                                                               DockPanel.Dock="Bottom"
-                                                               HorizontalAlignment="Right"
-                                                               FontSize="10"
-                                                               />
-
-                                                <!-- DataTemplate using ReactiveFolderStyle/Views/AppOptionTemplate.xaml -->
-                                                <ContentPresenter Content="{Binding}"
-                                                                      Margin="16 2 0 0"
-                                                                      />
-                                            </DockPanel>
-
-                                        </DataTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                    </ItemsControl>
-                </Border>
-
-            </DockPanel>
-        </DataTemplate>
+        
 
 
         <DataTemplate x:Key="actionListItemTemplate">
@@ -121,8 +73,8 @@
                         </DockPanel>
                     </Border>
 
+                    <!-- ItemTemplate see@ ReactiveFolderStyles.AppOptionResources  -->
                     <ItemsControl ItemsSource="{Binding UsingOptions}" 
-                                  ItemTemplate="{StaticResource appLaunchActionInstanceOptionTemplate}" 
                                   Margin="32 0 0 0"
                                   HorizontalContentAlignment="Right"
                                   />

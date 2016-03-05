@@ -417,15 +417,15 @@ namespace Modules.InstantAction.ViewModels
 						// 利用するアプリポリシーを選択するダイアログを表示する
 						// アプリポリシー選択ダイアログ
 						var items = appPolicies.Select(x =>
-							new Views.DialogContent.AppPolicySelectItem()
+							new ReactiveFolderStyles.DialogContent.AppPolicySelectItem()
 							{
 								AppName = x.AppName,
 								AppGuid = x.Guid
 							});
 
-						var selectDialogVM = new Views.DialogContent.AppPolicySelectDialogContentViewModel(items);
+						var selectDialogVM = new ReactiveFolderStyles.DialogContent.AppPolicySelectDialogContentViewModel(items);
 
-						var view = new Views.DialogContent.AppPolicySelectDialogContent()
+						var view = new ReactiveFolderStyles.DialogContent.AppPolicySelectDialogContent()
 						{
 							DataContext = selectDialogVM
 						};
@@ -507,7 +507,7 @@ namespace Modules.InstantAction.ViewModels
 		public Guid AppGuid { get; private set; } 
 
 
-		public ReadOnlyReactiveCollection<AppLaunchActionInstanceOptionViewModel> UsingOptions { get; private set; }
+		public ReadOnlyReactiveCollection<AppOptionInstanceViewModel> UsingOptions { get; private set; }
 
 		public AppLaunchActionInstanceViewModel(ActionsSelectInstantActionStepViewModel parentVM, AppLaunchReactiveAction action)
 		{
@@ -522,7 +522,7 @@ namespace Modules.InstantAction.ViewModels
 			AppGuid = appPolicy.Guid;
 
 			UsingOptions = AppLaunchAction.AdditionalOptions
-				.ToReadOnlyReactiveCollection(x => new AppLaunchActionInstanceOptionViewModel(AppLaunchAction, x));
+				.ToReadOnlyReactiveCollection(x => new AppOptionInstanceViewModel(AppLaunchAction, x));
 		}
 
 		private DelegateCommand _RemoveActionCommand;
@@ -561,15 +561,15 @@ namespace Modules.InstantAction.ViewModels
 
 
 						var items = decls.Select(x =>
-							new Views.DialogContent.AppPolicyOptionSelectItem()
+							new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectItem()
 							{
 								OptionName = x.Name,
 								OptionId = x.Id
 							});
 
-						var selectDialogVM = new Views.DialogContent.AppPolicyOptionSelectDialogContentViewModel(items);
+						var selectDialogVM = new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectDialogContentViewModel(items);
 
-						var view = new Views.DialogContent.AppPolicyOptionSelectDialogContent()
+						var view = new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectDialogContent()
 						{
 							DataContext = selectDialogVM
 						};
@@ -590,49 +590,9 @@ namespace Modules.InstantAction.ViewModels
 					}));
 			}
 		}
-
-
-
 	}
 
-	public class AppLaunchActionInstanceOptionViewModel : BindableBase
-	{
-		public AppLaunchReactiveAction Action { get; private set; }
-		public AppOptionInstance OptionInstance { get; private set; }
-
-		public List<AppOptionValueViewModel> OptionValues { get; private set; }
-
-		public string OptionName { get; private set; }
-
-
-
-		public AppLaunchActionInstanceOptionViewModel(AppLaunchReactiveAction action, AppOptionInstance instance)
-		{
-			Action = action;
-			OptionInstance = instance;
-
-
-			OptionName = OptionInstance.OptionDeclaration.Name;
-
-			OptionValues = OptionInstance.FromAppOptionInstance()
-				.ToList();
-		}
-
-
-
-		private DelegateCommand _RemoveOptionCommand;
-		public DelegateCommand RemoveOptionCommand
-		{
-			get
-			{
-				return _RemoveOptionCommand
-					?? (_RemoveOptionCommand = new DelegateCommand(() =>
-					{
-						Action.RemoveAppOptionInstance(OptionInstance);
-					}));
-			}
-		}
-	}
+	
 
 
 
