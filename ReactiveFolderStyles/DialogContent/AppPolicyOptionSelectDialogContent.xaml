@@ -12,6 +12,7 @@
 
         <TextBlock Text="Select App Options"
                        Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                       Foreground="{StaticResource PrimaryHueMidBrush}"
                        Margin="0 16"
                        />
 

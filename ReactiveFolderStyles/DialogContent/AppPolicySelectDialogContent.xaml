@@ -12,13 +12,13 @@
 
         <TextBlock Text="Select Application"
                        Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                       Foreground="{StaticResource PrimaryHueMidBrush}"
                        Margin="0 16"
                        />
 
         <ListView ItemsSource="{Binding SelectItems}"
                   SelectionMode="Single"
                   SelectedValue="{Binding SelectedItem}"
-                  Margin="8 0"
                   >
             <ListView.ItemTemplate>
                 <DataTemplate>
