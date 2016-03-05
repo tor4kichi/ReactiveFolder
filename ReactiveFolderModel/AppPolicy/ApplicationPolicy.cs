@@ -345,6 +345,21 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
+		/// <summary>
+		/// 渡された拡張子の"全て"が、このアプリポリシーで受け取り可能であれば true を返します。
+		/// </summary>
+		/// <param name="outerExts"></param>
+		/// <returns></returns>
+		public bool CheckCanAcceptExntentions(IEnumerable<string> outerExts)
+		{
+			var innerExts = GetOutputExtentions();
+
+			// innerExtsがouterExtsの全てを含んでいればtrue
+
+			return outerExts.All(outerExt => innerExts.Any(innerExt => outerExt.EndsWith(innerExt)));
+		}
+
+
 
 		public string AppOptionsToArgumentText(IEnumerable<AppOptionInstance> optionValues)
 		{

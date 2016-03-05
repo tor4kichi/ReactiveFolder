@@ -8,6 +8,7 @@
              xmlns:vm="clr-namespace:Modules.Main.ViewModels"
              xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
              xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
+             xmlns:commonvm="clr-namespace:ReactiveFolderStyles.ViewModels;assembly=ReactiveFolderStyles"
              xmlns:prism="http://prismlibrary.com/"             
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:dd="clr-namespace:WPFBehaviorLibrary.DragDropBehavior;assembly=WPFBehaviorLibrary"
@@ -16,84 +17,6 @@
              d:DesignHeight="300" d:DesignWidth="300">
 
     <UserControl.Resources>
-
-        <DataTemplate DataType="{x:Type editervm:InputOptionValueViewModel}">
-            <TextBlock Text="Input" />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type editervm:OutputOptionValueViewModel}">
-            <TextBlock Text="Output" />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:FileOutputOptionValueViewModel}">
-            <DockPanel>
-                <TextBlock Text="{Binding Extention}"
-                           HorizontalAlignment="Right"
-                           />
-
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:StringListOptionValueViewModel}">
-            <DockPanel>
-                <ComboBox ItemsSource="{Binding List}"
-                      SelectedIndex="{Binding SelectedValue.Value}"
-                      Width="200"
-                      HorizontalAlignment="Right"
-                      
-                      >
-                </ComboBox>
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:NumberOptionValueViewModel}">
-            <DockPanel>
-                <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                     Width="200"
-                     HorizontalAlignment="Right"
-                     mybehavior:TextBoxHelper.IsNumeric="True"
-                     />
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:LimitedNumberOptionValueViewModel}">
-            <DockPanel>
-                <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                     Width="200"
-                     HorizontalAlignment="Right"
-                     mybehavior:TextBoxHelper.IsNumeric="True"
-                     />
-
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:RangeNumberOptionValueViewModel}">
-
-            <StackPanel 
-                Orientation="Horizontal"
-                HorizontalAlignment="Right"
-                >
-
-                <TextBlock Text="{Binding CurrentValue.Value}" 
-                           Margin="8 0"
-                           />
-                
-                <Slider Value="{Binding CurrentValue.Value}"
-                    Maximum="{Binding MaxValue, Mode=OneTime}"
-                    Minimum="{Binding MinValue, Mode=OneTime}"
-                    SmallChange="{Binding SkipAmount, Mode=OneTime}"
-                    LargeChange="{Binding SkipAmount, Mode=OneTime}"
-                    TickFrequency="{Binding SkipAmount, Mode=OneTime}" 
-                    IsSnapToTickEnabled="True"
-                    TickPlacement="BottomRight"
-                    MinWidth="200"
-                    MaxWidth="300"
-                    HorizontalAlignment="Right"
-                    >
-
-                </Slider>
-            </StackPanel>
-
-        </DataTemplate>
 
         <DataTemplate x:Key="ActionListItemTemplate">
             <DockPanel
@@ -161,6 +84,7 @@
                                                            FontSize="10"
                                                            />
 
+                                                <!-- DataTemplate using ReactiveFolderStyle/Views/AppOptionTemplate.xaml -->
                                                 <ContentPresenter Content="{Binding}"
                                                                   Margin="16 2 0 0"
                                                                   />

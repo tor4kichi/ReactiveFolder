@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="Modules.InstantAction.Views.InstantActionPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Modules.InstantAction.Views"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
+             xmlns:vm="clr-namespace:Modules.InstantAction.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="600"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             >
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="stempEmptyTemplate">
+            <TextBlock Text="empty" />
+        </DataTemplate>
+
+
+        <DataTemplate x:Key="FileSelectStepTemplate">
+            <local:FileSelectStepContent />
+        </DataTemplate>
+
+        <DataTemplate x:Key="ActionSelectStepTemplate">
+            <local:ActionSelectStepControl />
+        </DataTemplate>
+
+        <DataTemplate x:Key="FinishingStepTemplate">
+            <local:FinishingStepContent />
+        </DataTemplate>
+
+        <local:InstantActionStepDataTemplateSelecter x:Key="actionInstantStepTemplateSelecter" 
+                                                     EmptyTemplate="{StaticResource stempEmptyTemplate}"
+                                                     FileSelectTemplate="{StaticResource FileSelectStepTemplate}"
+                                                     ActionSelectTemplate="{StaticResource ActionSelectStepTemplate}"
+                                                     FinishingTemplate="{StaticResource FinishingStepTemplate}"
+                                                     />
+
+    </UserControl.Resources>
+    <Grid>
+        <Border Margin="32">
+            <ContentControl Content="{Binding InstantActionVM.Value}">
+                <ContentControl.ContentTemplate>
+                    <DataTemplate>
+
+                        <DockPanel>
+
+                            <Border DockPanel.Dock="Bottom">
+                                <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        >
+                                    <Button Content="Back"
+                                            Command="{Binding GoBackCommand}"
+                                            Width="200"
+                                            Margin="8 0"
+                                        />
+
+                                    <Button Content="Continue"
+                                            Command="{Binding GoNextCommand}"
+                                            Width="200"
+                                        />
+
+                                </StackPanel>
+                            </Border>
+
+                            <ContentControl Content="{Binding}"
+                                    ContentTemplateSelector="{StaticResource actionInstantStepTemplateSelecter}"
+                                    Margin="0 0 0 16"
+                                    />
+
+                        </DockPanel>
+                    </DataTemplate>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
+        </Border>
+    </Grid>
+</UserControl>

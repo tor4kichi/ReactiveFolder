@@ -1,5 +1,7 @@
-﻿using Prism.Modularity;
+﻿using Prism.Events;
+using Prism.Modularity;
 using Prism.Regions;
+using ReactiveFolderStyles.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +12,13 @@ namespace Modules.AppPolicy
 {
 	public class AppPolicyModule : IModule
 	{
+		IEventAggregator _EveentAggregator;
 		IRegionManager _regionManager;
 
-		public AppPolicyModule(IRegionManager regionManager)
+		public AppPolicyModule(IRegionManager regionManager, IEventAggregator ea)
 		{
 			_regionManager = regionManager;
+			_EveentAggregator = ea;
 		}
 
 		public void Initialize()
@@ -22,7 +26,14 @@ namespace Modules.AppPolicy
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyManagePage));
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyEditControl));
 
-//			_regionManager.RequestNavigate("MainRegion", nameof(Views.AppPolicyListPage));
+
+
+			var settingsOpenEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenAppPolicyManageEventPayload>>();
+			settingsOpenEvent.Subscribe(x =>
+			{
+				_regionManager.RequestNavigate("MainRegion", nameof(Views.AppPolicyManagePage));
+			}
+			, keepSubscriberReferenceAlive: true);
 		}
 	}
 

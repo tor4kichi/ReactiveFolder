@@ -8,14 +8,21 @@ using System.IO;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.Util;
 using Microsoft.Practices.Prism.Mvvm;
+using ReactiveFolderStyles.Models;
+using Prism.Events;
 
 namespace ReactiveFolder.Models
 {
 	public class ReactiveFolderApp : BindableBase
 	{
+		public const AppPageType InitialPage = AppPageType.InstantAction;
+
+
 		public const string APP_POLICY_FOLDER_NAME = "app_policy";
 		public const string REACTION_FOLDER_NAME = "reaction";
 		public const string UPDATE_RECORD_FOLDER_NAME = "update_record";
+		public const string INSTANT_ACTION_FOLDER_NAME = "instant_action";
+		public const string INSTANT_ACTION_TEMP_FOLDER_NAME = "instant_action_temp";
 
 		public static readonly string DefaultGlobalSettingSavePath =
 			new DirectoryInfo(
@@ -66,10 +73,14 @@ namespace ReactiveFolder.Models
 		public FolderReactionMonitorModel ReactionMonitor { get; private set; }
 
 
+		public InstantActionManager InstantActionManager { get; private set; }
 
-		public ReactiveFolderApp()
+		public PageManager PageManager { get; private set; }
+
+
+		public ReactiveFolderApp(IEventAggregator ea)
 		{
-			PageType = AppPageType.ReactionManage;
+			PageManager = new PageManager(ea);
 
 			// AppData
 			var appDataSaveFolder = new DirectoryInfo(AppDataSaveFolder);
@@ -101,9 +112,16 @@ namespace ReactiveFolder.Models
 			ReactionMonitor.DefaultInterval = TimeSpan.FromSeconds(Settings.DefaultMonitorIntervalSeconds);
 
 
-
+			InstantActionManager = new InstantActionManager();
+			InstantActionManager.SaveFolder = Path.Combine(Settings.SaveFolder, INSTANT_ACTION_FOLDER_NAME);
+			InstantActionManager.TempSaveFolder = Path.Combine(Settings.SaveFolder, INSTANT_ACTION_TEMP_FOLDER_NAME);
 		}
 
+
+		public void OpenInitialPage()
+		{
+			PageManager.OpenPage(InitialPage);
+		}
 
 
 		public void SaveGlobalSettings()
@@ -171,13 +189,5 @@ namespace ReactiveFolder.Models
 	}
 
 
-	public enum AppPageType
-	{
-		ReactionManage,
-		AppPolicyManage,
-
-		Settings,
-		About,
-	}
 	
 }

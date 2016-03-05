@@ -5,6 +5,7 @@ using Prism.Regions;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
+using ReactiveFolderStyles.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace ReactiveFolder.ViewModels
 	{
 		public IRegionManager _RegionManager;
 
-		public ReactiveFolderApp App { get; private set; }
+		public PageManager PageManager { get; private set; }
 
 
 
@@ -26,6 +27,7 @@ namespace ReactiveFolder.ViewModels
 		public MenuItemViewModel ReactionManageListItem { get; private set; }
 		public MenuItemViewModel SettingsListItem { get; private set; }
 		public MenuItemViewModel AboutListItem { get; private set; }
+		public MenuItemViewModel InstantActionListItem { get; private set; }
 
 		public List<MenuItemViewModel> TopMenuItems { get; private set; }
 
@@ -39,9 +41,9 @@ namespace ReactiveFolder.ViewModels
 			BottomMenuItems = new List<MenuItemViewModel>();
 		}
 
-		public SideMenuViewModel(ReactiveFolderApp app, IRegionManager regionManagar)
+		public SideMenuViewModel(PageManager page, IRegionManager regionManagar)
 		{
-			App = app;
+			PageManager = page;
 			_RegionManager = regionManagar;
 
 			
@@ -53,7 +55,7 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.Apps,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					App.PageType = AppPageType.AppPolicyManage;
+					PageManager.OpenPage(AppPageType.AppPolicyManage);
 				})
 			};
 
@@ -63,21 +65,30 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.ViewList,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					App.PageType = AppPageType.ReactionManage;
+					PageManager.OpenPage(AppPageType.ReactionManage);
+				})
+			};
+
+			InstantActionListItem = new MenuItemViewModel(AppPageType.InstantAction)
+			{
+				Title = "Instant Action",
+				Kind = PackIconKind.Run,
+				MenuItemSelectedCommand = new DelegateCommand(() =>
+				{
+					PageManager.OpenPage(AppPageType.InstantAction);
 				})
 			};
 
 
 
 
-			
 			SettingsListItem = new MenuItemViewModel(AppPageType.Settings)
 			{
 				Title = "Settings",
 				Kind = PackIconKind.Settings,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					App.PageType = AppPageType.Settings;
+					PageManager.OpenPage(AppPageType.Settings);
 				})
 			};
 
@@ -87,15 +98,16 @@ namespace ReactiveFolder.ViewModels
 				Kind = PackIconKind.CommentQuestionOutline,
 				MenuItemSelectedCommand = new DelegateCommand(() => 
 				{
-					App.PageType = AppPageType.About;
+					PageManager.OpenPage(AppPageType.About);
 				})
 			};
 
 
 			TopMenuItems = new List<MenuItemViewModel>()
 			{
+				InstantActionListItem,
+				ReactionManageListItem,
 				AppPolicyManageListItem,
-				ReactionManageListItem
 			};
 
 			BottomMenuItems = new List<MenuItemViewModel>()
@@ -106,7 +118,7 @@ namespace ReactiveFolder.ViewModels
 
 
 
-			App.ObserveProperty(x => x.PageType)
+			PageManager.ObserveProperty(x => x.PageType)
 				.Subscribe(x =>
 				{
 					var allMenuItems = TopMenuItems.Concat(BottomMenuItems);
@@ -116,23 +128,7 @@ namespace ReactiveFolder.ViewModels
 						nonSelectedItem.IsSelected = false;
 					}
 
-					switch (x)
-					{
-						case AppPageType.ReactionManage:
-							ReactionManageListItem.IsSelected = true;
-							break;
-						case AppPageType.AppPolicyManage:
-							AppPolicyManageListItem.IsSelected = true;
-							break;
-						case AppPageType.Settings:
-							SettingsListItem.IsSelected = true;
-							break;
-						case AppPageType.About:
-							AboutListItem.IsSelected = true;
-							break;
-						default:
-							throw new Exception();
-					}
+					allMenuItems.Single(y => y.PageType == x).IsSelected = true;
 				});
 				
 				
