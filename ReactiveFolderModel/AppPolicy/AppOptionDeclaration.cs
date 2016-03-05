@@ -247,7 +247,7 @@ namespace ReactiveFolder.Models.AppPolicy
 					}
 				).ToArray();
 
-			return new AppOptionInstance(this.Id, values, this);
+			return new AppOptionInstance(values, this);
 		}
 	}
 	

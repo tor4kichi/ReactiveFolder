@@ -76,5 +76,13 @@
                 </ContentControl.ContentTemplate>
             </ContentControl>
         </Border>
+
+
+        <materialDesign:DialogHost Identifier="InstantActoinDialogHost"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Margin="8 40"
+                                   MinWidth="400"
+                                           />
     </Grid>
 </UserControl>
