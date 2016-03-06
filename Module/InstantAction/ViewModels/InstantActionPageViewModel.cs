@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
 using Modules.InstantAction.Models;
 using Prism.Commands;
 using Prism.Events;
@@ -378,70 +379,80 @@ namespace Modules.InstantAction.ViewModels
 
 	public class ActionsSelectInstantActionStepViewModel : InstantActionStepViewModel
 	{
-		
-		public ObservableCollection<ToggleSelectableInstantAppOptionViewModel> AppOptions { get; private set; }
-
-		public ObservableCollection<InstantAppOptionInstanceViewModel> ActionVMs { get; private set; }
+		public ObservableCollection<AppLaunchActionInstanceViewModel> ActionVMs { get; private set; }
 
 		public ActionsSelectInstantActionStepViewModel(InstantActionPageViewModel pageVM, InstantActionModel instantAction)
 			: base(pageVM, instantAction)
 		{
-			AppOptions = new ObservableCollection<ToggleSelectableInstantAppOptionViewModel>(
-				InstantAction.GenerateAppOptions()
-				.Select(x => new ToggleSelectableInstantAppOptionViewModel(x))
+			ActionVMs = new ObservableCollection<AppLaunchActionInstanceViewModel>(
+				instantAction.Actions.Select(x => new AppLaunchActionInstanceViewModel(this, x))
 				);
-
-			ActionVMs = new ObservableCollection<InstantAppOptionInstanceViewModel>(
-				instantAction.Actions.Select(x => new InstantAppOptionInstanceViewModel(this, x))
-				);
-
 			
-				
-
-			foreach (var appOption in AppOptions)
-			{
-				var vm = ActionVMs.SingleOrDefault(x => x.AppGuid == appOption.AppPolicy.Guid && x.OptionInstance.OptionDeclaration == appOption.Declaration);
-				if (vm != null)
-				{
-					appOption.IsSelected = true;
-					appOption._CachedActionVM = vm;
-				}
-			}
-
-			// Actions
-			// SelectedAppOptionsの追加に合わせてActionsを変更
-			AppOptions.ObserveElementProperty(x => x.IsSelected, isPushCurrentValueAtFirst:false)
-				.Select(pack => pack.Instance)
-				.Subscribe(ToggleAction) 
-				.AddTo(_CompositeDisposable);
-
 
 		}
 
-		// Note: 利用したいオプションとして選択用オプションとしては表示をOFFに
-		private void ToggleAction(ToggleSelectableInstantAppOptionViewModel appOption)
+		private DelegateCommand _AddApplicationCommand;
+		public DelegateCommand AddApplicationCommand
 		{
-			if (appOption.IsSelected)
+			get
 			{
-				// Actionsに追加
-				if (appOption._CachedActionVM == null)
-				{
-					var action = InstantActionModel.CreateOneOptionAppLaunchAction(appOption.AppPolicy.Guid, appOption.Declaration);
-					appOption._CachedActionVM = new InstantAppOptionInstanceViewModel(this, action);
-				}
+				return _AddApplicationCommand
+					?? (_AddApplicationCommand = new DelegateCommand(async () =>
+					{
 
-				InstantAction.AddAction(appOption._CachedActionVM.AppLaunchAction);
+						var appPolicies = InstantAction.GetAvailableAppPoliciesOnCurrentFiles();
 
-				ActionVMs.Add(appOption._CachedActionVM);
+						// 有効なアプリポリシーが一つだけの時は、選択をスキップ
+						if (appPolicies.Count() == 1)
+						{
+							var action = new AppLaunchReactiveAction()
+							{
+								AppGuid = appPolicies.ElementAt(0).Guid
+							};
+							AddAction(action);
+
+							return;
+						}
+
+						// 利用するアプリポリシーを選択するダイアログを表示する
+						// アプリポリシー選択ダイアログ
+						var items = appPolicies.Select(x =>
+							new ReactiveFolderStyles.DialogContent.AppPolicySelectItem()
+							{
+								AppName = x.AppName,
+								AppGuid = x.Guid
+							});
+
+						var selectDialogVM = new ReactiveFolderStyles.DialogContent.AppPolicySelectDialogContentViewModel(items);
+
+						var view = new ReactiveFolderStyles.DialogContent.AppPolicySelectDialogContent()
+						{
+							DataContext = selectDialogVM
+						};
+
+						var result = (bool?)await DialogHost.Show(view, "InstantActoinDialogHost");
+						
+						if (result.HasValue && result.Value == true)
+						{
+							var selectedAppGuid = selectDialogVM.SelectedItem.AppGuid;
+
+							var appPolicy = PageVM.AppPolicyManger.Policies.SingleOrDefault(x => x.Guid == selectedAppGuid);
+							if (appPolicy != null)
+							{
+								var action = new AppLaunchReactiveAction()
+								{
+									AppGuid = selectedAppGuid
+								};
+								AddAction(action);
+							}
+						}
+
+
+
+					}));
 			}
-			else
-			{
-				InstantAction.RemoveAction(appOption._CachedActionVM.AppLaunchAction);
-				ActionVMs.Remove(appOption._CachedActionVM);
-			}
-
-			RaiseCanGoNextChanged();
 		}
+
 
 
 
@@ -466,125 +477,52 @@ namespace Modules.InstantAction.ViewModels
 			return new FinishingInstantActionStepViewModel(PageVM, InstantAction);
 		}
 
+		internal void AddAction(AppLaunchReactiveAction action)
+		{
+			InstantAction.AddAction(action);
+			ActionVMs.Add(new AppLaunchActionInstanceViewModel(this, action));
+
+			RaiseCanGoNextChanged();
+		}
+
 		internal void RemoveAction(AppLaunchReactiveAction action)
 		{
-			var appOption = AppOptions.SingleOrDefault(x =>
-				x.AppPolicy.Guid == action.AppGuid &&
-				x.Declaration.Id == action.AdditionalOptions[0].OptionId);
+			var vm = ActionVMs.Single(x => x.AppLaunchAction == action);
+			ActionVMs.Remove(vm);
+			InstantAction.RemoveAction(action);
 
-			if (appOption != null)
-			{
-				appOption.IsSelected = false;
-			}
-			else
-			{
-				var vm = ActionVMs.Single(x => x.AppLaunchAction == action);
-				ActionVMs.Remove(vm);
-				InstantAction.RemoveAction(action);
-			}
+			RaiseCanGoNextChanged();
 		}
 	}
 
 
-	public class ToggleSelectableInstantAppOptionViewModel : BindableBase
-	{
-		public InstantAppOptionInstanceViewModel _CachedActionVM { get; set; }
-
-		public InstantAppOption AppOption { get; private set; }
-
-		public ApplicationPolicy AppPolicy
-		{
-			get
-			{
-				return AppOption.AppPolicy;
-			}
-		}
-
-		public AppOptionDeclarationBase Declaration
-		{
-			get
-			{
-				return AppOption.Declaration;
-			}
-		}
-
-		private bool _IsSelected;
-		public bool IsSelected
-		{
-			get
-			{
-				return _IsSelected;
-			}
-			set
-			{
-				SetProperty(ref _IsSelected, value);
-			}
-		}
-
-
-		public string AppName { get; private set; }
-
-		public string OptionName { get; private set; }
-		
-
-		public ToggleSelectableInstantAppOptionViewModel(InstantAppOption appOption)
-		{
-			AppOption = appOption;
-			AppName = AppPolicy.AppName;
-			OptionName = Declaration.Name;
-
-		}
-
-		private DelegateCommand _ToggleSelectCommand;
-		public DelegateCommand ToggleSelectCommand
-		{
-			get
-			{
-				return _ToggleSelectCommand
-					?? (_ToggleSelectCommand = new DelegateCommand(() =>
-					{
-						IsSelected = !IsSelected;   // toggle selected
-					}));
-			}
-		}
-
-		
-	}
-
-
-	public class InstantAppOptionInstanceViewModel : BindableBase
+	public class AppLaunchActionInstanceViewModel : BindableBase
 	{
 		public ActionsSelectInstantActionStepViewModel ActionSelectStepVM { get; private set; }
 
 		public AppLaunchReactiveAction AppLaunchAction { get; private set; }
-		public AppOptionInstance OptionInstance { get; private set; }
-
-		public List<AppOptionValueViewModel> OptionValues { get; private set; }
 
 
 		public string AppName { get; private set; }
 		public Guid AppGuid { get; private set; } 
 
-		public string OptionName { get; private set; }
 
-		public InstantAppOptionInstanceViewModel(ActionsSelectInstantActionStepViewModel parentVM, AppLaunchReactiveAction action)
+		public ReadOnlyReactiveCollection<AppOptionInstanceViewModel> UsingOptions { get; private set; }
+
+		public AppLaunchActionInstanceViewModel(ActionsSelectInstantActionStepViewModel parentVM, AppLaunchReactiveAction action)
 		{
 			ActionSelectStepVM = parentVM;
 
 			AppLaunchAction = action;
-			OptionInstance = action.AdditionalOptions[0];
+			
 			var appPolicy = action.AppPolicy;
 
 
 			AppName = appPolicy.AppName;
 			AppGuid = appPolicy.Guid;
 
-			OptionName = OptionInstance.OptionDeclaration.Name;
-
-			OptionValues = OptionInstance.FromAppOptionInstance()
-				.ToList();
-
-			
+			UsingOptions = AppLaunchAction.AdditionalOptions
+				.ToReadOnlyReactiveCollection(x => new AppOptionInstanceViewModel(AppLaunchAction, x));
 		}
 
 		private DelegateCommand _RemoveActionCommand;
@@ -600,8 +538,71 @@ namespace Modules.InstantAction.ViewModels
 			}
 		}
 
-		
+
+
+		private DelegateCommand _AddOptionCommand;
+		public DelegateCommand AddOptionCommand
+		{
+			get
+			{
+				return _AddOptionCommand
+					?? (_AddOptionCommand = new DelegateCommand(async () =>
+					{
+						// オプション選択ダイアログを表示
+
+
+
+						var appPolicy = AppLaunchAction.AppPolicy;
+
+						// 未追加のオプションを取得
+						var optionDecls = appPolicy.OptionDeclarations
+							.Where(x => AppLaunchAction.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
+						var outputOptionDecls = appPolicy.OutputOptionDeclarations
+							.Where(x => AppLaunchAction.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
+
+
+
+						var optionItems = optionDecls.Select(x =>
+							new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectItem()
+							{
+								OptionName = x.Name,
+								OptionId = x.Id
+							});
+
+						var outputOptionItems = outputOptionDecls.Select(x =>
+							new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectItem()
+							{
+								OptionName = x.Name,
+								OptionId = x.Id
+							});
+
+
+						var selectDialogVM = new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectDialogContentViewModel(optionItems, outputOptionItems);
+
+						var view = new ReactiveFolderStyles.DialogContent.AppPolicyOptionSelectDialogContent()
+						{
+							DataContext = selectDialogVM
+						};
+
+						var result = (bool?) await DialogHost.Show(view, "InstantActoinDialogHost");
+
+						if (result.HasValue && result.Value == true)
+						{
+							var selectedOptions = selectDialogVM.GetSelectedItems();
+
+							foreach (var opt in selectedOptions)
+							{
+								var decl = appPolicy.FindOptionDeclaration(opt.OptionId);
+								var optioinInstance = decl.CreateInstance();
+								AppLaunchAction.AddAppOptionInstance(optioinInstance);
+							}
+						}
+					}));
+			}
+		}
 	}
+
+	
 
 
 

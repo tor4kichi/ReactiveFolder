@@ -266,10 +266,20 @@ namespace ReactiveFolder.Models.Util
 				return null;
 			}
 
-			return JsonConvert.DeserializeObject<T>(jsonText, new JsonSerializerSettings()
+			try
 			{
-				TypeNameHandling = TypeNameHandling.Objects
-			});
+				return JsonConvert.DeserializeObject<T>(jsonText, new JsonSerializerSettings()
+				{
+					TypeNameHandling = TypeNameHandling.Objects
+				});
+			}
+			catch(Exception e)
+			{
+				System.Diagnostics.Debug.WriteLine(e.Message);
+				System.Diagnostics.Debugger.Break();
+
+				return null;
+			}
 		}
 		
 	}

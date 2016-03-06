@@ -32,11 +32,16 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
-		
-
-		public AppOptionInstance(int optionId, AppOptionValue[] values, AppOptionDeclarationBase decl)
+		public AppOptionInstance()
 		{
-			OptionId = optionId;
+			OptionId = -1;
+			Values = null;
+			OptionDeclaration = null;
+		}
+
+		public AppOptionInstance(AppOptionValue[] values, AppOptionDeclarationBase decl)
+		{
+			OptionId = decl.Id;
 			Values = values;
 			OptionDeclaration = decl;
 		}

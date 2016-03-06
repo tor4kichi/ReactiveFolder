@@ -13,91 +13,64 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="600">
     <UserControl.Resources>
+        
+
+
         <DataTemplate x:Key="actionListItemTemplate">
             <DockPanel
                 Margin="0 8"
                 Background="Transparent"
                 >
-                <Button DockPanel.Dock="Right"
-                                    Command="{Binding RemoveActionCommand}"
-                        Style="{StaticResource MaterialDesignFlatButton}"
-                        Foreground="Red"
-                        Margin="8 0"
-                                    >
-                    <materialDesign:PackIcon Kind="Delete"></materialDesign:PackIcon>
-                </Button>
-
-                <Border DockPanel.Dock="Left"
-                        Background="Transparent"
-                        IsHitTestVisible="True"
-                        Width="32"
-                        Height="32"
-                        Margin="8 0"
-                        >
-                    <materialDesign:PackIcon Kind="SwapVertical"
-                                             HorizontalAlignment="Center"
-                                             VerticalAlignment="Center"
-                                             Background="Transparent" 
-                                             IsHitTestVisible="True"
-                                             />
-                </Border>
-
                 <DockPanel>
+                    
                     <Border
-                        DockPanel.Dock="Left"
+                        DockPanel.Dock="Top"
                         >
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock>
-                                <Run Text="{Binding OptionName, Mode=OneTime}" FontSize="14"/>
-                            </TextBlock>
-
-                            <Border Margin="0 2" />
-
-                            <TextBlock
-                                HorizontalAlignment="Right"
+                        <DockPanel>
+                            
+                            
+                            <Button 
+                                DockPanel.Dock="Left"
+                                Command="{Binding AddOptionCommand}"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                                Margin="8 0"
+                                ToolTip="Add Option"
                                 >
-                                <Run Text="{Binding AppName, Mode=OneTime}" 
-                                     Foreground="Gray"
-                                     
+                                <materialDesign:PackIcon Kind="Plus" 
+                                                     Width="16"
+                                                     Height="16"
+                                                     />
+                            </Button>
+                           
+                            <Button DockPanel.Dock="Right"
+                                    Command="{Binding RemoveActionCommand}"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Foreground="Red"
+                                    Margin="8 0"
+                                    >
+                                <materialDesign:PackIcon Kind="Delete"></materialDesign:PackIcon>
+                            </Button>
+
+                            <TextBlock VerticalAlignment="Center">
+                                <Run Text="{Binding AppName, Mode=OneTime}"                                      
                                      />
                             </TextBlock>
-                        </StackPanel>
+                        </DockPanel>
                     </Border>
 
-                    <ItemsControl ItemsSource="{Binding OptionValues}"
-                                  DockPanel.Dock="Right"
-                                  >
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="ContentTemplate">
-                                    <Setter.Value>
-                                        <DataTemplate>
-                                            <DockPanel
-                                                >
+                    <!-- ItemTemplate see@ ReactiveFolderStyles.AppOptionResources  -->
+                    <ItemsControl ItemsSource="{Binding UsingOptions}" 
+                                  Margin="32 0 0 0"
+                                  HorizontalContentAlignment="Right"
+                                  />
 
-                                                <TextBlock Text="{Binding PropertyName}" 
-                                                           DockPanel.Dock="Bottom"
-                                                           HorizontalAlignment="Right"
-                                                           FontSize="10"
-                                                           />
-
-                                                <!-- DataTemplate using ReactiveFolderStyle/Views/AppOptionTemplate.xaml -->
-                                                <ContentPresenter Content="{Binding}"
-                                                                  Margin="16 2 0 0"
-                                                                  />
-                                            </DockPanel>
-
-                                        </DataTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                    </ItemsControl>
 
                 </DockPanel>
 
             </DockPanel>
         </DataTemplate>
+
+        
 
 
         <DataTemplate x:Key="actionListItemDragingTemplate">
@@ -135,67 +108,60 @@
         </Border>
 
         <DockPanel>
-            <Border
-                DockPanel.Dock="Left"
-                >
-                <DockPanel>
-
-                    <TextBlock Text="Choice Options" 
-                               DockPanel.Dock="Top"
-                               Style="{StaticResource MaterialDesignSubheadingTextBlock}"
-                               Margin="0 8"
-                               />
-
-                    <ScrollViewer>
-                        <ListView ItemsSource="{Binding AppOptions}" 
-                                  SelectionMode="Multiple"
-                                  MinWidth="300"
-                                  >
-                            <ListView.ItemContainerStyle>
-                                <!-- This Style binds a ListBoxItem to a the ViewModelItem. -->
-                                <Style
-                                      TargetType="{x:Type ListViewItem}">
-                                    <Setter
-                                         Property="IsSelected"
-                                         Value="{Binding IsSelected, Mode=TwoWay}" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Margin="8">
-                                        <TextBlock>
-                                            <Run Text="{Binding AppName, Mode=OneTime}" />
-                                            <Run Text="-" />
-                                            <Run Text="{Binding OptionName, Mode=OneTime}" />
-                                        </TextBlock>
-                                    </Border>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                                    
-
-
-                        </ListView>
-                    </ScrollViewer>
-
-                </DockPanel>
-            </Border>
-
+            
             <Border
                 >
                 <DockPanel>
 
-                    <TextBlock Text="Actions" 
-                               DockPanel.Dock="Top"
+                    <DockPanel 
+                        DockPanel.Dock="Top"
+                         >
+
+                        <Button 
+                                DockPanel.Dock="Left"
+                                Command="{Binding AddApplicationCommand}"
+                                Style="{StaticResource MaterialDesignFloatingActionButton}"
+                                Margin="8 0"
+                                ToolTip="Add Application Action"
+                                >
+                            <materialDesign:PackIcon Kind="Plus" 
+                                                     Width="24"
+                                                     Height="24"
+                                                     />
+                        </Button>
+
+                        <TextBlock Text="Actions" 
                                Style="{StaticResource MaterialDesignSubheadingTextBlock}"
-                               Margin="0 8"
+                                       VerticalAlignment="Center"
                                />
+                        <StackPanel
+                                Orientation="Horizontal"
+                                Margin="16 0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                            >
+    
+                            <TextBlock Text="Can Reorder"
+                                       Foreground="Gray"
+                                       />
+                            <materialDesign:PackIcon Kind="SwapVertical"
+                                             HorizontalAlignment="Center"
+                                             Background="Transparent" 
+                                             IsHitTestVisible="True"
+                                             Margin="2 0"
+                                             Foreground="Gray"
+                                             />
+
+                        </StackPanel>
+
+                    </DockPanel>
 
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding ActionVMs}" 
                                       ItemTemplate="{StaticResource actionListItemTemplate}"
                                       >
                             <i:Interaction.Behaviors>
-                                <dd:DragDropBehavior ItemType="{x:Type vm:InstantAppOptionInstanceViewModel}" 
+                                <dd:DragDropBehavior ItemType="{x:Type vm:AppLaunchActionInstanceViewModel}" 
                                                      DataTemplate="{StaticResource actionListItemDragingTemplate}" 
                                          
                                          />

@@ -185,7 +185,7 @@ namespace Modules.InstantAction.Models
 		}
 
 
-		public InstantAppOption[] GenerateAppOptions()
+		public ApplicationPolicy[] GetAvailableAppPoliciesOnCurrentFiles()
 		{
 			var extentions = _TargetFiles
 				.Select(x => x.FilePath)
@@ -196,25 +196,9 @@ namespace Modules.InstantAction.Models
 			var acceptPolicies = AppPolicyManager
 				.FindAppPolicyOnAcceptExtentions(extentions);
 
-			return acceptPolicies
-				.SelectMany(FromAppPolicy)
-				.ToArray();
+			return acceptPolicies.ToArray();
 		}
 
-
-
-		public IEnumerable<InstantAppOption> FromAppPolicy(ApplicationPolicy appPolicy)
-		{
-			foreach (var optDecl in appPolicy.OptionDeclarations)
-			{
-				yield return new InstantAppOption(appPolicy, optDecl);
-			}
-
-			foreach (var outputOptDecl in appPolicy.OutputOptionDeclarations)
-			{
-				yield return new InstantAppOption(appPolicy, outputOptDecl);
-			}
-		}
 
 		public bool CanExecute
 		{
@@ -295,13 +279,10 @@ namespace Modules.InstantAction.Models
 		/// <param name="appGuid"></param>
 		/// <param name="decl"></param>
 		/// <returns></returns>
-		public static AppLaunchReactiveAction CreateOneOptionAppLaunchAction(Guid appGuid, AppOptionDeclarationBase decl)
+		public static AppLaunchReactiveAction CreateOneOptionAppLaunchAction(Guid appGuid)
 		{
 			var actionModel = new AppLaunchReactiveAction();
 			actionModel.AppGuid = appGuid;
-
-			var optionInstance = decl.CreateInstance();
-			actionModel.AddAppOptionInstance(optionInstance);
 
 			return actionModel;
 		}
@@ -507,15 +488,4 @@ namespace Modules.InstantAction.Models
 		Failed,
 	}
 
-	public class InstantAppOption 
-	{
-		public ApplicationPolicy AppPolicy { get; private set; }
-		public AppOptionDeclarationBase Declaration { get; private set; }
-
-		public InstantAppOption(ApplicationPolicy appPolicy, AppOptionDeclarationBase decl)
-		{
-			AppPolicy = appPolicy;
-			Declaration = decl;
-		}
-	}
 }
