@@ -123,7 +123,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\InstantActionModel.cs" />
     <Compile Include="ViewModels\InstantActionPageViewModel.cs" />
     <Compile Include="Views\ActionSelectStepControl.xaml.cs">
       <DependentUpon>ActionSelectStepControl.xaml</DependentUpon>

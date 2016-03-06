@@ -10,6 +10,7 @@ using ReactiveFolder.Models.Util;
 using Microsoft.Practices.Prism.Mvvm;
 using ReactiveFolderStyles.Models;
 using Prism.Events;
+using ReactiveFolder.Models.History;
 
 namespace ReactiveFolder.Models
 {
@@ -23,6 +24,7 @@ namespace ReactiveFolder.Models
 		public const string UPDATE_RECORD_FOLDER_NAME = "update_record";
 		public const string INSTANT_ACTION_FOLDER_NAME = "instant_action";
 		public const string INSTANT_ACTION_TEMP_FOLDER_NAME = "instant_action_temp";
+		public const string HISTORY_FOLDER_NAME = "history";
 
 		public static readonly string DefaultGlobalSettingSavePath =
 			new DirectoryInfo(
@@ -77,6 +79,8 @@ namespace ReactiveFolder.Models
 
 		public PageManager PageManager { get; private set; }
 
+		public HistoryManager HistoryManager { get; private set; }
+
 
 		public ReactiveFolderApp(IEventAggregator ea)
 		{
@@ -99,22 +103,25 @@ namespace ReactiveFolder.Models
 			var appPolicySaveFolder = Path.Combine(Settings.SaveFolder, APP_POLICY_FOLDER_NAME);
 			AppPolicyManager = InitializeAppLaunchAction(appPolicySaveFolder);
 
-
-
 			var updateRecordSaveFolder = Path.Combine(Settings.SaveFolder, UPDATE_RECORD_FOLDER_NAME);
 			UpdateRecordManager = InitializeFileUpdateRecordManager(updateRecordSaveFolder);
 
+			var historySaveFolder = Path.Combine(Settings.SaveFolder, HISTORY_FOLDER_NAME);
+			HistoryManager = new HistoryManager(historySaveFolder, Settings.HistoryAvailableStorageSizeMB);
 
-			// Note: AppPolicyとUpdateRecordが ReactionMonitor の前提条件となるため、ReactionMonitorを最後に初期化
 
+
+			// Note: ReactionMonitorの前提条件
+			// AppPolicy / UpdateRecord / HistoryManager
 			var reactionSaveFolder = Path.Combine(Settings.SaveFolder, REACTION_FOLDER_NAME);
-			ReactionMonitor = InitializeMonitorModel(reactionSaveFolder);
+			ReactionMonitor = InitializeMonitorModel(reactionSaveFolder, HistoryManager);
 			ReactionMonitor.DefaultInterval = TimeSpan.FromSeconds(Settings.DefaultMonitorIntervalSeconds);
 
 
 			InstantActionManager = new InstantActionManager();
 			InstantActionManager.SaveFolder = Path.Combine(Settings.SaveFolder, INSTANT_ACTION_FOLDER_NAME);
 			InstantActionManager.TempSaveFolder = Path.Combine(Settings.SaveFolder, INSTANT_ACTION_TEMP_FOLDER_NAME);
+
 		}
 
 
@@ -180,9 +187,9 @@ namespace ReactiveFolder.Models
 		}
 
 
-		static FolderReactionMonitorModel InitializeMonitorModel(string monitorSaveFolderPath)
+		static FolderReactionMonitorModel InitializeMonitorModel(string monitorSaveFolderPath, IHistoryManager historyManager)
 		{
-			return new FolderReactionMonitorModel(new DirectoryInfo(monitorSaveFolderPath));
+			return new FolderReactionMonitorModel(new DirectoryInfo(monitorSaveFolderPath), historyManager);
 		}
 
 

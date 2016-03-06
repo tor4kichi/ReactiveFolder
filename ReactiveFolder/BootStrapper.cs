@@ -18,6 +18,7 @@ using Prism.Events;
 using ReactiveFolder.Models.Timings;
 using ReactiveFolderStyles;
 using ReactiveFolderStyles.Models;
+using ReactiveFolder.Models.History;
 
 namespace ReactiveFolder
 {
@@ -49,6 +50,10 @@ namespace ReactiveFolder
 
 			ReactiveFolderApp = new ReactiveFolderApp(ea);
 
+			this.Container.RegisterInstance<IHistoryManager>(ReactiveFolderApp.HistoryManager);
+
+
+
 			// リアクションモニターのインスタンスを生成＆DIコンテナに登録
 			this.Container.RegisterInstance<IFolderReactionMonitorModel>(ReactiveFolderApp.ReactionMonitor);
 
@@ -63,6 +68,7 @@ namespace ReactiveFolder
 			this.Container.RegisterInstance<IReactiveFolderSettings>(ReactiveFolderApp.Settings);
 
 			this.Container.RegisterInstance<PageManager>(ReactiveFolderApp.PageManager);
+
 
 			this.Container.RegisterInstance<ReactiveFolderApp>(ReactiveFolderApp);
 

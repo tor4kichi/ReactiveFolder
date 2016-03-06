@@ -18,6 +18,7 @@ using ReactiveFolder.Models.Util;
 using ReactiveFolder.Models.AppPolicy;
 using MaterialDesignThemes.Wpf;
 using System.Reactive.Linq;
+using ReactiveFolder.Models.History;
 
 namespace Modules.Main.ViewModels
 {
@@ -28,6 +29,8 @@ namespace Modules.Main.ViewModels
 		private IEventAggregator _EventAggregator;
 
 		public IAppPolicyManager AppPolicyManager { get; private set; }
+
+		public IHistoryManager HistoryManager { get; private set; }
 
 		public FolderModel CurrentFolder { get; private set; }
 
@@ -44,11 +47,12 @@ namespace Modules.Main.ViewModels
 
 		public ReactiveProperty<ReactionEditControlViewModel> ReactionEditControl { get; private set; }
 
-		public FolderReactionManagePageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IEventAggregator ea, IAppPolicyManager appPolicyManager)
+		public FolderReactionManagePageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IEventAggregator ea, IAppPolicyManager appPolicyManager, IHistoryManager historyManager)
 			: base(regionManager, monitor)
 		{
 			_EventAggregator = ea;
 			AppPolicyManager = appPolicyManager;
+			HistoryManager = historyManager;
 
 			FolderName = new ReactiveProperty<string>("");
 			/*
@@ -173,7 +177,7 @@ namespace Modules.Main.ViewModels
 
 
 				// VMを設定
-				ReactionEditControl.Value = new ReactionEditControlViewModel(this, _RegionManager, _MonitorModel, AppPolicyManager, reaction);
+				ReactionEditControl.Value = new ReactionEditControlViewModel(this, _RegionManager, _MonitorModel, AppPolicyManager, HistoryManager, reaction);
 
 
 				// リスト表示を更新

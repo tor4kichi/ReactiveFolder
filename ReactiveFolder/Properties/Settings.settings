@@ -8,5 +8,8 @@
     <Setting Name="DefaultMonitorIntervalSeconds" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">300</Value>
     </Setting>
+    <Setting Name="HistoryAvailableStorageSizeMB" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

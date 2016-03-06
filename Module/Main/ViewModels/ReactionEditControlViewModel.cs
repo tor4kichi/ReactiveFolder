@@ -9,6 +9,7 @@ using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolder.Models.History;
 using ReactiveFolder.Models.Timings;
 using ReactiveFolder.Models.Util;
 using System;
@@ -38,6 +39,7 @@ namespace Modules.Main.ViewModels
 		public FolderReactionManagePageViewModel PageVM { get; private set; }
 		public FolderReactionModel Reaction { get; private set; }
 		private IAppPolicyManager _AppPolicyManager;
+		public IHistoryManager HistoryManager { get; private set; }
 		private CompositeDisposable _CompositeDisposable;
 
 		public ReactiveProperty<ReactionViewModel> ReactionVM { get; private set; }
@@ -47,12 +49,14 @@ namespace Modules.Main.ViewModels
 		private IDisposable CanSaveSubscriber;
 
 
-		public ReactionEditControlViewModel(FolderReactionManagePageViewModel pageVM, IRegionManager regionManager, IFolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager, FolderReactionModel reaction)
+		public ReactionEditControlViewModel(FolderReactionManagePageViewModel pageVM, IRegionManager regionManager, IFolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager, IHistoryManager historyManager, FolderReactionModel reaction)
 			: base(regionManager, monitor)
 		{
 			PageVM = pageVM;
 			Reaction = reaction;
 			_AppPolicyManager = appPolicyManager;
+			HistoryManager = historyManager;
+
 			_CompositeDisposable = new CompositeDisposable();
 
 			ReactionVM = new ReactiveProperty<ReactionViewModel>(new ReactionViewModel(Reaction, _AppPolicyManager))
@@ -147,7 +151,14 @@ namespace Modules.Main.ViewModels
 				return _TestCommand
 					?? (_TestCommand = new DelegateCommand(() =>
 					{
-						Reaction.Execute(forceEnable:true);
+						var results = Reaction.Execute(forceEnable:true);
+
+						var historyData = new HistoryData();
+						historyData.Actions = Reaction.Actions.Select(x => x as AppLaunchReactiveAction).ToArray();
+						historyData.ActionSourceFilePath = _MonitorModel.RootFolder.MakeReactionSaveFilePath(Reaction);
+						historyData.FileHistories = results;
+
+						HistoryManager.SaveHistory(historyData);
 					}
 					));
 			}

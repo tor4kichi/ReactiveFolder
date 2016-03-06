@@ -184,6 +184,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\HistoryManager.cs" />
     <Compile Include="Models\InstantActionManager.cs" />
     <Compile Include="ShortcutInstallCustomAction.cs">
       <SubType>Component</SubType>

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
+using ReactiveFolder.Models.Actions;
+using ReactiveFolder.Models.History;
 using ReactiveFolder.Models.Util;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,9 @@ namespace ReactiveFolder.Models
 {
 	public class FolderReactionMonitorModel : BindableBase, IFolderReactionMonitorModel
 	{
+
+		public IHistoryManager HistoryManager { get; private set; }
+
 		private Dictionary<Guid, ReactionMonitor> _RunningReactions;
 
 	
@@ -58,8 +63,9 @@ namespace ReactiveFolder.Models
 			}
 		}		
 
-		public FolderReactionMonitorModel(DirectoryInfo saveFolder)
+		public FolderReactionMonitorModel(DirectoryInfo saveFolder, IHistoryManager historyManager)
 		{
+			HistoryManager = historyManager;
 			_RunningReactions = new Dictionary<Guid, ReactionMonitor>();
 
 			ReactionSaveFolder = saveFolder;
@@ -123,7 +129,7 @@ namespace ReactiveFolder.Models
 
 			if (reaction.IsEnable && reaction.IsValid)
 			{
-				_RunningReactions.Add(reaction.Guid, new ReactionMonitor(reaction));
+				_RunningReactions.Add(reaction.Guid, new ReactionMonitor(reaction, this, HistoryManager));
 			}
 		}
 
@@ -178,6 +184,8 @@ namespace ReactiveFolder.Models
 	public class ReactionMonitor : IDisposable
 	{
 		public FolderReactionModel Reaction { get; private set; }
+		public IFolderReactionMonitorModel Monitor { get; private set; }
+		public IHistoryManager HistoryManager { get; private set; }
 
 		public bool NowProcessing { get; private set; }
 		public bool IsTerminated { get; set; }
@@ -186,9 +194,12 @@ namespace ReactiveFolder.Models
 
 		public Exception TerminateCauseException { get; private set; }
 
-		public ReactionMonitor(FolderReactionModel reaction)
+		public ReactionMonitor(FolderReactionModel reaction, IFolderReactionMonitorModel monitor, IHistoryManager history)
 		{
 			Reaction = reaction;
+			Monitor = monitor;
+			HistoryManager = history;
+
 			NowProcessing = false;
 			IsTerminated = false;
 
@@ -258,15 +269,31 @@ namespace ReactiveFolder.Models
 
 		private void TriggerReaction()
 		{
+			HistoryDataByFile[] results = null;
+
+
 			try
 			{
-				Reaction.Execute();
+				results = Reaction.Execute();
 			}
 			catch(Exception e)
 			{
 				IsTerminated = true;
 				TerminateCauseException = e;
 				Dispose();
+			}
+
+
+			if (results != null)
+			{
+				var historyData = new HistoryData()
+				{
+					Actions = Reaction.Actions.Select(x => x as AppLaunchReactiveAction).ToArray(),
+					ActionSourceFilePath = Monitor.RootFolder.MakeReactionSaveFilePath(Reaction),
+					FileHistories = results
+				};
+
+				HistoryManager.SaveHistory(historyData);
 			}
 		}
 

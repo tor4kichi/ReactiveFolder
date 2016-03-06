@@ -16,6 +16,7 @@ using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.Destinations;
 using Microsoft.Practices.Prism;
 using ReactiveFolder.Models.Util;
+using ReactiveFolder.Models.History;
 
 namespace ReactiveFolder.Models
 {
@@ -649,20 +650,25 @@ namespace ReactiveFolder.Models
 		}
 		
 
-		public void Execute(bool forceEnable = false)
+		public HistoryDataByFile[] Execute(bool forceEnable = false)
 		{
 			ResetWorkingFolder();
 
 			if (false == IsValid)
 			{
-				return;
+				return null;
 			}
 
 
 			if (!forceEnable && false == IsEnable)
 			{
-				return;
+				return null; 
 			}
+
+
+			var results = new List<HistoryDataByFile>();
+
+
 
 			var initialContext = CreatePayload();
 			var streams = EnumStreamItems();
@@ -673,12 +679,16 @@ namespace ReactiveFolder.Models
 			// 実行
 			foreach(var context in branchedContexts)
 			{
+				context.OnStart();
+
 				foreach (var stream in streams)
 				{
 					if (!context.IsRunnning) break;
 
 					stream.Execute(context);
 				}
+
+				context.OnEnd();
 			}
 
 			// 正常終了した場合の処理
@@ -703,6 +713,18 @@ namespace ReactiveFolder.Models
 				}
 			}
 
+			
+			// 処理結果情報を作成
+			var result = branchedContexts.Select(x => new HistoryDataByFile()
+			{
+				InputFilePath = x.OriginalPath,
+				OutputFilePath = x.OutputPath,
+				StartTime = x.StartTime,
+				EndTime = x.EndTime,
+				IsSuccessed = x.Status == ReactiveStreamStatus.Completed
+			})
+			.ToArray();
+
 
 			// コンテキストの終了処理
 			foreach (var context in branchedContexts)
@@ -712,6 +734,10 @@ namespace ReactiveFolder.Models
 
 			// 完了処理
 			FileUpdateTiming.OnCompleteReaction();
+
+
+
+			return result;
 		}
 
 		private IEnumerable<ReactiveStraightStreamBase> EnumStreamItems()
@@ -732,8 +758,5 @@ namespace ReactiveFolder.Models
 			reaction.Guid = Guid.NewGuid();
 		}
 	}
-
-
-
 	
 }
