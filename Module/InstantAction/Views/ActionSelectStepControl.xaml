@@ -27,28 +27,13 @@
                         DockPanel.Dock="Top"
                         >
                         <DockPanel>
-                            <Border DockPanel.Dock="Left"
-                                    Background="Transparent"
-                                    IsHitTestVisible="True"
-                                    Width="32"
-                                    Height="32"
-                                    Margin="8 0"
-                                >
-                                <materialDesign:PackIcon Kind="SwapVertical"
-                                             HorizontalAlignment="Center"
-                                             VerticalAlignment="Center"
-                                             Background="Transparent" 
-                                             IsHitTestVisible="True"
-                                             />
-                            </Border>
+                            
                             
                             <Button 
                                 DockPanel.Dock="Left"
                                 Command="{Binding AddOptionCommand}"
-                                Style="{StaticResource MaterialDesignFloatingActionButton}"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
                                 Margin="8 0"
-                                Width="32"
-                                Height="32"
                                 ToolTip="Add Option"
                                 >
                                 <materialDesign:PackIcon Kind="Plus" 
@@ -137,8 +122,6 @@
                                 Command="{Binding AddApplicationCommand}"
                                 Style="{StaticResource MaterialDesignFloatingActionButton}"
                                 Margin="8 0"
-                                Width="40"
-                                Height="40"
                                 ToolTip="Add Application Action"
                                 >
                             <materialDesign:PackIcon Kind="Plus" 
@@ -149,8 +132,27 @@
 
                         <TextBlock Text="Actions" 
                                Style="{StaticResource MaterialDesignSubheadingTextBlock}"
-                               Margin="0 8"
+                                       VerticalAlignment="Center"
                                />
+                        <StackPanel
+                                Orientation="Horizontal"
+                                Margin="16 0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                            >
+    
+                            <TextBlock Text="Can Reorder"
+                                       Foreground="Gray"
+                                       />
+                            <materialDesign:PackIcon Kind="SwapVertical"
+                                             HorizontalAlignment="Center"
+                                             Background="Transparent" 
+                                             IsHitTestVisible="True"
+                                             Margin="2 0"
+                                             Foreground="Gray"
+                                             />
+
+                        </StackPanel>
 
                     </DockPanel>
 
