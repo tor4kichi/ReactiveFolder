@@ -89,6 +89,7 @@ namespace ReactiveFolder
 			moduleCatalog.AddModule(typeof(Modules.Settings.SettingsModule));
 			moduleCatalog.AddModule(typeof(Modules.About.AboutModule));
 			moduleCatalog.AddModule(typeof(Modules.InstantAction.InstantActionModule));
+			moduleCatalog.AddModule(typeof(Modules.History.HistoryModule));
 
 
 		}

@@ -269,6 +269,10 @@
       <Project>{98736a13-f8cd-4b8d-8ad1-be8e8d8e631f}</Project>
       <Name>AppPolicy</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Module\History\History.csproj">
+      <Project>{6bbf7d16-8990-48c4-be25-83bbb89ce797}</Project>
+      <Name>History</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Module\InstantAction\InstantAction.csproj">
       <Project>{e94dce91-1b7e-4753-8673-6fd851e905ae}</Project>
       <Name>InstantAction</Name>

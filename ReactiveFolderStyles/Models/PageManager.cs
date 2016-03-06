@@ -51,6 +51,9 @@ namespace ReactiveFolderStyles.Models
 				case AppPageType.InstantAction:
 					OpenInstantAction();
 					break;
+				case AppPageType.History:
+					OpenHistory();
+					break;
 				case AppPageType.Settings:
 					OpenSettings();
 					break;
@@ -61,6 +64,10 @@ namespace ReactiveFolderStyles.Models
 					throw new NotSupportedException("not support pagetype: " + pageType.ToString());
 			}
 		}
+
+
+
+
 
 		public void OpenReactionManage()
 		{
@@ -84,6 +91,8 @@ namespace ReactiveFolderStyles.Models
 
 
 
+
+
 		public void OpenAppPolicyManage()
 		{
 			var e = EventAggregator.GetEvent<PubSubEvent<OpenAppPolicyManageEventPayload>>();
@@ -91,6 +100,8 @@ namespace ReactiveFolderStyles.Models
 
 			PageType = AppPageType.AppPolicyManage;
 		}
+
+
 
 
 
@@ -116,6 +127,45 @@ namespace ReactiveFolderStyles.Models
 		}
 
 		
+
+
+
+
+		public void OpenHistory()
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenHisotryPageEventPayload>>();
+			e.Publish(new OpenHisotryPageEventPayload()
+			{
+				
+			});
+
+			PageType = AppPageType.History;
+		}
+
+
+		public void OpenHistoryWithAppPolicy(Guid appPolicyGuid)
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenHisotryWithAppPolicyPageEventPayload>>();
+			e.Publish(new OpenHisotryWithAppPolicyPageEventPayload()
+			{
+				AppPolicyGuid = appPolicyGuid
+			});
+
+			PageType = AppPageType.History;
+		}
+
+		public void OpenHistoryWithReaction(Guid reactionGuid)
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenHisotryWithReactionPageEventPayload>>();
+			e.Publish(new OpenHisotryWithReactionPageEventPayload()
+			{
+				ReactionGuid = reactionGuid
+			});
+
+			PageType = AppPageType.History;
+		}
+
+
 
 
 
@@ -159,6 +209,7 @@ namespace ReactiveFolderStyles.Models
 		ReactionManage,
 		AppPolicyManage,
 		InstantAction,
+		History,
 
 		Settings,
 		About,

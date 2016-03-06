@@ -25,9 +25,12 @@ namespace ReactiveFolder.ViewModels
 
 		public MenuItemViewModel AppPolicyManageListItem { get; private set; }
 		public MenuItemViewModel ReactionManageListItem { get; private set; }
+		public MenuItemViewModel InstantActionListItem { get; private set; }
+		public MenuItemViewModel HistoryListItem { get; private set; }
+
+
 		public MenuItemViewModel SettingsListItem { get; private set; }
 		public MenuItemViewModel AboutListItem { get; private set; }
-		public MenuItemViewModel InstantActionListItem { get; private set; }
 
 		public List<MenuItemViewModel> TopMenuItems { get; private set; }
 
@@ -79,6 +82,15 @@ namespace ReactiveFolder.ViewModels
 				})
 			};
 
+			HistoryListItem = new MenuItemViewModel(AppPageType.History)
+			{
+				Title = "History",
+				Kind = PackIconKind.History,
+				MenuItemSelectedCommand = new DelegateCommand(() =>
+				{
+					PageManager.OpenPage(AppPageType.History);
+				})
+			};
 
 
 
@@ -108,6 +120,7 @@ namespace ReactiveFolder.ViewModels
 				InstantActionListItem,
 				ReactionManageListItem,
 				AppPolicyManageListItem,
+				HistoryListItem,
 			};
 
 			BottomMenuItems = new List<MenuItemViewModel>()
