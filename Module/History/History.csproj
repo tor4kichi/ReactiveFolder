@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E94DCE91-1B7E-4753-8673-6FD851E905AE}</ProjectGuid>
+    <ProjectGuid>{6BBF7D16-8990-48C4-BE25-83BBB89CE797}</ProjectGuid>
     <OutputType>library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Modules.InstantAction</RootNamespace>
-    <AssemblyName>InstantAction</AssemblyName>
+    <RootNamespace>Modules.History</RootNamespace>
+    <AssemblyName>History</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -114,55 +114,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="WPFBehaviorLibrary">
-      <HintPath>..\..\packages\WPFBehaviorLibrary 0.2\WPFBehaviorLibrary.dll</HintPath>
-    </Reference>
-    <Reference Include="WPFFolderBrowser, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\WPFFolderBrowser.1.0.2\lib\WPFFolderBrowser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ViewModels\InstantActionPageViewModel.cs" />
-    <Compile Include="Views\ActionSelectStepControl.xaml.cs">
-      <DependentUpon>ActionSelectStepControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\FileSelectStepContent.xaml.cs">
-      <DependentUpon>FileSelectStepContent.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\FinishingStepContent.xaml.cs">
-      <DependentUpon>FinishingStepContent.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\InstantActionPage.xaml.cs">
-      <DependentUpon>InstantActionPage.xaml</DependentUpon>
-    </Compile>
-    <Page Include="UserControl1.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="InstantActionModule.cs" />
-    <Compile Include="UserControl1.xaml.cs">
-      <DependentUpon>UserControl1.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="Views\ActionSelectStepControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\FileSelectStepContent.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\FinishingStepContent.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\InstantActionPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="HistoryModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -175,6 +129,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="ViewModels\HistoryPageViewModel.cs" />
+    <Compile Include="Views\HistoryPage.xaml.cs">
+      <DependentUpon>HistoryPage.xaml</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -198,7 +156,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Views\DialogContent\" />
+    <Page Include="Views\HistoryPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

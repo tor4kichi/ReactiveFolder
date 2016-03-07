@@ -1,8 +1,10 @@
-﻿using Prism.Mvvm;
+﻿
+using Microsoft.Practices.Prism.Mvvm;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.AppPolicy;
 using ReactiveFolder.Models.Destinations;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,11 +15,14 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Modules.InstantAction.Models
+namespace ReactiveFolder.Models
 {
 	[DataContract]
 	public class InstantActionSaveModel
 	{
+		[DataMember]
+		public Guid Guid { get; private set; }
+
 		[DataMember]
 		public string[] TargetFiles { get; private set; }
 
@@ -69,8 +74,10 @@ namespace Modules.InstantAction.Models
 
 	public class InstantActionModel : BindableBase
 	{
-		public IAppPolicyManager AppPolicyManager { get; set; }
+		public IAppPolicyManager AppPolicyManager { get; private set; }
 
+
+		public Guid Guid { get; private set; }
 
 		private ObservableCollection<InstantActionTargetFile> _TargetFiles { get; set; }
 		public ReadOnlyObservableCollection<InstantActionTargetFile> TargetFiles { get; private set; }
@@ -115,20 +122,33 @@ namespace Modules.InstantAction.Models
 		{
 			AppPolicyManager = appPolicyManager;
 
+			Guid = Guid.NewGuid();
 			_TargetFiles = new ObservableCollection<InstantActionTargetFile>();
 			TargetFiles = new ReadOnlyObservableCollection<InstantActionTargetFile>(_TargetFiles);
 			_Actions = new ObservableCollection<AppLaunchReactiveAction>();
 			Actions = new ReadOnlyObservableCollection<AppLaunchReactiveAction>(_Actions);
+
+
 			OutputFolderPath = "";
+
 		}
 
-
-		public static InstantActionModel FromInstantAction(InstantActionSaveModel saveModel, IAppPolicyManager appPolicyManager)
+		public static InstantActionModel FromSerializedData(InstantActionSaveModel saveModel, IAppPolicyManager appPolicyManager)
 		{
 			var instantAction = new InstantActionModel(appPolicyManager);
 
-			instantAction._TargetFiles.AddRange(saveModel.TargetFiles.Select(x => new InstantActionTargetFile(x)));
-			instantAction._Actions.AddRange(saveModel.Actions);
+			instantAction.Guid = saveModel.Guid;
+
+			foreach (var targetFile in saveModel.TargetFiles.Select(x => new InstantActionTargetFile(x)))
+			{
+				instantAction._TargetFiles.Add(targetFile);
+			}
+
+			foreach (var action in saveModel.Actions)
+			{
+				instantAction._Actions.Add(action);
+			}
+
 			instantAction.OutputFolderPath = saveModel.OutputFolderPath;
 
 			return instantAction;

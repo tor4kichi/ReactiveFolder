@@ -1,6 +1,5 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
-using Modules.InstantAction.Models;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -10,6 +9,7 @@ using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolder.Models.History;
 using ReactiveFolderStyles.Events;
 using ReactiveFolderStyles.Models;
 using ReactiveFolderStyles.ViewModels;
@@ -33,6 +33,7 @@ namespace Modules.InstantAction.ViewModels
 		public IAppPolicyManager AppPolicyManger { get; private set; }
 		public IInstantActionManager InstantActionManager { get; private set; }
 		public IFolderReactionMonitorModel Monitor { get; private set; }
+		public IHistoryManager HistoryManager { get; private set; }
 
 		public IRegionNavigationService NavigationService;
 
@@ -44,12 +45,13 @@ namespace Modules.InstantAction.ViewModels
 
 		public ReactiveProperty<InstantActionStepViewModel> InstantActionVM { get; private set; }
 
-		public InstantActionPageViewModel(IEventAggregator ea, IAppPolicyManager appPolicyManager, IInstantActionManager instantActionManager, IFolderReactionMonitorModel monitor)
+		public InstantActionPageViewModel(IEventAggregator ea, IAppPolicyManager appPolicyManager, IInstantActionManager instantActionManager, IFolderReactionMonitorModel monitor, IHistoryManager historyManager)
 		{
 			_EventAggregator = ea;
 			AppPolicyManger = appPolicyManager;
 			InstantActionManager = instantActionManager;
 			Monitor = monitor;
+			HistoryManager = historyManager;
 
 			InstantActionVM = new ReactiveProperty<InstantActionStepViewModel>();
 				
@@ -72,7 +74,7 @@ namespace Modules.InstantAction.ViewModels
 
 		public void OnNavigatedFrom(NavigationContext navigationContext)
 		{
-			
+			SaveCurrentInstantAction();
 		}
 
 		public void OnNavigatedTo(NavigationContext navigationContext)
@@ -85,44 +87,63 @@ namespace Modules.InstantAction.ViewModels
 				Model.OutputFolderPath = InstantActionManager.TempSaveFolder;
 			}
 
-			try
-			{
-				var paths = (string[])navigationContext.Parameters["filepaths"];
 
-				if (paths != null)
+			if (navigationContext.Parameters.Any(x => x.Key == "targetfiles"))
+			{
+				try
 				{
-					foreach(var path in paths)
+					var paths = (string[])navigationContext.Parameters["targetfiles"];
+					foreach (var path in paths)
 					{
 						Model.AddTargetFile(path);
 					}
 				}
+				catch
+				{
+					
+				}
+
 			}
-			catch
+
+			else if (navigationContext.Parameters.Any(x => x.Key == "filepath"))
 			{
-				
+				try
+				{
+					var filepath = (string)navigationContext.Parameters["filepath"];
+
+					Model = InstantActionManager.Load(filepath);
+				}
+				catch
+				{
+
+				}
 			}
 
 
-			if (Model.TargetFiles.Count == 0)
-			{
-				// ファイル選択画面からスタート
-				ShowFileSelectStep();
-			}
-			else
-			{
-				// 外部からファイルが提供されている場合にはアクション選択画面からスタート
-				ShowActioinSelectStep();
-			}
+			// ファイル選択画面からスタート
+			ShowFileSelectStep();
 		}
 
-		public static NavigationParameters MakeNavigationParamWithTargetFile(string[] paths)
+		public static NavigationParameters MakeNavigationParamWithTargetFiles(string[] paths)
 		{
 			var param = new NavigationParameters();
-			param.Add("filepaths", paths);
+			param.Add("targetfiles", paths);
 
 			return param;
 		}
 
+		/// <summary>
+		/// インスタントアクションが記録されたファイルを元にインスタントアクションページのナビゲーションパラメータを作成します。
+		/// </summary>
+		/// <param name="paths"></param>
+		/// <returns></returns>
+		public static NavigationParameters MakeNavigationParamWithFilePath(string filePath)
+		{
+			var param = new NavigationParameters();
+			param.Add("filepath", filePath);
+
+			return param;
+		}
 
 
 
@@ -159,6 +180,14 @@ namespace Modules.InstantAction.ViewModels
 		}
 
 
+		internal void SaveCurrentInstantAction()
+		{
+			// 対象ファイルのいずれかが処理された後であればインスタントアクションを保存しておく
+			if (Model != null && Model.TargetFiles.Any(x => x.IsComplete || x.IsFailed))
+			{
+				InstantActionManager.Save(Model);
+			}
+		}
 
 
 
@@ -876,16 +905,40 @@ namespace Modules.InstantAction.ViewModels
 		
 		public void StartProcess()
 		{
-			// TODO: 
+			var historyData = new HistoryData();
+			historyData.Actions = InstantAction.Actions.ToArray();
+			historyData.ActionSourceFilePath = PageVM.InstantActionManager.GetSavePath(InstantAction);
+
+			var byFiles = new List<HistoryDataByFile>();
+
+
 			Task.Run(() =>
 			{
 				foreach (var file in InstantAction.TargetFiles.Where(x => x.IsReady))
 				{
 					lock (_InstantActionProcessLock)
 					{
+						var startTime = DateTime.Now;
+
+
 						InstantAction.Execute(file);
+
+
+						byFiles.Add(new HistoryDataByFile()
+						{
+							InputFilePath = file.FilePath,
+							OutputFilePath = file.OutputPath,
+							StartTime = startTime,
+							EndTime = DateTime.Now,
+							IsSuccessed = file.ProcessState == FileProcessState.Complete
+						});
 					}
 				}
+			})
+			.ContinueWith(x => 
+			{
+				historyData.FileHistories = byFiles.ToArray();
+				PageVM.HistoryManager.SaveHistory(historyData);
 			});
 		}
 		

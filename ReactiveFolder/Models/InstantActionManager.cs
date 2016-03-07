@@ -1,4 +1,6 @@
-﻿using ReactiveFolderStyles.Models;
+﻿using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolder.Models.Util;
+using ReactiveFolderStyles.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +12,10 @@ namespace ReactiveFolder.Models
 {
 	public class InstantActionManager : IInstantActionManager
 	{
+		public const string INSTANT_ACTION_FILE_EXTENTION = ".rfinstant.json";
+
+		public IAppPolicyManager AppPolicyManager { get; private set; }
+
 		private string _SaveFolder;
 		public string SaveFolder
 		{
@@ -55,5 +61,29 @@ namespace ReactiveFolder.Models
 		}
 
 
+		public InstantActionManager(IAppPolicyManager appPolicyManager)
+		{
+			AppPolicyManager = appPolicyManager;
+		}
+
+
+		public void Save(InstantActionModel instantAction)
+		{
+			var serializeData = InstantActionSaveModel.CreateFromInstantActionModel(instantAction);
+			var savePath = GetSavePath(instantAction);
+			FileSerializeHelper.Save(savePath, serializeData);
+		}
+
+		public InstantActionModel Load(string path)
+		{
+			var serializeData = FileSerializeHelper.LoadAsync<InstantActionSaveModel>(path);
+			return InstantActionModel.FromSerializedData(serializeData, AppPolicyManager);
+		}
+
+		public string GetSavePath(InstantActionModel instantAction)
+		{
+			var fileName = instantAction.Guid.ToString() + INSTANT_ACTION_FILE_EXTENTION;
+			return Path.Combine(SaveFolder, fileName);
+		}
 	}
 }

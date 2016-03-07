@@ -33,12 +33,24 @@ namespace Modules.InstantAction
 				_regionManager.RequestNavigate("MainRegion", nameof(Views.InstantActionPage));
 			}
 			, keepSubscriberReferenceAlive: true);
-		
 
-			var openInstantActionWithFileEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenInstantActionWithFilesEventPayload>>();
-			openInstantActionWithFileEvent.Subscribe(x =>
+
+			var openInstantActionWithFilePathEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenInstantActionWithFilePathEventPayload>>();
+			openInstantActionWithFilePathEvent.Subscribe(x =>
 			{
-				var param = ViewModels.InstantActionPageViewModel.MakeNavigationParamWithTargetFile(x.FilePaths);
+				var param = ViewModels.InstantActionPageViewModel.MakeNavigationParamWithFilePath(x.FilePath);
+
+				_regionManager.RequestNavigate("MainRegion", nameof(Views.InstantActionPage), param);
+			}
+			, keepSubscriberReferenceAlive: true);
+
+
+
+
+			var openInstantActionWithTargetFilesEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenInstantActionWithFilesEventPayload>>();
+			openInstantActionWithTargetFilesEvent.Subscribe(x =>
+			{
+				var param = ViewModels.InstantActionPageViewModel.MakeNavigationParamWithTargetFiles(x.FilePaths);
 
 				_regionManager.RequestNavigate("MainRegion", nameof(Views.InstantActionPage), param);
 			}

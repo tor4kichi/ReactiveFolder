@@ -1,8 +1,10 @@
 ﻿using Prism.Events;
 using Prism.Mvvm;
+using ReactiveFolder.Models;
 using ReactiveFolderStyles.Events;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,6 +53,9 @@ namespace ReactiveFolderStyles.Models
 				case AppPageType.InstantAction:
 					OpenInstantAction();
 					break;
+				case AppPageType.History:
+					OpenHistory();
+					break;
 				case AppPageType.Settings:
 					OpenSettings();
 					break;
@@ -62,10 +67,36 @@ namespace ReactiveFolderStyles.Models
 			}
 		}
 
+
+
+
+
 		public void OpenReactionManage()
 		{
 			var e = EventAggregator.GetEvent<PubSubEvent<OpenReactionManageEventPayload>>();
 			e.Publish(new OpenReactionManageEventPayload());
+
+			PageType = AppPageType.ReactionManage;
+		}
+
+
+		public void OpenReaction(string filePath)
+		{
+			if (String.IsNullOrEmpty(filePath) || false == File.Exists(filePath))
+			{
+				return;
+			}
+
+			if (false == filePath.EndsWith(FolderModel.REACTION_EXTENTION))
+			{
+				return;
+			}
+
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenReactionWithFilePathEventPayload>>();
+			e.Publish(new OpenReactionWithFilePathEventPayload()
+			{
+				FilePath = filePath
+			});
 
 			PageType = AppPageType.ReactionManage;
 		}
@@ -84,6 +115,8 @@ namespace ReactiveFolderStyles.Models
 
 
 
+
+
 		public void OpenAppPolicyManage()
 		{
 			var e = EventAggregator.GetEvent<PubSubEvent<OpenAppPolicyManageEventPayload>>();
@@ -95,10 +128,28 @@ namespace ReactiveFolderStyles.Models
 
 
 
+
+
 		public void OpenInstantAction()
 		{
 			var e = EventAggregator.GetEvent<PubSubEvent<OpenInstantActionEventPayload>>();
 			e.Publish(new OpenInstantActionEventPayload());
+
+			PageType = AppPageType.InstantAction;
+		}
+
+		public void OpenInstantActionWithInstantActionFile(string filePath)
+		{
+			if (String.IsNullOrEmpty(filePath) || false == File.Exists(filePath))
+			{
+				return;
+			}
+
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenInstantActionWithFilePathEventPayload>>();
+			e.Publish(new OpenInstantActionWithFilePathEventPayload()
+			{
+				FilePath = filePath
+			});
 
 			PageType = AppPageType.InstantAction;
 		}
@@ -116,6 +167,45 @@ namespace ReactiveFolderStyles.Models
 		}
 
 		
+
+
+
+
+		public void OpenHistory()
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenHisotryPageEventPayload>>();
+			e.Publish(new OpenHisotryPageEventPayload()
+			{
+				
+			});
+
+			PageType = AppPageType.History;
+		}
+
+
+		public void OpenHistoryWithAppPolicy(Guid appPolicyGuid)
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenHisotryWithAppPolicyPageEventPayload>>();
+			e.Publish(new OpenHisotryWithAppPolicyPageEventPayload()
+			{
+				AppPolicyGuid = appPolicyGuid
+			});
+
+			PageType = AppPageType.History;
+		}
+
+		public void OpenHistoryWithReaction(Guid reactionGuid)
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenHisotryWithReactionPageEventPayload>>();
+			e.Publish(new OpenHisotryWithReactionPageEventPayload()
+			{
+				ReactionGuid = reactionGuid
+			});
+
+			PageType = AppPageType.History;
+		}
+
+
 
 
 
@@ -159,6 +249,7 @@ namespace ReactiveFolderStyles.Models
 		ReactionManage,
 		AppPolicyManage,
 		InstantAction,
+		History,
 
 		Settings,
 		About,

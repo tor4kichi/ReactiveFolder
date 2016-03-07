@@ -9,4 +9,9 @@ namespace ReactiveFolderStyles.Events
 	public class OpenInstantActionEventPayload
 	{
 	}
+
+	public class OpenInstantActionWithFilePathEventPayload
+	{
+		public string FilePath { get; set; }
+	}
 }

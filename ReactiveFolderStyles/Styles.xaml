@@ -34,6 +34,9 @@
     <Style x:Key="AppbarText" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignHeadlineTextBlock}" >
         <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
     </Style>
+    <Style x:Key="AppBarTextBox" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}" >
+        
+    </Style>
 
     <Style x:Key="Appbar" TargetType="Grid">
         <Setter Property="Height" Value="64" />
