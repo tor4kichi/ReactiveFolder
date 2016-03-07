@@ -133,7 +133,6 @@ namespace ReactiveFolder.Models
 
 		}
 
-
 		public static InstantActionModel FromSerializedData(InstantActionSaveModel saveModel, IAppPolicyManager appPolicyManager)
 		{
 			var instantAction = new InstantActionModel(appPolicyManager);

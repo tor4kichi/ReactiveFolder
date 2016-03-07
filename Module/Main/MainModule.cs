@@ -39,6 +39,15 @@ namespace Modules.Main
 			, keepSubscriberReferenceAlive: true);
 
 
+			var openReactionWithFilePathEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenReactionWithFilePathEventPayload>>();
+			openReactionWithFilePathEvent.Subscribe(x =>
+			{
+				var parameter = ViewModels.FolderReactionManagePageViewModel.CreateOpenReactionParameter(x.FilePath);
+
+				_regionManager.RequestNavigate("MainRegion", nameof(FolderReactionManagePage), parameter);
+			}
+			, keepSubscriberReferenceAlive: true);
+
 
 			var openReactionEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenReactionEventPayload>>();
 			openReactionEvent.Subscribe(x => 

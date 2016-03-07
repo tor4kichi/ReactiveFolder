@@ -9,4 +9,10 @@ namespace ReactiveFolderStyles.Events
 	public class OpenReactionManageEventPayload
 	{
 	}
+
+
+	public class OpenReactionWithFilePathEventPayload
+	{
+		public string FilePath { get; set; }
+	}
 }

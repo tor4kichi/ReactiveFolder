@@ -87,44 +87,63 @@ namespace Modules.InstantAction.ViewModels
 				Model.OutputFolderPath = InstantActionManager.TempSaveFolder;
 			}
 
-			try
-			{
-				var paths = (string[])navigationContext.Parameters["filepaths"];
 
-				if (paths != null)
+			if (navigationContext.Parameters.Any(x => x.Key == "targetfiles"))
+			{
+				try
 				{
-					foreach(var path in paths)
+					var paths = (string[])navigationContext.Parameters["targetfiles"];
+					foreach (var path in paths)
 					{
 						Model.AddTargetFile(path);
 					}
 				}
+				catch
+				{
+					
+				}
+
 			}
-			catch
+
+			else if (navigationContext.Parameters.Any(x => x.Key == "filepath"))
 			{
-				
+				try
+				{
+					var filepath = (string)navigationContext.Parameters["filepath"];
+
+					Model = InstantActionManager.Load(filepath);
+				}
+				catch
+				{
+
+				}
 			}
 
 
-			if (Model.TargetFiles.Count == 0)
-			{
-				// ファイル選択画面からスタート
-				ShowFileSelectStep();
-			}
-			else
-			{
-				// 外部からファイルが提供されている場合にはアクション選択画面からスタート
-				ShowActioinSelectStep();
-			}
+			// ファイル選択画面からスタート
+			ShowFileSelectStep();
 		}
 
-		public static NavigationParameters MakeNavigationParamWithTargetFile(string[] paths)
+		public static NavigationParameters MakeNavigationParamWithTargetFiles(string[] paths)
 		{
 			var param = new NavigationParameters();
-			param.Add("filepaths", paths);
+			param.Add("targetfiles", paths);
 
 			return param;
 		}
 
+		/// <summary>
+		/// インスタントアクションが記録されたファイルを元にインスタントアクションページのナビゲーションパラメータを作成します。
+		/// </summary>
+		/// <param name="paths"></param>
+		/// <returns></returns>
+		public static NavigationParameters MakeNavigationParamWithFilePath(string filePath)
+		{
+			var param = new NavigationParameters();
+			param.Add("filepath", filePath);
+
+			return param;
+		}
 
 
 

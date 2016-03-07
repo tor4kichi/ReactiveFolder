@@ -1,8 +1,10 @@
 ﻿using Prism.Events;
 using Prism.Mvvm;
+using ReactiveFolder.Models;
 using ReactiveFolderStyles.Events;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -77,6 +79,28 @@ namespace ReactiveFolderStyles.Models
 			PageType = AppPageType.ReactionManage;
 		}
 
+
+		public void OpenReaction(string filePath)
+		{
+			if (String.IsNullOrEmpty(filePath) || false == File.Exists(filePath))
+			{
+				return;
+			}
+
+			if (false == filePath.EndsWith(FolderModel.REACTION_EXTENTION))
+			{
+				return;
+			}
+
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenReactionWithFilePathEventPayload>>();
+			e.Publish(new OpenReactionWithFilePathEventPayload()
+			{
+				FilePath = filePath
+			});
+
+			PageType = AppPageType.ReactionManage;
+		}
+
 		public void OpenReaction(Guid reactionGuid)
 		{
 			var e = EventAggregator.GetEvent<PubSubEvent<OpenReactionEventPayload>>();
@@ -110,6 +134,22 @@ namespace ReactiveFolderStyles.Models
 		{
 			var e = EventAggregator.GetEvent<PubSubEvent<OpenInstantActionEventPayload>>();
 			e.Publish(new OpenInstantActionEventPayload());
+
+			PageType = AppPageType.InstantAction;
+		}
+
+		public void OpenInstantActionWithInstantActionFile(string filePath)
+		{
+			if (String.IsNullOrEmpty(filePath) || false == File.Exists(filePath))
+			{
+				return;
+			}
+
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenInstantActionWithFilePathEventPayload>>();
+			e.Publish(new OpenInstantActionWithFilePathEventPayload()
+			{
+				FilePath = filePath
+			});
 
 			PageType = AppPageType.InstantAction;
 		}

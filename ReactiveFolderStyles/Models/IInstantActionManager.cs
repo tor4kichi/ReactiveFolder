@@ -11,6 +11,6 @@ namespace ReactiveFolderStyles.Models
 		string GetSavePath(InstantActionModel instantAction);
 
 		void Save(InstantActionModel instantAction);
-		InstantActionModel Load(string path, IAppPolicyManager appPolicyManager);
+		InstantActionModel Load(string path);
 	}
 }

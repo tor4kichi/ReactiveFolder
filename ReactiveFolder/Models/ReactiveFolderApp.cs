@@ -118,7 +118,7 @@ namespace ReactiveFolder.Models
 			ReactionMonitor.DefaultInterval = TimeSpan.FromSeconds(Settings.DefaultMonitorIntervalSeconds);
 
 
-			InstantActionManager = new InstantActionManager();
+			InstantActionManager = new InstantActionManager(AppPolicyManager);
 			InstantActionManager.SaveFolder = Path.Combine(Settings.SaveFolder, INSTANT_ACTION_FOLDER_NAME);
 			InstantActionManager.TempSaveFolder = Path.Combine(Settings.SaveFolder, INSTANT_ACTION_TEMP_FOLDER_NAME);
 

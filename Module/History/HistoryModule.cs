@@ -42,7 +42,7 @@ namespace Modules.History
 			var openHisotryWithAppPolicyEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenHisotryWithAppPolicyPageEventPayload>>();
 			openHisotryWithAppPolicyEvent.Subscribe(x => 
 			{
-				var parameter = ViewModels.HisotryPageViewModel.CreateAppPolicyFilteringParameter(x.AppPolicyGuid);
+				var parameter = ViewModels.HistoryPageViewModel.CreateAppPolicyFilteringParameter(x.AppPolicyGuid);
 
 				_regionManager.RequestNavigate("MainRegion", nameof(HistoryPage), parameter);
 			}
@@ -53,7 +53,7 @@ namespace Modules.History
 			var openHistoryWithReactionEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenHisotryWithReactionPageEventPayload>>();
 			openHistoryWithReactionEvent.Subscribe(x =>
 			{
-				var parameter = ViewModels.HisotryPageViewModel.CreateReactionFilteringParameter(x.ReactionGuid);
+				var parameter = ViewModels.HistoryPageViewModel.CreateReactionFilteringParameter(x.ReactionGuid);
 
 				_regionManager.RequestNavigate("MainRegion", nameof(HistoryPage), parameter);
 			}

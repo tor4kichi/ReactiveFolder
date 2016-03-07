@@ -100,17 +100,48 @@ namespace Modules.Main.ViewModels
 
 			if (navigationContext.Parameters.Count() > 0)
 			{
-				try
+				if (navigationContext.Parameters.Any(x => x.Key == "guid"))
 				{
-					var reactionGuid = (Guid)navigationContext.Parameters["guid"];
+					try
+					{
+						var reactionGuid = (Guid)navigationContext.Parameters["guid"];
 
-					ShowReaction(_MonitorModel.RootFolder.FindReaction(reactionGuid));
+						ShowReaction(_MonitorModel.RootFolder.FindReaction(reactionGuid));
+					}
+					catch
+					{
+						Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
+					}
 				}
-				catch
+
+				else if (navigationContext.Parameters.Any(x => x.Key == "filepath"))
 				{
-					Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
-				}
-			}
+					try
+					{
+						var reactionFilePath = (string)navigationContext.Parameters["filepath"];
+
+						var reaction = _MonitorModel.RootFolder.Reactions
+							.SingleOrDefault(x => _MonitorModel.RootFolder.MakeReactionSaveFilePath(x) == reactionFilePath);
+
+
+						if (reaction == null)
+						{
+							// インポート
+							reaction = ImportReactionFile(reactionFilePath);
+
+							if (reaction == null)
+							{
+								throw new Exception("failed import Reaction file");
+							}
+						}
+
+						ShowReaction(reaction);
+					}
+					catch
+					{
+						Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
+					}
+				}}
 			
 		}
 
@@ -121,6 +152,14 @@ namespace Modules.Main.ViewModels
 			var parameters = new NavigationParameters();
 
 			parameters.Add("guid", reactionGuid);
+			return parameters;
+		}
+
+		public static NavigationParameters CreateOpenReactionParameter(string filePath)
+		{
+			var parameters = new NavigationParameters();
+
+			parameters.Add("filepath", filePath);
 			return parameters;
 		}
 
@@ -317,7 +356,7 @@ namespace Modules.Main.ViewModels
 			}
 		}
 
-		private void ImportReactionFile(string path)
+		private FolderReactionModel ImportReactionFile(string path)
 		{
 			var importedReaction = FileSerializeHelper.LoadAsync<FolderReactionModel>(path);
 
@@ -330,6 +369,8 @@ namespace Modules.Main.ViewModels
 			{
 				CurrentFolder.AddReaction(importedReaction);
 			}
+
+			return importedReaction;
 		}
 
 
