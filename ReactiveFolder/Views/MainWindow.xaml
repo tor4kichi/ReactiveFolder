@@ -45,9 +45,13 @@
 
             <view:SideMenu
                 DockPanel.Dock="Left"
-                Width="60"
                 />
 
+            <ContentControl
+                prism:RegionManager.RegionName="SubRegion"
+                Visibility="Collapsed"
+                DockPanel.Dock="Right"
+                />
 
             <ContentControl
                 prism:RegionManager.RegionName="MainRegion" />
@@ -71,6 +75,9 @@
             
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
+                    <ContextMenu.Style>
+                        <Style TargetType="ContextMenu"></Style>
+                    </ContextMenu.Style>
                     <MenuItem Header="Open Window" Command="{Binding OpenWindowCommand}" />
                     <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}" />
                 </ContextMenu>
