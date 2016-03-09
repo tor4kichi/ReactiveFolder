@@ -5,6 +5,8 @@ using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
 using ReactiveFolder.Models;
+using ReactiveFolderStyles.Models;
+using ReactiveFolderStyles.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +15,8 @@ using System.Threading.Tasks;
 
 namespace Modules.Settings.ViewModels
 {
-	public class SettingsPageViewModel : BindableBase, INavigationAware
+	public class SettingsPageViewModel : PageViewModelBase
 	{
-		public IRegionManager _RegionManager;
 		public IRegionNavigationService NavigationService;
 
 		public IReactiveFolderSettings Settings { get; private set; }
@@ -26,9 +27,9 @@ namespace Modules.Settings.ViewModels
 
 
 
-		public SettingsPageViewModel(IRegionManager regionManagar, IReactiveFolderSettings settings)
+		public SettingsPageViewModel(PageManager pageManager, IReactiveFolderSettings settings)
+			: base(pageManager)
 		{
-			_RegionManager = regionManagar;
 			Settings = settings;
 
 			ReactionCheckInterval = new ReactiveProperty<string>(settings.DefaultMonitorIntervalSeconds.ToString());
@@ -52,39 +53,16 @@ namespace Modules.Settings.ViewModels
 
 		}
 
-		private DelegateCommand _BackCommand;
-		public DelegateCommand BackCommand
+
+		
+		public override void OnNavigatedTo(NavigationContext navigationContext)
 		{
-			get
-			{
-				return _BackCommand
-					?? (_BackCommand = new DelegateCommand(() =>
-					{
-						if (NavigationService.Journal.CanGoBack)
-						{
-							NavigationService.Journal.GoBack();
-						}
-						else
-						{
-							_RegionManager.RequestNavigate("MainRegion", "FolderListPage");
-						}
-					}));
-			}
+			
 		}
 
-		public void OnNavigatedTo(NavigationContext navigationContext)
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
 		{
-			NavigationService = navigationContext.NavigationService;
-		}
-
-		public bool IsNavigationTarget(NavigationContext navigationContext)
-		{
-			return true;
-		}
-
-		public void OnNavigatedFrom(NavigationContext navigationContext)
-		{
-			// nothing do.
+			
 		}
 	}
 }

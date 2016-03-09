@@ -38,7 +38,7 @@ namespace Modules.AppPolicy.Views
 			{
 				return EmptyTemplate;
 			}
-			else if (item is ViewModels.AppPolicyEditControlViewModel)
+			else if (item is ViewModels.AppPolicyEditPageViewModel)
 			{
 				return AppPolicyEditTemplate;
 			}

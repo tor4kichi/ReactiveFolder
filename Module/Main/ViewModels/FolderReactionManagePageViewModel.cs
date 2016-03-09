@@ -19,17 +19,24 @@ using ReactiveFolder.Models.AppPolicy;
 using MaterialDesignThemes.Wpf;
 using System.Reactive.Linq;
 using ReactiveFolder.Models.History;
+using ReactiveFolderStyles.Models;
+using ReactiveFolderStyles.ViewModels;
 
 namespace Modules.Main.ViewModels
 {
-	public class FolderReactionManagePageViewModel : PageViewModelBase, INavigationAware
+
+
+
+	// TODO: Stack構造によるフォルダーの階層構造を表現するUIを作成する
+
+
+
+
+	public class FolderReactionManagePageViewModel : PageViewModelBase
 	{
-		public IRegionNavigationService NavigationService;
-
+		public IFolderReactionMonitorModel Monitor { get; private set; }
 		private IEventAggregator _EventAggregator;
-
 		public IAppPolicyManager AppPolicyManager { get; private set; }
-
 		public IHistoryManager HistoryManager { get; private set; }
 
 		public FolderModel CurrentFolder { get; private set; }
@@ -42,14 +49,14 @@ namespace Modules.Main.ViewModels
 
 		public ReactiveProperty<string> FolderName { get; private set; }
 
-		public ReactiveProperty<bool> CanGoBack { get; private set; }
 
 
-		public ReactiveProperty<ReactionEditControlViewModel> ReactionEditControl { get; private set; }
+//		public ReactiveProperty<ReactionEditPageViewModel> ReactionEditControl { get; private set; }
 
-		public FolderReactionManagePageViewModel(IRegionManager regionManager, IFolderReactionMonitorModel monitor, IEventAggregator ea, IAppPolicyManager appPolicyManager, IHistoryManager historyManager)
-			: base(regionManager, monitor)
+		public FolderReactionManagePageViewModel(PageManager pageManager, IFolderReactionMonitorModel monitor, IEventAggregator ea, IAppPolicyManager appPolicyManager, IHistoryManager historyManager)
+			: base(pageManager)
 		{
+			Monitor = monitor;
 			_EventAggregator = ea;
 			AppPolicyManager = appPolicyManager;
 			HistoryManager = historyManager;
@@ -66,22 +73,16 @@ namespace Modules.Main.ViewModels
 				*/
 			PreviousFolderName = "";
 
-			CanGoBack = new ReactiveProperty<bool>(false);
 
-			ReactionEditControl = new ReactiveProperty<ReactionEditControlViewModel>();
+//			ReactionEditControl = new ReactiveProperty<ReactionEditPageViewModel>();
 
-			Initialize(_MonitorModel.RootFolder);
+			Initialize(Monitor.RootFolder);
 		}
 
 
-		public bool IsNavigationTarget(NavigationContext navigationContext)
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
 		{
-			return true;
-		}
-
-		public void OnNavigatedFrom(NavigationContext navigationContext)
-		{
-			ExitEdit();
+			
 		}
 
 		public async Task<bool?> ShowReactionEditCloseConfirmDialog()
@@ -91,11 +92,9 @@ namespace Modules.Main.ViewModels
 			return (bool?)await DialogHost.Show(view, "ReactionEditCommonDialogHost");
 		}
 
-		public void OnNavigatedTo(NavigationContext navigationContext)
+		public override void OnNavigatedTo(NavigationContext navigationContext)
 		{
-			NavigationService = navigationContext.NavigationService;
-
-			Initialize(_MonitorModel.RootFolder);
+			Initialize(Monitor.RootFolder);
 
 
 			if (navigationContext.Parameters.Count() > 0)
@@ -106,7 +105,7 @@ namespace Modules.Main.ViewModels
 					{
 						var reactionGuid = (Guid)navigationContext.Parameters["guid"];
 
-						ShowReaction(_MonitorModel.RootFolder.FindReaction(reactionGuid));
+						SelectedReaction(Monitor.RootFolder.FindReaction(reactionGuid));
 					}
 					catch
 					{
@@ -120,22 +119,16 @@ namespace Modules.Main.ViewModels
 					{
 						var reactionFilePath = (string)navigationContext.Parameters["filepath"];
 
-						var reaction = _MonitorModel.RootFolder.Reactions
-							.SingleOrDefault(x => _MonitorModel.RootFolder.MakeReactionSaveFilePath(x) == reactionFilePath);
+						var reaction = Monitor.RootFolder.Reactions
+							.SingleOrDefault(x => Monitor.RootFolder.MakeReactionSaveFilePath(x) == reactionFilePath);
 
 
 						if (reaction == null)
 						{
-							// インポート
-							reaction = ImportReactionFile(reactionFilePath);
-
-							if (reaction == null)
-							{
-								throw new Exception("failed import Reaction file");
-							}
+							throw new Exception("use import reaction.");
 						}
 
-						ShowReaction(reaction);
+						SelectedReaction(reaction);
 					}
 					catch
 					{
@@ -175,21 +168,17 @@ namespace Modules.Main.ViewModels
 			FolderItems = CurrentFolder.Children
 				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(this, x));
 
-			if (folder == _MonitorModel.RootFolder)
+			if (folder == Monitor.RootFolder)
 			{
 				// ルートは戻る無効
 				PreviousFolderName = "";
 				OnPropertyChanged(nameof(PreviousFolderName));
-
-				CanGoBack.Value = false;
 			}
 			else
 			{
 				var parentFolder = Path.GetDirectoryName(folder.Folder.FullName);
 				PreviousFolderName = Path.GetFileName(parentFolder);
 				OnPropertyChanged(nameof(PreviousFolderName));
-
-				CanGoBack.Value = true;
 			}
 
 
@@ -197,13 +186,23 @@ namespace Modules.Main.ViewModels
 		}
 
 
+		internal void SelectedReaction(FolderReactionModel reaction)
+		{
+			var reactionVM = ReactionItems.SingleOrDefault(x => x.Reaction == reaction);
+			if (reactionVM != null)
+			{
+				reactionVM.IsSelected = true;
+			}
+		}
 
 
 		internal void ShowReaction(FolderReactionModel reaction)
 		{
-			SetupEdit(reaction);
-		}
+			PageManager.OpenReaction(reaction.Guid);
 
+			SelectedReaction(reaction);
+		}
+		/*
 
 		private void SetupEdit(FolderReactionModel reaction)
 		{
@@ -216,7 +215,7 @@ namespace Modules.Main.ViewModels
 
 
 				// VMを設定
-				ReactionEditControl.Value = new ReactionEditControlViewModel(this, _RegionManager, _MonitorModel, AppPolicyManager, HistoryManager, reaction);
+				ReactionEditControl.Value = new ReactionEditPageViewModel(this, _RegionManager, _MonitorModel, AppPolicyManager, HistoryManager, reaction);
 
 
 				// リスト表示を更新
@@ -257,7 +256,7 @@ namespace Modules.Main.ViewModels
 
 
 
-
+	*/
 
 		private DelegateCommand _RefreshCommand;
 		public DelegateCommand RefreshCommand
@@ -286,7 +285,7 @@ namespace Modules.Main.ViewModels
 
 						var folderModel = CurrentFolder.AddFolder(newFolderName);
 
-						this.NavigationToFolderListPage(folderModel);
+						// TODO: FolderStackにフォルダを積む
 					}));
 			}
 		}
@@ -360,7 +359,7 @@ namespace Modules.Main.ViewModels
 		{
 			var importedReaction = FileSerializeHelper.LoadAsync<FolderReactionModel>(path);
 
-			if (null != _MonitorModel.FindReaction(importedReaction.Guid))
+			if (null != Monitor.FindReaction(importedReaction.Guid))
 			{
 				// alread exist reaction
 				// Guidを張り替える？
@@ -386,17 +385,18 @@ namespace Modules.Main.ViewModels
 				return _RemoveThisFolderCommand
 					?? (_RemoveThisFolderCommand = new DelegateCommand(() =>
 					{
+						/*
 						if (CurrentFolder.Children.Count > 0)
 						{
 							// confirm delete dialog.
 						}
 
+						
 						_MonitorModel.RootFolder.RemoveFolder(CurrentFolder);
+						*/
 
-						// move to Reaction editer page.
-						NavigationService.Journal.GoBack();
 					}
-					, () => _MonitorModel.RootFolder.Folder.FullName != this.CurrentFolder.Folder.FullName
+					, () => Monitor.RootFolder.Folder.FullName != this.CurrentFolder.Folder.FullName
 					
 					));
 			}
@@ -424,18 +424,10 @@ namespace Modules.Main.ViewModels
 			// 削除
 			if (result != null && result.HasValue && result.Value == true)
 			{
-				_MonitorModel.StopMonitoring(reaction);
+				Monitor.StopMonitoring(reaction);
 
-				var reactionSaveFoler = _MonitorModel.FindReactionParentFolder(reaction);
+				var reactionSaveFoler = Monitor.FindReactionParentFolder(reaction);
 				reactionSaveFoler.RemoveReaction(reaction.Guid);
-
-
-				var currentReaction = this.ReactionEditControl.Value?.Reaction;
-				if (currentReaction == reaction)
-				{
-					this.ReactionEditControl.Value = null;
-				}
-
 			}
 		}
 

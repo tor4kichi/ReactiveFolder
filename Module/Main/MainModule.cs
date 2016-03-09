@@ -29,6 +29,7 @@ namespace Modules.Main
 		{
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(FolderReactionManagePage));
 
+			_regionManager.RegisterViewWithRegion("SubRegion", typeof(ReactionEditPage));
 
 
 			var openReactionManageEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenReactionManageEventPayload>>();
@@ -45,6 +46,8 @@ namespace Modules.Main
 				var parameter = ViewModels.FolderReactionManagePageViewModel.CreateOpenReactionParameter(x.FilePath);
 
 				_regionManager.RequestNavigate("MainRegion", nameof(FolderReactionManagePage), parameter);
+				_regionManager.RequestNavigate("SubRegion", nameof(ReactionEditPage), parameter);
+
 			}
 			, keepSubscriberReferenceAlive: true);
 
@@ -55,6 +58,7 @@ namespace Modules.Main
 				var parameter = ViewModels.FolderReactionManagePageViewModel.CreateOpenReactionParameter(x.ReactionGuid);
 
 				_regionManager.RequestNavigate("MainRegion", nameof(FolderReactionManagePage), parameter);
+				_regionManager.RequestNavigate("SubRegion", nameof(ReactionEditPage), parameter);
 			}
 			, keepSubscriberReferenceAlive:true);
 		}

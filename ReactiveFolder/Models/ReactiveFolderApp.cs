@@ -16,7 +16,7 @@ namespace ReactiveFolder.Models
 {
 	public class ReactiveFolderApp : BindableBase
 	{
-		public const AppPageType InitialPage = AppPageType.InstantAction;
+		public const AppPageType InitialPage = AppPageType.History;
 
 
 		public const string APP_POLICY_FOLDER_NAME = "app_policy";

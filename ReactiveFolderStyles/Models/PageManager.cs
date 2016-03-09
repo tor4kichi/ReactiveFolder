@@ -1,11 +1,13 @@
 ﻿using Prism.Events;
 using Prism.Mvvm;
+using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolderStyles.Events;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -28,14 +30,66 @@ namespace ReactiveFolderStyles.Models
 			}
 			private set
 			{
-				SetProperty(ref _PageType, value);
+				if (SetProperty(ref _PageType, value))
+				{
+					IsOpenSideMenu = false;
+					IsOpenSubContent = false;
+				}
 			}
 		}
+
+		private bool _IsOpenSideMenu;
+		public bool IsOpenSideMenu
+		{
+			get
+			{
+				return _IsOpenSideMenu;
+			}
+			set
+			{
+				SetProperty(ref _IsOpenSideMenu, value);
+			}
+		}
+
+		private bool _IsOpenSubContent;
+		public bool IsOpenSubContent
+		{
+			get
+			{
+				return _IsOpenSubContent;
+			}
+			set
+			{
+				SetProperty(ref _IsOpenSubContent, value);
+			}
+		}
+
+
+		private PageSizeState _SizeState;
+		public PageSizeState SizeState
+		{
+			get
+			{
+				return _SizeState;
+			}
+			set
+			{
+				SetProperty(ref _SizeState, value);
+			}
+		}
+
+
+
+
 
 
 		public PageManager(IEventAggregator ea)
 		{
 			EventAggregator = ea;
+
+
+			var subContentVisibleEvent = EventAggregator.GetEvent<PubSubEvent<SubContentVisibilityChangeEventPayload>>();
+			subContentVisibleEvent.Subscribe(e => IsOpenSubContent = e.IsVisible);
 		}
 
 
@@ -65,9 +119,13 @@ namespace ReactiveFolderStyles.Models
 				default:
 					throw new NotSupportedException("not support pagetype: " + pageType.ToString());
 			}
+
 		}
 
 
+
+
+		
 
 
 
@@ -99,6 +157,7 @@ namespace ReactiveFolderStyles.Models
 			});
 
 			PageType = AppPageType.ReactionManage;
+			IsOpenSubContent = true;
 		}
 
 		public void OpenReaction(Guid reactionGuid)
@@ -125,6 +184,18 @@ namespace ReactiveFolderStyles.Models
 			PageType = AppPageType.AppPolicyManage;
 		}
 
+		public void OpenAppPolicy(Guid appPolicyGuid)
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<OpenAppPolicyWithAppGuidEventPayload>>();
+			e.Publish(new OpenAppPolicyWithAppGuidEventPayload()
+			{
+				AppPolicyGuid = appPolicyGuid
+			});
+
+
+
+			PageType = AppPageType.AppPolicyManage;
+		}
 
 
 
@@ -253,6 +324,43 @@ namespace ReactiveFolderStyles.Models
 
 		Settings,
 		About,
+	}
+
+
+	public enum PageSizeState
+	{
+		XSmall,
+		Small,
+		Midium,
+		Large,
+		XLarge,
+	}
+
+	public static class PageManagerObservableExtention
+	{
+		public static IObservable<PageSizeState> ObservePageSizeSmallerThan(this PageManager pageManager, PageSizeState sizeState)
+		{
+			return pageManager.ObserveProperty(x => x.SizeState)
+				.Where(x => x <= sizeState);
+		}
+
+		public static IObservable<PageSizeState> ObservePageSizeGreaterThan(this PageManager pageManager, PageSizeState sizeState)
+		{
+			return pageManager.ObserveProperty(x => x.SizeState)
+				.Where(x => x >= sizeState);
+		}
+
+		public static IObservable<PageSizeState> ObservePageSizeEqual(this PageManager pageManager, PageSizeState sizeState)
+		{
+			return pageManager.ObserveProperty(x => x.SizeState)
+				.Where(x => x == sizeState);
+		}
+
+		public static IObservable<PageSizeState> ObservePageSizeNotEqual(this PageManager pageManager, PageSizeState sizeState)
+		{
+			return pageManager.ObserveProperty(x => x.SizeState)
+				.Where(x => x != sizeState);
+		}
 	}
 
 }

@@ -20,13 +20,12 @@ using Reactive.Bindings.Extensions;
 
 namespace Modules.History.ViewModels
 {
-	public class HistoryPageViewModel : BindableBase, INavigationAware
+	public class HistoryPageViewModel : PageViewModelBase
 	{
 		public const int AdditionalLoadFilesAmount = 10;
 
 
 		public IHistoryManager HistoryManager { get; private set; }
-		public PageManager PageManager { get; private set; }
 		public IFolderReactionMonitorModel Monitor { get; private set; }
 		public IInstantActionManager InstantActionManager { get; private set; }
 
@@ -38,9 +37,9 @@ namespace Modules.History.ViewModels
 		public ReactiveProperty<bool> CanIncrementalLoad { get; private set; }
 
 		public HistoryPageViewModel(IHistoryManager histroyManager, PageManager pageManager, IFolderReactionMonitorModel monitor, IInstantActionManager instantActionManager)
+			: base(pageManager)
 		{
 			HistoryManager = histroyManager;
-			PageManager = pageManager;
 			Monitor = monitor;
 			InstantActionManager = instantActionManager;
 
@@ -107,17 +106,13 @@ namespace Modules.History.ViewModels
 		}
 
 
-		public bool IsNavigationTarget(NavigationContext navigationContext)
-		{
-			return true;
-		}
-
-		public void OnNavigatedFrom(NavigationContext navigationContext)
+		
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
 		{
 			ShowHistoryVMs.Clear();
 		}
 
-		public void OnNavigatedTo(NavigationContext navigationContext)
+		public override void OnNavigatedTo(NavigationContext navigationContext)
 		{
 			HistoryFileInfoList = HistoryManager.GetHistoryDataFileList();
 

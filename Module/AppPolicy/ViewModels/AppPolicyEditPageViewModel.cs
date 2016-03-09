@@ -17,16 +17,16 @@ using ReactiveFolder.Models.Util;
 using Microsoft.Win32;
 using ReactiveFolderStyles.DialogContent;
 using System.Reactive.Disposables;
+using ReactiveFolderStyles.ViewModels;
+using ReactiveFolderStyles.Models;
 
 namespace Modules.AppPolicy.ViewModels
 {
-	public class AppPolicyEditControlViewModel : PageViewModelBase, IDisposable
+	public class AppPolicyEditPageViewModel : PageViewModelBase, IDisposable
 	{
+		public IAppPolicyManager AppPolicyManager { get; private set; }
 
-		public IRegionNavigationService NavigationService;
-
-		public ApplicationPolicy AppPolicy { get; private set; }
-		public ApplicationPolicyViewModel AppPolicyVM { get; private set; }
+		public ReactiveProperty<ApplicationPolicyViewModel> AppPolicyVM { get; private set; }
 
 
 		public string RollbackData { get; private set; }
@@ -36,11 +36,11 @@ namespace Modules.AppPolicy.ViewModels
 
 		private IDisposable CanSaveSubscriber;
 
-		public AppPolicyEditControlViewModel(ApplicationPolicy appPolicy, IRegionManager regionManager, IAppPolicyManager appPolicyManager)
-			: base(regionManager, appPolicyManager)
+		public AppPolicyEditPageViewModel(PageManager pageManager, IAppPolicyManager appPolicyManager)
+			: base(pageManager)
 		{
-			AppPolicy = appPolicy;
-			AppPolicyVM = new ApplicationPolicyViewModel(this, _AppPolicyManager, AppPolicy);
+			AppPolicyManager = appPolicyManager;
+			AppPolicyVM = new ReactiveProperty<ApplicationPolicyViewModel>();
 			IsNeedSave = new ReactiveProperty<bool>(false);
 
 			SaveCommand = IsNeedSave.ToReactiveCommand(false);
@@ -49,6 +49,7 @@ namespace Modules.AppPolicy.ViewModels
 
 			IsNeedSave.Value = false;
 
+			/*
 			CanSaveSubscriber = Observable.Merge(
 					AppPolicy.PropertyChangedAsObservable().ToUnit(),
 					AppPolicy.AcceptExtentions.CollectionChangedAsObservable().ToUnit(),
@@ -59,6 +60,8 @@ namespace Modules.AppPolicy.ViewModels
 				{
 					IsNeedSave.Value = true;
 				});
+
+			*/
 		}
 
 
@@ -71,6 +74,15 @@ namespace Modules.AppPolicy.ViewModels
 		}
 
 
+		public ApplicationPolicy AppPolicy
+		{
+			get
+			{
+				return AppPolicyVM.Value?.AppPolicy;
+			}
+		}
+
+
 		public ReactiveCommand SaveCommand { get; private set; }
 
 		internal void Save()
@@ -79,7 +91,7 @@ namespace Modules.AppPolicy.ViewModels
 
 			try
 			{
-				_AppPolicyManager.SavePolicyFile(this.AppPolicy);	
+				AppPolicyManager.SavePolicyFile(this.AppPolicy);	
 			}
 			catch
 			{
@@ -87,15 +99,34 @@ namespace Modules.AppPolicy.ViewModels
 			}
 		}
 
+		public override void OnNavigatedTo(NavigationContext navigationContext)
+		{
+			PageManager.IsOpenSubContent = false;
 
-		
+			if (navigationContext.Parameters.Count() > 0)
+			{
+				if (navigationContext.Parameters.Any(x => x.Key == "guid"))
+				{
+					try
+					{
+						var appPolicyGuid = (Guid)navigationContext.Parameters["guid"];
 
+						AppPolicyVM.Value = new ApplicationPolicyViewModel(this, AppPolicyManager, AppPolicyManager.FromAppGuid(appPolicyGuid));
 
+						PageManager.IsOpenSubContent = true;
+					}
+					catch
+					{
+						Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
+					}
+				}
+			}
+		}
 
-
-		
-
-		
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
+		{
+			
+		}
 	}
 
 
@@ -105,7 +136,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		private CompositeDisposable _CompositeDisposable;
 
-		public AppPolicyEditControlViewModel EditPageVM { get; private set; }
+		public AppPolicyEditPageViewModel EditPageVM { get; private set; }
 		public IAppPolicyManager AppPolicyManager { get; private set; }
 		public ApplicationPolicy AppPolicy { get; private set; }
 
@@ -136,7 +167,7 @@ namespace Modules.AppPolicy.ViewModels
 		public ReactiveProperty<ApplicationPathState> AppPathState { get; private set; }
 
 
-		public ApplicationPolicyViewModel(AppPolicyEditControlViewModel editPageVM, IAppPolicyManager manager, ApplicationPolicy appPolicy)
+		public ApplicationPolicyViewModel(AppPolicyEditPageViewModel editPageVM, IAppPolicyManager manager, ApplicationPolicy appPolicy)
 		{
 			EditPageVM = editPageVM;
 			AppPolicyManager = manager;

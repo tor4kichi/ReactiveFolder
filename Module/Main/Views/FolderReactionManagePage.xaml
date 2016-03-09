@@ -25,18 +25,220 @@
             </local:ReactionEditControlTemplateSelecter.EmptyTemplate>
             <local:ReactionEditControlTemplateSelecter.ReactionEditControlTemplate>
                 <DataTemplate>
-                    <local:ReactionEditControl DataContext="{Binding}" />
+                    <local:ReactionEditPage DataContext="{Binding}" />
                 </DataTemplate>
             </local:ReactionEditControlTemplateSelecter.ReactionEditControlTemplate>
         </local:ReactionEditControlTemplateSelecter>
     </UserControl.Resources>
     
     <Grid>
+
+        <materialDesign:ColorZone 
+                        x:Name="Header"
+                        Mode="PrimaryMid"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                        Height="64"
+                        VerticalContentAlignment="Center"
+                        Panel.ZIndex="1"
+                        Margin="0 0 17 0"
+                        >
+            <materialDesign:ColorZone.Resources>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource AppbarText}" />
+                <Style TargetType="materialDesign:PackIcon" BasedOn="{StaticResource AppbarIcon}" />
+                <Style TargetType="TextBox" BasedOn="{StaticResource AppBarTextBox}">
+                </Style>
+            </materialDesign:ColorZone.Resources>
+
+            <DockPanel 
+                        Margin="16 0"
+                        >
+                <Border DockPanel.Dock="Left">
+                    <Button Command="{Binding OpenSideMenuCommand}" 
+                                Style="{StaticResource AppbarButton}"
+                                >
+                        <materialDesign:PackIcon Kind="Menu" />
+                    </Button>
+                </Border>
+
+                <StackPanel Orientation="Horizontal"
+                            DockPanel.Dock="Right"
+                                Visibility="Hidden"
+                            >
+                    <materialDesign:PackIcon Kind="Magnify"
+                                            Margin="8 0"
+                                            />
+                    <TextBox Width="200"
+                                FontSize="16"
+                                />
+                </StackPanel>
+
+                <Border Margin="16 0 0 0">
+                    <TextBlock Text="Manage Reaction"
+                                Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                VerticalAlignment="Center"
+                                />
+                </Border>
+            </DockPanel>
+
+
+
+        </materialDesign:ColorZone>
+
+
+        <ScrollViewer >
+
+
+            <StackPanel Orientation="Vertical" Margin="16 0">
+
+                <Border Height="{Binding ElementName=Header, Path=Height}" />
+
+                <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Width="300"
+                                  >
+                    <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0 16"
+                                
+                                
+                                    >
+                        <!--
+                        <TextBlock Text="Folder" 
+                               Style="{StaticResource ListSubheaderText}"/>
+                    
+                    
+                        <ItemsControl ItemsSource="{Binding FolderItems}"
+                                      Style="{StaticResource List}"
+                                      ItemContainerStyle="{StaticResource ListItem}"
+                                      >
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource ListButton}"
+                                            Command="{Binding OpenFolderReactionListCommand}"
+                                            Margin="0 0 0 8"
+                                            Height="40"
+                                            >
+                                    
+                                        <StackPanel Orientation="Horizontal"
+                                                    >
+                                            <materialDesign:PackIcon Kind="Folder"
+                                                                     Style="{StaticResource ListPrimaryIcon}"
+                                                                     Margin="16 0"
+                                                                        />
+                                            <StackPanel Orientation="Vertical">
+                                                <TextBlock Text="{Binding FolderName}"
+                                                            Style="{StaticResource ListPrimaryText}"
+                                                            />
+                                            </StackPanel>
+                                    
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                         -->
+                        <!-- 
+                        <TextBlock Text="Files" 
+                               Style="{StaticResource ListSubheaderText}"/>
+                        -->
+
+
+                        <ItemsControl ItemsSource="{Binding ReactionItems}"
+                                      Style="{StaticResource List}"
+                                      ItemContainerStyle="{StaticResource ListItem}"
+                                      >
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="Border" >
+                                        <Button Style="{StaticResource ListButton}"
+                                                Command="{Binding OpenReactionCommand}"
+                                                HorizontalContentAlignment="Stretch"
+                                                Height="40"
+                                                Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
+                                                >
+
+                                            <Button.ContextMenu>
+                                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                    <MenuItem Header="Export" Command="{Binding ExportCommand}"></MenuItem>
+                                                    <Separator />
+                                                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
+                                                </ContextMenu>
+                                            </Button.ContextMenu>
+
+
+                                            <DockPanel VerticalAlignment="Center">
+
+                                                <materialDesign:PackIcon Kind="File"
+                                                                         Style="{StaticResource ListPrimaryIcon}"
+                                                                         DockPanel.Dock="Left"
+                                                                        />
+
+
+
+                                                <!-- Validationで失敗している時に表示するアイコン -->
+                                                <materialDesign:PackIcon Visibility="{Binding IsInvalid, Converter={StaticResource BoolToVisibility}}"
+                                                                         Kind="Alert"
+                                                                         Style="{StaticResource ListSecondaryIcon}"
+                                                                         Foreground="Red"
+                                                                         VerticalAlignment="Center"
+                                                                         HorizontalAlignment="Right"
+                                                                         ToolTip="Invalid reaction"
+                                                                         DockPanel.Dock="Right"
+                                                                         Background="Transparent"
+                                                                         />
+
+                                                <!-- アクティブではない時に表示するアイコン -->
+                                                <materialDesign:PackIcon Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}"
+                                                                         Kind="InformationOutline"
+                                                                         Style="{StaticResource ListSecondaryIcon}"
+                                                                         VerticalAlignment="Center"
+                                                                         HorizontalAlignment="Right"
+                                                                         ToolTip="Inactive reaction"
+                                                                         DockPanel.Dock="Right"
+                                                                         Background="Transparent"
+                                                                         />
+
+
+                                                <StackPanel Orientation="Vertical" Margin="0 2">
+                                                    <TextBlock Text="{Binding Name}"
+                                                            Style="{StaticResource ListPrimaryText}"
+                                                            />
+                                                    <!--
+                                                        <Border Margin="0 2 0 0" />
+
+                                                        <TextBlock Text="{Binding FilePath}"
+                                                            Style="{StaticResource ListSecondaryText}"
+                                                            />
+                                                        -->
+                                                </StackPanel>
+                                            </DockPanel>
+
+
+                                        </Button>
+                                    </Border>
+
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialDesignSelection}" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+
+                                </DataTemplate>
+
+
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </StackPanel>
+
+        </ScrollViewer>
+
         <DockPanel>
 
 
             <DockPanel DockPanel.Dock="Left" Width="300">
                 <!-- Top Buttons -->
+                <!--
                 <Border Height="40" DockPanel.Dock="Top">
 
                     <DockPanel VerticalAlignment="Center" Margin="8 8 8 0" >
@@ -73,146 +275,12 @@
 
                     </DockPanel>
                 </Border>
-
+                -->
+                
+                
                 <Border >
 
-                    <ScrollViewer HorizontalScrollBarVisibility="Hidden"
-                                  VerticalScrollBarVisibility="Auto"
-                                  Width="300"
-                                  >
-                        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0 16"
-                                
-                                
-                                    >
-                            <!--
-                        <TextBlock Text="Folder" 
-                               Style="{StaticResource ListSubheaderText}"/>
                     
-                    
-                        <ItemsControl ItemsSource="{Binding FolderItems}"
-                                      Style="{StaticResource List}"
-                                      ItemContainerStyle="{StaticResource ListItem}"
-                                      >
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Style="{StaticResource ListButton}"
-                                            Command="{Binding OpenFolderReactionListCommand}"
-                                            Margin="0 0 0 8"
-                                            Height="40"
-                                            >
-                                    
-                                        <StackPanel Orientation="Horizontal"
-                                                    >
-                                            <materialDesign:PackIcon Kind="Folder"
-                                                                     Style="{StaticResource ListPrimaryIcon}"
-                                                                     Margin="16 0"
-                                                                        />
-                                            <StackPanel Orientation="Vertical">
-                                                <TextBlock Text="{Binding FolderName}"
-                                                            Style="{StaticResource ListPrimaryText}"
-                                                            />
-                                            </StackPanel>
-                                    
-                                        </StackPanel>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                         -->
-                            <!-- 
-                        <TextBlock Text="Files" 
-                               Style="{StaticResource ListSubheaderText}"/>
-                        -->
-
-
-                            <ItemsControl ItemsSource="{Binding ReactionItems}"
-                                      Style="{StaticResource List}"
-                                      ItemContainerStyle="{StaticResource ListItem}"
-                                      >
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border x:Name="Border" >
-                                            <Button Style="{StaticResource ListButton}"
-                                                Command="{Binding OpenReactionCommand}"
-                                                HorizontalContentAlignment="Stretch"
-                                                Height="40"
-                                                Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
-                                                >
-
-                                                <Button.ContextMenu>
-                                                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                                        <MenuItem Header="Export" Command="{Binding ExportCommand}"></MenuItem>
-                                                        <Separator />
-                                                        <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
-                                                    </ContextMenu>
-                                                </Button.ContextMenu>
-
-                                            
-                                                <DockPanel VerticalAlignment="Center">
-
-                                                    <materialDesign:PackIcon Kind="File"
-                                                                         Style="{StaticResource ListPrimaryIcon}"
-                                                                         DockPanel.Dock="Left"
-                                                                        />
-
-
-
-                                                    <!-- Validationで失敗している時に表示するアイコン -->
-                                                    <materialDesign:PackIcon Visibility="{Binding IsInvalid, Converter={StaticResource BoolToVisibility}}"
-                                                                         Kind="Alert"
-                                                                         Style="{StaticResource ListSecondaryIcon}"
-                                                                         Foreground="Red"
-                                                                         VerticalAlignment="Center"
-                                                                         HorizontalAlignment="Right"
-                                                                         ToolTip="Invalid reaction"
-                                                                         DockPanel.Dock="Right"
-                                                                         Background="Transparent"
-                                                                         />
-
-                                                    <!-- アクティブではない時に表示するアイコン -->
-                                                    <materialDesign:PackIcon Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}"
-                                                                         Kind="InformationOutline"
-                                                                         Style="{StaticResource ListSecondaryIcon}"
-                                                                         VerticalAlignment="Center"
-                                                                         HorizontalAlignment="Right"
-                                                                         ToolTip="Inactive reaction"
-                                                                         DockPanel.Dock="Right"
-                                                                         Background="Transparent"
-                                                                         />
-
-
-                                                    <StackPanel Orientation="Vertical" Margin="0 2">
-                                                        <TextBlock Text="{Binding Name}"
-                                                            Style="{StaticResource ListPrimaryText}"
-                                                            />
-                                                        <!--
-                                                        <Border Margin="0 2 0 0" />
-
-                                                        <TextBlock Text="{Binding FilePath}"
-                                                            Style="{StaticResource ListSecondaryText}"
-                                                            />
-                                                        -->
-                                                    </StackPanel>
-                                                </DockPanel>
-
-
-                                            </Button>
-                                        </Border>
-                                        
-                                        <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialDesignSelection}" />
-                                            </DataTrigger>
-                                        </DataTemplate.Triggers>
-                                        
-                                    </DataTemplate>
-                                    
-                                    
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </ScrollViewer>
 
 
 
@@ -232,18 +300,7 @@
                 </Border>
             </Grid>
     -->
-            <Border BorderThickness="1 0 0 0" 
-                    BorderBrush="{StaticResource MaterialDesignDivider}"
-                    Margin="8 24 8 8"
-                />
-
-            <Border>
-                <ContentControl Content="{Binding ReactionEditControl.Value}"
-                                ContentTemplateSelector="{StaticResource reactionEditControlTemplate}"
-                                >
-                </ContentControl>
-            </Border>
-
+            
         </DockPanel>
 
         <materialDesign:DialogHost Identifier="ReactionEditCommonDialogHost"

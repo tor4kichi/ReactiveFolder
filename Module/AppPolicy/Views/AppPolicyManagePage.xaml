@@ -14,9 +14,11 @@
              >
 
     <UserControl.Resources>
-        <DataTemplate x:Key="appPolicyEditTemplate" DataType="{x:Type vm:AppPolicyEditControlViewModel}">
-            <local:AppPolicyEditControl DataContext="{Binding}" />
+        
+        <DataTemplate x:Key="appPolicyEditTemplate" DataType="{x:Type vm:AppPolicyEditPageViewModel}">
+            <local:AppPolicyEditPage DataContext="{Binding}" />
         </DataTemplate>
+        
         <DataTemplate x:Key="emptyTemplate" >
             <TextBlock Text="not selected" />
         </DataTemplate>
@@ -27,138 +29,156 @@
                                              />
 
     </UserControl.Resources>
-    
-    
-    
+
+
+
     <Grid>
-        <DockPanel>
-            <DockPanel DockPanel.Dock="Left" Width="300">
-
-                <!-- Top Buttons -->
-
-                <Border Height="40" DockPanel.Dock="Top"
+        <materialDesign:ColorZone 
+                        x:Name="Header"
+                        Mode="PrimaryMid"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                        Height="64"
+                        VerticalContentAlignment="Center"
+                        Panel.ZIndex="1"
+                        Margin="0 0 17 0"
                         >
+            <materialDesign:ColorZone.Resources>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource AppbarText}" />
+                <Style TargetType="materialDesign:PackIcon" BasedOn="{StaticResource AppbarIcon}" />
+                <Style TargetType="TextBox" BasedOn="{StaticResource AppBarTextBox}">
+                </Style>
+            </materialDesign:ColorZone.Resources>
 
-                    <DockPanel VerticalAlignment="Center" Margin="8 8 8 0" >
-
-
-                        <!--
-                        <Button Command="{Binding ShowHelpCommand}" 
+            <DockPanel 
+                        Margin="16 0"
+                        >
+                <Border DockPanel.Dock="Left">
+                    <Button Command="{Binding OpenSideMenuCommand}" 
                                 Style="{StaticResource AppbarButton}"
-                                DockPanel.Dock="Right">
-                            <materialDesign:PackIcon Kind="CommentQuestionOutline" />
-                        </Button>
-                        -->
-                        <materialDesign:PopupBox 
-                                         PlacementMode="BottomAndAlignCentres"                                                                      
-                                         DockPanel.Dock="Right"
-                                         >
-                            <materialDesign:PopupBox.ToggleContent>
-                                <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
-                            </materialDesign:PopupBox.ToggleContent>
-                            
-                            <StackPanel>
-                                <Button Command="{Binding AddAppPolicyCommand}">
-                                    <DockPanel>
-                                        <materialDesign:PackIcon Kind="File" Width="24" Height="24" DockPanel.Dock="Left" />
-                                        <TextBlock Text="Create New" VerticalAlignment="Center" />
-                                    </DockPanel>
-                                </Button>
-                                <Button Command="{Binding ImportAppPolicyCommand}">
-                                    <DockPanel>
-                                        <materialDesign:PackIcon Kind="Import" Width="24" Height="24" DockPanel.Dock="Left" />
-                                        <TextBlock Text="Import" VerticalAlignment="Center" />
-                                    </DockPanel>
-                                </Button>
-                            </StackPanel>
-                        </materialDesign:PopupBox>
-
-                        <Border />
-
-                    </DockPanel>
-
-
+                                >
+                        <materialDesign:PackIcon Kind="Menu" />
+                    </Button>
                 </Border>
 
-                <Border>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0 24">
+                <StackPanel Orientation="Horizontal"
+                            DockPanel.Dock="Right"
+                                Visibility="Hidden"
+                            >
+                    <materialDesign:PackIcon Kind="Magnify"
+                                            Margin="8 0"
+                                            />
+                    <TextBox Width="200"
+                                FontSize="16"
+                                />
+                </StackPanel>
 
-                            <!--
-                        <TextBlock Text="Folder" 
-                               Style="{StaticResource ListSubheaderText}"/>
-                        -->
-
-                            <ItemsControl ItemsSource="{Binding AppPolicies}"
-                                      Style="{StaticResource List}"
-                                      ItemContainerStyle="{StaticResource ListItem}"
-                                      >
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border x:Name="Border">
-                                            <Button Style="{StaticResource ListButton}"
-                                                Command="{Binding SelectAppCommand}"
-                                                Height="40"
-                                                Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
-                                                >
-
-                                                <Button.ContextMenu>
-                                                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                                        <MenuItem Header="Export" Command="{Binding ExportCommand}"></MenuItem>
-                                                        <Separator />
-                                                        <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
-                                                    </ContextMenu>
-                                                </Button.ContextMenu>
-
-
-                                                <StackPanel Orientation="Horizontal">
-                                                    <materialDesign:PackIcon Kind="Apps"
-                                                                            Style="{StaticResource ListPrimaryIcon}"
-                                                                 
-                                                                            />
-                                                    <StackPanel Orientation="Vertical">
-                                                        <TextBlock Text="{Binding AppName.Value}"
-                                                                Style="{StaticResource ListPrimaryText}"
-                                                                />
-                                                    </StackPanel>
-
-                                                </StackPanel>
-                                            </Button>
-                                        </Border>
-
-                                        <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialDesignSelection}" />
-                                            </DataTrigger>
-                                        </DataTemplate.Triggers>
-                                        
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-
-
-                        </StackPanel>
-                    </ScrollViewer>
+                <Border Margin="16 0 0 0">
+                    <TextBlock Text="Application Policy Manage"
+                                Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                VerticalAlignment="Center"
+                                />
                 </Border>
             </DockPanel>
 
 
-            <Border BorderThickness="1 0 0 0" 
-                    BorderBrush="{StaticResource MaterialDesignDivider}"
-                    Margin="8 24 8 8"
-                />
-            
 
-            <ContentControl Content="{Binding AppPolicyEditVM.Value}"
-                            ContentTemplateSelector="{StaticResource appPolicyEditTemplateSelecter}"
+        </materialDesign:ColorZone>
+
+        <ScrollViewer >
+            <StackPanel Orientation="Vertical" Margin="16 0">
+
+                <Border Height="{Binding ElementName=Header, Path=ActualHeight}" />
+
+                <!--
+                <Button Command="{Binding ShowHelpCommand}" 
+                        Style="{StaticResource AppbarButton}"
+                        DockPanel.Dock="Right">
+                    <materialDesign:PackIcon Kind="CommentQuestionOutline" />
+                </Button>
+                <materialDesign:PopupBox 
+                                    PlacementMode="BottomAndAlignCentres"                                                                      
+                                    DockPanel.Dock="Right"
+                                    >
+                    <materialDesign:PopupBox.ToggleContent>
+                        <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
+                    </materialDesign:PopupBox.ToggleContent>
+                            
+                    <StackPanel>
+                        <Button Command="{Binding AddAppPolicyCommand}">
+                            <DockPanel>
+                                <materialDesign:PackIcon Kind="File" Width="24" Height="24" DockPanel.Dock="Left" />
+                                <TextBlock Text="Create New" VerticalAlignment="Center" />
+                            </DockPanel>
+                        </Button>
+                        <Button Command="{Binding ImportAppPolicyCommand}">
+                            <DockPanel>
+                                <materialDesign:PackIcon Kind="Import" Width="24" Height="24" DockPanel.Dock="Left" />
+                                <TextBlock Text="Import" VerticalAlignment="Center" />
+                            </DockPanel>
+                        </Button>
+                    </StackPanel>
+                </materialDesign:PopupBox>
+
+                <Border />
+                -->
+              
+
+                    <!--
+                <TextBlock Text="Folder" 
+                        Style="{StaticResource ListSubheaderText}"/>
+                -->
+
+                <ItemsControl ItemsSource="{Binding AppPolicies}"
+                            Style="{StaticResource List}"
+                            ItemContainerStyle="{StaticResource ListItem}"
                             >
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border x:Name="Border">
+                                <Button Style="{StaticResource ListButton}"
+                                    Command="{Binding SelectAppCommand}"
+                                    Height="40"
+                                    Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
+                                    >
 
-            </ContentControl>
+                                    <Button.ContextMenu>
+                                        <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                            <MenuItem Header="Export" Command="{Binding ExportCommand}"></MenuItem>
+                                            <Separator />
+                                            <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Apps"
+                                                                Style="{StaticResource ListPrimaryIcon}"
+                                                                 
+                                                                />
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock Text="{Binding AppName.Value}"
+                                                    Style="{StaticResource ListPrimaryText}"
+                                                    />
+                                        </StackPanel>
+
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialDesignSelection}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                                        
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
 
 
-        </DockPanel>
+            </StackPanel>
+        </ScrollViewer>
 
 
         <materialDesign:DialogHost Identifier="AppPolicyEditDialogHost"

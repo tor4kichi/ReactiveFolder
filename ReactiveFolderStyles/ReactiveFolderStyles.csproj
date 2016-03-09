@@ -145,6 +145,7 @@
     <Compile Include="Events\OpenReactionEventPayload.cs" />
     <Compile Include="Events\OpenReactionManageEventPayload.cs" />
     <Compile Include="Events\OpenSettingsEventPayload.cs" />
+    <Compile Include="Events\SubContentVisibilityChangeEventPayload.cs" />
     <Compile Include="Events\TaskbarIconBalloonMessageEventPayload.cs" />
     <Compile Include="Models\IInstantActionManager.cs" />
     <Compile Include="Models\PageManager.cs" />
@@ -166,6 +167,7 @@
     <Compile Include="Util\KnownFolders.cs" />
     <Compile Include="ViewModels\AppOptionInstanceViewModel.cs" />
     <Compile Include="ViewModels\AppOptionValueViewModel.cs" />
+    <Compile Include="ViewModels\PageViewModelBase.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
