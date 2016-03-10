@@ -13,27 +13,45 @@
              d:DesignHeight="600" d:DesignWidth="600">
     <UserControl.Resources>
         <DataTemplate x:Key="FilterEditTemplate">
-            <Grid
+            <StackPanel Orientation="Vertical"
                             Margin="0 0 0 0"
                             >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    
-                </Grid.ColumnDefinitions>
                 
-                <StackPanel Orientation="Vertical">
+                <DockPanel>
 
-                    <TextBlock Text="Positive List" 
-                           Grid.Row="0"
-                           Grid.Column="0"
+                    <DockPanel DockPanel.Dock="Top" Margin="0 8">
+
+                        <TextBlock Text="Positive List" 
+                           VerticalAlignment="Center"
                            HorizontalAlignment="Center"
-                           Margin="0 8"
+                           
+                               DockPanel.Dock="Left"
                             />
+                        <DockPanel Margin="8 0"
+                                   >
+                            <Button Content="Add"
+                                Command="{Binding AddIncludeFilterTextCommand}"
+                                CommandParameter="{Binding IncludeFilterText.Value}"
+                                Margin="8 0 0 0"
+                                Width="200"
+                                DockPanel.Dock="Right"
+                                >
+                            </Button>
+
+                            <TextBox Text="{Binding IncludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:TextFieldAssist.Hint="ex) *.png"
+                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
+                                     Margin="32 0 8 0"
+                                 />
+
+                        </DockPanel>
+
+                        
+                        
+                    </DockPanel>
 
                     <ItemsControl ItemsSource="{Binding IncludeFilterPatterns}"
-                               Grid.Row="3"
-                                Grid.Column="0"
+                               DockPanel.Dock="Bottom"
                                     >
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -59,37 +77,40 @@
                     </ItemsControl>
 
 
-                    <DockPanel Margin="8 0">
-                        <Button Content="Add"
-                            Command="{Binding AddIncludeFilterTextCommand}"
-                            CommandParameter="{Binding IncludeFilterText.Value}"
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Margin="8 8 0 8"
-                            Width="80"
-                            DockPanel.Dock="Right"
-                            >
-                        </Button>
-
-                        <TextBox Text="{Binding IncludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
-                                 materialDesign:TextFieldAssist.Hint="ex) *.png"
-                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
-                                 />
-
-                    </DockPanel>
-
-                </StackPanel>
-
-
-                <StackPanel Orientation="Vertical" 
-                            Grid.Column="1" >
                     
-                    <TextBlock Text="Negative List" 
+
+                </DockPanel>
+
+
+                <DockPanel>
+
+
+                    <DockPanel DockPanel.Dock="Top">
+                        <TextBlock Text="Negative List" 
                             Grid.Row="0"
                            Grid.Column="1"
                            HorizontalAlignment="Center"
                            Margin="0 8"
                             />
+
+                        <DockPanel Margin="8 0">
+                            <Button Content="Add"
+                            Command="{Binding AddExcludeFilterTextCommand}"
+                            CommandParameter="{Binding ExcludeFilterText.Value}"
+                            Margin="8 0 0 0"
+                            Width="200"
+                            DockPanel.Dock="Right"
+                            >
+                            </Button>
+
+                            <TextBox Text="{Binding ExcludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:TextFieldAssist.Hint="ex) filename.*"
+                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
+                                      Margin="32 0 8 0"
+                                 />
+
+                        </DockPanel>
+                    </DockPanel>
 
                     <ItemsControl ItemsSource="{Binding ExcludeFilterPatterns}"
                               Grid.Row="3"
@@ -119,25 +140,8 @@
                     </ItemsControl>
 
 
-                    <DockPanel Margin="8 0">
-                        <Button Content="Add"
-                            Command="{Binding AddExcludeFilterTextCommand}"
-                            CommandParameter="{Binding ExcludeFilterText.Value}"
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Margin="8 8 0 8"
-                            Width="80"
-                            DockPanel.Dock="Right"
-                            >
-                        </Button>
-
-                        <TextBox Text="{Binding ExcludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
-                                 materialDesign:TextFieldAssist.Hint="ex) filename.*"
-                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
-                                 />
-
-                    </DockPanel>
-                </StackPanel>
+                   
+                </DockPanel>
                 
 
 
@@ -153,7 +157,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     -->
-            </Grid>
+            </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
     <Grid x:Name="FilterContainer" >
@@ -190,22 +194,29 @@
             </TextBlock>
 
             <!-- FileかFolderの選択を行うラジオボタン -->
-            <ComboBox ItemsSource="{Binding Filters}"
+
+            <DockPanel Margin="0 0 0 8">
+
+                <TextBlock Text="入力アイテムの種類" DockPanel.Dock="Left" 
+                           VerticalAlignment="Center"
+                           />
+                <ComboBox ItemsSource="{Binding Filters}"
                       SelectedItem="{Binding SelectedFilterVM.Value}"
                       Width="200"
                       HorizontalAlignment="Right"
-                      Margin="0 0 0 8"
-                >
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock>
+                     >
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
                             <Run Text="Input " />
                             <Run Text="{Binding FilterType, Mode=OneTime}" />
-                        </TextBlock>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
 
-            </ComboBox>
+                </ComboBox>
+            </DockPanel>
+           
 
             <Border Margin="0 0 0 8" />
 
