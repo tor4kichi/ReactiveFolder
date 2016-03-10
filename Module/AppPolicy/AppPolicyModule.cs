@@ -1,6 +1,7 @@
 ﻿using Prism.Events;
 using Prism.Modularity;
 using Prism.Regions;
+using ReactiveFolder.Models.AppPolicy;
 using ReactiveFolderStyles.Events;
 using System;
 using System.Collections.Generic;
@@ -24,14 +25,26 @@ namespace Modules.AppPolicy
 		public void Initialize()
 		{
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyManagePage));
-			_regionManager.RegisterViewWithRegion("MainRegion", typeof(Views.AppPolicyEditControl));
+			_regionManager.RegisterViewWithRegion("SubRegion", typeof(Views.AppPolicyEditPage));
 
 
 
-			var settingsOpenEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenAppPolicyManageEventPayload>>();
-			settingsOpenEvent.Subscribe(x =>
+			var openAppPolicyManagerEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenAppPolicyManageEventPayload>>();
+			openAppPolicyManagerEvent.Subscribe(x =>
 			{
 				_regionManager.RequestNavigate("MainRegion", nameof(Views.AppPolicyManagePage));
+			}
+			, keepSubscriberReferenceAlive: true);
+
+
+
+
+			var openAppPolicyWithAppGuidEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenAppPolicyWithAppGuidEventPayload>>();
+			openAppPolicyWithAppGuidEvent.Subscribe(x =>
+			{
+				var param = AppPolicyNavigationParametersHelper.CreateNavigationParameterFromAppPolicy(x.AppPolicyGuid);
+				_regionManager.RequestNavigate("MainRegion", nameof(Views.AppPolicyManagePage), param);
+				_regionManager.RequestNavigate("SubRegion", nameof(Views.AppPolicyEditPage), param);
 			}
 			, keepSubscriberReferenceAlive: true);
 		}
@@ -50,7 +63,7 @@ namespace Modules.AppPolicy
 		{
 			var param = new NavigationParameters();
 			param.Add("guid", appGuid);
-			regionManager.RequestNavigate("MainRegion", nameof(AppPolicy.Views.AppPolicyEditControl), param);
+			regionManager.RequestNavigate("MainRegion", nameof(AppPolicy.Views.AppPolicyEditPage), param);
 		}
 	}
 
@@ -65,6 +78,13 @@ namespace Modules.AppPolicy
 			}
 
 			return appGuid;
+		}
+
+		public static NavigationParameters CreateNavigationParameterFromAppPolicy(Guid appPolicyGuid)
+		{
+			var param = new NavigationParameters();
+			param.Add("guid", appPolicyGuid);
+			return param;
 		}
 	}
 }

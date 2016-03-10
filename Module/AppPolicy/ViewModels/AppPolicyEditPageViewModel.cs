@@ -17,57 +17,48 @@ using ReactiveFolder.Models.Util;
 using Microsoft.Win32;
 using ReactiveFolderStyles.DialogContent;
 using System.Reactive.Disposables;
+using ReactiveFolderStyles.ViewModels;
+using ReactiveFolderStyles.Models;
 
 namespace Modules.AppPolicy.ViewModels
 {
-	public class AppPolicyEditControlViewModel : PageViewModelBase, IDisposable
+	public class AppPolicyEditPageViewModel : PageViewModelBase, IDisposable
 	{
+		public IAppPolicyManager AppPolicyManager { get; private set; }
 
-		public IRegionNavigationService NavigationService;
-
-		public ApplicationPolicy AppPolicy { get; private set; }
-		public ApplicationPolicyViewModel AppPolicyVM { get; private set; }
+		public ReactiveProperty<ApplicationPolicyViewModel> AppPolicyVM { get; private set; }
 
 
 		public string RollbackData { get; private set; }
 
 
-		public ReactiveProperty<bool> IsNeedSave { get; private set; }
-
-		private IDisposable CanSaveSubscriber;
-
-		public AppPolicyEditControlViewModel(ApplicationPolicy appPolicy, IRegionManager regionManager, IAppPolicyManager appPolicyManager)
-			: base(regionManager, appPolicyManager)
+		public AppPolicyEditPageViewModel(PageManager pageManager, IAppPolicyManager appPolicyManager)
+			: base(pageManager)
 		{
-			AppPolicy = appPolicy;
-			AppPolicyVM = new ApplicationPolicyViewModel(this, _AppPolicyManager, AppPolicy);
-			IsNeedSave = new ReactiveProperty<bool>(false);
+			AppPolicyManager = appPolicyManager;
+			AppPolicyVM = new ReactiveProperty<ApplicationPolicyViewModel>();
 
-			SaveCommand = IsNeedSave.ToReactiveCommand(false);
+			SaveCommand = new ReactiveCommand();
 
 			SaveCommand.Subscribe(_ => Save());
 
-			IsNeedSave.Value = false;
-
-			CanSaveSubscriber = Observable.Merge(
-					AppPolicy.PropertyChangedAsObservable().ToUnit(),
-					AppPolicy.AcceptExtentions.CollectionChangedAsObservable().ToUnit(),
-					AppPolicy.OptionDeclarations.CollectionChangedAsObservable().ToUnit(),
-					AppPolicy.OptionDeclarations.ObserveElementPropertyChanged().ToUnit()
-				)
-				.Subscribe(_ =>
-				{
-					IsNeedSave.Value = true;
-				});
+			
 		}
 
 
 		public void Dispose()
 		{
 			AppPolicyVM?.Dispose();
-			IsNeedSave?.Dispose();
-			CanSaveSubscriber?.Dispose();
 			SaveCommand?.Dispose();
+		}
+
+
+		public ApplicationPolicy AppPolicy
+		{
+			get
+			{
+				return AppPolicyVM.Value?.AppPolicy;
+			}
 		}
 
 
@@ -75,27 +66,45 @@ namespace Modules.AppPolicy.ViewModels
 
 		internal void Save()
 		{
-			IsNeedSave.Value = false;
-
 			try
 			{
-				_AppPolicyManager.SavePolicyFile(this.AppPolicy);	
+				AppPolicyManager.SavePolicyFile(this.AppPolicy);
+				PageManager.ShowInformation( $"{AppPolicy.AppName} Saved");
 			}
 			catch
 			{
-				IsNeedSave.Value = true;
+				PageManager.ShowError($"{AppPolicy.AppName} Save failed.");
 			}
 		}
 
+		public override void OnNavigatedTo(NavigationContext navigationContext)
+		{
+			PageManager.IsOpenSubContent = false;
 
-		
+			if (navigationContext.Parameters.Count() > 0)
+			{
+				if (navigationContext.Parameters.Any(x => x.Key == "guid"))
+				{
+					try
+					{
+						var appPolicyGuid = (Guid)navigationContext.Parameters["guid"];
 
+						AppPolicyVM.Value = new ApplicationPolicyViewModel(this, AppPolicyManager, AppPolicyManager.FromAppGuid(appPolicyGuid));
 
+						PageManager.IsOpenSubContent = true;
+					}
+					catch
+					{
+						Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
+					}
+				}
+			}
+		}
 
-
-		
-
-		
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
+		{
+			
+		}
 	}
 
 
@@ -105,7 +114,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		private CompositeDisposable _CompositeDisposable;
 
-		public AppPolicyEditControlViewModel EditPageVM { get; private set; }
+		public AppPolicyEditPageViewModel EditPageVM { get; private set; }
 		public IAppPolicyManager AppPolicyManager { get; private set; }
 		public ApplicationPolicy AppPolicy { get; private set; }
 
@@ -136,7 +145,7 @@ namespace Modules.AppPolicy.ViewModels
 		public ReactiveProperty<ApplicationPathState> AppPathState { get; private set; }
 
 
-		public ApplicationPolicyViewModel(AppPolicyEditControlViewModel editPageVM, IAppPolicyManager manager, ApplicationPolicy appPolicy)
+		public ApplicationPolicyViewModel(AppPolicyEditPageViewModel editPageVM, IAppPolicyManager manager, ApplicationPolicy appPolicy)
 		{
 			EditPageVM = editPageVM;
 			AppPolicyManager = manager;
@@ -342,13 +351,13 @@ namespace Modules.AppPolicy.ViewModels
 		internal void RemoveDeclaration(AppOptionDeclarationBase declaration)
 		{
 			// TODO: AppOptionDeclarationの削除確認ダイアログの表示
-			if (declaration is AppOptionDeclaration)
+			if (declaration is AppOutputOptionDeclaration)
+			{
+				AppPolicy.RemoveOutputOptionDeclaration(declaration as AppOutputOptionDeclaration);
+			}
+			else if (declaration is AppOptionDeclaration)
 			{
 				AppPolicy.RemoveOptionDeclaration(declaration as AppOptionDeclaration);
-			}
-			else if (declaration is AppOutputOptionDeclaration)
-			{
-				AppPolicy.RemoveOptionDeclaration(declaration as AppOutputOptionDeclaration);
 			}
 			else
 			{

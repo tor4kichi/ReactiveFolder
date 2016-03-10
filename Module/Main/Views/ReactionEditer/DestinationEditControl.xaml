@@ -48,8 +48,9 @@
                 <TextBlock Text="{Binding OutputFolderPath}"
                            VerticalAlignment="Center"
                            TextWrapping="Wrap"
-                           DockPanel.Dock="Left"
-                           Margin="0 0 8 0"
+                           DockPanel.Dock="Top"
+                           Margin="0 0 0 16"
+                           HorizontalAlignment="Right"
                            />
 
                 <Button Content="Select Folder" 
@@ -59,19 +60,22 @@
                         />
             </DockPanel>
 
-            <StackPanel Orientation="Horizontal" 
-                        HorizontalAlignment="Right" 
-                        VerticalAlignment="Bottom"
-                        Margin="0 8"
+            <DockPanel Margin="0 8"
                         >
+
+                <TextBlock Text="出力名の変換規則"
+                           VerticalAlignment="Center"
+                           DockPanel.Dock="Left"
+                           />
                 <TextBox Text="{Binding OutputNamePattern.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Width="200"
                          ToolTip="%NAME% %INDEX% %DATE% %YY% %MM% %DD% %HH% %mm% %SS%"
                          materialDesign:TextFieldAssist.Hint="Rename"
+                         HorizontalAlignment="Right"
                          />
                 
                 <!-- Renameで扱える特殊文字列の説明 -->
-            </StackPanel>
+            </DockPanel>
 
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right"

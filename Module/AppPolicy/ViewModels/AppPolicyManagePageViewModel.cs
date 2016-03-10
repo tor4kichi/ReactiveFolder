@@ -16,57 +16,82 @@ using ReactiveFolder.Models.Util;
 using ReactiveFolderStyles.DialogContent;
 using MaterialDesignThemes.Wpf;
 using ReactiveFolder.Models.Actions;
+using ReactiveFolderStyles.ViewModels;
+using ReactiveFolderStyles.Models;
 
 namespace Modules.AppPolicy.ViewModels
 {
-	public class AppPolicyManagePageViewModel : PageViewModelBase, INavigationAware
+	public class AppPolicyManagePageViewModel : PageViewModelBase
 	{
 		public IFolderReactionMonitorModel Monitor { get; private set; }
-		public IRegionNavigationService NavigationService { get; private set; }
+		public IAppPolicyManager AppPolicyManager { get; private set; }
 
 
+		public ReadOnlyReactiveCollection<AppPolicyListItemViewModel> AppPolicies { get; private set; }
 
-		public static ReadOnlyReactiveCollection<AppPolicyListItemViewModel> AppPolicies { get; private set; }
+		public ReactiveProperty<AppPolicyListItemViewModel> SelectedAppPolicy { get; private set; }
 
-
-		public ReactiveProperty<AppPolicyEditControlViewModel> AppPolicyEditVM { get; private set; }
-
-
-		public AppPolicyManagePageViewModel(IRegionManager regionManager, IAppPolicyManager appPolicyManager, IFolderReactionMonitorModel monitor)
-			: base(regionManager, appPolicyManager)
+		public AppPolicyManagePageViewModel(PageManager pageManager, IAppPolicyManager appPolicyManager, IFolderReactionMonitorModel monitor)
+			: base(pageManager)
 		{
 			Monitor = monitor;
-			AppPolicies = _AppPolicyManager.Policies
+			AppPolicyManager = appPolicyManager;
+			AppPolicies = AppPolicyManager.Policies
 				.ToReadOnlyReactiveCollection(x => new AppPolicyListItemViewModel(this, x));
+			SelectedAppPolicy = new ReactiveProperty<AppPolicyListItemViewModel>();
 
-			AppPolicyEditVM = new ReactiveProperty<AppPolicyEditControlViewModel>();
-		}
-
-
-		public bool IsNavigationTarget(NavigationContext navigationContext)
-		{
-			return true;
-		}
-
-		public void OnNavigatedFrom(NavigationContext navigationContext)
-		{
-			// nothing to do.
-			if (AppPolicyEditVM.Value != null)
+			SelectedAppPolicy.Subscribe(x => 
 			{
-				ExitEdit();
+				if (x != null)
+				{
+					ShowAppPolicyEditPage(x.AppPolicy);
+				}
+			});
+		}
+
+		
+
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
+		{
+			ExitEdit();
+		}
+
+		public override void OnNavigatedTo(NavigationContext navigationContext)
+		{
+			if (navigationContext.Parameters.Count() > 0)
+			{
+				if (navigationContext.Parameters.Any(x => x.Key == "guid"))
+				{
+					try
+					{
+						var appPolicyGuid = (Guid)navigationContext.Parameters["guid"];
+
+						SelectAppPolicy(AppPolicyManager.FromAppGuid(appPolicyGuid));
+					}
+					catch
+					{
+						Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
+					}
+				}
 			}
 		}
 
-		public void OnNavigatedTo(NavigationContext navigationContext)
+		public void SelectAppPolicy(ApplicationPolicy appPolicy)
 		{
-			NavigationService = navigationContext.NavigationService;
-
+			// リスト表示を更新
+			var selectedListItem = AppPolicies.SingleOrDefault(x => x.AppPolicy == appPolicy);
+			if (selectedListItem != null)
+			{
+				SelectedAppPolicy.Value = selectedListItem;
+				selectedListItem.IsSelected = true;
+			}
 		}
-
-
 
 		public void ShowAppPolicyEditPage(ApplicationPolicy appPolicy)
 		{
+			PageManager.OpenAppPolicy(appPolicy.Guid);
+
+			/*
 			if (AppPolicyEditVM.Value?.AppPolicy != appPolicy)
 			{
 				if (AppPolicyEditVM.Value != null)
@@ -76,9 +101,10 @@ namespace Modules.AppPolicy.ViewModels
 
 				SetupEdit(appPolicy);
 			}
+			*/
 		}
 
-
+		/*
 		public void SetupEdit(ApplicationPolicy appPolicy)
 		{
 			try
@@ -92,7 +118,7 @@ namespace Modules.AppPolicy.ViewModels
 				}
 
 				// VMを設定
-				AppPolicyEditVM.Value = new AppPolicyEditControlViewModel(appPolicy, _RegionManager, _AppPolicyManager);
+				AppPolicyEditVM.Value = new AppPolicyEditControlViewModel(appPolicy, _RegionManager, AppPolicyManager);
 
 
 				// リスト表示を更新
@@ -111,9 +137,10 @@ namespace Modules.AppPolicy.ViewModels
 
 
 		}
-
+		*/
 		public void ExitEdit()
 		{
+			/*
 			var appPolicy = AppPolicyEditVM.Value?.AppPolicy;
 
 			AppPolicyEditVM.Value?.Save();
@@ -136,27 +163,7 @@ namespace Modules.AppPolicy.ViewModels
 			{
 				Monitor.StartMonitoring(reaction);
 			}
-		}
-
-
-		private DelegateCommand _BackCommand;
-		public DelegateCommand BackCommand
-		{
-			get
-			{
-				return _BackCommand
-					?? (_BackCommand = new DelegateCommand(() =>
-					{
-						if (NavigationService.Journal.CanGoBack)
-						{
-							NavigationService.Journal.GoBack();
-						}
-						else
-						{
-							_RegionManager.RequestNavigate("MainRegion", "FolderListPage");
-						}
-					}));
-			}
+			*/
 		}
 
 
@@ -173,7 +180,7 @@ namespace Modules.AppPolicy.ViewModels
 
 						Task.Run(() =>
 						{
-							_AppPolicyManager.AddAppPolicy(newAppPolicy);
+							AppPolicyManager.AddAppPolicy(newAppPolicy);
 						})
 						.ContinueWith(x => 
 						{
@@ -201,8 +208,8 @@ namespace Modules.AppPolicy.ViewModels
 						dialog.Title = "ReactiveFolder - Import Application Policy";
 						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
-						dialog.Filter = $"App Policy|*{_AppPolicyManager.PolicyFileExtention}|Json|*.json|All|*.*";
-						dialog.DefaultExt = _AppPolicyManager.PolicyFileExtention;
+						dialog.Filter = $"App Policy|*{AppPolicyManager.PolicyFileExtention}|Json|*.json|All|*.*";
+						dialog.DefaultExt = AppPolicyManager.PolicyFileExtention;
 						dialog.Multiselect = true;
 
 						var result = dialog.ShowDialog();
@@ -225,7 +232,7 @@ namespace Modules.AppPolicy.ViewModels
 		{
 			var appPolicy = FileSerializeHelper.LoadAsync<ApplicationPolicy>(path);
 
-			if (_AppPolicyManager.HasAppPolicy(appPolicy))
+			if (AppPolicyManager.HasAppPolicy(appPolicy))
 			{
 				// TODO: インポートしたファイルをGuidを強制的に書き換えて別ファイルとして取り込む
 				// ApplicationPolicyにエクスポート実行者によるバージョン管理機能があればベター？
@@ -233,7 +240,7 @@ namespace Modules.AppPolicy.ViewModels
 			}
 			else
 			{
-				_AppPolicyManager.AddAppPolicy(appPolicy);
+				AppPolicyManager.AddAppPolicy(appPolicy);
 			}
 
 		}
@@ -262,13 +269,15 @@ namespace Modules.AppPolicy.ViewModels
 
 			if (result != null && ((bool)result) == true)
 			{
-				_AppPolicyManager.RemoveAppPolicy(appPolicy);
+				AppPolicyManager.RemoveAppPolicy(appPolicy);
 
-
+				
+				/*
 				if (AppPolicyEditVM.Value?.AppPolicy == appPolicy)
 				{
 					AppPolicyEditVM.Value = null;
 				}
+				*/
 			}
 
 		}
@@ -363,7 +372,7 @@ namespace Modules.AppPolicy.ViewModels
 					?? (_ExportCommand = new DelegateCommand(() =>
 					{
 						var appPolicy = this.AppPolicy;
-						var appPolicyManager = PageVM._AppPolicyManager;
+						var appPolicyManager = PageVM.AppPolicyManager;
 						// 出力先のファイル名を取得
 						var dialog = new SaveFileDialog();
 

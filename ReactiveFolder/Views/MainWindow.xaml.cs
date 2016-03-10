@@ -1,6 +1,7 @@
 ﻿using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace ReactiveFolder.Views
 
 			Closing += Window_Closing;
 
+			
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -39,5 +41,25 @@ namespace ReactiveFolder.Views
 
 
 
+	}
+
+
+	public class SizeEventConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (parameter is SizeChangedEventArgs)
+			{
+				var args = parameter as SizeChangedEventArgs;
+				return args.NewSize;
+			}
+
+			return null;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

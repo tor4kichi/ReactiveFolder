@@ -19,9 +19,9 @@ namespace Modules.Main.Views
 	/// <summary>
 	/// ReactionEditerPage.xaml の相互作用ロジック
 	/// </summary>
-	public partial class ReactionEditControl : UserControl
+	public partial class ReactionEditPage : UserControl
 	{
-		public ReactionEditControl()
+		public ReactionEditPage()
 		{
 			InitializeComponent();
 		}

@@ -18,8 +18,9 @@
 
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
+    <SolidColorBrush x:Key="SubContentBackground" Color="#FFF0F0F0" />
 
-    
+
     <!-- アプリバー -->
     <Style x:Key="AppbarButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
         <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />

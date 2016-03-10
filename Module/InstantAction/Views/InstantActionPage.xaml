@@ -41,41 +41,104 @@
 
     </UserControl.Resources>
     <Grid>
-        <Border Margin="32">
-            <ContentControl Content="{Binding InstantActionVM.Value}">
-                <ContentControl.ContentTemplate>
-                    <DataTemplate>
+        <materialDesign:ColorZone 
+                        x:Name="Header"
+                        Mode="PrimaryMid"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                        Height="64"
+                        VerticalContentAlignment="Center"
+                        Panel.ZIndex="1"
+                        Margin="0 0 17 0"
+                        >
+            <materialDesign:ColorZone.Resources>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource AppbarText}" />
+                <Style TargetType="materialDesign:PackIcon" BasedOn="{StaticResource AppbarIcon}" />
+                <Style TargetType="TextBox" BasedOn="{StaticResource AppBarTextBox}">
+                </Style>
+            </materialDesign:ColorZone.Resources>
 
-                        <DockPanel>
+            <DockPanel 
+                        Margin="16 0"
+                        >
+                <Border DockPanel.Dock="Left">
+                    <Button Command="{Binding OpenSideMenuCommand}" 
+                                Style="{StaticResource AppbarButton}"
+                                >
+                        <materialDesign:PackIcon Kind="Menu" />
+                    </Button>
+                </Border>
 
-                            <Border DockPanel.Dock="Bottom">
-                                <StackPanel Orientation="Horizontal"
+                <StackPanel Orientation="Horizontal"
+                            DockPanel.Dock="Right"
+                                Visibility="Hidden"
+                            >
+                    <materialDesign:PackIcon Kind="Magnify"
+                                            Margin="8 0"
+                                            />
+                    <TextBox Width="200"
+                                FontSize="16"
+                                />
+                </StackPanel>
+
+                <Border Margin="16 0 0 0">
+                    <TextBlock Text="Generate Instant Action"
+                                Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                VerticalAlignment="Center"
+                                />
+                </Border>
+            </DockPanel>
+
+
+
+        </materialDesign:ColorZone>
+
+        <ScrollViewer >
+
+
+            <StackPanel Orientation="Vertical" Margin="16 0">
+
+                <Border Height="{Binding ElementName=Header, Path=Height}" />
+
+                <Border Margin="32">
+                    <ContentControl Content="{Binding InstantActionVM.Value}">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate>
+
+                                <DockPanel>
+
+                                    <Border DockPanel.Dock="Bottom">
+                                        <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Right"
                                         >
-                                    <Button Content="Back"
+                                            <Button Content="Back"
                                             Command="{Binding GoBackCommand}"
                                             Width="200"
                                             Margin="8 0"
                                         />
 
-                                    <Button Content="Continue"
+                                            <Button Content="Continue"
                                             Command="{Binding GoNextCommand}"
                                             Width="200"
                                         />
 
-                                </StackPanel>
-                            </Border>
+                                        </StackPanel>
+                                    </Border>
 
-                            <ContentControl Content="{Binding}"
-                                    ContentTemplateSelector="{StaticResource actionInstantStepTemplateSelecter}"
-                                    Margin="0 0 0 16"
-                                    />
+                                    <ContentControl Content="{Binding}"
+                                        ContentTemplateSelector="{StaticResource actionInstantStepTemplateSelecter}"
+                                        Margin="0 0 0 16"
+                                        />
 
-                        </DockPanel>
-                    </DataTemplate>
-                </ContentControl.ContentTemplate>
-            </ContentControl>
-        </Border>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </Border>
+            </StackPanel>
+
+        </ScrollViewer>
+        
+        
 
 
         <materialDesign:DialogHost Identifier="InstantActoinDialogHost"

@@ -27,7 +27,7 @@ using System.Windows;
 
 namespace Modules.InstantAction.ViewModels
 {
-	public class InstantActionPageViewModel : BindableBase, INavigationAware, IDisposable
+	public class InstantActionPageViewModel : PageViewModelBase, IDisposable
 	{
 		private IEventAggregator _EventAggregator;
 		public IAppPolicyManager AppPolicyManger { get; private set; }
@@ -35,7 +35,6 @@ namespace Modules.InstantAction.ViewModels
 		public IFolderReactionMonitorModel Monitor { get; private set; }
 		public IHistoryManager HistoryManager { get; private set; }
 
-		public IRegionNavigationService NavigationService;
 
 
 		public InstantActionModel Model { get; private set; }
@@ -45,7 +44,8 @@ namespace Modules.InstantAction.ViewModels
 
 		public ReactiveProperty<InstantActionStepViewModel> InstantActionVM { get; private set; }
 
-		public InstantActionPageViewModel(IEventAggregator ea, IAppPolicyManager appPolicyManager, IInstantActionManager instantActionManager, IFolderReactionMonitorModel monitor, IHistoryManager historyManager)
+		public InstantActionPageViewModel(PageManager pageManager, IEventAggregator ea, IAppPolicyManager appPolicyManager, IInstantActionManager instantActionManager, IFolderReactionMonitorModel monitor, IHistoryManager historyManager)
+			: base(pageManager)
 		{
 			_EventAggregator = ea;
 			AppPolicyManger = appPolicyManager;
@@ -67,20 +67,14 @@ namespace Modules.InstantAction.ViewModels
 
 
 
-		public bool IsNavigationTarget(NavigationContext navigationContext)
-		{
-			return true;
-		}
 
-		public void OnNavigatedFrom(NavigationContext navigationContext)
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
 		{
 			SaveCurrentInstantAction();
 		}
 
-		public void OnNavigatedTo(NavigationContext navigationContext)
+		public override void OnNavigatedTo(NavigationContext navigationContext)
 		{
-			NavigationService = navigationContext.NavigationService;
-
 			if (Model == null)
 			{
 				Model = new InstantActionModel(AppPolicyManger);

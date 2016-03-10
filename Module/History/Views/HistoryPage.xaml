@@ -98,9 +98,8 @@
         <Grid>
             <materialDesign:ColorZone 
                         x:Name="Header"
-                        DockPanel.Dock="Top"
                         Mode="PrimaryMid"
-                        materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth1"
                         Height="64"
                         VerticalContentAlignment="Center"
                         Panel.ZIndex="1"
@@ -114,8 +113,16 @@
                 </materialDesign:ColorZone.Resources>
 
                 <DockPanel 
-                        Margin="32 0"
+                        Margin="16 0"
                         >
+                    <Border DockPanel.Dock="Left">
+                        <Button Command="{Binding OpenSideMenuCommand}" 
+                                Style="{StaticResource AppbarButton}"
+                                >
+                            <materialDesign:PackIcon Kind="Menu" />
+                        </Button>
+                    </Border>
+                    
                     <StackPanel Orientation="Horizontal"
                             DockPanel.Dock="Right"
                                 Visibility="Hidden"
@@ -128,7 +135,7 @@
                                 />
                     </StackPanel>
 
-                    <Border>
+                    <Border Margin="16 0 0 0">
                         <TextBlock Text="History"
                                 Style="{StaticResource MaterialDesignTitleTextBlock}"
                                 VerticalAlignment="Center"

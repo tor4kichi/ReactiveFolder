@@ -18,9 +18,9 @@ namespace Modules.AppPolicy.Views
 	/// <summary>
 	/// AppPolicyListPage.xaml の相互作用ロジック
 	/// </summary>
-	public partial class AppPolicyEditControl : UserControl
+	public partial class AppPolicyEditPage : UserControl
 	{
-		public AppPolicyEditControl()
+		public AppPolicyEditPage()
 		{
 			InitializeComponent();
 		}

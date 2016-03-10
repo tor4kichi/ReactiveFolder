@@ -9,6 +9,7 @@
         xmlns:prism="http://prismlibrary.com/"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:tb="http://www.hardcodet.net/taskbar"
+        xmlns:toastNotifications="clr-namespace:ToastNotifications;assembly=ToastNotifications"
         xmlns:myAction="clr-namespace:ReactiveFolder.Views.Actions"
         mc:Ignorable="d"
         prism:ViewModelLocator.AutoWireViewModel="True"
@@ -37,24 +38,69 @@
     -->
     
     <Window.Resources>
-         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <view:SizeEventConverter x:Key="SizeEventConverter" />
+
+        
+        
     </Window.Resources>
 
+
+    
+    
     <Grid>
-        <DockPanel>
-
-            <view:SideMenu
-                DockPanel.Dock="Left"
-                Width="60"
-                />
-
-
-            <ContentControl
-                prism:RegionManager.RegionName="MainRegion" />
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="SizeChanged" >
+                <prism:InvokeCommandAction Command="{Binding WindowSizeChangeCommand}" TriggerParameterPath="NewSize"/>
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
 
 
+        <!-- 画面が大きいとき -->
+       
 
-        </DockPanel>
+
+        <!-- 画面が中くらいのとき -->
+
+        <materialDesign:DrawerHost IsLeftDrawerOpen="{Binding IsOpenSideMenu.Value, Mode=TwoWay}"
+                                   >
+            <materialDesign:DrawerHost.LeftDrawerContent>
+                <Border Visibility="{Binding IsOpenSideMenu.Value, Converter={StaticResource BoolToVisibility}}"
+                            HorizontalAlignment="Left"
+                        >
+                    <view:SideMenu
+                        />
+
+                </Border>
+            </materialDesign:DrawerHost.LeftDrawerContent>
+            <DockPanel >
+                <ContentControl
+                        prism:RegionManager.RegionName="SubRegion"
+                        Visibility="{Binding IsOpenSubContent.Value, Converter={StaticResource BoolToVisibility}}"
+                        DockPanel.Dock="Right"
+                        />
+
+                <materialDesign:ColorZone Mode="Standard" materialDesign:ShadowAssist.ShadowDepth="Depth2" VerticalAlignment="Stretch"
+                                          VerticalContentAlignment="Stretch"
+                                          >
+                    <ContentControl prism:RegionManager.RegionName="MainRegion"
+                                            VerticalContentAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            />
+
+                </materialDesign:ColorZone>
+            </DockPanel>
+
+        </materialDesign:DrawerHost>
+
+
+        <toastNotifications:NotificationTray NotificationsSource="{Binding NotificationSource}" 
+                                             VerticalAlignment="Bottom" 
+                                             HorizontalAlignment="Right"
+                                             
+                                             >
+            
+        </toastNotifications:NotificationTray>
 
 
         <tb:TaskbarIcon 
@@ -71,6 +117,9 @@
             
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
+                    <ContextMenu.Style>
+                        <Style TargetType="ContextMenu"></Style>
+                    </ContextMenu.Style>
                     <MenuItem Header="Open Window" Command="{Binding OpenWindowCommand}" />
                     <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}" />
                 </ContextMenu>

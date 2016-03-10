@@ -29,6 +29,7 @@ namespace Modules.History
 			_regionManager.RegisterViewWithRegion("MainRegion", typeof(HistoryPage));
 
 
+
 			// open History
 			var openReactionManageEvent = _EveentAggregator.GetEvent<PubSubEvent<OpenHisotryPageEventPayload>>();
 			openReactionManageEvent.Subscribe(x =>

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Modules.Main.Views.ReactionEditControl"
+﻿<UserControl x:Class="Modules.Main.Views.ReactionEditPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
@@ -12,40 +12,76 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:mybehavior="clr-namespace:ReactiveFolderStyles.Behaviors;assembly=ReactiveFolderStyles"
              mc:Ignorable="d" 
-             d:DesignHeight="1200" d:DesignWidth="400"
+             d:DesignHeight="1200" d:DesignWidth="800"
+             prism:ViewModelLocator.AutoWireViewModel="True"
              >
     <Grid
-        MaxWidth="800"
         >
-        <DockPanel >
-        
-            <!-- Top Buttons -->
-            <DockPanel DockPanel.Dock="Top">
+        <materialDesign:ColorZone 
+                        x:Name="Header"
+                        Mode="PrimaryDark"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                        Height="64"
+                        VerticalContentAlignment="Center"
+                        Panel.ZIndex="1"
+                        Margin="0 0 17 0"
+                        >
+            <materialDesign:ColorZone.Resources>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource AppbarText}" />
+                <Style TargetType="materialDesign:PackIcon" BasedOn="{StaticResource AppbarIcon}" />
+                <Style TargetType="TextBox" BasedOn="{StaticResource AppBarTextBox}">
+                </Style>
+            </materialDesign:ColorZone.Resources>
 
-                <Border DockPanel.Dock="Left" Margin="8 0">
-                    <Button Command="{Binding SaveCommand}"
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                        >
-                        <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save"/>
+            <DockPanel 
+                        Margin="16 0"
+                        >
+                <Border DockPanel.Dock="Left">
+                    <Button Command="{Binding CloseSubContentCommand}" 
+                                Style="{StaticResource AppbarButton}"
+                                >
+                        <materialDesign:PackIcon Kind="Close" />
                     </Button>
                 </Border>
-                <Border DockPanel.Dock="Right" Margin="8 0">
 
-                    <StackPanel Orientation="Horizontal" >
+                <StackPanel Orientation="Horizontal"
+                            DockPanel.Dock="Right"
+                                Visibility="Visible"
+                            >
+                    <Border DockPanel.Dock="Left" Margin="8 0">
+                        <Button Command="{Binding SaveCommand}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        >
+                            <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save"/>
+                        </Button>
+                    </Border>
 
+                    <Border Margin="8 0">
                         <Button Command="{Binding TestCommand}"
                                 Style="{StaticResource MaterialDesignFlatButton}"
                                 >
                             <materialDesign:PackIcon Kind="Run" ToolTip="Test Run" />
                         </Button>
-                    </StackPanel>
-                
-                </Border>
+                    </Border>
+                </StackPanel>
 
-                <Border />
-                
+                <Border Margin="16 0 0 0">
+                    <TextBlock Text="Edit Reaction"
+                                Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                VerticalAlignment="Center"
+                                />
+                </Border>
             </DockPanel>
 
+
+
+        </materialDesign:ColorZone>
+        
+        <DockPanel 
+                  Background="{StaticResource SubContentBackground}"
+            >
+        
+           
 
 
             <ScrollViewer HorizontalAlignment="Stretch"
@@ -213,23 +249,30 @@
                         </StackPanel>
                     </DataTemplate>
                 </ScrollViewer.Resources>
-                
-                
-                <ContentControl Content="{Binding ReactionVM.Value}"
+
+                <StackPanel Orientation="Vertical">
+                    <Border Height="{Binding ElementName=Header, Path=Height}" />
+                    <ContentControl Content="{Binding ReactionVM.Value}"
                                 ContentTemplate="{StaticResource ReactionEditTemplate}"
                                 >
-                </ContentControl>
+                    </ContentControl>
+                </StackPanel>
+                
                 
             </ScrollViewer>
 
        
 
         </DockPanel>
-        
-        
-        
-        
-       
+
+
+
+
+        <materialDesign:DialogHost Identifier="ReactionEditCommonDialogHost"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Margin="8 40"
+                                       MinWidth="400"
+                                           />
     </Grid>
 
 </UserControl>

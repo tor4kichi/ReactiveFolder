@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace ReactiveFolderStyles.Events
 {
-	public class OpenAppPolicyManageEventPayload
+	public class SubContentVisibilityChangeEventPayload
 	{
-	}
-
-	public class OpenAppPolicyWithAppGuidEventPayload
-	{
-		public Guid AppPolicyGuid { get; set; }
+		public bool IsVisible { get; set; }
 	}
 }

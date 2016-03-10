@@ -28,7 +28,7 @@ namespace Modules.Main.Views
 			{
 				return EmptyTemplate;
 			}
-			else if (item is ViewModels.ReactionEditControlViewModel)
+			else if (item is ViewModels.ReactionEditPageViewModel)
 			{
 				return ReactionEditControlTemplate;
 			}

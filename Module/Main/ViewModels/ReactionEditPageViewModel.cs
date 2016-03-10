@@ -12,6 +12,8 @@ using ReactiveFolder.Models.AppPolicy;
 using ReactiveFolder.Models.History;
 using ReactiveFolder.Models.Timings;
 using ReactiveFolder.Models.Util;
+using ReactiveFolderStyles.Models;
+using ReactiveFolderStyles.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -34,53 +36,33 @@ namespace Modules.Main.ViewModels
 	}
 
 
-	public class ReactionEditControlViewModel : PageViewModelBase, IDisposable
+	public class ReactionEditPageViewModel : PageViewModelBase, IDisposable
 	{
-		public FolderReactionManagePageViewModel PageVM { get; private set; }
-		public FolderReactionModel Reaction { get; private set; }
+		public IFolderReactionMonitorModel Monitor { get; private set; }
 		private IAppPolicyManager _AppPolicyManager;
 		public IHistoryManager HistoryManager { get; private set; }
 		private CompositeDisposable _CompositeDisposable;
 
 		public ReactiveProperty<ReactionViewModel> ReactionVM { get; private set; }
 
-		public ReactiveProperty<bool> IsNeedSave { get; private set; }
 
-		private IDisposable CanSaveSubscriber;
-
-
-		public ReactionEditControlViewModel(FolderReactionManagePageViewModel pageVM, IRegionManager regionManager, IFolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager, IHistoryManager historyManager, FolderReactionModel reaction)
-			: base(regionManager, monitor)
+		public ReactionEditPageViewModel(PageManager pageManager, IFolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager, IHistoryManager historyManager)
+			: base(pageManager)
 		{
-			PageVM = pageVM;
-			Reaction = reaction;
+			Monitor = monitor;
 			_AppPolicyManager = appPolicyManager;
 			HistoryManager = historyManager;
 
 			_CompositeDisposable = new CompositeDisposable();
 
-			ReactionVM = new ReactiveProperty<ReactionViewModel>(new ReactionViewModel(Reaction, _AppPolicyManager))
+			ReactionVM = new ReactiveProperty<ReactionViewModel>()
 				.AddTo(_CompositeDisposable);
 
-
-			IsNeedSave = new ReactiveProperty<bool>(false)
-				.AddTo(_CompositeDisposable);
-
-			SaveCommand = IsNeedSave.ToReactiveCommand(false)
-					.AddTo(_CompositeDisposable);
+			SaveCommand = new ReactiveCommand();
 
 			SaveCommand.Subscribe(_ => Save())
 				.AddTo(_CompositeDisposable);
 
-			CanSaveSubscriber = Observable.Merge(
-				Reaction.ObserveProperty(x => x.IsNeedValidation, false).ToUnit(),
-				Reaction.PropertyChangedAsObservable().ToUnit()
-				)
-				.Subscribe(_ =>
-				{
-					IsNeedSave.Value = true;
-				})
-				.AddTo(_CompositeDisposable);
 		}
 
 
@@ -93,10 +75,83 @@ namespace Modules.Main.ViewModels
 
 
 
+		public FolderReactionModel Reaction
+		{
+			get { return ReactionVM.Value?.Reaction; }
+		}
 
+
+		public override void OnNavigatedTo(NavigationContext navigationContext)
+		{
+			if (navigationContext.Parameters.Count() > 0)
+			{
+				if (navigationContext.Parameters.Any(x => x.Key == "guid"))
+				{
+					try
+					{
+						var reactionGuid = (Guid)navigationContext.Parameters["guid"];
+
+						var reaction = Monitor.RootFolder.FindReaction(reactionGuid);
+						ReactionVM.Value = new ReactionViewModel(reaction, _AppPolicyManager);
+
+						PageManager.IsOpenSubContent = true;
+					}
+					catch
+					{
+						Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
+					}
+				}
+
+				else if (navigationContext.Parameters.Any(x => x.Key == "filepath"))
+				{
+					try
+					{
+						var reactionFilePath = (string)navigationContext.Parameters["filepath"];
+
+						var reaction = Monitor.RootFolder.Reactions
+							.SingleOrDefault(x => Monitor.RootFolder.MakeReactionSaveFilePath(x) == reactionFilePath);
+
+
+						if (reaction == null)
+						{
+							throw new Exception("use import reaction.");
+						}
+
+						ReactionVM.Value = new ReactionViewModel(reaction, _AppPolicyManager);
+						PageManager.IsOpenSubContent = true;
+					}
+					catch
+					{
+						Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
+					}
+				}
+			}
+
+		}
 
 		
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
+		{
+			ReactionVM.Value?.Dispose();
+			ReactionVM.Value = null;
+		}
 
+
+		public static NavigationParameters CreateOpenReactionParameter(Guid reactionGuid)
+		{
+			var parameters = new NavigationParameters();
+
+			parameters.Add("guid", reactionGuid);
+			return parameters;
+		}
+
+		public static NavigationParameters CreateOpenReactionParameter(string filePath)
+		{
+			var parameters = new NavigationParameters();
+
+			parameters.Add("filepath", filePath);
+			return parameters;
+		}
 
 
 		
@@ -122,25 +177,21 @@ namespace Modules.Main.ViewModels
 			}
 		}
 		*/
-		
+
 		public ReactiveCommand SaveCommand { get; private set; }
 
 		public void Save()
 		{
-			IsNeedSave.Value = false;
-
 			try
 			{
-				_MonitorModel.SaveReaction(Reaction);
+				Monitor.SaveReaction(Reaction);
+				PageManager.ShowInformation($"{Reaction.Name} Saved");
 			}
 			catch
 			{
-				IsNeedSave.Value = true;
+				PageManager.ShowError($"{Reaction.Name} Failed Save");
 			}
 		}
-
-		
-
 
 
 		private DelegateCommand _TestCommand;
@@ -155,7 +206,7 @@ namespace Modules.Main.ViewModels
 
 						var historyData = new HistoryData();
 						historyData.Actions = Reaction.Actions.Select(x => x as AppLaunchReactiveAction).ToArray();
-						historyData.ActionSourceFilePath = _MonitorModel.RootFolder.MakeReactionSaveFilePath(Reaction);
+						historyData.ActionSourceFilePath = Monitor.RootFolder.MakeReactionSaveFilePath(Reaction);
 						historyData.FileHistories = results;
 
 						HistoryManager.SaveHistory(historyData);
@@ -188,7 +239,7 @@ namespace Modules.Main.ViewModels
 		CompositeDisposable _CompositeDisposable;
 
 
-		FolderReactionModel Reaction;
+		public FolderReactionModel Reaction { get; private set; }
 		IAppPolicyManager _AppPolicyManager;
 
 		public ReactiveProperty<bool> IsReactionValid { get; private set; }

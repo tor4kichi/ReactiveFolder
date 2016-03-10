@@ -32,16 +32,13 @@ namespace ReactiveFolder.ViewModels
 		public MenuItemViewModel SettingsListItem { get; private set; }
 		public MenuItemViewModel AboutListItem { get; private set; }
 
-		public List<MenuItemViewModel> TopMenuItems { get; private set; }
-
-		public List<MenuItemViewModel> BottomMenuItems { get; private set; }
+		public List<MenuItemViewModel> MenuItems { get; private set; }
 
 
 
 		public SideMenuViewModel()
 		{
-			TopMenuItems = new List<MenuItemViewModel>();
-			BottomMenuItems = new List<MenuItemViewModel>();
+			MenuItems = new List<MenuItemViewModel>();
 		}
 
 		public SideMenuViewModel(PageManager page, IRegionManager regionManagar)
@@ -115,33 +112,30 @@ namespace ReactiveFolder.ViewModels
 			};
 
 
-			TopMenuItems = new List<MenuItemViewModel>()
+			MenuItems = new List<MenuItemViewModel>()
 			{
+				AboutListItem,
+				SettingsListItem,
+
 				InstantActionListItem,
 				ReactionManageListItem,
 				AppPolicyManageListItem,
 				HistoryListItem,
+				
 			};
 
-			BottomMenuItems = new List<MenuItemViewModel>()
-			{
-				SettingsListItem,
-				AboutListItem
-			};
 
 
 
 			PageManager.ObserveProperty(x => x.PageType)
 				.Subscribe(x =>
 				{
-					var allMenuItems = TopMenuItems.Concat(BottomMenuItems);
-
-					foreach(var nonSelectedItem in allMenuItems.Where(y => y.PageType != x))
+					foreach(var nonSelectedItem in MenuItems.Where(y => y.PageType != x))
 					{
 						nonSelectedItem.IsSelected = false;
 					}
 
-					allMenuItems.Single(y => y.PageType == x).IsSelected = true;
+					MenuItems.Single(y => y.PageType == x).IsSelected = true;
 				});
 				
 				
