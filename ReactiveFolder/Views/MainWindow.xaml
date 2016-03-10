@@ -9,6 +9,7 @@
         xmlns:prism="http://prismlibrary.com/"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:tb="http://www.hardcodet.net/taskbar"
+        xmlns:toastNotifications="clr-namespace:ToastNotifications;assembly=ToastNotifications"
         xmlns:myAction="clr-namespace:ReactiveFolder.Views.Actions"
         mc:Ignorable="d"
         prism:ViewModelLocator.AutoWireViewModel="True"
@@ -91,8 +92,15 @@
             </DockPanel>
 
         </materialDesign:DrawerHost>
-        
-        
+
+
+        <toastNotifications:NotificationTray NotificationsSource="{Binding NotificationSource}" 
+                                             VerticalAlignment="Bottom" 
+                                             HorizontalAlignment="Right"
+                                             
+                                             >
+            
+        </toastNotifications:NotificationTray>
 
 
         <tb:TaskbarIcon 

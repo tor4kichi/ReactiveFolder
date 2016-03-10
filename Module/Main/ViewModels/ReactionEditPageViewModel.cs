@@ -45,10 +45,6 @@ namespace Modules.Main.ViewModels
 
 		public ReactiveProperty<ReactionViewModel> ReactionVM { get; private set; }
 
-		public ReactiveProperty<bool> IsNeedSave { get; private set; }
-
-		private IDisposable CanSaveSubscriber;
-
 
 		public ReactionEditPageViewModel(PageManager pageManager, IFolderReactionMonitorModel monitor, IAppPolicyManager appPolicyManager, IHistoryManager historyManager)
 			: base(pageManager)
@@ -62,26 +58,11 @@ namespace Modules.Main.ViewModels
 			ReactionVM = new ReactiveProperty<ReactionViewModel>()
 				.AddTo(_CompositeDisposable);
 
-
-			IsNeedSave = new ReactiveProperty<bool>(false)
-				.AddTo(_CompositeDisposable);
-
-			SaveCommand = IsNeedSave.ToReactiveCommand(false)
-					.AddTo(_CompositeDisposable);
+			SaveCommand = new ReactiveCommand();
 
 			SaveCommand.Subscribe(_ => Save())
 				.AddTo(_CompositeDisposable);
-/*
-			CanSaveSubscriber = Observable.Merge(
-				Reaction.ObserveProperty(x => x.IsNeedValidation, false).ToUnit(),
-				Reaction.PropertyChangedAsObservable().ToUnit()
-				)
-				.Subscribe(_ =>
-				{
-					IsNeedSave.Value = true;
-				})
-				.AddTo(_CompositeDisposable);
-*/
+
 		}
 
 
@@ -201,19 +182,18 @@ namespace Modules.Main.ViewModels
 
 		public void Save()
 		{
-			IsNeedSave.Value = false;
-
 			try
 			{
 				Monitor.SaveReaction(Reaction);
+				PageManager.ShowInformation($"{Reaction.Name} Saved");
 			}
 			catch
 			{
-				IsNeedSave.Value = true;
+				PageManager.ShowError($"{Reaction.Name} Failed Save");
 			}
 		}
 
-		
+
 		private DelegateCommand _TestCommand;
 		public DelegateCommand TestCommand
 		{

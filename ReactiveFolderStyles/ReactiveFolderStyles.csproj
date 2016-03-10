@@ -118,6 +118,10 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="ToastNotifications, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ToastNotifications.1.0.0.0\lib\net40\ToastNotifications.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -147,6 +151,7 @@
     <Compile Include="Events\OpenSettingsEventPayload.cs" />
     <Compile Include="Events\SubContentVisibilityChangeEventPayload.cs" />
     <Compile Include="Events\TaskbarIconBalloonMessageEventPayload.cs" />
+    <Compile Include="Events\ToastNotificationEventPayload.cs" />
     <Compile Include="Models\IInstantActionManager.cs" />
     <Compile Include="Models\PageManager.cs" />
     <Compile Include="OpenSideMenuEvent.cs" />

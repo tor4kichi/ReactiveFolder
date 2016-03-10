@@ -11,6 +11,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ToastNotifications;
 
 namespace ReactiveFolderStyles.Models
 {
@@ -310,6 +311,51 @@ namespace ReactiveFolderStyles.Models
 				Title = title,
 				Message = message,
 				Icon = icon
+			});
+		}
+
+
+
+
+
+		
+		public void ShowInformation(string message)
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<ToastNotificationEventPayload>>();
+			e.Publish(new ToastNotificationEventPayload()
+			{
+				Message = message,
+				Type = NotificationType.Information
+			});
+		}
+
+		public void ShowSuccess(string message)
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<ToastNotificationEventPayload>>();
+			e.Publish(new ToastNotificationEventPayload()
+			{
+				Message = message,
+				Type = NotificationType.Success
+			});
+		}
+
+		public void ShowWarning(string message)
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<ToastNotificationEventPayload>>();
+			e.Publish(new ToastNotificationEventPayload()
+			{
+				Message = message,
+				Type = NotificationType.Warning
+			});
+		}
+
+		public void ShowError(string message)
+		{
+			var e = EventAggregator.GetEvent<PubSubEvent<ToastNotificationEventPayload>>();
+			e.Publish(new ToastNotificationEventPayload()
+			{
+				Message = message,
+				Type = NotificationType.Error
 			});
 		}
 

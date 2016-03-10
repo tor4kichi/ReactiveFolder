@@ -32,44 +32,23 @@ namespace Modules.AppPolicy.ViewModels
 		public string RollbackData { get; private set; }
 
 
-		public ReactiveProperty<bool> IsNeedSave { get; private set; }
-
-		private IDisposable CanSaveSubscriber;
-
 		public AppPolicyEditPageViewModel(PageManager pageManager, IAppPolicyManager appPolicyManager)
 			: base(pageManager)
 		{
 			AppPolicyManager = appPolicyManager;
 			AppPolicyVM = new ReactiveProperty<ApplicationPolicyViewModel>();
-			IsNeedSave = new ReactiveProperty<bool>(false);
 
-			SaveCommand = IsNeedSave.ToReactiveCommand(false);
+			SaveCommand = new ReactiveCommand();
 
 			SaveCommand.Subscribe(_ => Save());
 
-			IsNeedSave.Value = false;
-
-			/*
-			CanSaveSubscriber = Observable.Merge(
-					AppPolicy.PropertyChangedAsObservable().ToUnit(),
-					AppPolicy.AcceptExtentions.CollectionChangedAsObservable().ToUnit(),
-					AppPolicy.OptionDeclarations.CollectionChangedAsObservable().ToUnit(),
-					AppPolicy.OptionDeclarations.ObserveElementPropertyChanged().ToUnit()
-				)
-				.Subscribe(_ =>
-				{
-					IsNeedSave.Value = true;
-				});
-
-			*/
+			
 		}
 
 
 		public void Dispose()
 		{
 			AppPolicyVM?.Dispose();
-			IsNeedSave?.Dispose();
-			CanSaveSubscriber?.Dispose();
 			SaveCommand?.Dispose();
 		}
 
@@ -87,15 +66,14 @@ namespace Modules.AppPolicy.ViewModels
 
 		internal void Save()
 		{
-			IsNeedSave.Value = false;
-
 			try
 			{
-				AppPolicyManager.SavePolicyFile(this.AppPolicy);	
+				AppPolicyManager.SavePolicyFile(this.AppPolicy);
+				PageManager.ShowInformation( $"{AppPolicy.AppName} Saved");
 			}
 			catch
 			{
-				IsNeedSave.Value = true;
+				PageManager.ShowError($"{AppPolicy.AppName} Save failed.");
 			}
 		}
 
@@ -373,13 +351,13 @@ namespace Modules.AppPolicy.ViewModels
 		internal void RemoveDeclaration(AppOptionDeclarationBase declaration)
 		{
 			// TODO: AppOptionDeclarationの削除確認ダイアログの表示
-			if (declaration is AppOptionDeclaration)
+			if (declaration is AppOutputOptionDeclaration)
+			{
+				AppPolicy.RemoveOutputOptionDeclaration(declaration as AppOutputOptionDeclaration);
+			}
+			else if (declaration is AppOptionDeclaration)
 			{
 				AppPolicy.RemoveOptionDeclaration(declaration as AppOptionDeclaration);
-			}
-			else if (declaration is AppOutputOptionDeclaration)
-			{
-				AppPolicy.RemoveOptionDeclaration(declaration as AppOutputOptionDeclaration);
 			}
 			else
 			{

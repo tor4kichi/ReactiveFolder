@@ -16,6 +16,7 @@ using ReactiveFolderStyles.Models;
 using System.Windows;
 using Prism.Interactivity.InteractionRequest;
 using ReactiveFolderStyles.Events;
+using ToastNotifications;
 
 namespace ReactiveFolder.ViewModels
 {
@@ -33,6 +34,8 @@ namespace ReactiveFolder.ViewModels
 		public ReactiveProperty<bool> IsOpenSideMenu { get; private set; }
 		public ReactiveProperty<bool> IsOpenSubContent { get; private set; }
 
+
+		public NotificationsSource NotificationSource { get; private set; }
 
 		public MainWindowViewModel(PageManager pageManager, IEventAggregator ea, IFolderReactionMonitorModel monitor, IRegionManager regionManagar)
 		{
@@ -61,7 +64,17 @@ namespace ReactiveFolder.ViewModels
 
 			IsOpenSideMenu = PageManager
 				.ToReactivePropertyAsSynchronized(x => x.IsOpenSideMenu);
-				
+
+
+
+
+			NotificationSource = new NotificationsSource();
+
+			var toastEvent = ea.GetEvent<PubSubEvent<ToastNotificationEventPayload>>();
+			toastEvent.Subscribe(x =>
+			{
+				NotificationSource.Show(x.Message, x.Type);
+			});
 		}
 
 		public void Dispose()

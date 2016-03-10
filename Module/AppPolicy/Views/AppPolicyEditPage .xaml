@@ -360,10 +360,16 @@
                 
         </ScrollViewer>
 
-            
-               
-             
-        
-       
+
+
+        <materialDesign:DialogHost Identifier="AppPolicyEditDialogHost"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Margin="8 40"
+                                           Width="500"
+                                           >
+        </materialDesign:DialogHost>
+
+
+
     </Grid>
 </UserControl>
