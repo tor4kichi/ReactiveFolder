@@ -29,6 +29,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		public ReadOnlyReactiveCollection<AppPolicyListItemViewModel> AppPolicies { get; private set; }
 
+		public ReactiveProperty<AppPolicyListItemViewModel> SelectedAppPolicy { get; private set; }
 
 		public AppPolicyManagePageViewModel(PageManager pageManager, IAppPolicyManager appPolicyManager, IFolderReactionMonitorModel monitor)
 			: base(pageManager)
@@ -37,7 +38,15 @@ namespace Modules.AppPolicy.ViewModels
 			AppPolicyManager = appPolicyManager;
 			AppPolicies = AppPolicyManager.Policies
 				.ToReadOnlyReactiveCollection(x => new AppPolicyListItemViewModel(this, x));
+			SelectedAppPolicy = new ReactiveProperty<AppPolicyListItemViewModel>();
 
+			SelectedAppPolicy.Subscribe(x => 
+			{
+				if (x != null)
+				{
+					ShowAppPolicyEditPage(x.AppPolicy);
+				}
+			});
 		}
 
 		
@@ -73,6 +82,7 @@ namespace Modules.AppPolicy.ViewModels
 			var selectedListItem = AppPolicies.SingleOrDefault(x => x.AppPolicy == appPolicy);
 			if (selectedListItem != null)
 			{
+				SelectedAppPolicy.Value = selectedListItem;
 				selectedListItem.IsSelected = true;
 			}
 		}

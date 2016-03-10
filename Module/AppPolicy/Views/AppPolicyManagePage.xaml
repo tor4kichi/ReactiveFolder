@@ -33,11 +33,38 @@
 
 
     <Grid>
+        <materialDesign:PopupBox Style="{StaticResource MaterialDesignMultiFloatingActionLightPopupBox}"
+                                    PlacementMode="RightAndAlignMiddles"     
+                                  VerticalAlignment="Top"
+                                    Margin="32 104 0 0"
+                                 Panel.ZIndex="2"
+                                 Width="48"
+                                 Height="{Binding RelativeSource={RelativeSource Self}, Path=Width}"
+                                 
+                                    >
+
+
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddAppPolicyCommand}">
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="File" Width="24" Height="24" DockPanel.Dock="Left" 
+                                                 ToolTip="Add New"
+                                                 />
+                    </DockPanel>
+                </Button>
+                <Button Command="{Binding ImportAppPolicyCommand}">
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="Import" Width="24" Height="24" DockPanel.Dock="Left"
+                                                 ToolTip="Import"
+                                                 />
+                    </DockPanel>
+                </Button>
+            </StackPanel>
+        </materialDesign:PopupBox>
         <materialDesign:ColorZone 
                         x:Name="Header"
                         Mode="PrimaryMid"
                         materialDesign:ShadowAssist.ShadowDepth="Depth1"
-                        Height="64"
                         VerticalContentAlignment="Center"
                         Panel.ZIndex="1"
                         Margin="0 0 17 0"
@@ -49,137 +76,135 @@
                 </Style>
             </materialDesign:ColorZone.Resources>
 
-            <DockPanel 
+            <StackPanel Orientation="Vertical">
+                <DockPanel 
                         Margin="16 0"
+                    Height="64"
                         >
-                <Border DockPanel.Dock="Left">
-                    <Button Command="{Binding OpenSideMenuCommand}" 
+                    <Border DockPanel.Dock="Left">
+                        <Button Command="{Binding OpenSideMenuCommand}" 
                                 Style="{StaticResource AppbarButton}"
                                 >
-                        <materialDesign:PackIcon Kind="Menu" />
-                    </Button>
-                </Border>
+                            <materialDesign:PackIcon Kind="Menu" />
+                        </Button>
+                    </Border>
 
-                <StackPanel Orientation="Horizontal"
+                    <StackPanel Orientation="Horizontal"
                             DockPanel.Dock="Right"
                                 Visibility="Hidden"
                             >
-                    <materialDesign:PackIcon Kind="Magnify"
+                        <materialDesign:PackIcon Kind="Magnify"
                                             Margin="8 0"
                                             />
-                    <TextBox Width="200"
+                        <TextBox Width="200"
                                 FontSize="16"
                                 />
-                </StackPanel>
+                    </StackPanel>
 
-                <Border Margin="16 0 0 0">
-                    <TextBlock Text="Application Policy Manage"
+                    
+                </DockPanel>
+
+
+                <DockPanel Height="64">
+                    
+                    <Border DockPanel.Dock="Left" Width="108" />
+
+                    <Border Margin="0 0 0 0">
+                        <TextBlock Text="Application Policy Manage"
                                 Style="{StaticResource MaterialDesignTitleTextBlock}"
                                 VerticalAlignment="Center"
                                 />
-                </Border>
-            </DockPanel>
+                    </Border>
+                </DockPanel>
+            </StackPanel>
+            
 
 
 
         </materialDesign:ColorZone>
 
+        
+
         <ScrollViewer >
-            <StackPanel Orientation="Vertical" Margin="16 0">
+            <StackPanel Orientation="Vertical" Margin="0 0">
 
                 <Border Height="{Binding ElementName=Header, Path=ActualHeight}" />
 
-                <!--
-                <Button Command="{Binding ShowHelpCommand}" 
-                        Style="{StaticResource AppbarButton}"
-                        DockPanel.Dock="Right">
-                    <materialDesign:PackIcon Kind="CommentQuestionOutline" />
-                </Button>
-                <materialDesign:PopupBox 
-                                    PlacementMode="BottomAndAlignCentres"                                                                      
-                                    DockPanel.Dock="Right"
-                                    >
-                    <materialDesign:PopupBox.ToggleContent>
-                        <materialDesign:PackIcon Kind="Plus" Width="24" Height="24" />
-                    </materialDesign:PopupBox.ToggleContent>
-                            
-                    <StackPanel>
-                        <Button Command="{Binding AddAppPolicyCommand}">
-                            <DockPanel>
-                                <materialDesign:PackIcon Kind="File" Width="24" Height="24" DockPanel.Dock="Left" />
-                                <TextBlock Text="Create New" VerticalAlignment="Center" />
-                            </DockPanel>
-                        </Button>
-                        <Button Command="{Binding ImportAppPolicyCommand}">
-                            <DockPanel>
-                                <materialDesign:PackIcon Kind="Import" Width="24" Height="24" DockPanel.Dock="Left" />
-                                <TextBlock Text="Import" VerticalAlignment="Center" />
-                            </DockPanel>
-                        </Button>
-                    </StackPanel>
-                </materialDesign:PopupBox>
-
-                <Border />
-                -->
-              
-
-                    <!--
-                <TextBlock Text="Folder" 
-                        Style="{StaticResource ListSubheaderText}"/>
-                -->
-
-                <ItemsControl ItemsSource="{Binding AppPolicies}"
-                            Style="{StaticResource List}"
-                            ItemContainerStyle="{StaticResource ListItem}"
+                <DataGrid ItemsSource="{Binding AppPolicies}"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          SelectionMode="Single"
+                          SelectionUnit="FullRow"
+                          AutoGenerateColumns="False"
+                          HorizontalContentAlignment="Stretch"
+                          HorizontalAlignment="Stretch"
+                          SelectedItem="{Binding SelectedAppPolicy.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             >
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border x:Name="Border">
-                                <Button Style="{StaticResource ListButton}"
-                                    Command="{Binding SelectAppCommand}"
-                                    Height="40"
-                                    Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
-                                    >
 
-                                    <Button.ContextMenu>
-                                        <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                            <MenuItem Header="Export" Command="{Binding ExportCommand}"></MenuItem>
-                                            <Separator />
-                                            <MenuItem Header="Delete" Command="{Binding DeleteCommand}"></MenuItem>
-                                        </ContextMenu>
-                                    </Button.ContextMenu>
+                    <DataGrid.Resources>
+                        <SolidColorBrush x:Key="SubTextColor" Color="Gray" />
+                    </DataGrid.Resources>
+                    <DataGrid.RowHeaderStyle>
+                        <Style TargetType="DataGridRowHeader">
+                            <Setter Property="Height" Value="48" />
+                        </Style>
+                    </DataGrid.RowHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Width="88" />
 
+                        <DataGridTextColumn Header="App Policy Name" 
+                                            Binding="{Binding AppName.Value, Mode=OneWay}" 
+                                            Width="*" />
+                        
+                        <DataGridTextColumn Header="Using Application" 
+                                            Binding="{Binding AppName.Value, Mode=OneWay}"
+                                            Foreground="{StaticResource SubTextColor}"
+                                            Width="200" />
+                        
+                        <DataGridTemplateColumn Header="" Width="64">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <materialDesign:PopupBox 
+                                             PlacementMode="LeftAndAlignTopEdges"     
+                                             Width="32"
+                                             Height="{Binding RelativeSource={RelativeSource Self}, Path=Width}"
+                                            
+                                            >
+                                            <materialDesign:PopupBox.ToggleCheckedContent>
+                                                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="{StaticResource SubTextColor}"
+                                                        >
+                                                    <materialDesign:PackIcon Kind="DotsVertical" HorizontalAlignment="Left" />
+                                                </Button>
+                                            </materialDesign:PopupBox.ToggleCheckedContent>
 
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="Apps"
-                                                                Style="{StaticResource ListPrimaryIcon}"
-                                                                 
-                                                                />
-                                        <StackPanel Orientation="Vertical">
-                                            <TextBlock Text="{Binding AppName.Value}"
-                                                    Style="{StaticResource ListPrimaryText}"
-                                                    />
-                                        </StackPanel>
+                                            <StackPanel Orientation="Vertical">
+                                                <Button Command="{Binding ExportCommand}">
+                                                    Export
+                                                </Button>
+                                                <Separator />
+                                                <Button Command="{Binding DeleteCommand}">
+                                                    Delete
+                                                </Button>
+                                            </StackPanel>
+                                        </materialDesign:PopupBox>
 
-                                    </StackPanel>
-                                </Button>
-                            </Border>
-
-                            <DataTemplate.Triggers>
-                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialDesignSelection}" />
-                                </DataTrigger>
-                            </DataTemplate.Triggers>
-                                        
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                    
+                </DataGrid>
 
 
 
             </StackPanel>
         </ScrollViewer>
 
+        
+        
 
         <materialDesign:DialogHost Identifier="AppPolicyEditDialogHost"
                                      HorizontalAlignment="Center" VerticalAlignment="Center"

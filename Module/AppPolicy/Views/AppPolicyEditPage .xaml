@@ -15,7 +15,7 @@
              d:DesignHeight="600" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
-    <Grid>
+    <Grid MinWidth="400">
 
 
         <Grid.Resources>
