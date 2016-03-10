@@ -116,10 +116,6 @@ namespace ReactiveFolder.Models
 		}
 
 
-		
-
-
-
 		#region Monitor Manage
 
 
@@ -172,6 +168,8 @@ namespace ReactiveFolder.Models
 				RecursiveFolder(childFolder, act);
 			}
 		}
+
+		
 
 
 		#endregion

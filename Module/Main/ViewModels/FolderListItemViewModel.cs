@@ -29,15 +29,15 @@ namespace Modules.Main.ViewModels
 			
 		}
 
-		private DelegateCommand _OpenFolderReactionListCommand;
-		public DelegateCommand OpenFolderReactionListCommand
+		private DelegateCommand _SelectFolderCommand;
+		public DelegateCommand SelectFolderCommand
 		{
 			get
 			{
-				return _OpenFolderReactionListCommand
-					?? (_OpenFolderReactionListCommand = new DelegateCommand(() =>
+				return _SelectFolderCommand
+					?? (_SelectFolderCommand = new DelegateCommand(() =>
 					{
-//						PageVM.NavigationToFolderListPage(FolderModel);
+						PageVM.SelectFolder(FolderModel);
 					}));
 			}
 		}

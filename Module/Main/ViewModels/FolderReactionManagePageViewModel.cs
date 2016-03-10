@@ -21,6 +21,7 @@ using System.Reactive.Linq;
 using ReactiveFolder.Models.History;
 using ReactiveFolderStyles.Models;
 using ReactiveFolderStyles.ViewModels;
+using System.Collections.ObjectModel;
 
 namespace Modules.Main.ViewModels
 {
@@ -39,19 +40,10 @@ namespace Modules.Main.ViewModels
 		public IAppPolicyManager AppPolicyManager { get; private set; }
 		public IHistoryManager HistoryManager { get; private set; }
 
-		public FolderModel CurrentFolder { get; private set; }
+		
+		public ObservableCollection<ReactionManageFolderViewModel> FolderStack { get; private set; }
 
-		public ReadOnlyReactiveCollection<ReactionListItemViewModel> ReactionItems { get; private set; }
-
-		public ReadOnlyReactiveCollection<FolderListItemViewModel> FolderItems { get; private set; }
-
-		public string PreviousFolderName { get; private set; }
-
-		public ReactiveProperty<string> FolderName { get; private set; }
-
-
-
-//		public ReactiveProperty<ReactionEditPageViewModel> ReactionEditControl { get; private set; }
+		public ReactiveProperty<ReactionManageFolderViewModel> CurrentFolder { get; private set; }
 
 		public FolderReactionManagePageViewModel(PageManager pageManager, IFolderReactionMonitorModel monitor, IEventAggregator ea, IAppPolicyManager appPolicyManager, IHistoryManager historyManager)
 			: base(pageManager)
@@ -61,22 +53,19 @@ namespace Modules.Main.ViewModels
 			AppPolicyManager = appPolicyManager;
 			HistoryManager = historyManager;
 
-			FolderName = new ReactiveProperty<string>("");
-			/*
-			CurrentFolder = _MonitorModel.RootFolder;
+			
+			
 
-			ReactionListItems = CurrentFolder.Models
-				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(this, x));
+			CurrentFolder = new ReactiveProperty<ReactionManageFolderViewModel>();
+			FolderStack = new ObservableCollection<ReactionManageFolderViewModel>();
 
-			ChildrenFolderListItems = CurrentFolder.Children
-				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(this, x));
-				*/
-			PreviousFolderName = "";
+			FolderStack.CollectionChangedAsObservable()
+				.Subscribe(x => 
+				{
+					CurrentFolder.Value = FolderStack.Last();
+				});
 
-
-//			ReactionEditControl = new ReactiveProperty<ReactionEditPageViewModel>();
-
-			Initialize(Monitor.RootFolder);
+			FolderStack.Add(new ReactionManageFolderViewModel(this, Monitor.RootFolder));
 		}
 
 
@@ -94,7 +83,6 @@ namespace Modules.Main.ViewModels
 
 		public override void OnNavigatedTo(NavigationContext navigationContext)
 		{
-			Initialize(Monitor.RootFolder);
 
 
 			if (navigationContext.Parameters.Count() > 0)
@@ -103,9 +91,9 @@ namespace Modules.Main.ViewModels
 				{
 					try
 					{
-						var reactionGuid = (Guid)navigationContext.Parameters["guid"];
+//						var reactionGuid = (Guid)navigationContext.Parameters["guid"];
 
-						SelectedReaction(Monitor.RootFolder.FindReaction(reactionGuid));
+//						SelectReaction(Monitor.RootFolder.FindReaction(reactionGuid));
 					}
 					catch
 					{
@@ -128,7 +116,7 @@ namespace Modules.Main.ViewModels
 							throw new Exception("use import reaction.");
 						}
 
-						SelectedReaction(reaction);
+//						SelectReaction(reaction);
 					}
 					catch
 					{
@@ -156,42 +144,20 @@ namespace Modules.Main.ViewModels
 			return parameters;
 		}
 
-		private void Initialize(FolderModel folder)
+
+
+		internal void SelectReaction(FolderReactionModel reaction)
 		{
-			CurrentFolder = folder;
+			var reactionParentFolder = Monitor.FindReactionParentFolder(reaction);
 
-			FolderName.Value = CurrentFolder.Folder.Name;
+			SelectFolder(reactionParentFolder);
 
-			ReactionItems = CurrentFolder.Reactions
-				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(this, x));
 
-			FolderItems = CurrentFolder.Children
-				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(this, x));
+			var reactionListItem = CurrentFolder.Value.ReactionItems.SingleOrDefault(x => x.Reaction == reaction);
 
-			if (folder == Monitor.RootFolder)
+			if (reactionListItem != null)
 			{
-				// ルートは戻る無効
-				PreviousFolderName = "";
-				OnPropertyChanged(nameof(PreviousFolderName));
-			}
-			else
-			{
-				var parentFolder = Path.GetDirectoryName(folder.Folder.FullName);
-				PreviousFolderName = Path.GetFileName(parentFolder);
-				OnPropertyChanged(nameof(PreviousFolderName));
-			}
-
-
-
-		}
-
-
-		internal void SelectedReaction(FolderReactionModel reaction)
-		{
-			var reactionVM = ReactionItems.SingleOrDefault(x => x.Reaction == reaction);
-			if (reactionVM != null)
-			{
-				reactionVM.IsSelected = true;
+				CurrentFolder.Value.SelectReaction(reactionListItem);
 			}
 		}
 
@@ -199,9 +165,62 @@ namespace Modules.Main.ViewModels
 		internal void ShowReaction(FolderReactionModel reaction)
 		{
 			PageManager.OpenReaction(reaction.Guid);
-
-			SelectedReaction(reaction);
 		}
+
+
+
+		internal void SelectFolder(FolderModel folder)
+		{
+			if (CurrentFolder?.Value.Folder == folder)
+			{
+				return;
+			}
+
+			// 一個上のフォルダを積むとき
+			if (CurrentFolder.Value.Folder.Children.Any(x => x == folder))
+			{
+				var folderVM = new ReactionManageFolderViewModel(this, folder);
+				FolderStack.Add(folderVM);
+
+				return;
+			}
+
+
+			
+			var existFolder = FolderStack.SingleOrDefault(x => x.Folder == folder);
+
+
+			// 前のフォルダに戻る時
+			if (existFolder != null)
+			{
+				var position = FolderStack.IndexOf(existFolder);
+
+				position += 1;
+
+				var removeFolders = FolderStack.Where((x, index) => position <= index).ToArray();
+				foreach (var removeFolder in removeFolders)
+				{
+					FolderStack.Remove(removeFolder);
+				}
+			}
+
+			// それ以外の時は一旦全削除して再度フォルダを積み直す
+			else
+			{
+				FolderStack.Clear();
+
+				var folderStackModels = folder.GetAllParent();
+
+				folderStackModels.Add(folder);
+
+				foreach (var parentFolder in folderStackModels)
+				{
+					FolderStack.Add(new ReactionManageFolderViewModel(this, parentFolder));
+				}
+			}
+		}
+
+
 		/*
 
 		private void SetupEdit(FolderReactionModel reaction)
@@ -266,11 +285,35 @@ namespace Modules.Main.ViewModels
 				return _RefreshCommand
 					?? (_RefreshCommand = new DelegateCommand(() =>
 					{
-						CurrentFolder.UpdateReactionModels();
-						CurrentFolder.UpdateChildren();
+						CurrentFolder.Value.Folder.UpdateReactionModels();
+						CurrentFolder.Value.Folder.UpdateChildren();
 					}));
 			}
 		}
+
+
+		
+
+
+		
+
+		internal FolderReactionModel ImportReactionFile(FolderModel folder, string path)
+		{
+			var importedReaction = FileSerializeHelper.LoadAsync<FolderReactionModel>(path);
+
+			if (null != Monitor.FindReaction(importedReaction.Guid))
+			{
+				// alread exist reaction
+				// Guidを張り替える？
+			}
+			else
+			{
+				folder.AddReaction(importedReaction);
+			}
+
+			return importedReaction;
+		}
+
 
 
 		private DelegateCommand _AddFolderCommand;
@@ -283,14 +326,12 @@ namespace Modules.Main.ViewModels
 					{
 						var newFolderName = "NewFolder-" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
 
-						var folderModel = CurrentFolder.AddFolder(newFolderName);
+						var folderModel = CurrentFolder.Value.Folder.AddFolder(newFolderName);
 
-						// TODO: FolderStackにフォルダを積む
+						SelectFolder(folderModel);
 					}));
 			}
 		}
-
-		
 
 		private DelegateCommand _AddReactionCommand;
 		public DelegateCommand AddReactionCommand
@@ -307,18 +348,18 @@ namespace Modules.Main.ViewModels
 						reaction.Filter = new ReactiveFolder.Models.Filters.FileReactiveFilter();
 
 						// AddReaction中で非同期での保存処理が走る
-						Task.Run(() => 
+						var currentFolder = CurrentFolder.Value.Folder;
+						Task.Run(() =>
 						{
-							CurrentFolder.AddReaction(reaction);
+							currentFolder.AddReaction(reaction);
 						})
-						.ContinueWith(x => 
+						.ContinueWith(x =>
 						{
 							ShowReaction(reaction);
 						});
 					}));
 			}
 		}
-
 
 
 		private DelegateCommand _ImportReactionCommand;
@@ -343,9 +384,10 @@ namespace Modules.Main.ViewModels
 
 						if (result != null && ((bool)result) == true)
 						{
+							var currentFolder = CurrentFolder.Value.Folder;
 							foreach (var destFilePath in dialog.FileNames)
 							{
-								ImportReactionFile(destFilePath);
+								ImportReactionFile(currentFolder, destFilePath);
 							}
 						}
 
@@ -354,28 +396,6 @@ namespace Modules.Main.ViewModels
 					}));
 			}
 		}
-
-		private FolderReactionModel ImportReactionFile(string path)
-		{
-			var importedReaction = FileSerializeHelper.LoadAsync<FolderReactionModel>(path);
-
-			if (null != Monitor.FindReaction(importedReaction.Guid))
-			{
-				// alread exist reaction
-				// Guidを張り替える？
-			}
-			else
-			{
-				CurrentFolder.AddReaction(importedReaction);
-			}
-
-			return importedReaction;
-		}
-
-
-
-
-		
 
 		private DelegateCommand _RemoveThisFolderCommand;
 		public DelegateCommand RemoveThisFolderCommand
@@ -396,7 +416,7 @@ namespace Modules.Main.ViewModels
 						*/
 
 					}
-					, () => Monitor.RootFolder.Folder.FullName != this.CurrentFolder.Folder.FullName
+					, () => FolderStack.Count >= 1
 					
 					));
 			}
@@ -409,7 +429,7 @@ namespace Modules.Main.ViewModels
 				return _OpenInExplorerCommand
 					?? (_OpenInExplorerCommand = new DelegateCommand(() =>
 					{
-						Process.Start(this.CurrentFolder.Folder.FullName);
+//						Process.Start(this.CurrentFolder.Folder.FullName);
 					}));
 			}
 		}
@@ -440,7 +460,67 @@ namespace Modules.Main.ViewModels
 	}
 
 
+	public class ReactionManageFolderViewModel : BindableBase
+	{
+		public FolderReactionManagePageViewModel PageVM { get; private set; }
 
+		public FolderModel Folder { get; private set; }
+
+		public string FolderName { get; private set; }
+
+		public ReadOnlyReactiveCollection<ReactionListItemViewModel> ReactionItems { get; private set; }
+
+		public ReadOnlyReactiveCollection<FolderListItemViewModel> FolderItems { get; private set; }
+
+		public ReactiveProperty<ReactionListItemViewModel> SelectedReaction { get; private set; }
+
+
+		public ReactionManageFolderViewModel(FolderReactionManagePageViewModel pageVM, FolderModel folder)
+		{
+			PageVM = pageVM;
+			Folder = folder;
+			FolderName = Folder.Name;
+
+			ReactionItems = Folder.Reactions
+				.ToReadOnlyReactiveCollection(x => new ReactionListItemViewModel(PageVM, x));
+
+			FolderItems = Folder.Children
+				.ToReadOnlyReactiveCollection(x => new FolderListItemViewModel(PageVM, x));
+			
+			SelectedReaction = new ReactiveProperty<ReactionListItemViewModel>();
+
+			SelectedReaction.Subscribe(x =>
+			{
+				if (x != null)
+				{
+					PageVM.ShowReaction(x.Reaction);
+				}
+			});
+			
+		}
+
+		private DelegateCommand _SelectFolderCommand;
+		public DelegateCommand SelectFolderCommand
+		{
+			get
+			{
+				return _SelectFolderCommand
+					?? (_SelectFolderCommand = new DelegateCommand(() =>
+					{
+						PageVM.SelectFolder(Folder);
+					}));
+			}
+		}
+
+
+		internal void SelectReaction(ReactionListItemViewModel reactionListItem)
+		{
+			SelectedReaction.Value = reactionListItem;
+		}
+
+
+
+	}
 
 
 }

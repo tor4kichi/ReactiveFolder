@@ -264,11 +264,15 @@
        
 
         </DockPanel>
-        
-        
-        
-        
-       
+
+
+
+
+        <materialDesign:DialogHost Identifier="ReactionEditCommonDialogHost"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Margin="8 40"
+                                       MinWidth="400"
+                                           />
     </Grid>
 
 </UserControl>
