@@ -144,7 +144,7 @@
                                    />
 
                         <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
+                                    HorizontalAlignment="Right"
                                     >
                             <ComboBox ItemsSource="{x:Static vm:ApplicationPolicyViewModel.FolderItemTypes}"
                                       SelectedItem="{Binding InputPathType.Value, Mode=TwoWay}"
