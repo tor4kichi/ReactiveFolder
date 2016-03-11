@@ -15,6 +15,12 @@
              d:DesignHeight="600" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
+    <UserControl.InputBindings>
+        <KeyBinding Key="S" Modifiers="Ctrl" 
+                    Command="{Binding SaveCommand}"
+                    />
+    </UserControl.InputBindings>
+    
     <Grid MinWidth="400">
 
 
