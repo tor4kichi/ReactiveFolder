@@ -142,6 +142,7 @@
                                 <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
                                     <DataTrigger.Setters>
                                         <Setter Property="Foreground" Value="Red"/>
+                                        <Setter Property="Cursor" Value="Help" />
                                     </DataTrigger.Setters>
                                 </DataTrigger>
                             </Style.Triggers>

@@ -163,6 +163,7 @@
                                                                     DockPanel.Dock="Left"
                                                                     Margin="0 1"
                                                         Background="Transparent"
+                                                        
                                                                     >
 
                                                 <StackPanel.InputBindings>
@@ -193,6 +194,7 @@
                                                                     <DataTrigger.Setters>
                                                                         <Setter Property="Kind" Value="Alert"/>
                                                                         <Setter Property="Foreground" Value="Red"/>
+                                                                        <Setter Property="Cursor" Value="Help" />
                                                                     </DataTrigger.Setters>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
