@@ -22,27 +22,35 @@
                     <DockPanel DockPanel.Dock="Top" Margin="0 8">
 
                         <TextBlock Text="Positive List" 
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"
-                           
-                               DockPanel.Dock="Left"
-                            />
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   DockPanel.Dock="Left"
+                                />
                         <DockPanel Margin="8 0"
                                    >
                             <Button Content="Add"
-                                Command="{Binding AddIncludeFilterTextCommand}"
-                                CommandParameter="{Binding IncludeFilterText.Value}"
-                                Margin="8 0 0 0"
-                                Width="200"
-                                DockPanel.Dock="Right"
-                                >
-                            </Button>
+                                    Command="{Binding AddIncludeFilterTextCommand}"
+                                    CommandParameter="{Binding IncludeFilterText.Value}"
+                                    Margin="8 0 0 0"
+                                    Width="100"
+                                    DockPanel.Dock="Right"
+                                    />
+
 
                             <TextBox Text="{Binding IncludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
-                                 materialDesign:TextFieldAssist.Hint="ex) *.png"
-                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
+                                     materialDesign:TextFieldAssist.Hint="ex) *.png"
+                                     ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
                                      Margin="32 0 8 0"
-                                 />
+                                     Width="150"
+                                     HorizontalAlignment="Right"
+                                 >
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" 
+                                                Command="{Binding AddIncludeFilterTextCommand}"
+                                                CommandParameter="{Binding IncludeFilterText.Value}"
+                                                />
+                                </TextBox.InputBindings>
+                            </TextBox>
 
                         </DockPanel>
 
@@ -87,35 +95,45 @@
 
                     <DockPanel DockPanel.Dock="Top">
                         <TextBlock Text="Negative List" 
-                            Grid.Row="0"
-                           Grid.Column="1"
-                           HorizontalAlignment="Center"
-                           Margin="0 8"
-                            />
+                                   Grid.Row="0"
+                                   Grid.Column="1"
+                                   HorizontalAlignment="Center"
+                                   Margin="0 8"
+                                />
 
                         <DockPanel Margin="8 0">
                             <Button Content="Add"
-                            Command="{Binding AddExcludeFilterTextCommand}"
-                            CommandParameter="{Binding ExcludeFilterText.Value}"
-                            Margin="8 0 0 0"
-                            Width="200"
-                            DockPanel.Dock="Right"
-                            >
-                            </Button>
+                                    Command="{Binding AddExcludeFilterTextCommand}"
+                                    CommandParameter="{Binding ExcludeFilterText.Value}"
+                                    Margin="8 0 0 0"
+                                    Width="100"
+                                    DockPanel.Dock="Right"
+                                    />
+
 
                             <TextBox Text="{Binding ExcludeFilterText.Value, UpdateSourceTrigger=PropertyChanged}"
-                                 materialDesign:TextFieldAssist.Hint="ex) filename.*"
-                                 ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
-                                      Margin="32 0 8 0"
-                                 />
+                                     materialDesign:TextFieldAssist.Hint="ex) filename.*"
+                                     ToolTip="'＊' = ワイルドカード  '?' = 任意の１文字"
+                                     Margin="32 0 8 0"
+                                     Width="150"
+                                     HorizontalAlignment="Right"
+                                     
+                                 >
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" 
+                                                Command="{Binding AddExcludeFilterTextCommand}"
+                                                CommandParameter="{Binding ExcludeFilterText.Value}"
+                                                />
+                                </TextBox.InputBindings>
+                            </TextBox>
 
                         </DockPanel>
                     </DockPanel>
 
                     <ItemsControl ItemsSource="{Binding ExcludeFilterPatterns}"
-                              Grid.Row="3"
-                              Grid.Column="1"
-                              >
+                                  Grid.Row="3"
+                                  Grid.Column="1"
+                                  >
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel Orientation="Horizontal" />
@@ -125,10 +143,10 @@
                             <DataTemplate>
                                 <Border>
                                     <Button
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                                    Command="{Binding Path=DataContext.RemoveExcludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
-                                                    CommandParameter="{Binding}"
-                                                    >
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Command="{Binding Path=DataContext.RemoveExcludeFilterTextCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}"
+                                            CommandParameter="{Binding}"
+                                            >
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding}"  Margin="8 0"/>
                                             <materialDesign:PackIcon Kind="Close" />
@@ -173,10 +191,10 @@
                 </Border.InputBindings>
                 
                 <TextBlock Text="処理対象の絞り込み条件" 
-                        VerticalAlignment="Center"
-                        Margin="0 0 0 16"
-                       FontWeight="Bold"
-                        >
+                           VerticalAlignment="Center"
+                           Margin="0 0 0 16"
+                           FontWeight="Bold"
+                           >
                     <TextBlock.Style>
                         <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
                             <Style.Triggers>
@@ -211,10 +229,10 @@
                            VerticalAlignment="Center"
                            />
                 <ComboBox ItemsSource="{Binding Filters}"
-                      SelectedItem="{Binding SelectedFilterVM.Value}"
-                      Width="200"
-                      HorizontalAlignment="Right"
-                     >
+                          SelectedItem="{Binding SelectedFilterVM.Value}"
+                          Width="200"
+                          HorizontalAlignment="Right"
+                          >
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock>
@@ -231,8 +249,8 @@
             <Border Margin="0 0 0 8" />
 
             <ContentControl Content="{Binding SelectedFilterVM.Value}"
-                                ContentTemplate="{StaticResource FilterEditTemplate}"
-                                >
+                            ContentTemplate="{StaticResource FilterEditTemplate}"
+                            >
             </ContentControl>
         </StackPanel>
 
