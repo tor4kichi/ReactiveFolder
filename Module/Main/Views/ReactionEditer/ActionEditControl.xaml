@@ -150,8 +150,34 @@
 
                 </TextBlock>
             </Border>
-            
 
+
+            <Border Visibility="{Binding IsActionsEmpty.Value, Converter={StaticResource BoolToVisibility}}"
+                    BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Margin="16 0 16 8"
+                    Padding="8"
+                    >
+
+                <DockPanel>
+
+                    <materialDesign:PackIcon Kind="Information" 
+                                             DockPanel.Dock="Left"
+                                             VerticalAlignment="Center"
+                                             Foreground="Gray"
+                                             Margin="8 0 0 0"
+                                             />
+
+                    <TextBlock Text="処理がない時は入力アイテムは出力フォルダにコピーされます"
+                           TextWrapping="Wrap"
+                           Foreground="Gray"
+                               Margin="8 0"
+                           />
+
+                </DockPanel>
+                
+            </Border>
 
 
             <ItemsControl ItemsSource="{Binding Actions}" 
