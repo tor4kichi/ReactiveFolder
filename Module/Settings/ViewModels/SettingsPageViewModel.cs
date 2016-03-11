@@ -62,7 +62,7 @@ namespace Modules.Settings.ViewModels
 
 		public override void OnNavigatedFrom(NavigationContext navigationContext)
 		{
-			
+			Settings.Save();
 		}
 	}
 }

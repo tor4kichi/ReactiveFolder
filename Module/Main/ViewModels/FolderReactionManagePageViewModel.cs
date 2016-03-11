@@ -40,21 +40,23 @@ namespace Modules.Main.ViewModels
 		public IAppPolicyManager AppPolicyManager { get; private set; }
 		public IHistoryManager HistoryManager { get; private set; }
 
+		public IReactiveFolderSettings Settings { get; private set; }
+
 		
 		public ObservableCollection<ReactionManageFolderViewModel> FolderStack { get; private set; }
 
 		public ReactiveProperty<ReactionManageFolderViewModel> CurrentFolder { get; private set; }
 
-		public FolderReactionManagePageViewModel(PageManager pageManager, IFolderReactionMonitorModel monitor, IEventAggregator ea, IAppPolicyManager appPolicyManager, IHistoryManager historyManager)
+		public FolderReactionManagePageViewModel(PageManager pageManager, IFolderReactionMonitorModel monitor, IEventAggregator ea, IAppPolicyManager appPolicyManager, IHistoryManager historyManager, IReactiveFolderSettings settings)
 			: base(pageManager)
 		{
 			Monitor = monitor;
 			_EventAggregator = ea;
 			AppPolicyManager = appPolicyManager;
 			HistoryManager = historyManager;
+			Settings = settings;
 
-			
-			
+
 
 			CurrentFolder = new ReactiveProperty<ReactionManageFolderViewModel>();
 			FolderStack = new ObservableCollection<ReactionManageFolderViewModel>();
@@ -346,6 +348,8 @@ namespace Modules.Main.ViewModels
 						reaction.Name = "TypeYourReactionNameHere";
 
 						reaction.Filter = new ReactiveFolder.Models.Filters.FileReactiveFilter();
+
+						reaction.CheckInterval = TimeSpan.FromSeconds(Settings.DefaultMonitorIntervalSeconds);
 
 						// AddReaction中で非同期での保存処理が走る
 						var currentFolder = CurrentFolder.Value.Folder;
