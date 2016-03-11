@@ -73,6 +73,13 @@
                                    />
                         <DockPanel Margin="8 0">
 
+                            <Button Content="Change"
+                                    Command="{Binding ChangeApplicationPathCommand}"
+                                    DockPanel.Dock="Bottom"
+                                    HorizontalAlignment="Right"
+                                    Margin="0 8"
+                                    />
+                            
                             <materialDesign:PackIcon 
                                     VerticalAlignment="Center"
                                     Margin="8 0"
@@ -124,12 +131,10 @@
 
                             </materialDesign:PackIcon>
 
-                            <Button Content="Change"
-                                    Command="{Binding ChangeApplicationPathCommand}"
-                                    DockPanel.Dock="Right"
-                                    />
+                            
                             <TextBlock Text="{Binding ApplicationPath.Value}" 
                                        VerticalAlignment="Center"
+                                       TextWrapping="Wrap"
                                                      >
                             </TextBlock>
                             
