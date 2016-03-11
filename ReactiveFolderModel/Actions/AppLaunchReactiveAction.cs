@@ -68,9 +68,9 @@ namespace ReactiveFolder.Models.Actions
 
 
 		[DataMember]
-		private ObservableCollection<AppOptionInstance> _AdditionalOptions { get; set; }
+		private ObservableCollection<AppOptionInstance> _Options { get; set; }
 
-		public ReadOnlyObservableCollection<AppOptionInstance> AdditionalOptions { get; private set; }
+		public ReadOnlyObservableCollection<AppOptionInstance> Options { get; private set; }
 
 
 
@@ -113,25 +113,25 @@ namespace ReactiveFolder.Models.Actions
 
 		public AppLaunchReactiveAction()
 		{
-			_AdditionalOptions = new ObservableCollection<AppOptionInstance>();
+			_Options = new ObservableCollection<AppOptionInstance>();
 
-			AdditionalOptions = new ReadOnlyObservableCollection<AppOptionInstance>(_AdditionalOptions);
+			Options = new ReadOnlyObservableCollection<AppOptionInstance>(_Options);
 		}
 
 		[OnDeserialized]
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
-			if (_AdditionalOptions == null)
+			if (_Options == null)
 			{
-				_AdditionalOptions = new ObservableCollection<AppOptionInstance>();
+				_Options = new ObservableCollection<AppOptionInstance>();
 			}
 
 
-			AdditionalOptions = new ReadOnlyObservableCollection<AppOptionInstance>(_AdditionalOptions);
+			Options = new ReadOnlyObservableCollection<AppOptionInstance>(_Options);
 
 			if (AppPolicy != null)
 			{
-				foreach (var option in AdditionalOptions)
+				foreach (var option in Options)
 				{
 					option.ResetDeclaration(AppPolicy);
 				}
@@ -160,6 +160,13 @@ namespace ReactiveFolder.Models.Actions
 				return result;
 			}
 
+			if (Options.Count == 0)
+			{
+				result.AddMessage("Needed one or more Options");
+				return result;
+			}
+
+
 			if (false == CanCreateSandbox())
 			{
 				result.AddMessage("AppLaunchReactiveAction:Invalid AppName:guid is " + AppGuid);
@@ -171,7 +178,7 @@ namespace ReactiveFolder.Models.Actions
 
 			if (false == sandbox.Validate(GenerateTempStreamContext()))
 			{
-				result.AddMessage("Invalid AppLaunchReactiveAction, due to diffarent IO file/folder type.");
+				result.AddMessage("may be diffarent Reaction I/O type and Action Input Type.");
 			}			
 
 			return result;
@@ -206,7 +213,22 @@ namespace ReactiveFolder.Models.Actions
 
 		public bool CanCreateSandbox()
 		{
-			return AppPolicy != null && AppPolicyManager.Security.IsAuthorized(AppPolicy.ApplicationPath);
+			if (AppPolicy == null)
+			{
+				return false;
+			}
+
+			if (false == AppPolicyManager.Security.IsAuthorized(AppPolicy.ApplicationPath))
+			{
+				return false;
+			}
+
+			if (false == AppPolicy.ValidateAppOptionInstances(Options))
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 
@@ -218,7 +240,7 @@ namespace ReactiveFolder.Models.Actions
 				throw new Exception("");
 			}
 
-			return appPolicy.CreateExecuteSandbox(AppPolicyManager, AdditionalOptions.ToArray());
+			return appPolicy.CreateExecuteSandbox(AppPolicyManager, Options.ToArray());
 		}
 
 		public IEnumerable<string> GetFilters()
@@ -231,6 +253,34 @@ namespace ReactiveFolder.Models.Actions
 			{
 				return Enumerable.Empty<string>();
 			}
+		}
+
+
+		public bool HasFileOutputOption
+		{
+			get
+			{
+				return Options.Any(x => x.OptionDeclaration is AppOutputOptionDeclaration);
+			}
+		}
+
+		public string GetOutputExtention()
+		{
+			var outputOption = Options.SingleOrDefault(x => x.OptionDeclaration is AppOutputOptionDeclaration);
+			if (outputOption == null)
+			{
+				return null;
+			}
+
+			var outputOptDecl = outputOption.OptionDeclaration as AppOutputOptionDeclaration;
+			var fileOutputOptProperty = outputOptDecl.OutputPathProperty as FileOutputAppOptionProperty;
+
+			if (fileOutputOptProperty == null)
+			{
+				return null;
+			}
+
+			return fileOutputOptProperty.Extention;
 		}
 
 
@@ -259,7 +309,7 @@ namespace ReactiveFolder.Models.Actions
 			
 			if (AppPolicy.OutputOptionDeclarations.Contains(instance.OptionDeclaration))
 			{
-				var alreadyOutputOption = AdditionalOptions.SingleOrDefault(x => AppPolicy.OutputOptionDeclarations.Any(y => x.OptionDeclaration == y));
+				var alreadyOutputOption = Options.SingleOrDefault(x => AppPolicy.OutputOptionDeclarations.Any(y => x.OptionDeclaration == y));
 
 				if (alreadyOutputOption != null)
 				{
@@ -268,18 +318,18 @@ namespace ReactiveFolder.Models.Actions
 						return;
 					}
 
-					_AdditionalOptions.Remove(alreadyOutputOption);
+					_Options.Remove(alreadyOutputOption);
 				}
 			}
 
-			_AdditionalOptions.Add(instance);
+			_Options.Add(instance);
 
 			ValidatePropertyChanged();
 		}
 
 		public void RemoveAppOptionInstance(AppOptionInstance instance)
 		{
-			if (_AdditionalOptions.Remove(instance))
+			if (_Options.Remove(instance))
 			{
 				ValidatePropertyChanged();
 			}

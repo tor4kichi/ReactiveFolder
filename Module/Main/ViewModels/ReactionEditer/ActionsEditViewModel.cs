@@ -6,7 +6,9 @@ using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolder.Models.Util;
 using ReactiveFolderStyles.DialogContent;
+using ReactiveFolderStyles.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -35,8 +37,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public ObservableCollection<AppLaunchActionViewModel> Actions { get; private set; }
 
 
-		public ActionsEditViewModel(FolderReactionModel reactionModel, IAppPolicyManager appPolicyManager)
-			: base(reactionModel)
+		public ActionsEditViewModel(FolderReactionModel reactionModel, PageManager pageManager, IAppPolicyManager appPolicyManager)
+			: base(pageManager, reactionModel)
 		{
 			_AppPolicyManager = appPolicyManager;
 
@@ -71,6 +73,13 @@ namespace Modules.Main.ViewModels.ReactionEditer
 						Reaction.AddAction(reAdditem.Action);
 					}
 				});
+		}
+
+
+		protected override IEnumerable<string> GetValidateError()
+		{
+			ValidationResult validateResult = Reaction.ValidateActions();
+			return validateResult.Messages;
 		}
 
 

@@ -97,6 +97,12 @@ namespace ReactiveFolder.Models
 		{
 			var result = new ValidationResult();
 
+			if (IncludeFilter.Count == 0)
+			{
+				result.AddMessage("IncludeFilter can not Empty.");
+				return result;
+			}
+
 			foreach (var fileFilterParttern in IncludeFilter)
 			{
 				if (false == IsValidFilterPatternText(fileFilterParttern))

@@ -297,8 +297,12 @@
                 </Button>
             </StackPanel>
         </materialDesign:PopupBox>
-        
-        
+
+        <materialDesign:DialogHost Identifier="ReactionManageCommonDialogHost"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Margin="8 40"
+                                       MinWidth="400"
+                                           />
     </Grid>
 
 </UserControl>

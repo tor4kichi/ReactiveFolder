@@ -28,8 +28,10 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
+		[DataMember]
+		public int PropertyId { get; private set; }
 
-		public AppOptionProperty(string valiableName)
+		public AppOptionProperty(int id, string valiableName)
 		{
 			ValiableName = valiableName;
 		}
@@ -56,8 +58,8 @@ namespace ReactiveFolder.Models.AppPolicy
 			return value is string;
 		}
 
-		public PathAppOptionProperty(string name)
-			: base(name)
+		public PathAppOptionProperty(int id, string name)
+			: base(id, name)
 		{
 		}
 	}
@@ -72,8 +74,8 @@ namespace ReactiveFolder.Models.AppPolicy
 
 		
 
-		public InputAppOptionProperty(string name)
-			: base(name)
+		public InputAppOptionProperty(int id, string name)
+			: base(id, name)
 		{
 		}
 
@@ -91,8 +93,8 @@ namespace ReactiveFolder.Models.AppPolicy
 	{
 	
 
-		public FolderOutputAppOptionProperty(string name)
-			: base(name)
+		public FolderOutputAppOptionProperty(int id, string name)
+			: base(id, name)
 		{
 		}
 
@@ -140,8 +142,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		
 
 		
-		public FileOutputAppOptionProperty(string name)
-			: base(name)
+		public FileOutputAppOptionProperty(int id, string name)
+			: base(id, name)
 			
 		{
 			Extention = "";
@@ -207,8 +209,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		public int DefaultIndex { get; set; }
 
 
-		public StringListOptionProperty(string valiableName)
-			: base(valiableName)
+		public StringListOptionProperty(int id, string valiableName)
+			: base(id, valiableName)
 		{
 			_List = new ObservableCollection<StringListItem>();
 
@@ -311,8 +313,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		public int DefaultNumber { get; set; }
 
 
-		public NumberAppOptionProperty(string valiableName)
-			: base(valiableName)
+		public NumberAppOptionProperty(int id, string valiableName)
+			: base(id, valiableName)
 		{
 			DefaultNumber = 0;
 		}
@@ -373,8 +375,8 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
-		public LimitedNumberAppOptionProerty(string valiableName)
-			: base(valiableName)
+		public LimitedNumberAppOptionProerty(int id, string valiableName)
+			: base(id, valiableName)
 		{
 			_MinValue = 0;
 			_MaxValue = 100;
@@ -413,8 +415,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
-		public RangeNumberAppOptionProperty(string valiableName)
-			: base(valiableName)
+		public RangeNumberAppOptionProperty(int id, string valiableName)
+			: base(id, valiableName)
 		{
 			SkipAmount = 1;
 		}

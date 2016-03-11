@@ -7,6 +7,7 @@ using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Filters;
 using ReactiveFolder.Models.Util;
+using ReactiveFolderStyles.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -27,8 +28,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		public ReactiveProperty<FilterViewModelBase> SelectedFilterVM { get; private set; }
 
 
-		public FilterEditViewModel(FolderReactionModel reactionModel)
-			: base(reactionModel)
+		public FilterEditViewModel(PageManager pageManager, FolderReactionModel reactionModel)
+			: base(pageManager, reactionModel)
 		{
 			Reaction.ObserveProperty(x => x.IsFilterValid)
 				.Subscribe(x => IsValid.Value = x)
@@ -70,6 +71,14 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				);
 		}
 
+
+		protected override IEnumerable<string> GetValidateError()
+		{
+			if (Reaction.Filter.IncludeFilter.Count == 0)
+			{
+				yield return "Fileter: Positive list needs 1 or more filter text pattern.";
+			}
+		}
 
 		public ReactionFilterType FilterModelToVMType(ReactiveFilterBase filter)
 		{
