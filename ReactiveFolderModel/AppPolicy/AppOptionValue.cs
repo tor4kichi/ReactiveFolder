@@ -8,6 +8,7 @@ namespace ReactiveFolder.Models.AppPolicy
 {
 	public class AppOptionValue
 	{
+		public int PropertyId { get; set; }
 		public string ValiableName { get; set; }
 		public dynamic Value { get; set; }
 	}

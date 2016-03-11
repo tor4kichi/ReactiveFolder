@@ -544,7 +544,7 @@ namespace Modules.InstantAction.ViewModels
 			AppName = appPolicy.AppName;
 			AppGuid = appPolicy.Guid;
 
-			UsingOptions = AppLaunchAction.AdditionalOptions
+			UsingOptions = AppLaunchAction.Options
 				.ToReadOnlyReactiveCollection(x => new AppOptionInstanceViewModel(AppLaunchAction, x));
 		}
 
@@ -579,9 +579,9 @@ namespace Modules.InstantAction.ViewModels
 
 						// 未追加のオプションを取得
 						var optionDecls = appPolicy.OptionDeclarations
-							.Where(x => AppLaunchAction.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
+							.Where(x => AppLaunchAction.Options.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
 						var outputOptionDecls = appPolicy.OutputOptionDeclarations
-							.Where(x => AppLaunchAction.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
+							.Where(x => AppLaunchAction.Options.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
 
 
 

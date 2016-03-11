@@ -382,6 +382,21 @@ namespace ReactiveFolder.Models.AppPolicy
 
 			return String.Join(" ", argumentTexts);
 		}
+
+
+		public bool ValidateAppOptionInstances(IEnumerable<AppOptionInstance> options)
+		{
+			foreach (var opt in options)
+			{
+				if ( false == opt.Validate())
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		
 
 		public ApplicationExecuteSandbox CreateExecuteSandbox(IAppPolicyManager manager, AppOptionInstance[] options)

@@ -118,32 +118,39 @@
     <Grid x:Name="ActionsContainer" >
         <StackPanel Orientation="Vertical">
 
-            <TextBlock Text="処理内容" 
+            <Border>
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding ShowValidateErrorCommand}"></MouseBinding>
+                </Border.InputBindings>
+
+                <TextBlock Text="処理内容" 
                         VerticalAlignment="Center"
                         Margin="0 0 0 16"
                        FontWeight="Bold"
                         >
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
-                                <DataTrigger.Setters>
-                                </DataTrigger.Setters>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
-                                <DataTrigger.Setters>
-                                </DataTrigger.Setters>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
-                                <DataTrigger.Setters>
-                                    <Setter Property="Foreground" Value="Red"/>
-                                </DataTrigger.Setters>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
+                                    <DataTrigger.Setters>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
+                                    <DataTrigger.Setters>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
 
-            </TextBlock>
+                </TextBlock>
+            </Border>
+            
 
 
 

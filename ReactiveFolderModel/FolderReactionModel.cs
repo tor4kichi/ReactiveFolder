@@ -17,6 +17,7 @@ using ReactiveFolder.Models.Destinations;
 using Microsoft.Practices.Prism;
 using ReactiveFolder.Models.Util;
 using ReactiveFolder.Models.History;
+using ReactiveFolder.Models.AppPolicy;
 
 namespace ReactiveFolder.Models
 {
@@ -136,6 +137,7 @@ namespace ReactiveFolder.Models
 					_Filter.SetParentReactionModel(this);
 
 					ValidateFilter();
+					ValidateActions();
 
 					OnPropertyChanged(nameof(InputType));
 					OnPropertyChanged(nameof(OutputType));
@@ -264,7 +266,6 @@ namespace ReactiveFolder.Models
 
 
 		public ValidationResult ValidationResult { get; private set; }
-		
 
 		private bool NeedValidation
 		{
@@ -378,6 +379,7 @@ namespace ReactiveFolder.Models
 			{
 				IsFilterValid = false;
 				ValidateFilter();
+				ValidateActions();
 			}
 			else if (model is ReactiveActionBase)
 			{
@@ -498,6 +500,7 @@ namespace ReactiveFolder.Models
 		{
 			outResult = outResult ?? new ValidationResult();
 
+			var validActions = true;
 			if (Actions.Count > 0)
 			{
 				foreach (var action in Actions)
@@ -507,14 +510,67 @@ namespace ReactiveFolder.Models
 					if (false == isValid)
 					{
 						// Action validate failed.
-						outResult.AddMessage(($"{(nameof(Actions))} has validation error."));
 						outResult.AddMessages(action.ValidateResult.Messages);
+						validActions = false;
 					}
+					else
+					{
+						// ActionのAppPolicyを使うため、Validチェックを通っている必要がある
+
+						var position = Actions.IndexOf(action);
+
+						if (position == 0)
+						{
+							// フィルタが通過させる拡張子タイプは先頭のActionsが受け取れるか
+							var appLaunchAction = Actions[0] as AppLaunchReactiveAction;
+
+							var appAcceptExts = appLaunchAction.GetFilters();
+
+							if (false == Filter.IncludeFilter.All(x => appAcceptExts.Any(y => x.EndsWith(y))))
+							{
+								outResult.AddMessage($"'絞り込み条件' の出力アイテムを {appLaunchAction.AppPolicy.AppName} が処理できません。");
+								validActions = false;
+							}
+						}
+						else if (position < Actions.Count)
+						{
+							// アクションからアクションへの出力連鎖が妥当かチェック
+
+							var currentAction = Actions[position - 1] as AppLaunchReactiveAction;
+							var nextAction = Actions[position] as AppLaunchReactiveAction;
+
+							var nextActionFilters = nextAction.GetFilters().ToArray();
+							if (currentAction.HasFileOutputOption)
+							{
+								// 出力されるファイルタイプが次のアクションのアプリが対応しているか
+								var outputExtention = currentAction.GetOutputExtention();
+
+								if (false == nextActionFilters.Any(x => x.EndsWith(outputExtention)))
+								{
+									outResult.AddMessage($"{currentAction.AppPolicy.AppName}が出力するファイルタイプ({outputExtention})を {nextAction.AppPolicy.AppName} が処理できません。");
+									validActions = false;
+								}
+							}
+							else
+							{
+								// 出力予定の全てのファイルタイプが次のアクションのアプリが対応しているか
+								var currentActionWillOutputExts = currentAction.AppPolicy.OutputOptionDeclarations.Where(x => x.OutputPathProperty is FileOutputAppOptionProperty)
+									.Select(x => x.OutputPathProperty as FileOutputAppOptionProperty)
+									.Select(x => x.Extention);
 
 
+								if (false == currentActionWillOutputExts.All(x => nextActionFilters.Any(y => y.EndsWith(x))))
+								{
+									outResult.AddMessage($"{currentAction.AppPolicy.AppName}が出力するであろうファイルタイプ({String.Join(",", currentActionWillOutputExts)})を{nextAction.AppPolicy.AppName}が処理できません。");
+									validActions = false;
+								}
+							}
+						}
+					}
+					
 				}
 
-				IsActionsValid = Actions.All(x => x.IsValid);
+				IsActionsValid = validActions;
 			}
 			else
 			{
@@ -523,6 +579,7 @@ namespace ReactiveFolder.Models
 
 				IsActionsValid = true;
 			}
+
 
 			return outResult;
 		}
@@ -579,6 +636,8 @@ namespace ReactiveFolder.Models
 
 			return outResult;
 		}
+
+	
 
 
 		/// <summary>

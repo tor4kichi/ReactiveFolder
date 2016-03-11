@@ -216,9 +216,9 @@ namespace Modules.History.ViewModels
 			Action = action;
 
 			AppName = action.AppPolicy?.AppName ?? "<Deleted AppPolicy>";
-			OptionsText = String.Join("+", action.AdditionalOptions.Select(x => x.OptionDeclaration?.Name ?? ""));
+			OptionsText = String.Join("+", action.Options.Select(x => x.OptionDeclaration?.Name ?? ""));
 
-			OptionInstances = action.AdditionalOptions
+			OptionInstances = action.Options
 				.Select(x => new AppOptionInstanceViewModel(Action, x))
 				.ToList();
 		}

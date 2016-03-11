@@ -45,9 +45,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				AppName = AppPolicy.AppName;
 				AppGuid = AppPolicy.Guid;
 
-				UsingOptions = Action.AdditionalOptions.ToReadOnlyReactiveCollection(x =>
+				UsingOptions = Action.Options.ToReadOnlyReactiveCollection(x =>
 					new AppOptionInstanceViewModel(Action, x)
 					);
+
+				Action.Options.ObserveElementPropertyChanged()
+					.Subscribe(x => Action.Validate());
 			}
 			else
 			{
@@ -94,9 +97,9 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					{
 						var appPolicy = Action.AppPolicy;
 						var optionDecls = appPolicy.OptionDeclarations
-							.Where(x => Action.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
+							.Where(x => Action.Options.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
 						var outputOptionDecls = appPolicy.OutputOptionDeclarations
-							.Where(x => Action.AdditionalOptions.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
+							.Where(x => Action.Options.All(alreadyAddedOption => x.Id != alreadyAddedOption.OptionId));
 
 
 

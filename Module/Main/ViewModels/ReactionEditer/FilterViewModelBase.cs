@@ -130,7 +130,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		{
 			Filter.AddIncludeFilter(word);
 
-			Filter.Validate();
+			ReactionModel.ValidateFilter();
+			ReactionModel.ValidateActions();
 
 			IncludeFilterText.Value = "";
 		}
@@ -147,8 +148,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					{
 						Filter.RemoveInlcudeFilter(word);
 
-						Filter.Validate();
-
+						ReactionModel.ValidateFilter();
+						ReactionModel.ValidateActions();
 
 					}));
 			}

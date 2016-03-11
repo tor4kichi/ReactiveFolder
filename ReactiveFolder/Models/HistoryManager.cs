@@ -77,7 +77,7 @@ namespace ReactiveFolder.Models
 
 
 			var filename = String.Join("-",
-				historyData.Actions.Select(x => ToPathSafeString(x.AppPolicy.AppName) + "(" + String.Join("_", x.AdditionalOptions.Select(y => ToPathSafeString(y.OptionDeclaration.Name))) + ") "
+				historyData.Actions.Select(x => ToPathSafeString(x.AppPolicy.AppName) + "(" + String.Join("_", x.Options.Select(y => ToPathSafeString(y.OptionDeclaration.Name))) + ") "
 			))
 			+ Path.GetRandomFileName();
 

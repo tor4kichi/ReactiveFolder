@@ -12,5 +12,7 @@ namespace ReactiveFolder.Models.Util
 		bool IsValid { get; }
 
 		bool Validate();
+
+		ValidationResult ValidateResult { get; }
 	}
 }

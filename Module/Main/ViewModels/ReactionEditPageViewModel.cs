@@ -92,7 +92,7 @@ namespace Modules.Main.ViewModels
 						var reactionGuid = (Guid)navigationContext.Parameters["guid"];
 
 						var reaction = Monitor.RootFolder.FindReaction(reactionGuid);
-						ReactionVM.Value = new ReactionViewModel(reaction, _AppPolicyManager);
+						ReactionVM.Value = new ReactionViewModel(reaction, PageManager, _AppPolicyManager);
 
 						PageManager.IsOpenSubContent = true;
 					}
@@ -117,7 +117,7 @@ namespace Modules.Main.ViewModels
 							throw new Exception("use import reaction.");
 						}
 
-						ReactionVM.Value = new ReactionViewModel(reaction, _AppPolicyManager);
+						ReactionVM.Value = new ReactionViewModel(reaction, PageManager, _AppPolicyManager);
 						PageManager.IsOpenSubContent = true;
 					}
 					catch
@@ -240,6 +240,7 @@ namespace Modules.Main.ViewModels
 
 
 		public FolderReactionModel Reaction { get; private set; }
+		public PageManager PageManager { get; private set; }
 		IAppPolicyManager _AppPolicyManager;
 
 		public ReactiveProperty<bool> IsReactionValid { get; private set; }
@@ -259,10 +260,11 @@ namespace Modules.Main.ViewModels
 
 		// Reactionmodelを受け取ってVMを生成する
 
-		public ReactionViewModel(FolderReactionModel reaction, IAppPolicyManager appPolicyManager)
+		public ReactionViewModel(FolderReactionModel reaction, PageManager pageManager, IAppPolicyManager appPolicyManager)
 		{
 			_CompositeDisposable = new CompositeDisposable();
 			Reaction = reaction;
+			PageManager = pageManager;
 			_AppPolicyManager = appPolicyManager;
 
 
@@ -273,10 +275,10 @@ namespace Modules.Main.ViewModels
 			ReactionWorkName = Reaction.ToReactivePropertyAsSynchronized(x => x.Name)
 				.AddTo(_CompositeDisposable);
 
-			WorkFolderEditVM = new WorkFolderEditViewModel(Reaction);
-			FilterEditVM = new FilterEditViewModel(Reaction);
-			ActionsEditVM = new ActionsEditViewModel(Reaction, _AppPolicyManager);
-			DestinationEditVM = new DestinationEditViewModel(Reaction);
+			WorkFolderEditVM = new WorkFolderEditViewModel(PageManager, Reaction);
+			FilterEditVM = new FilterEditViewModel(PageManager, Reaction);
+			ActionsEditVM = new ActionsEditViewModel(Reaction, PageManager, _AppPolicyManager);
+			DestinationEditVM = new DestinationEditViewModel(PageManager, Reaction);
 
 
 			EditVMList = new List<ReactionEditViewModelBase>()

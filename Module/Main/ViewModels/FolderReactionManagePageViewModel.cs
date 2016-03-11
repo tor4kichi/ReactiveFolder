@@ -440,7 +440,7 @@ namespace Modules.Main.ViewModels
 
 
 
-		internal async void DeleteFolderReactionFile(FolderReactionModel reaction)
+		internal async Task<bool> DeleteFolderReactionFile(FolderReactionModel reaction)
 		{
 			// 確認ダイアログを表示
 			var result = await ShowReactionDeleteConfirmDialog();
@@ -452,14 +452,22 @@ namespace Modules.Main.ViewModels
 
 				var reactionSaveFoler = Monitor.FindReactionParentFolder(reaction);
 				reactionSaveFoler.RemoveReaction(reaction.Guid);
+
+				return true;
 			}
+			else
+			{
+				return false;
+			}
+
+			
 		}
 
 		public async Task<bool?> ShowReactionDeleteConfirmDialog()
 		{
 			var view = new Views.DialogContent.DeleteReactionConfirmDialogContent();
 
-			return (bool?)await DialogHost.Show(view, "ReactionEditCommonDialogHost");
+			return (bool?)await DialogHost.Show(view, "ReactionManageCommonDialogHost");
 		}
 	}
 
@@ -498,7 +506,14 @@ namespace Modules.Main.ViewModels
 				if (x != null)
 				{
 					PageVM.ShowReaction(x.Reaction);
+					x.IsSelected = true;
 				}
+
+				foreach (var item in ReactionItems.Where(y => y != x))
+				{
+					item.IsSelected = false;
+				}
+
 			});
 			
 		}

@@ -148,11 +148,21 @@
                                     <DataTemplate>
                                         <DockPanel Margin="0 16" >
 
+                                            
+                                            
+                                            
+                                            
                                             <StackPanel Orientation="Horizontal"
                                                                     VerticalAlignment="Top"
                                                                     DockPanel.Dock="Left"
                                                                     Margin="0 1"
+                                                        Background="Transparent"
                                                                     >
+
+                                                <StackPanel.InputBindings>
+                                                    <MouseBinding MouseAction="LeftClick" Command="{Binding ShowValidateErrorCommand}"></MouseBinding>
+                                                </StackPanel.InputBindings>
+                                                
                                                 <materialDesign:PackIcon 
                                                                         VerticalAlignment="Bottom"
                                                                         Margin="8 0"
@@ -165,6 +175,7 @@
                                                                         <Setter Property="Kind" Value="CommentQuestionOutline"/>
                                                                         <Setter Property="Foreground" Value="Gray"/>
                                                                     </DataTrigger.Setters>
+
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
                                                                     <DataTrigger.Setters>

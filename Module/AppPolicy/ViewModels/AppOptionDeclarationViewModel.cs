@@ -142,7 +142,7 @@ namespace Modules.AppPolicy.ViewModels
 			if (Declaration is AppOptionDeclaration)
 			{
 				(Declaration as AppOptionDeclaration)
-					.AddProperty(propertyType.ToOptionProperty("name"));
+					.AddProperty(id => propertyType.ToOptionProperty(id, "name"));
 			}
 		}
 	}
@@ -190,18 +190,18 @@ namespace Modules.AppPolicy.ViewModels
 
 	public static class AddableAppOptionPropertyTypeHelper
 	{
-		public static AppOptionProperty ToOptionProperty(this AddableAppOptionPropertyType propType, string valiableName)
+		public static AppOptionProperty ToOptionProperty(this AddableAppOptionPropertyType propType, int id, string valiableName)
 		{
 			switch (propType)
 			{
 				case AddableAppOptionPropertyType.StringList:
-					return new StringListOptionProperty(valiableName);
+					return new StringListOptionProperty(id, valiableName);
 				case AddableAppOptionPropertyType.Number:
-					return new NumberAppOptionProperty(valiableName);
+					return new NumberAppOptionProperty(id, valiableName);
 				case AddableAppOptionPropertyType.LimitedNumber:
-					return new LimitedNumberAppOptionProerty(valiableName);
+					return new LimitedNumberAppOptionProerty(id, valiableName);
 				case AddableAppOptionPropertyType.RangeNumber:
-					return new RangeNumberAppOptionProperty(valiableName);
+					return new RangeNumberAppOptionProperty(id, valiableName);
 				default:
 					throw new NotSupportedException();
 			}

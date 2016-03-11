@@ -83,9 +83,15 @@ namespace Modules.Main.ViewModels
 			get
 			{
 				return _DeleteCommand
-					?? (_DeleteCommand = new DelegateCommand(() =>
+					?? (_DeleteCommand = new DelegateCommand(async () =>
 					{
-						PageVM.DeleteFolderReactionFile(this.Reaction);
+						if (await PageVM.DeleteFolderReactionFile(this.Reaction))
+						{
+							if (IsSelected)
+							{
+								PageVM.PageManager.IsOpenSubContent = false;
+							}
+						}
 					}
 					));
 			}

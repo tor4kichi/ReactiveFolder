@@ -3,6 +3,7 @@ using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Timings;
+using ReactiveFolderStyles.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,8 +23,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 	
 
 
-		public WorkFolderEditViewModel(FolderReactionModel reactionModel)
-			: base(reactionModel)
+		public WorkFolderEditViewModel(PageManager pageManager, FolderReactionModel reactionModel)
+			: base(pageManager, reactionModel)
 		{
 
 			Reaction.ObserveProperty(x => x.IsWorkFolderValid)
@@ -35,10 +36,21 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				.Select(x => x?.FullName ?? "<not selected>")
 				.ToReactiveProperty()
 				.AddTo(_CompositeDisposable);
+
 		}
 
 
-
+		protected override IEnumerable<string> GetValidateError()
+		{
+			if (String.IsNullOrEmpty(Reaction.WorkFolderPath))
+			{
+				yield return "Select Target Folder";
+			}
+			else if (false == Directory.Exists(Reaction.WorkFolderPath))
+			{
+				yield return "Not found selected Target Folder";
+			}
+		}
 
 		private DelegateCommand _FolderSelectCommand;
 		public DelegateCommand FolderSelectCommand

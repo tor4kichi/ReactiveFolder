@@ -9,6 +9,8 @@ using System.Reactive.Disposables;
 using ReactiveFolder.Models.Destinations;
 using System.IO;
 using Microsoft.Practices.Prism.Commands;
+using ReactiveFolderStyles.Models;
+using System.Collections.Generic;
 
 namespace Modules.Main.ViewModels.ReactionEditer
 {
@@ -26,8 +28,8 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 		public ReactiveProperty<string> RenamePattern { get; private set; }
 
-		public DestinationEditViewModel(FolderReactionModel reactionModel)
-			: base(reactionModel)
+		public DestinationEditViewModel(PageManager pageManager, FolderReactionModel reactionModel)
+			: base(pageManager, reactionModel)
 		{
 			_CompositeDisposable = new CompositeDisposable();
 
@@ -67,6 +69,19 @@ namespace Modules.Main.ViewModels.ReactionEditer
 
 
 		}
+
+		protected override IEnumerable<string> GetValidateError()
+		{
+			if (String.IsNullOrEmpty(Reaction.Destination.AbsoluteFolderPath))
+			{
+				yield return "Select output folder";
+			}
+			else if (false == Directory.Exists(Reaction.Destination.AbsoluteFolderPath))
+			{
+				yield return "Missing selected output folder";
+			}
+		}
+
 
 		private DelegateCommand _SelectOutputFolderCommand;
 		public DelegateCommand SelectOutputFolderCommand
@@ -125,11 +140,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 				return _ResetRenamePartternCommand
 					?? (_ResetRenamePartternCommand = new DelegateCommand(() =>
 					{
-						// TODO: use const
 						RenamePattern.Value = ReactiveDestinationBase.DefaultRenamePattern;
 
 					}));
 			}
 		}
+
+		
 	}
 }

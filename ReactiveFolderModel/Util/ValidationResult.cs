@@ -83,5 +83,10 @@ namespace ReactiveFolder.Models.Util
 				AddMessage(message);
 			}
 		}
+
+		public void Clear()
+		{
+			_Messages.Clear();
+		}
 	}
 }
