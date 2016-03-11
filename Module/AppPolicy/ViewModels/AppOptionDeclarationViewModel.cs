@@ -113,7 +113,7 @@ namespace Modules.AppPolicy.ViewModels
 						AppPolicyVM.RemoveDeclaration(this.Declaration);
 					}
 					, 
-					() => false == (Declaration is AppInputOptionDeclaration)
+					() => false == (Declaration is AppInputOptionDeclaration) 
 					));
 			}
 		}

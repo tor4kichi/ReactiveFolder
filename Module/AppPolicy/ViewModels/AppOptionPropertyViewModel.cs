@@ -84,7 +84,7 @@ namespace Modules.AppPolicy.ViewModels
 						DeclarationVM.RemoveProperty(Property);
 					}
 					,
-					() => false == (Property is InputAppOptionProperty)
+					() => false == (Property is PathAppOptionProperty)
 					));
 			}
 		}
