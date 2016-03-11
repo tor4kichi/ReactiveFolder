@@ -331,7 +331,7 @@
                 </StackPanel>
 
                 <Border Margin="16 0 0 0">
-                    <TextBlock Text="History"
+                    <TextBlock Text="Edit AppPolicy"
                                 Style="{StaticResource MaterialDesignTitleTextBlock}"
                                 VerticalAlignment="Center"
                                 />
