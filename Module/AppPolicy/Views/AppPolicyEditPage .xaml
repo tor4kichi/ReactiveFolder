@@ -78,6 +78,7 @@
                                     DockPanel.Dock="Bottom"
                                     HorizontalAlignment="Right"
                                     Margin="0 8"
+                                    Width="200"
                                     />
                             
                             <materialDesign:PackIcon 
@@ -187,6 +188,7 @@
                                     Text="{Binding ExtentionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Width="200"
                                      Margin="8 0"
+                                     materialDesign:TextFieldAssist.Hint="ex) .png"
                                      >
                                 <TextBox.InputBindings>
                                     <KeyBinding Key="Return" Command="{Binding AddAcceptExtentionCommand}" />
@@ -196,6 +198,7 @@
                             <Button Content="Add"
                                     Command="{Binding AddAcceptExtentionCommand}"
                                     DockPanel.Dock="Right"
+                                    Width="100"
                                     />
 
 
