@@ -67,6 +67,7 @@
                             
                             >
                         <TextBlock Text="ReactiveFolder" 
+                                   Style="{StaticResource MaterialDesignTitleTextBlock}"
                                    Margin="0 32"
                                    />
 

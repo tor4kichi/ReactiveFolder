@@ -52,7 +52,7 @@ namespace ReactiveFolder.ViewModels
 			AppPolicyManageListItem = new MenuItemViewModel(AppPageType.AppPolicyManage)
 			{
 				Title = "App Policy List",
-				Kind = PackIconKind.Apps,
+				Kind = PackIconKind.ViewList,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
 					PageManager.OpenPage(AppPageType.AppPolicyManage);
@@ -62,7 +62,7 @@ namespace ReactiveFolder.ViewModels
 			ReactionManageListItem = new MenuItemViewModel(AppPageType.ReactionManage)
 			{
 				Title = "Manage Reaction",
-				Kind = PackIconKind.ViewList,
+				Kind = PackIconKind.Monitor,
 				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
 					PageManager.OpenPage(AppPageType.ReactionManage);

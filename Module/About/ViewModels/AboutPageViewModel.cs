@@ -27,8 +27,10 @@ namespace Modules.About.ViewModels
 			Tabs = new List<TabViewModelBase>();
 
 			var aboutTabVM = new AboutTabViewModel();
+			var howUseTabVM = new HowUseTabViewModel();
 			var lisenceTabVM = new LisenceTabViewModel();
 			Tabs.Add(aboutTabVM);
+			Tabs.Add(howUseTabVM);
 			Tabs.Add(lisenceTabVM);
 
 
@@ -53,17 +55,25 @@ namespace Modules.About.ViewModels
 		abstract public string Title { get; }
 	}
 
+	
 
 	public class AboutTabViewModel : TabViewModelBase
 	{
 
-		public override string Title { get; } = "What's this?";
+		public override string Title { get; } = "ReactiveFolder ?";
 	}
+
+	public class HowUseTabViewModel : TabViewModelBase
+	{
+
+		public override string Title { get; } = "使い方";
+	}
+
 
 
 	public class LisenceTabViewModel : TabViewModelBase
 	{
-		public override string Title { get; } = "Using Library's";
+		public override string Title { get; } = "利用ライブラリ";
 
 
 		public List<LibraryItem> Libraries { get; private set; }
@@ -114,7 +124,16 @@ namespace Modules.About.ViewModels
 					AuthorName = "Newtonsoft",
 					LisenceTypeName = LisenceType.MIT.LisenceTypeToName(),
 					SiteUri = "http://www.newtonsoft.com/json"
-				}
+				},
+				new LibraryItem()
+				{
+					LibraryName = "ToastNotifications",
+					AuthorName = "Rafał Łopatka",
+					LisenceTypeName = LisenceType.MIT.LisenceTypeToName(),
+					SiteUri = "https://github.com/raflop/ToastNotifications"
+				},
+
+				
 			};
 
 			// ライブラリ名でソート
