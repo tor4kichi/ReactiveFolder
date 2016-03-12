@@ -128,6 +128,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behaviors\AcceptDrop.cs" />
+    <Compile Include="Behaviors\BubbleScrollEvent.cs" />
     <Compile Include="Behaviors\HyperLinkExtention.cs" />
     <Compile Include="Behaviors\TextBoxHelper.cs" />
     <Compile Include="DialogContent\AppPolicyOptionSelectDialogContent.xaml.cs">

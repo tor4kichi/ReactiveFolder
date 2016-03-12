@@ -178,14 +178,9 @@ namespace Modules.AppPolicy.ViewModels
 					{
 						var newAppPolicy = new ApplicationPolicy();
 
-						Task.Run(() =>
-						{
-							AppPolicyManager.AddAppPolicy(newAppPolicy);
-						})
-						.ContinueWith(x => 
-						{
-							ShowAppPolicyEditPage(newAppPolicy);
-						});
+						AppPolicyManager.AddAppPolicy(newAppPolicy);
+
+						ShowAppPolicyEditPage(newAppPolicy);
 					}));
 			}
 		}
