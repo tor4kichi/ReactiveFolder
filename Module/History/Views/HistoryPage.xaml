@@ -125,14 +125,16 @@
                     
                     <StackPanel Orientation="Horizontal"
                             DockPanel.Dock="Right"
-                                Visibility="Hidden"
+                                Visibility="Visible"
                             >
-                        <materialDesign:PackIcon Kind="Magnify"
-                                            Margin="8 0"
-                                            />
-                        <TextBox Width="200"
-                                FontSize="16"
-                                />
+                        <Button Command="{Binding ClearHistoryCommand}" 
+                                Style="{StaticResource AppbarButton}"
+                                Foreground="{StaticResource PrimaryHueDarkBrush}"
+                                Background="Transparent"
+                                ToolTip="全履歴を削除"
+                                >
+                            <materialDesign:PackIcon Kind="Delete" />
+                        </Button>
                     </StackPanel>
 
                     <Border Margin="16 0 0 0">
@@ -230,6 +232,13 @@
 
             </ScrollViewer>
 
+
+            <materialDesign:DialogHost Identifier="HistoryPageDialogHost"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Margin="8 40"
+                                   MinWidth="400"
+                                           />
         </Grid>
     </DockPanel>
 </UserControl>

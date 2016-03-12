@@ -135,6 +135,11 @@
                               SelectionUnit="FullRow"
                               Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}"
                            >
+
+                            <i:Interaction.Behaviors>
+                                <mybehavior:BubbleScrollEvent />
+                            </i:Interaction.Behaviors>
+                            
                             <DataGrid.ContextMenu>
                                 <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                                     <MenuItem Header="Copy Files"

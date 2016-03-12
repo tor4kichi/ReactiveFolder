@@ -15,6 +15,12 @@
              d:DesignHeight="600" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
+    <UserControl.InputBindings>
+        <KeyBinding Key="S" Modifiers="Ctrl" 
+                    Command="{Binding SaveCommand}"
+                    />
+    </UserControl.InputBindings>
+    
     <Grid MinWidth="400">
 
 
@@ -67,6 +73,14 @@
                                    />
                         <DockPanel Margin="8 0">
 
+                            <Button Content="Change"
+                                    Command="{Binding ChangeApplicationPathCommand}"
+                                    DockPanel.Dock="Bottom"
+                                    HorizontalAlignment="Right"
+                                    Margin="0 8"
+                                    Width="200"
+                                    />
+                            
                             <materialDesign:PackIcon 
                                     VerticalAlignment="Center"
                                     Margin="8 0"
@@ -118,12 +132,10 @@
 
                             </materialDesign:PackIcon>
 
-                            <Button Content="Change"
-                                    Command="{Binding ChangeApplicationPathCommand}"
-                                    DockPanel.Dock="Right"
-                                    />
+                            
                             <TextBlock Text="{Binding ApplicationPath.Value}" 
                                        VerticalAlignment="Center"
+                                       TextWrapping="Wrap"
                                                      >
                             </TextBlock>
                             
@@ -138,7 +150,7 @@
                                    />
 
                         <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
+                                    HorizontalAlignment="Right"
                                     >
                             <ComboBox ItemsSource="{x:Static vm:ApplicationPolicyViewModel.FolderItemTypes}"
                                       SelectedItem="{Binding InputPathType.Value, Mode=TwoWay}"
@@ -176,6 +188,7 @@
                                     Text="{Binding ExtentionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Width="200"
                                      Margin="8 0"
+                                     materialDesign:TextFieldAssist.Hint="ex) .png"
                                      >
                                 <TextBox.InputBindings>
                                     <KeyBinding Key="Return" Command="{Binding AddAcceptExtentionCommand}" />
@@ -185,6 +198,7 @@
                             <Button Content="Add"
                                     Command="{Binding AddAcceptExtentionCommand}"
                                     DockPanel.Dock="Right"
+                                    Width="100"
                                     />
 
 
@@ -325,7 +339,7 @@
                 </StackPanel>
 
                 <Border Margin="16 0 0 0">
-                    <TextBlock Text="History"
+                    <TextBlock Text="Edit AppPolicy"
                                 Style="{StaticResource MaterialDesignTitleTextBlock}"
                                 VerticalAlignment="Center"
                                 />

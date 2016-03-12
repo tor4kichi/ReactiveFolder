@@ -17,6 +17,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reactive.Linq;
 using Reactive.Bindings.Extensions;
+using MaterialDesignThemes.Wpf;
+using ReactiveFolderStyles.DialogContent;
 
 namespace Modules.History.ViewModels
 {
@@ -44,6 +46,8 @@ namespace Modules.History.ViewModels
 			InstantActionManager = instantActionManager;
 
 			ShowHistoryVMs = new ObservableCollection<HistoryDataViewModel>();
+
+			HistoryFileInfoList = new List<FileInfo>();
 
 			CanIncrementalLoad = ShowHistoryVMs.CollectionChangedAsObservable()
 				.Select(_ => HistoryFileInfoList.Count > ShowHistoryVMs.Count)
@@ -85,6 +89,8 @@ namespace Modules.History.ViewModels
 				.Select(x => new HistoryDataViewModel(this, PageManager, Monitor, InstantActionManager, x));
 
 			ShowHistoryVMs.AddRange(additionalHistoryVMs);
+
+			
 		}
 
 		public static NavigationParameters CreateAppPolicyFilteringParameter(Guid appPolicyGuid)
@@ -115,9 +121,46 @@ namespace Modules.History.ViewModels
 		public override void OnNavigatedTo(NavigationContext navigationContext)
 		{
 			HistoryFileInfoList = HistoryManager.GetHistoryDataFileList();
+			ClearHistoryCommand.RaiseCanExecuteChanged();
 
 			IncrementalLoadHistoryItems();
 		}
+
+
+		private DelegateCommand _ClearHistoryCommand;
+		public DelegateCommand ClearHistoryCommand
+		{
+			get
+			{
+				return _ClearHistoryCommand
+					?? (_ClearHistoryCommand = new DelegateCommand(async () =>
+					{
+						var view = new DeleteConfirmDialogContent()
+						{
+							DataContext = new DeleteConfirmDialogContentViewModel()
+							{
+								Title = "全ての履歴を削除しますか？"
+							}
+						};
+
+						var result = (bool?)await DialogHost.Show(view, "HistoryPageDialogHost");
+
+						if (result.HasValue && result.Value == true)
+						{
+							HistoryManager.ClearHistory();
+							HistoryFileInfoList.Clear();
+							ShowHistoryVMs.Clear();
+
+							ClearHistoryCommand.RaiseCanExecuteChanged();
+						}
+					}
+					, () => (HistoryFileInfoList?.Count ?? 0) != 0
+					));
+			}
+		}
+
+
+
 	}
 
 	public class HistoryDataViewModel : BindableBase
@@ -259,7 +302,7 @@ namespace Modules.History.ViewModels
 			}
 			else
 			{
-				OutputFileName = "<No Output>";
+				OutputFileName = "<出力なし>";
 				OutputFilePath = null; 
 			}
 

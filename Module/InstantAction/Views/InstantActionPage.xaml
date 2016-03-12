@@ -95,12 +95,13 @@
         <ScrollViewer >
 
 
-            <StackPanel Orientation="Vertical" Margin="16 0">
+            <DockPanel Margin="16 0">
 
-                <Border Height="{Binding ElementName=Header, Path=Height}" />
+                <Border Height="{Binding ElementName=Header, Path=Height}" DockPanel.Dock="Top" />
 
-                <Border Margin="32">
-                    <ContentControl Content="{Binding InstantActionVM.Value}">
+                <Border Margin="32" VerticalAlignment="Stretch">
+                    <ContentControl Content="{Binding InstantActionVM.Value}"
+                                    >
                         <ContentControl.ContentTemplate>
                             <DataTemplate>
 
@@ -125,16 +126,16 @@
                                     </Border>
 
                                     <ContentControl Content="{Binding}"
-                                        ContentTemplateSelector="{StaticResource actionInstantStepTemplateSelecter}"
-                                        Margin="0 0 0 16"
-                                        />
+                                                    ContentTemplateSelector="{StaticResource actionInstantStepTemplateSelecter}"
+                                                    Margin="0 0 0 16"
+                                                    />
 
                                 </DockPanel>
                             </DataTemplate>
                         </ContentControl.ContentTemplate>
                     </ContentControl>
                 </Border>
-            </StackPanel>
+            </DockPanel>
 
         </ScrollViewer>
         

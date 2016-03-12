@@ -14,6 +14,7 @@
         mc:Ignorable="d"
         prism:ViewModelLocator.AutoWireViewModel="True"
         Title="ReactiveFolder" 
+        Icon="/ReactiveFolder;component/Resources/Icon.ico"
         MinWidth="960"
         MinHeight="600"
         Width="960"
@@ -105,6 +106,7 @@
 
         <tb:TaskbarIcon 
             IconSource="/ReactiveFolder;component/Resources/icon.ico"
+            DoubleClickCommand="{Binding OpenWindowCommand}"
             >
             
             
@@ -120,8 +122,9 @@
                     <ContextMenu.Style>
                         <Style TargetType="ContextMenu"></Style>
                     </ContextMenu.Style>
-                    <MenuItem Header="Open Window" Command="{Binding OpenWindowCommand}" />
-                    <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}" />
+                    <MenuItem Header="ウィンドウを表示" Command="{Binding OpenWindowCommand}" />
+                    <Separator />
+                    <MenuItem Header="終了" Command="{Binding ExitApplicationCommand}" />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
 

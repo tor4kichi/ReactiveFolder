@@ -270,7 +270,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		public AppOutputOptionDeclaration AddOutputOptionDeclaration(string name)
 		{
 			var id = GetNextOptionDeclarationId();
-			var newOption = new AppOutputOptionDeclaration("Extention", id, FolderItemType.File);
+			var newOption = new AppOutputOptionDeclaration("OUT", id, FolderItemType.File);
 
 			newOption.Name = name;
 

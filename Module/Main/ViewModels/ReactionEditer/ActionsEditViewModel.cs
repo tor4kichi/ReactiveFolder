@@ -36,6 +36,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		/// </summary>
 		public ObservableCollection<AppLaunchActionViewModel> Actions { get; private set; }
 
+		public ReactiveProperty<bool> IsActionsEmpty { get; private set; }
 
 		public ActionsEditViewModel(FolderReactionModel reactionModel, PageManager pageManager, IAppPolicyManager appPolicyManager)
 			: base(pageManager, reactionModel)
@@ -73,6 +74,12 @@ namespace Modules.Main.ViewModels.ReactionEditer
 						Reaction.AddAction(reAdditem.Action);
 					}
 				});
+
+			IsActionsEmpty = Actions.ObserveProperty(x => x.Count)
+				.Select(x => x == 0)
+				.ToReactiveProperty();
+
+			IsActionsEmpty.Subscribe();
 		}
 
 

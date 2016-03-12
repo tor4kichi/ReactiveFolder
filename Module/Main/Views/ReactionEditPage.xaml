@@ -15,6 +15,12 @@
              d:DesignHeight="1200" d:DesignWidth="800"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
+
+    <UserControl.InputBindings>
+        <KeyBinding Key="S" Modifiers="Ctrl" 
+                    Command="{Binding SaveCommand}"
+                    />
+    </UserControl.InputBindings>
     <Grid
         >
         <materialDesign:ColorZone 
@@ -157,6 +163,7 @@
                                                                     DockPanel.Dock="Left"
                                                                     Margin="0 1"
                                                         Background="Transparent"
+                                                        
                                                                     >
 
                                                 <StackPanel.InputBindings>
@@ -187,6 +194,7 @@
                                                                     <DataTrigger.Setters>
                                                                         <Setter Property="Kind" Value="Alert"/>
                                                                         <Setter Property="Foreground" Value="Red"/>
+                                                                        <Setter Property="Cursor" Value="Help" />
                                                                     </DataTrigger.Setters>
                                                                 </DataTrigger>
                                                             </Style.Triggers>

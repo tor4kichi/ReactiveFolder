@@ -122,19 +122,13 @@
                                 <TextBlock TextWrapping="Wrap"
                                            Margin="0 8"
                                            >
-                                    <Run>フォルダにいれるだけで自動変換</Run>
+                                    <Run>コマンドラインアプリを簡単実行</Run>
                                 </TextBlock>
 
                                 <TextBlock TextWrapping="Wrap"
                                            Margin="0 8"
                                            >
-                                    <Run>フォルダにファイルやフォルダが追加されたことに反応してあなたが指定したアクションを自動で実行してくれるReactive（反応的）なフォルダを実現します。</Run>
-                                </TextBlock>
-
-                                <TextBlock TextWrapping="Wrap"
-                                           Margin="0 8"
-                                           >
-                                    <Run>外部アプリケーションの設定（Application Policy）を追加することで指定できるアクションは自由に拡張できます。</Run>
+                                    <Run>ReactiveFolderはコマンドラインアプリを事前定義することで「即時的なファイル変換作業」や「フォルダに投入されたファイルの自動変換」をサポートします。</Run>
                                 </TextBlock>
 
                                 <TextBlock Margin="0 8">
@@ -160,6 +154,68 @@
                                     <Run>Created by tor4kichi</Run>
                                 </TextBlock>
 
+
+
+                            </StackPanel>
+                        </DataTemplate>
+
+                        <DataTemplate DataType="{x:Type vm:HowUseTabViewModel}">
+                            <StackPanel Orientation="Vertical"  Margin="16" HorizontalAlignment="Center">
+
+                                <TextBlock Style="{StaticResource MaterialDesignDisplay1TextBlock}"
+                                           Margin="0 16"
+                                           >
+                                    アプリの使い方
+                                </TextBlock>
+                                
+
+                                <TextBlock Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                           Margin="0 8"
+                                           Foreground="{StaticResource PrimaryHueMidBrush}"
+                                           >
+                                    アプリの事前設定（App Policy）
+                                </TextBlock>
+                                <TextBlock Margin="32 8"
+                                           TextWrapping="Wrap"
+                                           >
+                                    <Run>まずはやりたいことに応じてコマンドラインアプリケーションを用意します。</Run>
+                                    <Run>そのアプリをReactiveFolderで使うために「App Policy」を設定してきます。</Run>
+                                    <Run>App Policyでは「アプリのファイルパス」「受付可能なファイル拡張子」「入力オプション設定」「出力オプション設定」「その他のオプション設定」を定義します。</Run>
+                                    <Run></Run>
+                                </TextBlock>
+
+                                <TextBlock Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                           Margin="0 8"
+                                           Foreground="{StaticResource PrimaryHueMidBrush}"
+                                           >
+                                    いますぐ変換作業をする（Instant Action）
+                                </TextBlock>
+
+                                <TextBlock Margin="32 8"
+                                           TextWrapping="Wrap"
+                                           >
+                                    
+                                    <Run>その場で変換作業をしたいときはInstant Actionをメニューから選択します。</Run>
+                                    <Run>Instant Actionは「ファイルの設定」「処理内容」「実行」の３ステップで行います。</Run>
+                                    <Run>ファイルをD＆D等で投げ込むとそのファイルの拡張子を処理できるアプリポリシーを使った処理を設定できます。</Run>
+                                    
+                                </TextBlock>
+
+                                <TextBlock Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                           Margin="0 8"
+                                           Foreground="{StaticResource PrimaryHueMidBrush}"
+                                           >
+                                    フォルダを指定してファイルの自動変換を設定する（Reaction）
+                                </TextBlock>
+
+                                <TextBlock Margin="32 8"
+                                           TextWrapping="Wrap"
+                                           >
+                                    
+                                    <Run>フォルダに投入されたアイテムを監視して自動で変換処理を実行させるにはReactionを設定します。</Run>
+                                    <Run>Reactionは「対象フォルダ」「入力ファイル名の規則」「処理内容」「出力先フォルダ」「ファイル名の変換規則（option）」を設定することで動作します。</Run>
+
+                                </TextBlock>
 
 
                             </StackPanel>

@@ -113,7 +113,7 @@ namespace Modules.AppPolicy.ViewModels
 						AppPolicyVM.RemoveDeclaration(this.Declaration);
 					}
 					, 
-					() => false == (Declaration is AppInputOptionDeclaration)
+					() => false == (Declaration is AppInputOptionDeclaration) 
 					));
 			}
 		}
@@ -195,7 +195,10 @@ namespace Modules.AppPolicy.ViewModels
 			switch (propType)
 			{
 				case AddableAppOptionPropertyType.StringList:
-					return new StringListOptionProperty(id, valiableName);
+					var stringListProp = new StringListOptionProperty(id, valiableName);
+					stringListProp.AddItem("No", "0");
+					stringListProp.AddItem("Yes", "1");
+					return stringListProp;
 				case AddableAppOptionPropertyType.Number:
 					return new NumberAppOptionProperty(id, valiableName);
 				case AddableAppOptionPropertyType.LimitedNumber:
