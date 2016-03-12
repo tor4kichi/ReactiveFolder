@@ -102,5 +102,23 @@ namespace ReactiveFolder.Models
 				.Reverse()
 				.ToList();
 		}
+
+		public void ClearHistory()
+		{
+			var files = GetHistoryDataFileList();
+
+			foreach (var file in files)
+			{
+				try
+				{
+					file.Delete();
+				}
+				catch (Exception e)
+				{
+					System.Diagnostics.Debug.WriteLine("Failed delete history file.");
+					System.Diagnostics.Debug.WriteLine(e.Message);
+				}
+			}
+		}
 	}
 }

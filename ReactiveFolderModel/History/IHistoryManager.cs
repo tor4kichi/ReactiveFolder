@@ -12,5 +12,6 @@ namespace ReactiveFolder.Models.History
 		List<FileInfo> GetHistoryDataFileList();
 		HistoryData LoadHistoryData(FileInfo fileInfo);
 		void SaveHistory(HistoryData historyData);
+		void ClearHistory();
 	}
 }

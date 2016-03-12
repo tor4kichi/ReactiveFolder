@@ -122,8 +122,9 @@
                     <ContextMenu.Style>
                         <Style TargetType="ContextMenu"></Style>
                     </ContextMenu.Style>
-                    <MenuItem Header="Open Window" Command="{Binding OpenWindowCommand}" />
-                    <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}" />
+                    <MenuItem Header="ウィンドウを表示" Command="{Binding OpenWindowCommand}" />
+                    <Separator />
+                    <MenuItem Header="終了" Command="{Binding ExitApplicationCommand}" />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
 
