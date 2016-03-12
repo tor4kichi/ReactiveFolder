@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:local="clr-namespace:Modules.AppPolicy.Views"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
@@ -14,12 +15,17 @@
              d:DesignHeight="600" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
-    <DockPanel>
-        
+    <UserControl.InputBindings>
+        <KeyBinding Key="S" Modifiers="Ctrl" 
+                    Command="{Binding SaveCommand}"
+                    />
+    </UserControl.InputBindings>
+    
+    <Grid MinWidth="400">
 
-        <DockPanel.Resources>
-            <BooleanToVisibilityConverter x:Key="BoolToVisiblity" />
 
+        <Grid.Resources>
+ 
             <DataTemplate x:Key="AppPolicyTemplate">
                 <StackPanel Orientation="Vertical" Grid.Row="1" Margin="16">
 
@@ -45,7 +51,7 @@
                         </DataTemplate>
                     </StackPanel.Resources>
 
-
+                    
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Display Name" 
                                    Style="{StaticResource ListSubheaderText}"
@@ -54,22 +60,85 @@
                             <TextBox Text="{Binding AppName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                      MinWidth="200"
                                      Margin="8 0"
-                                     />
+                                     >
+                            </TextBox>
                         </StackPanel>
                     </StackPanel>
+                    
+                    
                     
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Application Path" 
                                    Style="{StaticResource ListSubheaderText}"
                                    />
                         <DockPanel Margin="8 0">
+
                             <Button Content="Change"
                                     Command="{Binding ChangeApplicationPathCommand}"
-                                    DockPanel.Dock="Right"
+                                    DockPanel.Dock="Bottom"
+                                    HorizontalAlignment="Right"
+                                    Margin="0 8"
+                                    Width="200"
                                     />
+                            
+                            <materialDesign:PackIcon 
+                                    VerticalAlignment="Center"
+                                    Margin="8 0"
+                                    DockPanel.Dock="Left"
+                                    >
+                                
+                                <materialDesign:PackIcon.Style>
+                                    <Style TargetType="{x:Type materialDesign:PackIcon}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="NotSelected">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="InformationOutline"/>
+                                                    <Setter Property="ToolTip" Value="Select application" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="Missing">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="Alert"/>
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                    <Setter Property="ToolTip" Value="Missing application aile" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="NotAuthorized">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="Alert"/>
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                    <Setter Property="ToolTip" Value="Not authorized application" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="Ready">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="Check"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}"/>
+                                                    <Setter Property="ToolTip" Value="Ready to execute application" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding AppPathState.Value}" Value="{x:Null}">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Kind" Value="Check" />
+                                                    <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}"/>
+                                                    <Setter Property="ToolTip" Value="Ready to execute application" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+
+                                    </Style>
+                                </materialDesign:PackIcon.Style>
+
+                            </materialDesign:PackIcon>
+
+                            
                             <TextBlock Text="{Binding ApplicationPath.Value}" 
                                        VerticalAlignment="Center"
-                                                     />
+                                       TextWrapping="Wrap"
+                                                     >
+                            </TextBlock>
+                            
 
                         </DockPanel>
                     </StackPanel>
@@ -81,7 +150,7 @@
                                    />
 
                         <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
+                                    HorizontalAlignment="Right"
                                     >
                             <ComboBox ItemsSource="{x:Static vm:ApplicationPolicyViewModel.FolderItemTypes}"
                                       SelectedItem="{Binding InputPathType.Value, Mode=TwoWay}"
@@ -103,26 +172,8 @@
                     </StackPanel>
 
 
-                    <!-- 
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Default Option Text" 
-                                   Style="{StaticResource ListSubheaderText}"
-                                   />
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
-                            <TextBox Text="{Binding DefaultOptionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                     MinWidth="200"
-                                     materialDesign:TextFieldAssist.Hint="-i %IN% -o %OUT%"
-                                     ToolTip="%IN% %OUT%, both of replace to file/folder name, depends from IO Type settings."
-                                    DockPanel.Dock="Right"
-                                                     />
-                            
-                        </StackPanel>
-                        
-                    </StackPanel>
-                    -->
-
                     <StackPanel Orientation="Vertical" 
-                                Visibility="{Binding IsInputFile.Value, Converter={StaticResource BoolToVisiblity}}"
+                                Visibility="{Binding IsInputFile.Value, Converter={StaticResource BoolToVisibility}}"
                                 >
 
                         <TextBlock Text="Input Extentions"
@@ -137,6 +188,7 @@
                                     Text="{Binding ExtentionText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Width="200"
                                      Margin="8 0"
+                                     materialDesign:TextFieldAssist.Hint="ex) .png"
                                      >
                                 <TextBox.InputBindings>
                                     <KeyBinding Key="Return" Command="{Binding AddAcceptExtentionCommand}" />
@@ -146,13 +198,12 @@
                             <Button Content="Add"
                                     Command="{Binding AddAcceptExtentionCommand}"
                                     DockPanel.Dock="Right"
+                                    Width="100"
                                     />
 
 
 
                         </StackPanel>
-
-                        <!-- TODO: Extentionが追加されたときにアニメーションを実行する -->
                         
                         <ItemsControl ItemsSource="{Binding AcceptExtentions}">
                             <ItemsControl.ItemTemplate>
@@ -246,92 +297,93 @@
 
             </DataTemplate>
 
-        </DockPanel.Resources>
+        </Grid.Resources>
 
 
-        <!-- Top Buttons -->
-        <DockPanel DockPanel.Dock="Top">
+        <materialDesign:ColorZone 
+                        x:Name="Header"
+                        Mode="PrimaryDark"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                        Height="64"
+                        VerticalContentAlignment="Center"
+                        Panel.ZIndex="1"
+                        Margin="0 0 17 0"
+                        >
+            <materialDesign:ColorZone.Resources>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource AppbarText}" />
+                <Style TargetType="materialDesign:PackIcon" BasedOn="{StaticResource AppbarIcon}" />
+                <Style TargetType="TextBox" BasedOn="{StaticResource AppBarTextBox}">
+                </Style>
+            </materialDesign:ColorZone.Resources>
 
-            <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
-                                          Mode="PrimaryMid" DockPanel.Dock="Top">
+            <DockPanel 
+                        Margin="16 0"
+                        >
+                <Border DockPanel.Dock="Left">
+                    <Button Command="{Binding CloseSubContentCommand}" 
+                                Style="{StaticResource AppbarButton}"
+                                >
+                        <materialDesign:PackIcon Kind="Close" />
+                    </Button>
+                </Border>
 
-                <StackPanel>
-                    <DockPanel VerticalAlignment="Center" Margin="8" >
-
-                        <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
-                            Style="{StaticResource AppbarButton}"
+                <StackPanel Orientation="Horizontal"
+                            DockPanel.Dock="Right"
+                                Visibility="Visible"
                             >
-                            <materialDesign:PackIcon Kind="ArrowLeft"  />
-                        </Button>
-
-                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <Button Command="{Binding SaveCommand}"
+                    <Button Command="{Binding SaveCommand}"
                                     Style="{StaticResource AppbarButton}"
                                     >
-                                <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save" />
-                            </Button>
-
-                            <materialDesign:PopupBox 
-                                             PlacementMode="BottomAndAlignRightEdges">
-                                <StackPanel>
-                                    <Button Command="{Binding ExportCommand}">
-                                        <DockPanel>
-                                            <materialDesign:PackIcon Kind="Export" DockPanel.Dock="Left" />
-                                            <Border Margin="8 0 0 0" />
-                                            <TextBlock Text="Export" />
-                                        </DockPanel>
-                                    </Button>
-                                    <Button Command="{Binding DeleteCommand}">
-                                        <DockPanel>
-                                            <materialDesign:PackIcon Kind="Delete" DockPanel.Dock="Left" />
-                                            <Border Margin="8 0 0 0" />
-                                            <TextBlock Text="Delete" />
-                                        </DockPanel>
-                                    </Button>
-                                </StackPanel>
-                            </materialDesign:PopupBox>
-                        </StackPanel>
-
-                        <TextBlock Text="Edit Application Policy"
-                               FontSize="22"
-                               HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </DockPanel>
+                        <materialDesign:PackIcon Kind="ContentSave" ToolTip="Save" />
+                    </Button>
                 </StackPanel>
 
-            </materialDesign:ColorZone>
-        </DockPanel>
+                <Border Margin="16 0 0 0">
+                    <TextBlock Text="Edit AppPolicy"
+                                Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                VerticalAlignment="Center"
+                                />
+                </Border>
+            </DockPanel>
+
+
+
+        </materialDesign:ColorZone>
         
-        <Grid>
+        
             
             
 
-            <ScrollViewer HorizontalScrollBarVisibility="Hidden">
+        <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                      Background="{StaticResource SubContentBackground}"
+                      >
 
+            <StackPanel Orientation="Vertical">
+                    
+                <Border Height="{Binding ElementName=Header, Path=ActualHeight}" />
+                    
                 <ContentControl Content="{Binding AppPolicyVM.Value}"
                                 ContentTemplate="{StaticResource AppPolicyTemplate}"
                                 HorizontalContentAlignment="Stretch"
                                 VerticalContentAlignment="Stretch"
                                 >
                 </ContentControl>
-              
 
-
-               
-            </ScrollViewer>
-
-            <materialDesign:DialogHost Identifier="AppPolicyEditDialogHost"
-                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Margin="8 40"
-                                       Width="500"
-                                       >
-
+            </StackPanel>
                 
-            </materialDesign:DialogHost>
+                
+        </ScrollViewer>
 
-               
-             
-        </Grid>
-        
-       
-    </DockPanel>
+
+
+        <materialDesign:DialogHost Identifier="AppPolicyEditDialogHost"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Margin="8 40"
+                                           Width="500"
+                                           >
+        </materialDesign:DialogHost>
+
+
+
+    </Grid>
 </UserControl>

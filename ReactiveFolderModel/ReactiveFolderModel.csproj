@@ -140,6 +140,7 @@
     <Compile Include="Actions\ReactiveActionBase.cs" />
     <Compile Include="AppPolicy\AppOptionDeclaration.cs" />
     <Compile Include="AppPolicy\AppOptionInstanceHelper.cs" />
+    <Compile Include="AppPolicy\AppPolicySecurity.cs" />
     <Compile Include="AppPolicy\IAppPolicyManager.cs" />
     <Compile Include="Destinations\AbsolutePathReactiveDestination.cs" />
     <Compile Include="Destinations\ChildReactiveDestination.cs" />
@@ -151,7 +152,11 @@
     <Compile Include="Filters\ReactiveFilterHelper.cs" />
     <Compile Include="FolderModel.cs" />
     <Compile Include="FolderReactionModel.cs" />
+    <Compile Include="History\HistoryData.cs" />
+    <Compile Include="History\HistoryDataByFile.cs" />
+    <Compile Include="History\IHistoryManager.cs" />
     <Compile Include="IFolderReactionMonitorModel.cs" />
+    <Compile Include="InstantActionModel.cs" />
     <Compile Include="IReactiveFolderSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReactiveStreamContext.cs" />

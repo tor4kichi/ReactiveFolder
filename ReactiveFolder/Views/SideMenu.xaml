@@ -10,52 +10,96 @@
              xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="600"
+             d:DesignHeight="500" d:DesignWidth="240"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
-    <Grid Background="{StaticResource PrimaryHueDarkForegroundBrush}" 
-          HorizontalAlignment="Stretch"
-          VerticalAlignment="Stretch"
-         Width="300"
-          >
-        <StackPanel Orientation="Vertical">
 
-            <Grid Height="48">
-                <TextBlock 
-                HorizontalAlignment="Center" VerticalAlignment="Center">
-                ReactiveFolder
-                </TextBlock>
-            </Grid>
+    <UserControl.Resources>
+        <DataTemplate x:Key="MenuContentTemplate">
+            <Border x:Name="Border" Margin="16 8" HorizontalAlignment="Stretch">
+                <Button Command="{Binding MenuItemSelectedCommand}"
+                        x:Name="MenuButton"
+                        Foreground="Gray"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        HorizontalContentAlignment="Left"
+                        >
+                    <DockPanel >
+                        <materialDesign:PackIcon Kind="{Binding Kind, Mode=OneTime}"
+                                             Width="24"
+                                             Height="24"
+                                             DockPanel.Dock="Left"
+                                             />
 
-            <Border Grid.Column="1" Grid.Row="2" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource MaterialDesignDivider}" Margin="0 0 0 0" />
-
-            <ItemsControl ItemsSource="{x:Static vm:SideMenuViewModel.MenuItems}"
-                           Margin="32 8"
-                          >
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button
-                            Style="{StaticResource MaterialDesignFlatButton}"
-                            HorizontalAlignment="Left"
-                             >
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="PreviewMouseUp">
-                                    <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ItemsControl}, Path=DataContext.MenuItemSelectedCommand}"
-                                                           CommandParameter="{Binding Title}"
-                                                           />
-                                    <i:InvokeCommandAction Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Title}" />
-                            </StackPanel>
-
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                        <Border Margin="32 0 0 0" />
+                        
+                        <TextBlock Text="{Binding Title}"
+                                   VerticalAlignment="Center"
+                                   />
+                    </DockPanel>
+                </Button>
+            </Border>
             
-        </StackPanel>
-    </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter TargetName="MenuButton" Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+            
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Border Width="240">
+        <materialDesign:ColorZone Mode="Standard"
+                                  materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                                  VerticalContentAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  >
+
+            <DockPanel>
+
+                <DockPanel DockPanel.Dock="Top"
+                            Height="128"
+                            Margin="32 0"
+                    >
+                    <Border DockPanel.Dock="Bottom"
+                           
+                            
+                            >
+                        <TextBlock Text="ReactiveFolder" 
+                                   Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                   Margin="0 32"
+                                   />
+
+                    </Border>
+
+
+                    <Border />
+                </DockPanel>
+
+                <Border BorderThickness="0 1 0 0"
+                            BorderBrush="{StaticResource MaterialDesignDivider}" 
+                        DockPanel.Dock="Top"
+                            />
+
+
+                <StackPanel Orientation="Vertical">
+                    <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Auto"
+                                  >
+                        <ItemsControl ItemsSource="{Binding MenuItems}"
+                              ItemTemplate="{StaticResource MenuContentTemplate}"
+                              Margin="0 8"
+                              >
+                        </ItemsControl>
+
+                    </ScrollViewer>
+                </StackPanel>
+
+                <Border />
+
+
+            </DockPanel>
+        </materialDesign:ColorZone>
+    </Border>
 </UserControl>

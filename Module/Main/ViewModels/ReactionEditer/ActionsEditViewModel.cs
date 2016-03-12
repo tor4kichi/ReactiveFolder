@@ -6,6 +6,9 @@ using Reactive.Bindings.Extensions;
 using ReactiveFolder.Models;
 using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.AppPolicy;
+using ReactiveFolder.Models.Util;
+using ReactiveFolderStyles.DialogContent;
+using ReactiveFolderStyles.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -33,9 +36,10 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		/// </summary>
 		public ObservableCollection<AppLaunchActionViewModel> Actions { get; private set; }
 
+		public ReactiveProperty<bool> IsActionsEmpty { get; private set; }
 
-		public ActionsEditViewModel(FolderReactionModel reactionModel, IAppPolicyManager appPolicyManager)
-			: base(reactionModel)
+		public ActionsEditViewModel(FolderReactionModel reactionModel, PageManager pageManager, IAppPolicyManager appPolicyManager)
+			: base(pageManager, reactionModel)
 		{
 			_AppPolicyManager = appPolicyManager;
 
@@ -51,8 +55,7 @@ namespace Modules.Main.ViewModels.ReactionEditer
 					x =>
 					{
 						var appLaunchAction = x as AppLaunchReactiveAction;
-						var optionInstance = appLaunchAction.AdditionalOptions[0];
-						return new AppLaunchActionViewModel(this, Reaction, appLaunchAction, optionInstance);
+						return new AppLaunchActionViewModel(this, Reaction, appLaunchAction);
 					}
 					)
 				);
@@ -71,12 +74,25 @@ namespace Modules.Main.ViewModels.ReactionEditer
 						Reaction.AddAction(reAdditem.Action);
 					}
 				});
+
+			IsActionsEmpty = Actions.ObserveProperty(x => x.Count)
+				.Select(x => x == 0)
+				.ToReactiveProperty();
+
+			IsActionsEmpty.Subscribe();
 		}
 
 
-		public async Task<object> ShowSelectAppOptionDialog(AppOptionSelectDialogViewModel vm)
+		protected override IEnumerable<string> GetValidateError()
+		{
+			ValidationResult validateResult = Reaction.ValidateActions();
+			return validateResult.Messages;
+		}
+
+
+		public async Task<object> ShowSelectAppOptionDialog(AppPolicySelectDialogContentViewModel vm)
 		{ 
-			var view = new Views.DialogContent.AppOptionSelectDialogContent()
+			var view = new AppPolicySelectDialogContent()
 			{
 				DataContext = vm
 			};
@@ -85,26 +101,28 @@ namespace Modules.Main.ViewModels.ReactionEditer
 		}
 
 
-		private DelegateCommand _SelectAppOptionCommand;
-		public DelegateCommand SelectAppOptionCommand
+		private DelegateCommand _SelectApplicationCommand;
+		public DelegateCommand SelectApplicationCommand
 		{
 			get
 			{
-				return _SelectAppOptionCommand
-					?? (_SelectAppOptionCommand = new DelegateCommand(async () =>
+				return _SelectApplicationCommand
+					?? (_SelectApplicationCommand = new DelegateCommand(async () =>
 					{
-						var dialogVM = new AppOptionSelectDialogViewModel(_AppPolicyManager);
+						var items = _AppPolicyManager.Policies.Select(x => new AppPolicySelectItem()
+						{
+							AppName = x.AppName,
+							AppGuid = x.Guid
+						});
+
+						var dialogVM = new AppPolicySelectDialogContentViewModel(items);
 
 						var result = await ShowSelectAppOptionDialog(dialogVM);
 						if (result != null && ((bool)result) == true)
 						{
-							var opt = dialogVM.SelectedOption.Value;
-
 							var actionModel = new AppLaunchReactiveAction();
-							actionModel.AppGuid = opt.AppPolicy.Guid;
+							actionModel.AppGuid = dialogVM.SelectedItem.AppGuid;
 
-							var optionInstance = opt.Declaration.CreateInstance();
-							actionModel.AddAppOptionInstance(optionInstance);
 
 
 
@@ -113,8 +131,9 @@ namespace Modules.Main.ViewModels.ReactionEditer
 							// VM上のコレクション操作によってActions.CollectionChangedAsObservableが反応して、
 							// VM→モデルへとコレクションの状態が同期される
 
-							var actionVM = new AppLaunchActionViewModel(this, Reaction, actionModel, optionInstance);
+							var actionVM = new AppLaunchActionViewModel(this, Reaction, actionModel);
 							Actions.Add(actionVM);
+
 						}
 
 					}));

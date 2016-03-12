@@ -2,6 +2,8 @@
 using Prism.Mvvm;
 using Prism.Regions;
 using Reactive.Bindings;
+using ReactiveFolderStyles.Models;
+using ReactiveFolderStyles.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,26 +12,25 @@ using System.Threading.Tasks;
 
 namespace Modules.About.ViewModels
 {
-	public class AboutPageViewModel : BindableBase, INavigationAware
+	public class AboutPageViewModel : PageViewModelBase
 	{
-		public IRegionManager _RegionManager;
-		public IRegionNavigationService NavigationService;
-
 		public List<TabViewModelBase> Tabs { get; private set; }
 
 		public ReactiveProperty<TabViewModelBase> SelectedTab { get; private set; }
 
 
 
-		public AboutPageViewModel(IRegionManager regionManagar)
+		public AboutPageViewModel(PageManager pageManager)
+			: base(pageManager)
 		{
-			_RegionManager = regionManagar;
 
 			Tabs = new List<TabViewModelBase>();
 
 			var aboutTabVM = new AboutTabViewModel();
+			var howUseTabVM = new HowUseTabViewModel();
 			var lisenceTabVM = new LisenceTabViewModel();
 			Tabs.Add(aboutTabVM);
+			Tabs.Add(howUseTabVM);
 			Tabs.Add(lisenceTabVM);
 
 
@@ -39,41 +40,11 @@ namespace Modules.About.ViewModels
 		}
 
 
-
-
-
-
-		private DelegateCommand _BackCommand;
-		public DelegateCommand BackCommand
+		public override void OnNavigatedTo(NavigationContext navigationContext)
 		{
-			get
-			{
-				return _BackCommand
-					?? (_BackCommand = new DelegateCommand(() =>
-					{
-						if (NavigationService.Journal.CanGoBack)
-						{
-							NavigationService.Journal.GoBack();
-						}
-						else
-						{
-							_RegionManager.RequestNavigate("MainRegion", "FolderListPage");
-						}
-					}));
-			}
 		}
 
-		public void OnNavigatedTo(NavigationContext navigationContext)
-		{
-			NavigationService = navigationContext.NavigationService;
-		}
-
-		public bool IsNavigationTarget(NavigationContext navigationContext)
-		{
-			return true;
-		}
-
-		public void OnNavigatedFrom(NavigationContext navigationContext)
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
 		{
 			// nothing do.
 		}
@@ -84,17 +55,25 @@ namespace Modules.About.ViewModels
 		abstract public string Title { get; }
 	}
 
+	
 
 	public class AboutTabViewModel : TabViewModelBase
 	{
 
-		public override string Title { get; } = "What's this?";
+		public override string Title { get; } = "ReactiveFolder ?";
 	}
+
+	public class HowUseTabViewModel : TabViewModelBase
+	{
+
+		public override string Title { get; } = "使い方";
+	}
+
 
 
 	public class LisenceTabViewModel : TabViewModelBase
 	{
-		public override string Title { get; } = "Using Library's";
+		public override string Title { get; } = "利用ライブラリ";
 
 
 		public List<LibraryItem> Libraries { get; private set; }
@@ -145,7 +124,16 @@ namespace Modules.About.ViewModels
 					AuthorName = "Newtonsoft",
 					LisenceTypeName = LisenceType.MIT.LisenceTypeToName(),
 					SiteUri = "http://www.newtonsoft.com/json"
-				}
+				},
+				new LibraryItem()
+				{
+					LibraryName = "ToastNotifications",
+					AuthorName = "Rafał Łopatka",
+					LisenceTypeName = LisenceType.MIT.LisenceTypeToName(),
+					SiteUri = "https://github.com/raflop/ToastNotifications"
+				},
+
+				
 			};
 
 			// ライブラリ名でソート

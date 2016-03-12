@@ -18,8 +18,9 @@
 
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
+    <SolidColorBrush x:Key="SubContentBackground" Color="#FFF0F0F0" />
 
-    
+
     <!-- アプリバー -->
     <Style x:Key="AppbarButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
         <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
@@ -33,6 +34,9 @@
     </Style>
     <Style x:Key="AppbarText" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignHeadlineTextBlock}" >
         <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidForegroundBrush}" />
+    </Style>
+    <Style x:Key="AppBarTextBox" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}" >
+        
     </Style>
 
     <Style x:Key="Appbar" TargetType="Grid">
@@ -107,7 +111,7 @@
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="Foreground" Value="Black" />
-        <Setter Property="Margin" Value="0 0 0 8" />
+        <Setter Property="Margin" Value="0 0 0 0" />
         <Setter Property="Padding" Value="0" />
     </Style>
 

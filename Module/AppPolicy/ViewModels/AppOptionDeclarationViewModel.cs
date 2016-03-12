@@ -33,8 +33,7 @@ namespace Modules.AppPolicy.ViewModels
 
 		public List<AddablePropertyListItem> AddableProperties { get; private set; }
 
-		public bool IsDisplayOptionTextPattern { get; private set; }
-		public bool IsDisplayProperty { get; private set; }
+		public bool CanAddProperty { get; private set; }
 
 		public AppOptionDeclarationViewModel(ApplicationPolicyViewModel appPolicyVM, AppOptionDeclarationBase decl)
 		{
@@ -86,8 +85,7 @@ namespace Modules.AppPolicy.ViewModels
 
 
 			var isInputOption = decl is AppInputOptionDeclaration;
-			IsDisplayOptionTextPattern = !isInputOption;
-			IsDisplayProperty = !isInputOption;
+			CanAddProperty = !isInputOption;
 		}
 
 		private DelegateCommand _EditDeclarationCommand;
@@ -115,7 +113,7 @@ namespace Modules.AppPolicy.ViewModels
 						AppPolicyVM.RemoveDeclaration(this.Declaration);
 					}
 					, 
-					() => false == (Declaration is AppInputOptionDeclaration)
+					() => false == (Declaration is AppInputOptionDeclaration) 
 					));
 			}
 		}
@@ -144,7 +142,7 @@ namespace Modules.AppPolicy.ViewModels
 			if (Declaration is AppOptionDeclaration)
 			{
 				(Declaration as AppOptionDeclaration)
-					.AddProperty(propertyType.ToOptionProperty("name"));
+					.AddProperty(id => propertyType.ToOptionProperty(id, "name"));
 			}
 		}
 	}
@@ -192,18 +190,21 @@ namespace Modules.AppPolicy.ViewModels
 
 	public static class AddableAppOptionPropertyTypeHelper
 	{
-		public static AppOptionProperty ToOptionProperty(this AddableAppOptionPropertyType propType, string valiableName)
+		public static AppOptionProperty ToOptionProperty(this AddableAppOptionPropertyType propType, int id, string valiableName)
 		{
 			switch (propType)
 			{
 				case AddableAppOptionPropertyType.StringList:
-					return new StringListOptionProperty(valiableName);
+					var stringListProp = new StringListOptionProperty(id, valiableName);
+					stringListProp.AddItem("No", "0");
+					stringListProp.AddItem("Yes", "1");
+					return stringListProp;
 				case AddableAppOptionPropertyType.Number:
-					return new NumberAppOptionProperty(valiableName);
+					return new NumberAppOptionProperty(id, valiableName);
 				case AddableAppOptionPropertyType.LimitedNumber:
-					return new LimitedNumberAppOptionProerty(valiableName);
+					return new LimitedNumberAppOptionProerty(id, valiableName);
 				case AddableAppOptionPropertyType.RangeNumber:
-					return new RangeNumberAppOptionProperty(valiableName);
+					return new RangeNumberAppOptionProperty(id, valiableName);
 				default:
 					throw new NotSupportedException();
 			}

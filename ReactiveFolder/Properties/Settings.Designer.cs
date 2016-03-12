@@ -46,5 +46,17 @@ namespace ReactiveFolder.Properties {
                 this["DefaultMonitorIntervalSeconds"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int HistoryAvailableStorageSizeMB {
+            get {
+                return ((int)(this["HistoryAvailableStorageSizeMB"]));
+            }
+            set {
+                this["HistoryAvailableStorageSizeMB"] = value;
+            }
+        }
     }
 }

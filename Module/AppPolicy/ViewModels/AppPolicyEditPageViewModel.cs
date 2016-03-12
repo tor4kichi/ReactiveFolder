@@ -17,285 +17,94 @@ using ReactiveFolder.Models.Util;
 using Microsoft.Win32;
 using ReactiveFolderStyles.DialogContent;
 using System.Reactive.Disposables;
+using ReactiveFolderStyles.ViewModels;
+using ReactiveFolderStyles.Models;
 
 namespace Modules.AppPolicy.ViewModels
 {
-	public class AppPolicyEditPageViewModel : PageViewModelBase, INavigationAware, IDisposable
+	public class AppPolicyEditPageViewModel : PageViewModelBase, IDisposable
 	{
-		public IRegionNavigationService NavigationService;
+		public IAppPolicyManager AppPolicyManager { get; private set; }
 
-		public ApplicationPolicy AppPolicy { get; private set; }
 		public ReactiveProperty<ApplicationPolicyViewModel> AppPolicyVM { get; private set; }
 
 
 		public string RollbackData { get; private set; }
 
 
-		public ReactiveProperty<bool> IsNeedSave { get; private set; }
-
-		private IDisposable CanSaveSubscriber;
-
-		public AppPolicyEditPageViewModel(IRegionManager regionManager, IAppPolicyManager appPolicyManager)
-			: base(regionManager, appPolicyManager)
+		public AppPolicyEditPageViewModel(PageManager pageManager, IAppPolicyManager appPolicyManager)
+			: base(pageManager)
 		{
+			AppPolicyManager = appPolicyManager;
 			AppPolicyVM = new ReactiveProperty<ApplicationPolicyViewModel>();
-			IsNeedSave = new ReactiveProperty<bool>(false);
 
-			SaveCommand = IsNeedSave.ToReactiveCommand(false);
+			SaveCommand = new ReactiveCommand();
 
 			SaveCommand.Subscribe(_ => Save());
+
+			
 		}
 
 
 		public void Dispose()
 		{
 			AppPolicyVM?.Dispose();
-			IsNeedSave?.Dispose();
-			CanSaveSubscriber?.Dispose();
 			SaveCommand?.Dispose();
 		}
 
-		public bool IsNavigationTarget(NavigationContext navigationContext)
-		{
-			return true;
-		}
 
-		public void OnNavigatedFrom(NavigationContext navigationContext)
-		{
-			// nothing to do.
-		}
-
-		public void OnNavigatedTo(NavigationContext navigationContext)
-		{
-			NavigationService = navigationContext.NavigationService;
-
-			try
-			{
-				AppPolicyVM.Value?.Dispose();
-				CanSaveSubscriber?.Dispose();
-
-
-				var policy = base.ApplicationPolicyFromNavigationParameters(navigationContext.Parameters);
-
-				AppPolicy = policy;
-				AppPolicyVM.Value = new ApplicationPolicyViewModel(policy);
-
-				BackupAppPolicyModel();
-
-				IsNeedSave.Value = false;
-
-				CanSaveSubscriber = Observable.Merge(
-						AppPolicy.PropertyChangedAsObservable().ToUnit(),
-						AppPolicy.AcceptExtentions.CollectionChangedAsObservable().ToUnit(),
-						AppPolicy.OptionDeclarations.CollectionChangedAsObservable().ToUnit(),
-						AppPolicy.OptionDeclarations.ObserveElementPropertyChanged().ToUnit()
-					)
-					.Subscribe(_ =>
-					{
-						IsNeedSave.Value = true;
-					});
-			}
-			catch
-			{
-				NavigationService.Journal.GoBack();
-			}
-		}
-
-
-
-		private void BackupAppPolicyModel()
-		{
-			RollbackData = FileSerializeHelper.ToJson(AppPolicy);
-		}
-
-		private void RollbackAppPolicyModel()
-		{
-			var prevModel = FileSerializeHelper.FromJson<ApplicationPolicy>(RollbackData);
-
-			AppPolicy.RollbackFrom(prevModel);
-
-			IsNeedSave.Value = false;
-		}
-
-
-		private DelegateCommand _BackCommand;
-		public DelegateCommand BackCommand
+		public ApplicationPolicy AppPolicy
 		{
 			get
 			{
-				return _BackCommand
-					?? (_BackCommand = new DelegateCommand(async () =>
-					{
-						if (IsNeedSave.Value)
-						{
-							var result = await ShowAppPolicySaveAndBackConfirmDialog();
-
-							if (result.HasValue == false)
-							{
-								// キャンセル
-							}
-							else if (result.Value == true)
-							{
-								// 保存して戻る
-								Save();
-								Back();
-							}
-							else if (result.Value == false)
-							{
-								// 保存せずに戻る
-
-								// ロールバックして戻る
-								RollbackAppPolicyModel();
-								Back();
-							}
-						}
-						else
-						{
-							Back();
-						}
-
-					}));
-			}
-		}
-
-
-		private void Back()
-		{
-			if (NavigationService.Journal.CanGoBack)
-			{
-				NavigationService.Journal.GoBack();
-			}
-			else
-			{
-				_RegionManager.RequestNavigate("MainRegion", "FolderListPage");
+				return AppPolicyVM.Value?.AppPolicy;
 			}
 		}
 
 
 		public ReactiveCommand SaveCommand { get; private set; }
 
-		private void Save()
+		internal void Save()
 		{
-			IsNeedSave.Value = false;
-
 			try
 			{
-				_AppPolicyManager.SavePolicyFile(this.AppPolicy);	
+				AppPolicyManager.SavePolicyFile(this.AppPolicy);
+				PageManager.ShowInformation( $"{AppPolicy.AppName} Saved");
 			}
 			catch
 			{
-				IsNeedSave.Value = true;
-			}
-
-			BackupAppPolicyModel();
-		}
-
-
-		private DelegateCommand _ExportCommand;
-		public DelegateCommand ExportCommand
-		{
-			get
-			{
-				return _ExportCommand
-					?? (_ExportCommand = new DelegateCommand(() =>
-					{
-						var appPolicy = this.AppPolicyVM.Value.AppPolicy;
-						// 出力先のファイル名を取得
-						var dialog = new SaveFileDialog();
-
-						dialog.Title = "ReactiveFolder - select export application policy file";
-						dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
-						dialog.AddExtension = true;
-						dialog.FileName = appPolicy.AppName;
-						dialog.Filter = $"App Policy|*{_AppPolicyManager.PolicyFileExtention}|Json|*.json|All|*.*";
-						dialog.DefaultExt = _AppPolicyManager.PolicyFileExtention;
-
-
-						var result = dialog.ShowDialog();
-
-
-						if (result != null && ((bool)result) == true)
-						{
-							var destFilePath = dialog.FileName;
-							var destFileInfo = new FileInfo(destFilePath);
-
-							var sourceFilePath = _AppPolicyManager.GetSaveFilePath(appPolicy);
-
-							var sourceFileInfo = new FileInfo(sourceFilePath);
-
-							
-							try
-							{
-								if (destFileInfo.Exists)
-								{
-									destFileInfo.Delete();
-								}
-
-								sourceFileInfo.CopyTo(destFilePath);
-							}
-							catch
-							{
-								System.Diagnostics.Debug.WriteLine("failed export Application Policy.");
-								System.Diagnostics.Debug.WriteLine("from :" + sourceFilePath);
-								System.Diagnostics.Debug.WriteLine("  to :" + destFilePath);
-							}
-						}
-						
-
-
-						// 
-					}));
+				PageManager.ShowError($"{AppPolicy.AppName} Save failed.");
 			}
 		}
 
-
-
-
-		private DelegateCommand _DeleteCommand;
-		public DelegateCommand DeleteCommand
+		public override void OnNavigatedTo(NavigationContext navigationContext)
 		{
-			get
+			PageManager.IsOpenSubContent = false;
+
+			if (navigationContext.Parameters.Count() > 0)
 			{
-				return _DeleteCommand
-					?? (_DeleteCommand = new DelegateCommand(async () =>
-					{
-						var result = await ShowAppPolicyDeleteConfirmDialog();
-
-						if (result != null && ((bool)result) == true)
-						{
-							_AppPolicyManager.RemoveAppPolicy(this.AppPolicyVM.Value.AppPolicy);
-
-							NavigationService.Journal.GoBack();
-						}
-					}));
-			}
-		}
-
-		
-		public async Task<bool?> ShowAppPolicySaveAndBackConfirmDialog()
-		{
-			var view = new SaveAndBackConfirmDialogContent();
-
-			return (bool?)await DialogHost.Show(view, "AppPolicyEditDialogHost");
-		}
-
-		public async Task<bool?> ShowAppPolicyDeleteConfirmDialog()
-		{
-			var view = new DeleteConfirmDialogContent()
-			{
-				DataContext = new DeleteConfirmDialogContentViewModel()
+				if (navigationContext.Parameters.Any(x => x.Key == "guid"))
 				{
-					Title = "Delete AppPolicy?"
+					try
+					{
+						var appPolicyGuid = (Guid)navigationContext.Parameters["guid"];
+
+						AppPolicyVM.Value = new ApplicationPolicyViewModel(this, AppPolicyManager, AppPolicyManager.FromAppGuid(appPolicyGuid));
+
+						PageManager.IsOpenSubContent = true;
+					}
+					catch
+					{
+						Console.WriteLine("FolderReactionManagePage: パラメータが不正です。存在するReactionのGuidを指定してください。");
+					}
 				}
-			};
-
-
-
-			return (bool?)await DialogHost.Show(view, "AppPolicyEditDialogHost");
+			}
 		}
 
-		
+		public override void OnNavigatedFrom(NavigationContext navigationContext)
+		{
+			
+		}
 	}
 
 
@@ -305,6 +114,8 @@ namespace Modules.AppPolicy.ViewModels
 
 		private CompositeDisposable _CompositeDisposable;
 
+		public AppPolicyEditPageViewModel EditPageVM { get; private set; }
+		public IAppPolicyManager AppPolicyManager { get; private set; }
 		public ApplicationPolicy AppPolicy { get; private set; }
 
 		public ReactiveProperty<string> ApplicationPath { get; private set; }
@@ -331,8 +142,13 @@ namespace Modules.AppPolicy.ViewModels
 		public ReadOnlyReactiveCollection<AppOptionDeclarationViewModel> OptionDeclarations { get; private set; }
 
 
-		public ApplicationPolicyViewModel(ApplicationPolicy appPolicy)
+		public ReactiveProperty<ApplicationPathState> AppPathState { get; private set; }
+
+
+		public ApplicationPolicyViewModel(AppPolicyEditPageViewModel editPageVM, IAppPolicyManager manager, ApplicationPolicy appPolicy)
 		{
+			EditPageVM = editPageVM;
+			AppPolicyManager = manager;
 			AppPolicy = appPolicy;
 
 			_CompositeDisposable = new CompositeDisposable();
@@ -389,7 +205,34 @@ namespace Modules.AppPolicy.ViewModels
 				)
 				.AddTo(_CompositeDisposable);
 
+			AppPathState = Observable.Merge(
+					AppPolicyManager.Security.AppAuthoricationList.CollectionChangedAsObservable()
+						.Where(x => AppPolicyManager.Security.IsAuthorized(AppPolicy.ApplicationPath)).ToUnit(),
+					AppPolicy.ObserveProperty(x => x.ApplicationPath).ToUnit()
+					)
+					.Select(x => 
+					{
+						if (String.IsNullOrEmpty(AppPolicy.ApplicationPath))
+						{
+							return ApplicationPathState.NotSelected;
+						}
+						else if (false == File.Exists(AppPolicy.ApplicationPath))
+						{
+							return ApplicationPathState.Missing;
+						}
+						else if (false == AppPolicyManager.Security.IsAuthorized(AppPolicy.ApplicationPath))
+						{
+							return ApplicationPathState.NotAuthorized;
+						}
+						else
+						{
+							return ApplicationPathState.Ready;
+						}
+					})
+				.ToReactiveProperty();
 
+			AppPathState.Subscribe()
+				.AddTo(_CompositeDisposable);
 		}
 
 
@@ -411,7 +254,10 @@ namespace Modules.AppPolicy.ViewModels
 
 						if (result != null && ((bool)result) == true)
 						{
+							AppPolicyManager.Security.AuthorizeApplication(dialog.FileName);
+
 							AppPolicy.ApplicationPath = dialog.FileName;
+							EditPageVM.SaveCommand.Execute();
 						}
 					}));
 			}
@@ -505,13 +351,13 @@ namespace Modules.AppPolicy.ViewModels
 		internal void RemoveDeclaration(AppOptionDeclarationBase declaration)
 		{
 			// TODO: AppOptionDeclarationの削除確認ダイアログの表示
-			if (declaration is AppOptionDeclaration)
+			if (declaration is AppOutputOptionDeclaration)
+			{
+				AppPolicy.RemoveOutputOptionDeclaration(declaration as AppOutputOptionDeclaration);
+			}
+			else if (declaration is AppOptionDeclaration)
 			{
 				AppPolicy.RemoveOptionDeclaration(declaration as AppOptionDeclaration);
-			}
-			else if (declaration is AppOutputOptionDeclaration)
-			{
-				AppPolicy.RemoveOptionDeclaration(declaration as AppOutputOptionDeclaration);
 			}
 			else
 			{
@@ -529,7 +375,13 @@ namespace Modules.AppPolicy.ViewModels
 
 
 
-	
+	public enum ApplicationPathState
+	{
+		NotSelected,
+		Missing,
+		NotAuthorized,
+		Ready,
+	}
 
 
 

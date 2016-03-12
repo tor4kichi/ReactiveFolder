@@ -118,6 +118,10 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="ToastNotifications, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ToastNotifications.1.0.0.0\lib\net40\ToastNotifications.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -145,9 +149,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="ViewModels\FolderListItemViewModel.cs" />
-    <Compile Include="ViewModels\FolderListPageViewModel.cs" />
-    <Compile Include="ViewModels\PageViewModelBase.cs" />
-    <Compile Include="ViewModels\ReactionEditerPageViewModel.cs" />
+    <Compile Include="ViewModels\FolderReactionManagePageViewModel.cs" />
+    <Compile Include="ViewModels\ReactionEditPageViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\ActionsEditViewModel.cs" />
     <Compile Include="ViewModels\ReactionEditer\ActionViewModelBase.cs" />
     <Compile Include="ViewModels\ReactionEditer\AppLaunchActionViewModel.cs" />
@@ -177,11 +180,11 @@
     <Compile Include="Views\ReactionEditer\FilterEditControl.xaml.cs">
       <DependentUpon>FilterEditControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\FolderListPage.xaml.cs">
-      <DependentUpon>FolderListPage.xaml</DependentUpon>
+    <Compile Include="Views\FolderReactionManagePage.xaml.cs">
+      <DependentUpon>FolderReactionManagePage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ReactionEditerPage.xaml.cs">
-      <DependentUpon>ReactionEditerPage.xaml</DependentUpon>
+    <Compile Include="Views\ReactionEditPage.xaml.cs">
+      <DependentUpon>ReactionEditPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ReactionEditer\WorkFolderEditControl.xaml.cs">
       <DependentUpon>WorkFolderEditControl.xaml</DependentUpon>
@@ -231,11 +234,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\FolderListPage.xaml">
+    <Page Include="Views\FolderReactionManagePage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\ReactionEditerPage.xaml">
+    <Page Include="Views\ReactionEditPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -8,6 +8,7 @@
              xmlns:vm="clr-namespace:Modules.Main.ViewModels"
              xmlns:editervm="clr-namespace:Modules.Main.ViewModels.ReactionEditer"
              xmlns:editerView="clr-namespace:Modules.Main.Views.ReactionEditer"
+             xmlns:commonvm="clr-namespace:ReactiveFolderStyles.ViewModels;assembly=ReactiveFolderStyles"
              xmlns:prism="http://prismlibrary.com/"             
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:dd="clr-namespace:WPFBehaviorLibrary.DragDropBehavior;assembly=WPFBehaviorLibrary"
@@ -17,170 +18,78 @@
 
     <UserControl.Resources>
 
-        <DataTemplate DataType="{x:Type editervm:InputOptionValueViewModel}">
-            <TextBlock Text="Input" />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type editervm:OutputOptionValueViewModel}">
-            <TextBlock Text="Output" />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:FileOutputOptionValueViewModel}">
-            <DockPanel>
-                <TextBlock Text="{Binding Extention}"
-                           HorizontalAlignment="Right"
-                           />
-
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:StringListOptionValueViewModel}">
-            <DockPanel>
-                <ComboBox ItemsSource="{Binding List}"
-                      SelectedIndex="{Binding SelectedValue.Value}"
-                      Width="200"
-                      HorizontalAlignment="Right"
-                      
-                      >
-                </ComboBox>
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:NumberOptionValueViewModel}">
-            <DockPanel>
-                <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                     Width="200"
-                     HorizontalAlignment="Right"
-                     mybehavior:TextBoxHelper.IsNumeric="True"
-                     />
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:LimitedNumberOptionValueViewModel}">
-            <DockPanel>
-                <TextBox Text="{Binding NumberText.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                     Width="200"
-                     HorizontalAlignment="Right"
-                     mybehavior:TextBoxHelper.IsNumeric="True"
-                     />
-
-            </DockPanel>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type editervm:RangeNumberOptionValueViewModel}">
-
-            <StackPanel 
-                Orientation="Horizontal"
-                HorizontalAlignment="Right"
-                >
-
-                <TextBlock Text="{Binding CurrentValue.Value}" 
-                           Margin="8 0"
-                           />
-                
-                <Slider Value="{Binding CurrentValue.Value}"
-                    Maximum="{Binding MaxValue, Mode=OneTime}"
-                    Minimum="{Binding MinValue, Mode=OneTime}"
-                    SmallChange="{Binding SkipAmount, Mode=OneTime}"
-                    LargeChange="{Binding SkipAmount, Mode=OneTime}"
-                    TickFrequency="{Binding SkipAmount, Mode=OneTime}" 
-                    IsSnapToTickEnabled="True"
-                    TickPlacement="BottomRight"
-                    MinWidth="200"
-                    MaxWidth="300"
-                    HorizontalAlignment="Right"
-                    >
-
-                </Slider>
-            </StackPanel>
-
-        </DataTemplate>
-
-        <DataTemplate x:Key="ActionListItemTemplate">
+        <DataTemplate x:Key="actionListItemTemplate">
             <DockPanel
                 Margin="0 8"
+                Background="Transparent"
                 >
-                <Button DockPanel.Dock="Right"
-                                    Command="{Binding RemoveActionCommand}"
-                        Style="{StaticResource MaterialDesignFlatButton}"
-                        Foreground="Red"
-                        Margin="8 0"
-                                    >
-                    <materialDesign:PackIcon Kind="Delete"></materialDesign:PackIcon>
-                </Button>
+                <DockPanel>
 
-                <Border DockPanel.Dock="Left"
-                            Background="Transparent" IsHitTestVisible="True"
-                            Width="32"
-                            Height="32"
-                        Margin="8 0"
+                    <Border
+                        DockPanel.Dock="Top"
                         >
-                    <materialDesign:PackIcon Kind="SwapVertical"
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left"
+                                    Background="Transparent"
+                                    IsHitTestVisible="True"
+                                    Width="32"
+                                    Height="32"
+                                    Margin="8 0"
+                                >
+                                <materialDesign:PackIcon Kind="SwapVertical"
                                              HorizontalAlignment="Center"
                                              VerticalAlignment="Center"
                                              Background="Transparent" 
                                              IsHitTestVisible="True"
-                                             ></materialDesign:PackIcon>
-                </Border>
+                                             />
+                            </Border>
 
-                <DockPanel>
-                    <Border
-                        DockPanel.Dock="Left"
-                        >
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock>
-                                <Run Text="{Binding OptionName, Mode=OneTime}" FontSize="14"/>
-                            </TextBlock>
-
-                            <Border Margin="0 2" />
-                            
-                            <TextBlock
-                                HorizontalAlignment="Right"
+                            <Button 
+                                DockPanel.Dock="Left"
+                                Command="{Binding SelectAppOptionCommand}"
+                                Style="{StaticResource MaterialDesignFloatingActionButton}"
+                                Margin="8 0"
+                                Width="32"
+                                Height="32"
+                                ToolTip="Add Option"
                                 >
-                                <Run Text="{Binding AppName, Mode=OneTime}" 
-                                     Foreground="Gray"
-                                     
+                                <materialDesign:PackIcon Kind="Plus" 
+                                                     Width="16"
+                                                     Height="16"
+                                                     />
+                            </Button>
+
+                            <Button DockPanel.Dock="Right"
+                                    Command="{Binding RemoveActionCommand}"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Foreground="Red"
+                                    Margin="8 0"
+                                    >
+                                <materialDesign:PackIcon Kind="Delete"></materialDesign:PackIcon>
+                            </Button>
+
+                            <TextBlock VerticalAlignment="Center">
+                                <Run Text="{Binding AppName, Mode=OneTime}"                                      
                                      />
                             </TextBlock>
-                        </StackPanel>
+                        </DockPanel>
                     </Border>
 
-                    <ItemsControl ItemsSource="{Binding OptionValues}"
-                                  DockPanel.Dock="Right"
-                                  >
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="ContentTemplate">
-                                    <Setter.Value>
-                                        <DataTemplate>
-                                            <DockPanel
-                                                >
+                    <!-- ItemTemplate see@ ReactiveFolderStyles.AppOptionResources  -->
+                    <ItemsControl ItemsSource="{Binding UsingOptions}" 
+                                  Margin="32 0 0 0"
+                                  HorizontalContentAlignment="Right"
+                                  />
 
-                                                <TextBlock Text="{Binding PropertyName}" 
-                                                           DockPanel.Dock="Bottom"
-                                                           HorizontalAlignment="Right"
-                                                           FontSize="10"
-                                                           />
-
-                                                <ContentPresenter Content="{Binding}"
-                                                                  Margin="16 2 0 0"
-                                                                  />
-                                            </DockPanel>
-                                            
-                                        </DataTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                    </ItemsControl>
 
                 </DockPanel>
 
             </DockPanel>
         </DataTemplate>
 
-        
-        
-        
+
+
+
         <DataTemplate x:Key="ActionListItemDragingTemplate">
             <StackPanel Orientation="Horizontal" Margin="32 0 0 0">
 
@@ -209,37 +118,71 @@
     <Grid x:Name="ActionsContainer" >
         <StackPanel Orientation="Vertical">
 
-            <TextBlock Text="処理内容" 
+            <Border>
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding ShowValidateErrorCommand}"></MouseBinding>
+                </Border.InputBindings>
+
+                <TextBlock Text="処理内容" 
                         VerticalAlignment="Center"
                         Margin="0 0 0 16"
                        FontWeight="Bold"
                         >
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
-                                <DataTrigger.Setters>
-                                </DataTrigger.Setters>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
-                                <DataTrigger.Setters>
-                                </DataTrigger.Setters>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
-                                <DataTrigger.Setters>
-                                    <Setter Property="Foreground" Value="Red"/>
-                                </DataTrigger.Setters>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubheadingTextBlock}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ValidateState.Value}" Value="WaitFirstValidate">
+                                    <DataTrigger.Setters>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ValidateState.Value}" Value="Valid">
+                                    <DataTrigger.Setters>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ValidateState.Value}" Value="Invalid">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="Foreground" Value="Red"/>
+                                        <Setter Property="Cursor" Value="Help" />
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
 
-            </TextBlock>
+                </TextBlock>
+            </Border>
 
+
+            <Border Visibility="{Binding IsActionsEmpty.Value, Converter={StaticResource BoolToVisibility}}"
+                    BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Margin="16 0 16 8"
+                    Padding="8"
+                    >
+
+                <DockPanel>
+
+                    <materialDesign:PackIcon Kind="Information" 
+                                             DockPanel.Dock="Left"
+                                             VerticalAlignment="Center"
+                                             Foreground="Gray"
+                                             Margin="8 0 0 0"
+                                             />
+
+                    <TextBlock Text="処理がない時は入力アイテムは出力フォルダにコピーされます"
+                           TextWrapping="Wrap"
+                           Foreground="Gray"
+                               Margin="8 0"
+                           />
+
+                </DockPanel>
+                
+            </Border>
 
 
             <ItemsControl ItemsSource="{Binding Actions}" 
-                      ItemTemplate="{StaticResource ActionListItemTemplate}"
+                      ItemTemplate="{StaticResource actionListItemTemplate}"
                       >
                 <i:Interaction.Behaviors>
                     <dd:DragDropBehavior ItemType="{x:Type editervm:AppLaunchActionViewModel}" DataTemplate="{StaticResource ActionListItemDragingTemplate}" 
@@ -250,7 +193,7 @@
 
             <Grid Margin="0 8">
 
-                <Button Command="{Binding SelectAppOptionCommand}"
+                <Button Command="{Binding SelectApplicationCommand}"
                     HorizontalAlignment="Stretch"
                     Margin="16 0"
                         Width="200"

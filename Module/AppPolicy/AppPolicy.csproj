@@ -136,13 +136,12 @@
     <Compile Include="ViewModels\AppOptionPropertyViewModel.cs" />
     <Compile Include="ViewModels\AppOptionValueViewModel.cs" />
     <Compile Include="ViewModels\AppPolicyEditPageViewModel.cs" />
-    <Compile Include="ViewModels\AppPolicyListPageViewModel.cs" />
-    <Compile Include="ViewModels\PageViewModelBase.cs" />
+    <Compile Include="ViewModels\AppPolicyManagePageViewModel.cs" />
     <Compile Include="Views\AppPolicyEditPage .xaml.cs">
       <DependentUpon>AppPolicyEditPage .xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\AppPolicyListPage.xaml.cs">
-      <DependentUpon>AppPolicyListPage.xaml</DependentUpon>
+    <Compile Include="Views\AppPolicyManagePage.xaml.cs">
+      <DependentUpon>AppPolicyManagePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DeleteConfirmDialog.xaml.cs">
       <DependentUpon>DeleteConfirmDialog.xaml</DependentUpon>
@@ -170,7 +169,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\AppPolicyListPage.xaml">
+    <Page Include="Views\AppPolicyManagePage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

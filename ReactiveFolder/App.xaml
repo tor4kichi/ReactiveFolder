@@ -10,6 +10,7 @@
                 
                 <ResourceDictionary Source="pack://application:,,,/ReactiveFolderStyles;component/Styles.xaml" />
 
+                <ResourceDictionary Source="pack://application:,,,/ReactiveFolderStyles;component/Views/AppOptionResouces.xaml" />
 
             </ResourceDictionary.MergedDictionaries>
 

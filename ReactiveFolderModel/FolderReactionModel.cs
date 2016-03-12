@@ -16,6 +16,8 @@ using ReactiveFolder.Models.Actions;
 using ReactiveFolder.Models.Destinations;
 using Microsoft.Practices.Prism;
 using ReactiveFolder.Models.Util;
+using ReactiveFolder.Models.History;
+using ReactiveFolder.Models.AppPolicy;
 
 namespace ReactiveFolder.Models
 {
@@ -135,6 +137,7 @@ namespace ReactiveFolder.Models
 					_Filter.SetParentReactionModel(this);
 
 					ValidateFilter();
+					ValidateActions();
 
 					OnPropertyChanged(nameof(InputType));
 					OnPropertyChanged(nameof(OutputType));
@@ -263,7 +266,6 @@ namespace ReactiveFolder.Models
 
 
 		public ValidationResult ValidationResult { get; private set; }
-		
 
 		private bool NeedValidation
 		{
@@ -293,6 +295,8 @@ namespace ReactiveFolder.Models
 
 			FileUpdateTiming = new FileUpdateReactiveTiming();
 			FileUpdateTiming.SetParentReactionModel(this);
+
+			Filter = new FileReactiveFilter();
 
 			Destination = new AbsolutePathReactiveDestination();
 			Destination.SetParentReactionModel(this);
@@ -375,6 +379,7 @@ namespace ReactiveFolder.Models
 			{
 				IsFilterValid = false;
 				ValidateFilter();
+				ValidateActions();
 			}
 			else if (model is ReactiveActionBase)
 			{
@@ -495,6 +500,7 @@ namespace ReactiveFolder.Models
 		{
 			outResult = outResult ?? new ValidationResult();
 
+			var validActions = true;
 			if (Actions.Count > 0)
 			{
 				foreach (var action in Actions)
@@ -504,14 +510,67 @@ namespace ReactiveFolder.Models
 					if (false == isValid)
 					{
 						// Action validate failed.
-						outResult.AddMessage(($"{(nameof(Actions))} has validation error."));
 						outResult.AddMessages(action.ValidateResult.Messages);
+						validActions = false;
 					}
+					else
+					{
+						// ActionのAppPolicyを使うため、Validチェックを通っている必要がある
+
+						var position = Actions.IndexOf(action);
+
+						if (position == 0)
+						{
+							// フィルタが通過させる拡張子タイプは先頭のActionsが受け取れるか
+							var appLaunchAction = Actions[0] as AppLaunchReactiveAction;
+
+							var appAcceptExts = appLaunchAction.GetFilters();
+
+							if (false == Filter.IncludeFilter.All(x => appAcceptExts.Any(y => x.EndsWith(y))))
+							{
+								outResult.AddMessage($"'絞り込み条件' の出力アイテムを {appLaunchAction.AppPolicy.AppName} が処理できません。");
+								validActions = false;
+							}
+						}
+						else if (position < Actions.Count)
+						{
+							// アクションからアクションへの出力連鎖が妥当かチェック
+
+							var currentAction = Actions[position - 1] as AppLaunchReactiveAction;
+							var nextAction = Actions[position] as AppLaunchReactiveAction;
+
+							var nextActionFilters = nextAction.GetFilters().ToArray();
+							if (currentAction.HasFileOutputOption)
+							{
+								// 出力されるファイルタイプが次のアクションのアプリが対応しているか
+								var outputExtention = currentAction.GetOutputExtention();
+
+								if (false == nextActionFilters.Any(x => x.EndsWith(outputExtention)))
+								{
+									outResult.AddMessage($"{currentAction.AppPolicy.AppName}が出力するファイルタイプ({outputExtention})を {nextAction.AppPolicy.AppName} が処理できません。");
+									validActions = false;
+								}
+							}
+							else
+							{
+								// 出力予定の全てのファイルタイプが次のアクションのアプリが対応しているか
+								var currentActionWillOutputExts = currentAction.AppPolicy.OutputOptionDeclarations.Where(x => x.OutputPathProperty is FileOutputAppOptionProperty)
+									.Select(x => x.OutputPathProperty as FileOutputAppOptionProperty)
+									.Select(x => x.Extention);
 
 
+								if (false == currentActionWillOutputExts.All(x => nextActionFilters.Any(y => y.EndsWith(x))))
+								{
+									outResult.AddMessage($"{currentAction.AppPolicy.AppName}が出力するであろうファイルタイプ({String.Join(",", currentActionWillOutputExts)})を{nextAction.AppPolicy.AppName}が処理できません。");
+									validActions = false;
+								}
+							}
+						}
+					}
+					
 				}
 
-				IsActionsValid = Actions.All(x => x.IsValid);
+				IsActionsValid = validActions;
 			}
 			else
 			{
@@ -520,6 +579,7 @@ namespace ReactiveFolder.Models
 
 				IsActionsValid = true;
 			}
+
 
 			return outResult;
 		}
@@ -576,6 +636,8 @@ namespace ReactiveFolder.Models
 
 			return outResult;
 		}
+
+	
 
 
 		/// <summary>
@@ -647,20 +709,25 @@ namespace ReactiveFolder.Models
 		}
 		
 
-		public void Execute(bool forceEnable = false)
+		public HistoryDataByFile[] Execute(bool forceEnable = false)
 		{
 			ResetWorkingFolder();
 
 			if (false == IsValid)
 			{
-				return;
+				return null;
 			}
 
 
 			if (!forceEnable && false == IsEnable)
 			{
-				return;
+				return null; 
 			}
+
+
+			var results = new List<HistoryDataByFile>();
+
+
 
 			var initialContext = CreatePayload();
 			var streams = EnumStreamItems();
@@ -671,12 +738,16 @@ namespace ReactiveFolder.Models
 			// 実行
 			foreach(var context in branchedContexts)
 			{
+				context.OnStart();
+
 				foreach (var stream in streams)
 				{
 					if (!context.IsRunnning) break;
 
 					stream.Execute(context);
 				}
+
+				context.OnEnd();
 			}
 
 			// 正常終了した場合の処理
@@ -701,6 +772,18 @@ namespace ReactiveFolder.Models
 				}
 			}
 
+			
+			// 処理結果情報を作成
+			var result = branchedContexts.Select(x => new HistoryDataByFile()
+			{
+				InputFilePath = x.OriginalPath,
+				OutputFilePath = x.OutputPath,
+				StartTime = x.StartTime,
+				EndTime = x.EndTime,
+				IsSuccessed = x.Status == ReactiveStreamStatus.Completed
+			})
+			.ToArray();
+
 
 			// コンテキストの終了処理
 			foreach (var context in branchedContexts)
@@ -710,6 +793,10 @@ namespace ReactiveFolder.Models
 
 			// 完了処理
 			FileUpdateTiming.OnCompleteReaction();
+
+
+
+			return result;
 		}
 
 		private IEnumerable<ReactiveStraightStreamBase> EnumStreamItems()
@@ -730,8 +817,5 @@ namespace ReactiveFolder.Models
 			reaction.Guid = Guid.NewGuid();
 		}
 	}
-
-
-
 	
 }

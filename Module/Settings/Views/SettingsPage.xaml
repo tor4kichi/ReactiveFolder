@@ -11,50 +11,87 @@
              d:DesignHeight="300" d:DesignWidth="600"
              prism:ViewModelLocator.AutoWireViewModel="True"
              >
-    <DockPanel>
-        <!-- Top Buttons -->
-        <DockPanel DockPanel.Dock="Top">
-            <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth2"
-                                       Height="48"
-                                          Mode="PrimaryMid" DockPanel.Dock="Top">
+    <Grid>
+        <materialDesign:ColorZone 
+                        x:Name="Header"
+                        Mode="PrimaryMid"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                        Height="64"
+                        VerticalContentAlignment="Center"
+                        Panel.ZIndex="1"
+                        Margin="0 0 17 0"
+                        >
+            <materialDesign:ColorZone.Resources>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource AppbarText}" />
+                <Style TargetType="materialDesign:PackIcon" BasedOn="{StaticResource AppbarIcon}" />
+                <Style TargetType="TextBox" BasedOn="{StaticResource AppBarTextBox}">
+                </Style>
+            </materialDesign:ColorZone.Resources>
 
-                <DockPanel VerticalAlignment="Center" Margin="8" >
-
-                    <Button DockPanel.Dock="Left" Command="{Binding BackCommand}" 
-                            Style="{StaticResource AppbarButton}"
-                            >
-                        <materialDesign:PackIcon Kind="ArrowLeft"  />
+            <DockPanel 
+                        Margin="16 0"
+                        >
+                <Border DockPanel.Dock="Left">
+                    <Button Command="{Binding OpenSideMenuCommand}" 
+                                Style="{StaticResource AppbarButton}"
+                                >
+                        <materialDesign:PackIcon Kind="Menu" />
                     </Button>
+                </Border>
 
+                <StackPanel Orientation="Horizontal"
+                            DockPanel.Dock="Right"
+                                Visibility="Hidden"
+                            >
+                    <materialDesign:PackIcon Kind="Magnify"
+                                            Margin="8 0"
+                                            />
+                    <TextBox Width="200"
+                                FontSize="16"
+                                />
+                </StackPanel>
+
+                <Border Margin="16 0 0 0">
                     <TextBlock Text="Settings"
-                               FontSize="22"
-                               HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </DockPanel>
-            </materialDesign:ColorZone>
-        </DockPanel>
+                                Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                VerticalAlignment="Center"
+                                />
+                </Border>
+            </DockPanel>
 
 
-        <StackPanel Orientation="Vertical" Margin="16 0">
-            <TextBlock Text="Reaction File Default" 
+
+        </materialDesign:ColorZone>
+
+        <ScrollViewer>
+            <StackPanel Orientation="Vertical" Margin="16 0">
+
+                <Border Height="{Binding ElementName=Header, Path=Height}" />
+                
+                <TextBlock Text="Reaction File Default" 
                            Style="{StaticResource ListSubheaderText}"/>
 
 
-            <ItemsControl Margin="16 0">
+                <ItemsControl Margin="16 0">
 
-                <DockPanel>
+                    <DockPanel>
 
-                    <TextBox Text="{Binding ReactionCheckInterval.Value, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox Text="{Binding ReactionCheckInterval.Value, UpdateSourceTrigger=PropertyChanged}"
                              DockPanel.Dock="Right"
                              Width="200"
                              mybehavior:TextBoxHelper.IsNumeric="True"
                              ></TextBox>
-                             
-                    <TextBlock Text="Check Interval" 
+
+                        <TextBlock Text="Check Interval" 
                                VerticalAlignment="Center"
                                />
-                    
-                </DockPanel>
-            </ItemsControl>
-        </StackPanel>
-    </DockPanel>
+
+                    </DockPanel>
+                </ItemsControl>
+            </StackPanel>
+
+        </ScrollViewer>
+
+    </Grid>
+    
 </UserControl>

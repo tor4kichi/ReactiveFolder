@@ -1,0 +1,217 @@
+﻿<UserControl x:Class="Modules.AppPolicy.Views.AppPolicyManagePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:local="clr-namespace:Modules.AppPolicy.Views"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
+             xmlns:vm="clr-namespace:Modules.AppPolicy.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mybehavior="clr-namespace:ReactiveFolderStyles.Behaviors;assembly=ReactiveFolderStyles"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="800"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             >
+
+    <UserControl.Resources>
+        
+        <DataTemplate x:Key="appPolicyEditTemplate" DataType="{x:Type vm:AppPolicyEditPageViewModel}">
+            <local:AppPolicyEditPage DataContext="{Binding}" />
+        </DataTemplate>
+        
+        <DataTemplate x:Key="emptyTemplate" >
+            <TextBlock Text="not selected" />
+        </DataTemplate>
+
+        <local:AppPolicyEditTemplateSelecter x:Key="appPolicyEditTemplateSelecter"
+                                             AppPolicyEditTemplate="{StaticResource appPolicyEditTemplate}"
+                                             EmptyTemplate="{StaticResource emptyTemplate}"
+                                             />
+
+    </UserControl.Resources>
+
+
+
+    <Grid>
+        <materialDesign:PopupBox Style="{StaticResource MaterialDesignMultiFloatingActionLightPopupBox}"
+                                    PlacementMode="RightAndAlignMiddles"     
+                                  VerticalAlignment="Top"
+                                    Margin="32 104 0 0"
+                                 Panel.ZIndex="2"
+                                 Width="48"
+                                 Height="{Binding RelativeSource={RelativeSource Self}, Path=Width}"
+                                 
+                                    >
+
+
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding AddAppPolicyCommand}">
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="File" Width="24" Height="24" DockPanel.Dock="Left" 
+                                                 ToolTip="Add New"
+                                                 />
+                    </DockPanel>
+                </Button>
+                <Button Command="{Binding ImportAppPolicyCommand}">
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="Import" Width="24" Height="24" DockPanel.Dock="Left"
+                                                 ToolTip="Import"
+                                                 />
+                    </DockPanel>
+                </Button>
+            </StackPanel>
+        </materialDesign:PopupBox>
+        <materialDesign:ColorZone 
+                        x:Name="Header"
+                        Mode="PrimaryMid"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                        VerticalContentAlignment="Center"
+                        Panel.ZIndex="1"
+                        Margin="0 0 17 0"
+                        >
+            <materialDesign:ColorZone.Resources>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource AppbarText}" />
+                <Style TargetType="materialDesign:PackIcon" BasedOn="{StaticResource AppbarIcon}" />
+                <Style TargetType="TextBox" BasedOn="{StaticResource AppBarTextBox}">
+                </Style>
+            </materialDesign:ColorZone.Resources>
+
+            <StackPanel Orientation="Vertical">
+                <DockPanel 
+                        Margin="16 0"
+                    Height="64"
+                        >
+                    <Border DockPanel.Dock="Left">
+                        <Button Command="{Binding OpenSideMenuCommand}" 
+                                Style="{StaticResource AppbarButton}"
+                                >
+                            <materialDesign:PackIcon Kind="Menu" />
+                        </Button>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal"
+                            DockPanel.Dock="Right"
+                                Visibility="Hidden"
+                            >
+                        <materialDesign:PackIcon Kind="Magnify"
+                                            Margin="8 0"
+                                            />
+                        <TextBox Width="200"
+                                FontSize="16"
+                                />
+                    </StackPanel>
+
+                    
+                </DockPanel>
+
+
+                <DockPanel Height="64">
+                    
+                    <Border DockPanel.Dock="Left" Width="108" />
+
+                    <Border Margin="0 0 0 0">
+                        <TextBlock Text="Application Policy Manage"
+                                Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                VerticalAlignment="Center"
+                                />
+                    </Border>
+                </DockPanel>
+            </StackPanel>
+            
+
+
+
+        </materialDesign:ColorZone>
+
+        
+
+        <ScrollViewer >
+            <StackPanel Orientation="Vertical" Margin="0 0">
+
+                <Border Height="{Binding ElementName=Header, Path=ActualHeight}" />
+
+                <DataGrid ItemsSource="{Binding AppPolicies}"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          SelectionMode="Single"
+                          SelectionUnit="FullRow"
+                          AutoGenerateColumns="False"
+                          HorizontalContentAlignment="Stretch"
+                          HorizontalAlignment="Stretch"
+                          SelectedItem="{Binding SelectedAppPolicy.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         
+                          >
+                    <i:Interaction.Behaviors>
+                        <mybehavior:BubbleScrollEvent />
+                    </i:Interaction.Behaviors>
+                    <DataGrid.Resources>
+                        <SolidColorBrush x:Key="SubTextColor" Color="Gray" />
+                    </DataGrid.Resources>
+                    <DataGrid.RowHeaderStyle>
+                        <Style TargetType="DataGridRowHeader">
+                            <Setter Property="Height" Value="48" />
+                        </Style>
+                    </DataGrid.RowHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Width="88" />
+
+                        <DataGridTextColumn Header="App Policy Name" 
+                                            Binding="{Binding AppName.Value, Mode=OneWay}" 
+                                            Width="*" />
+                        
+                        <DataGridTextColumn Header="Using Application" 
+                                            Binding="{Binding AppName.Value, Mode=OneWay}"
+                                            Foreground="{StaticResource SubTextColor}"
+                                            Width="200" />
+                        
+                        <DataGridTemplateColumn Header="" Width="64">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <materialDesign:PopupBox 
+                                             PlacementMode="LeftAndAlignTopEdges"     
+                                             Width="32"
+                                             Height="{Binding RelativeSource={RelativeSource Self}, Path=Width}"
+                                            
+                                            >
+                                            <materialDesign:PopupBox.ToggleCheckedContent>
+                                                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="{StaticResource SubTextColor}"
+                                                        >
+                                                    <materialDesign:PackIcon Kind="DotsVertical" HorizontalAlignment="Left" />
+                                                </Button>
+                                            </materialDesign:PopupBox.ToggleCheckedContent>
+
+                                            <StackPanel Orientation="Vertical">
+                                                <Button Command="{Binding ExportCommand}">
+                                                    Export
+                                                </Button>
+                                                <Separator />
+                                                <Button Command="{Binding DeleteCommand}">
+                                                    Delete
+                                                </Button>
+                                            </StackPanel>
+                                        </materialDesign:PopupBox>
+
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                    
+                </DataGrid>
+
+
+
+            </StackPanel>
+        </ScrollViewer>
+
+        
+        
+
+        
+
+    </Grid>
+</UserControl>

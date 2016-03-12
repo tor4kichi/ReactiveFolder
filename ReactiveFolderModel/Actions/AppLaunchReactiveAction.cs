@@ -20,23 +20,23 @@ namespace ReactiveFolder.Models.Actions
 	[DataContract]
 	public class AppLaunchReactiveAction : ReactiveActionBase
 	{
-		private static IAppPolicyManager _AppPolicyFactory;
-		public static IAppPolicyManager AppPolicyFactory
+		private static IAppPolicyManager _AppPolicyManager;
+		public static IAppPolicyManager AppPolicyManager
 		{
 			get
 			{
-				if (_AppPolicyFactory == null)
+				if (_AppPolicyManager == null)
 				{
 					throw new Exception("AppLaunchReactiveAction want implemeted IAppPolicyFactory");
 				}
 
-				return _AppPolicyFactory;
+				return _AppPolicyManager;
 			}
 		}
 
-		public static void SetAppPolicyManager(IAppPolicyManager factory)
+		public static void SetAppPolicyManager(IAppPolicyManager manager)
 		{
-			_AppPolicyFactory = factory;
+			_AppPolicyManager = manager;
 		}
 
 
@@ -55,34 +55,28 @@ namespace ReactiveFolder.Models.Actions
 		}
 
 
-		[DataMember]
-		private int _AppOutputFormatId;
-		public int AppOutputFormatId
+		private ApplicationPolicy _AppPolicy;
+		public ApplicationPolicy AppPolicy
 		{
 			get
 			{
-				return _AppOutputFormatId;
-			}
-			set
-			{
-				if (SetProperty(ref _AppOutputFormatId, value))
-				{
-					_AdditionalOptions.Clear();
-				}
+				return _AppPolicy
+					?? (_AppPolicy = GetAppPolicy());
 			}
 		}
 
 
+
 		[DataMember]
-		private ObservableCollection<AppOptionInstance> _AdditionalOptions { get; set; }
+		private ObservableCollection<AppOptionInstance> _Options { get; set; }
 
-		public ReadOnlyObservableCollection<AppOptionInstance> AdditionalOptions { get; private set; }
+		public ReadOnlyObservableCollection<AppOptionInstance> Options { get; private set; }
 
 
 
-		public ApplicationPolicy GetAppPolicy()
+		private ApplicationPolicy GetAppPolicy()
 		{
-			return AppPolicyFactory.FromAppGuid(AppGuid);
+			return AppPolicyManager.FromAppGuid(AppGuid);
 		}
 
 		public override FolderItemType InputItemType
@@ -119,23 +113,27 @@ namespace ReactiveFolder.Models.Actions
 
 		public AppLaunchReactiveAction()
 		{
-			_AdditionalOptions = new ObservableCollection<AppOptionInstance>();
+			_Options = new ObservableCollection<AppOptionInstance>();
 
-			AdditionalOptions = new ReadOnlyObservableCollection<AppOptionInstance>(_AdditionalOptions);
+			Options = new ReadOnlyObservableCollection<AppOptionInstance>(_Options);
 		}
 
 		[OnDeserialized]
 		public void SetValuesOnDeserialized(StreamingContext context)
 		{
-			AdditionalOptions = new ReadOnlyObservableCollection<AppOptionInstance>(_AdditionalOptions);
-
-			var appPolicy = GetAppPolicy();
-
-			if (appPolicy != null)
+			if (_Options == null)
 			{
-				foreach (var option in AdditionalOptions)
+				_Options = new ObservableCollection<AppOptionInstance>();
+			}
+
+
+			Options = new ReadOnlyObservableCollection<AppOptionInstance>(_Options);
+
+			if (AppPolicy != null)
+			{
+				foreach (var option in Options)
 				{
-					option.ResetDeclaration(appPolicy);
+					option.ResetDeclaration(AppPolicy);
 				}
 			}
 			else
@@ -150,6 +148,24 @@ namespace ReactiveFolder.Models.Actions
 		{
 			var result = new ValidationResult();
 
+			if (AppPolicy == null)
+			{
+				result.AddMessage("AppPolicy Deleted.");
+				return result;
+			}
+
+			if (false == AppPolicyManager.Security.IsAuthorized(AppPolicy.ApplicationPath))
+			{
+				result.AddMessage("AppPolicy is not Authorized.");
+				return result;
+			}
+
+			if (Options.Count == 0)
+			{
+				result.AddMessage("Needed one or more Options");
+				return result;
+			}
+
 
 			if (false == CanCreateSandbox())
 			{
@@ -162,7 +178,7 @@ namespace ReactiveFolder.Models.Actions
 
 			if (false == sandbox.Validate(GenerateTempStreamContext()))
 			{
-				result.AddMessage("Invalid AppLaunchReactiveAction, due to diffarent IO file/folder type.");
+				result.AddMessage("may be diffarent Reaction I/O type and Action Input Type.");
 			}			
 
 			return result;
@@ -186,7 +202,7 @@ namespace ReactiveFolder.Models.Actions
 				}
 				else
 				{
-					context.Failed("Timeout または 実行に失敗");
+					context.Failed("Execute failed or timeout");
 				} 
 			}
 			catch (Exception e)
@@ -197,32 +213,74 @@ namespace ReactiveFolder.Models.Actions
 
 		public bool CanCreateSandbox()
 		{
-			return AppPolicyFactory.FromAppGuid(AppGuid) != null;
+			if (AppPolicy == null)
+			{
+				return false;
+			}
+
+			if (false == AppPolicyManager.Security.IsAuthorized(AppPolicy.ApplicationPath))
+			{
+				return false;
+			}
+
+			if (false == AppPolicy.ValidateAppOptionInstances(Options))
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 
 		public ApplicationExecuteSandbox CreateSandbox()
 		{
-			var appPolicy = AppPolicyFactory.FromAppGuid(AppGuid);
+			var appPolicy = AppPolicyManager.FromAppGuid(AppGuid);
 			if (appPolicy == null)
 			{
 				throw new Exception("");
 			}
 
-			return appPolicy.CreateExecuteSandbox(AdditionalOptions.ToArray());
+			return appPolicy.CreateExecuteSandbox(AppPolicyManager, Options.ToArray());
 		}
 
 		public IEnumerable<string> GetFilters()
 		{
-			var appPolicy = GetAppPolicy();
-			if (appPolicy != null)
+			if (AppPolicy != null)
 			{
-				return appPolicy.AcceptExtentions;
+				return AppPolicy.AcceptExtentions;
 			}
 			else
 			{
 				return Enumerable.Empty<string>();
 			}
+		}
+
+
+		public bool HasFileOutputOption
+		{
+			get
+			{
+				return Options.Any(x => x.OptionDeclaration is AppOutputOptionDeclaration);
+			}
+		}
+
+		public string GetOutputExtention()
+		{
+			var outputOption = Options.SingleOrDefault(x => x.OptionDeclaration is AppOutputOptionDeclaration);
+			if (outputOption == null)
+			{
+				return null;
+			}
+
+			var outputOptDecl = outputOption.OptionDeclaration as AppOutputOptionDeclaration;
+			var fileOutputOptProperty = outputOptDecl.OutputPathProperty as FileOutputAppOptionProperty;
+
+			if (fileOutputOptProperty == null)
+			{
+				return null;
+			}
+
+			return fileOutputOptProperty.Extention;
 		}
 
 
@@ -236,22 +294,42 @@ namespace ReactiveFolder.Models.Actions
 
 			var cast = other as AppLaunchReactiveAction;
 
-			return this.AppGuid == cast.AppGuid &&
-				this.AppOutputFormatId == cast.AppOutputFormatId;
+			return this.AppGuid == cast.AppGuid;
 		}
 
 
-
+		/// <summary>
+		/// AdditionalOptionsにオプションインスタンスを追加します。
+		/// 出力オプションのインスタンスを追加する時に、AdditionalOptionsに一つしか存在しないよう既存の出力オプションが除外されます。
+		/// </summary>
+		/// <see cref="ApplicationPolicy.OutputOptionDeclarations"/>
+		/// <param name="instance"></param>
 		public void AddAppOptionInstance(AppOptionInstance instance)
 		{
-			_AdditionalOptions.Add(instance);
+			
+			if (AppPolicy.OutputOptionDeclarations.Contains(instance.OptionDeclaration))
+			{
+				var alreadyOutputOption = Options.SingleOrDefault(x => AppPolicy.OutputOptionDeclarations.Any(y => x.OptionDeclaration == y));
+
+				if (alreadyOutputOption != null)
+				{
+					if (instance.OptionDeclaration == alreadyOutputOption.OptionDeclaration)
+					{
+						return;
+					}
+
+					_Options.Remove(alreadyOutputOption);
+				}
+			}
+
+			_Options.Add(instance);
 
 			ValidatePropertyChanged();
 		}
 
 		public void RemoveAppOptionInstance(AppOptionInstance instance)
 		{
-			if (_AdditionalOptions.Remove(instance))
+			if (_Options.Remove(instance))
 			{
 				ValidatePropertyChanged();
 			}

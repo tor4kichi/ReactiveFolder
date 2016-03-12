@@ -72,7 +72,8 @@ namespace ReactiveFolder.Models.AppPolicy
 		public ReadOnlyObservableCollection<AppOptionProperty> UserProperties { get; private set; }
 
 
-
+		[DataMember]
+		public int PropertyIdSeed { get; private set; }
 
 
 		private AppOptionInstance _CurrentOptionValueSet;
@@ -110,6 +111,16 @@ namespace ReactiveFolder.Models.AppPolicy
 			UserProperties = new ReadOnlyObservableCollection<AppOptionProperty>(_UserProperties);
 		}
 
+
+		protected int GenerateNextPropertyId()
+		{
+			return PropertyIdSeed++;
+		}
+
+		protected void PreventGeneratePropertyId()
+		{
+			PropertyIdSeed--;
+		}
 
 		public virtual void Rollback(AppOptionDeclarationBase other)
 		{
@@ -156,6 +167,30 @@ namespace ReactiveFolder.Models.AppPolicy
 				var patternedValiableName = ToPatternText(prop);
 
 				if (false == this.OptionTextPattern.Contains(patternedValiableName))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+
+		public bool CheckValidateOptionValues(AppOptionValue[] optionValues)
+		{
+			if (optionValues == null)
+			{
+				return false;
+			}
+
+			if (optionValues.Length != UserProperties.Count)
+			{
+				return false;
+			}
+
+			for (int itr = 0; itr < UserProperties.Count; ++itr)
+			{
+				if (optionValues[itr].PropertyId != UserProperties[itr].PropertyId)
 				{
 					return false;
 				}
@@ -242,12 +277,13 @@ namespace ReactiveFolder.Models.AppPolicy
 				.Select(x =>
 					new AppOptionValue()
 					{
+						PropertyId = x.PropertyId,
 						ValiableName = x.ValiableName,
 						Value = x.DefaultValue
 					}
 				).ToArray();
 
-			return new AppOptionInstance(this.Id, values, this);
+			return new AppOptionInstance(values, this);
 		}
 	}
 	
@@ -264,7 +300,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		public AppInputOptionDeclaration(string name, int id)
 			: base(name, id)
 		{
-			InputPathProperty = new InputAppOptionProperty(name);
+			InputPathProperty = new InputAppOptionProperty(GenerateNextPropertyId(), name);
 
 			_UserProperties.Add(InputPathProperty);
 
@@ -288,6 +324,61 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 	}
+
+
+	[DataContract]
+	public class AppOptionDeclaration : AppOptionDeclarationBase
+	{
+		public AppOptionDeclaration() { }
+
+		public AppOptionDeclaration(string name, int id)
+			: base(name, id)
+		{
+
+		}
+
+
+		protected virtual bool CanAddProperty(AppOptionProperty property)
+		{
+			return true;
+		}
+
+
+		public void AddProperty(Func<int, AppOptionProperty> generater)
+		{
+			var property = generater(GenerateNextPropertyId());
+
+			if (CanAddProperty(property))
+			{
+				_UserProperties.Add(property);
+			}
+			else
+			{
+				PreventGeneratePropertyId();
+			}
+		}
+
+		protected virtual bool CanRemoveProperty(AppOptionProperty property)
+		{
+			return true;
+		}
+
+		public bool RemoveProperty(AppOptionProperty property)
+		{
+			if (CanRemoveProperty(property))
+			{
+				return _UserProperties.Remove(property);
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+
+
+	}
+
 
 	[DataContract]
 	public class AppOutputOptionDeclaration : AppOptionDeclaration
@@ -347,13 +438,15 @@ namespace ReactiveFolder.Models.AppPolicy
 		{
 			_UserProperties.Remove(OutputPathProperty);
 
+			var propId = OutputPathProperty?.PropertyId ?? GenerateNextPropertyId();
+
 			switch (type)
 			{
 				case FolderItemType.File:
-					OutputPathProperty = new FileOutputAppOptionProperty(Name);
+					OutputPathProperty = new FileOutputAppOptionProperty(propId, Name);
 					break;
 				case FolderItemType.Folder:
-					OutputPathProperty = new FolderOutputAppOptionProperty(Name);
+					OutputPathProperty = new FolderOutputAppOptionProperty(propId, Name);
 					break;
 				default:
 					break;
@@ -366,57 +459,23 @@ namespace ReactiveFolder.Models.AppPolicy
 
 
 
-		public override void AddProperty(AppOptionProperty property)
+		protected override bool CanAddProperty(AppOptionProperty property)
 		{
-			if (property is FolderOutputAppOptionProperty)
-			{
-				throw new Exception();
-			}
-
-			base.AddProperty(property);
+			return false == property is FolderOutputAppOptionProperty;
 		}
 
-		public override bool RemoveProperty(AppOptionProperty property)
-		{
-			if (property is FolderOutputAppOptionProperty)
-			{
-				throw new Exception();
-			}
 
-			return base.RemoveProperty(property);
+		protected override bool CanRemoveProperty(AppOptionProperty property)
+		{
+			return false == property is FolderOutputAppOptionProperty;
 		}
+
 	}
 
 	
 
 
-	[DataContract]
-	public class AppOptionDeclaration : AppOptionDeclarationBase
-	{
-		public AppOptionDeclaration() { }
-
-		public AppOptionDeclaration(string name, int id)
-			: base(name, id)
-		{
-
-			
-		}
-
-		
-
-		public virtual void AddProperty(AppOptionProperty property)
-		{
-			_UserProperties.Add(property);
-		}
-
-		public virtual bool RemoveProperty(AppOptionProperty property)
-		{
-			return _UserProperties.Remove(property);
-		}
-
-
-		
-	}
+	
 
 
 

@@ -12,6 +12,7 @@ namespace ReactiveFolder.Models
 
 		public int DefaultMonitorIntervalSeconds { get; set; }
 
+		public int HistoryAvailableStorageSizeMB { get; set; }
 
 		public ReactiveFolderSettings()
 		{
@@ -22,12 +23,14 @@ namespace ReactiveFolder.Models
 		{
 			SaveFolder = Properties.Settings.Default.SaveFolder;
 			DefaultMonitorIntervalSeconds = Properties.Settings.Default.DefaultMonitorIntervalSeconds;
+			HistoryAvailableStorageSizeMB = Properties.Settings.Default.HistoryAvailableStorageSizeMB;
 		}
 
 		public void Save()
 		{
 			Properties.Settings.Default.SaveFolder = SaveFolder;
 			Properties.Settings.Default.DefaultMonitorIntervalSeconds = DefaultMonitorIntervalSeconds;
+			Properties.Settings.Default.HistoryAvailableStorageSizeMB = HistoryAvailableStorageSizeMB;
 
 			Properties.Settings.Default.Save();
 		}

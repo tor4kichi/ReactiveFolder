@@ -13,6 +13,7 @@ using System.Globalization;
 using System.Threading;
 using ReactiveFolder;
 using ReactiveFolder.Models;
+using Prism.Events;
 
 namespace ReactiveFolder
 {
@@ -26,11 +27,6 @@ namespace ReactiveFolder
 	public partial class App : Application
 	{
 		/// <summary>
-		/// タスクトレイに表示するアイコン
-		/// </summary>
-		private NotifyIconWrapper _NotifyIcon;
-
-		/// <summary>
 		/// System.Windows.Application.Startup イベント を発生させます。
 		/// </summary>
 		/// <param name="e"></param>
@@ -42,11 +38,10 @@ namespace ReactiveFolder
 			// ウィンドウを閉じる動作でアプリを終了しないようにする
 			this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-			// タスクトレイアイコン
-			this._NotifyIcon = new NotifyIconWrapper();
 
 			// Prismのアプリ立ち上げ作法に則る
-			Bootstrapper bs = new Bootstrapper();
+			var bs = new Bootstrapper(e.Args);
+
 			bs.Run();
 
 		}
@@ -58,8 +53,6 @@ namespace ReactiveFolder
 		protected override void OnExit(ExitEventArgs e)
 		{
 			base.OnExit(e);
-
-			this._NotifyIcon.Dispose();
 		}
 	}
 }

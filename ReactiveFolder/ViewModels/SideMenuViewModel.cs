@@ -2,9 +2,14 @@
 using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.Mvvm;
 using Prism.Regions;
+using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
+using ReactiveFolder.Models;
+using ReactiveFolderStyles.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,86 +19,156 @@ namespace ReactiveFolder.ViewModels
 	{
 		public IRegionManager _RegionManager;
 
-
-		public SideMenuViewModel(IRegionManager regionManagar)
-		{
-			_RegionManager = regionManagar;
-		}
+		public PageManager PageManager { get; private set; }
 
 
-		public static List<MenuItemViewModel> MenuItems { get; private set; }
+
+		public MenuItemViewModel AppPolicyManageListItem { get; private set; }
+		public MenuItemViewModel ReactionManageListItem { get; private set; }
+		public MenuItemViewModel InstantActionListItem { get; private set; }
+		public MenuItemViewModel HistoryListItem { get; private set; }
 
 
-		static SideMenuViewModel()
+		public MenuItemViewModel SettingsListItem { get; private set; }
+		public MenuItemViewModel AboutListItem { get; private set; }
+
+		public List<MenuItemViewModel> MenuItems { get; private set; }
+
+
+
+		public SideMenuViewModel()
 		{
 			MenuItems = new List<MenuItemViewModel>();
+		}
 
-			MenuItems.Add(new MenuItemViewModel()
-			{
-				Title = "Manage Reaction",
-				Kind = PackIconKind.Home,
-				SelectedAction = (regionManager) =>
-				{
-					regionManager.RequestNavigate("MainRegion", nameof(Modules.Main.Views.FolderListPage));
-				}
-			});
+		public SideMenuViewModel(PageManager page, IRegionManager regionManagar)
+		{
+			PageManager = page;
+			_RegionManager = regionManagar;
 
-			MenuItems.Add(new MenuItemViewModel()
+			
+			
+
+			AppPolicyManageListItem = new MenuItemViewModel(AppPageType.AppPolicyManage)
 			{
 				Title = "App Policy List",
-				Kind = PackIconKind.Home,
-				SelectedAction = (regionManager) =>
+				Kind = PackIconKind.ViewList,
+				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					regionManager.RequestNavigate("MainRegion", nameof(Modules.AppPolicy.Views.AppPolicyListPage));
-				}
-			});
+					PageManager.OpenPage(AppPageType.AppPolicyManage);
+				})
+			};
 
-			MenuItems.Add(new MenuItemViewModel()
+			ReactionManageListItem = new MenuItemViewModel(AppPageType.ReactionManage)
+			{
+				Title = "Manage Reaction",
+				Kind = PackIconKind.Monitor,
+				MenuItemSelectedCommand = new DelegateCommand(() =>
+				{
+					PageManager.OpenPage(AppPageType.ReactionManage);
+				})
+			};
+
+			InstantActionListItem = new MenuItemViewModel(AppPageType.InstantAction)
+			{
+				Title = "Instant Action",
+				Kind = PackIconKind.Run,
+				MenuItemSelectedCommand = new DelegateCommand(() =>
+				{
+					PageManager.OpenPage(AppPageType.InstantAction);
+				})
+			};
+
+			HistoryListItem = new MenuItemViewModel(AppPageType.History)
+			{
+				Title = "History",
+				Kind = PackIconKind.History,
+				MenuItemSelectedCommand = new DelegateCommand(() =>
+				{
+					PageManager.OpenPage(AppPageType.History);
+				})
+			};
+
+
+
+			SettingsListItem = new MenuItemViewModel(AppPageType.Settings)
 			{
 				Title = "Settings",
 				Kind = PackIconKind.Settings,
-				SelectedAction = (regionManager) =>
+				MenuItemSelectedCommand = new DelegateCommand(() =>
 				{
-					regionManager.RequestNavigate("MainRegion", nameof(Modules.Settings.Views.SettingsPage));
-				}
-			});
+					PageManager.OpenPage(AppPageType.Settings);
+				})
+			};
 
-			MenuItems.Add(new MenuItemViewModel()
+			AboutListItem = new MenuItemViewModel(AppPageType.About)
 			{
 				Title = "About",
 				Kind = PackIconKind.CommentQuestionOutline,
-				SelectedAction = (regionManager) =>
+				MenuItemSelectedCommand = new DelegateCommand(() => 
 				{
-					regionManager.RequestNavigate("MainRegion", nameof(Modules.About.Views.AboutPage));
-				}
-			});
-		}
+					PageManager.OpenPage(AppPageType.About);
+				})
+			};
 
 
-
-		private DelegateCommand<string> _OpenReactiveFolderListCommand;
-		public DelegateCommand<string> MenuItemSelectedCommand
-		{
-			get
+			MenuItems = new List<MenuItemViewModel>()
 			{
-				return _OpenReactiveFolderListCommand
-					?? (_OpenReactiveFolderListCommand = new DelegateCommand<string>((menuName) =>
-					{
-						var menuItem = MenuItems.SingleOrDefault(x => x.Title == menuName);
-						menuItem.SelectedAction(_RegionManager);
-					}));
-			}
-		}
+				AppPolicyManageListItem,
+				InstantActionListItem,
+				ReactionManageListItem,
+				HistoryListItem,
 
-		
+				SettingsListItem,
+				AboutListItem,
+			};
+
+
+
+
+			PageManager.ObserveProperty(x => x.PageType)
+				.Subscribe(x =>
+				{
+					foreach(var nonSelectedItem in MenuItems.Where(y => y.PageType != x))
+					{
+						nonSelectedItem.IsSelected = false;
+					}
+
+					MenuItems.Single(y => y.PageType == x).IsSelected = true;
+				});
+				
+				
+
+		}		
 	}
 
 
-	public class MenuItemViewModel
+	public class MenuItemViewModel : BindableBase
 	{
+
+		public MenuItemViewModel(AppPageType pageType)
+		{
+			PageType = pageType;
+
+		}
+
+		public AppPageType PageType { get; set;}
 		public string Title { get; set; }
 		public PackIconKind Kind { get; set; }
 
-		public Action<IRegionManager> SelectedAction { get; set; }
+		public DelegateCommand MenuItemSelectedCommand { get; set; }
+
+		private bool _IsSelected;
+		public bool IsSelected
+		{
+			get
+			{
+				return _IsSelected;
+			}
+			set
+			{
+				SetProperty(ref _IsSelected, value);
+			}
+		}
 	}
 }

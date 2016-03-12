@@ -13,27 +13,32 @@ namespace ReactiveFolder.Models
 	{
 		public const string REACTION_EXTENTION = ".rf.json";
 
+		public FolderModel ParentFolder { get; private set; }
 		public DirectoryInfo Folder { get; private set; }
 
-		private ObservableCollection<FolderReactionModel> _Models { get; set; }
-		public ReadOnlyObservableCollection<FolderReactionModel> Models { get; private set; } 
+		private ObservableCollection<FolderReactionModel> _Reactions { get; set; }
+		public ReadOnlyObservableCollection<FolderReactionModel> Reactions { get; private set; } 
 
 		public ObservableCollection<FolderModel> _Children { get; private set; }
 		public ReadOnlyObservableCollection<FolderModel> Children { get; private set; }
 
-		FolderModel(DirectoryInfo folder)
+
+		public string Name { get { return Folder.Name; } }
+
+		FolderModel(DirectoryInfo folder, FolderModel parentFolder = null)
 		{
+			ParentFolder = parentFolder;
 			Folder = folder;
 
-			_Models = new ObservableCollection<FolderReactionModel>();
-			Models = new ReadOnlyObservableCollection<FolderReactionModel>(_Models);
+			_Reactions = new ObservableCollection<FolderReactionModel>();
+			Reactions = new ReadOnlyObservableCollection<FolderReactionModel>(_Reactions);
 			_Children = new ObservableCollection<FolderModel>();
 			Children = new ReadOnlyObservableCollection<FolderModel>(_Children);
 		}
 
-		public static FolderModel LoadFolder(DirectoryInfo dir)
+		public static FolderModel LoadFolder(DirectoryInfo dir, FolderModel parentFolder = null)
 		{
-			var folderModel = new FolderModel(dir);
+			var folderModel = new FolderModel(dir, parentFolder);
 
 			folderModel.UpdateReactionModels();
 
@@ -51,7 +56,7 @@ namespace ReactiveFolder.Models
 			// 追加されたフォルダ
 			var addFolders = folders
 				.Where(x => _Children.All(y => y.Folder.FullName != x.FullName))
-				.Select(x => FolderModel.LoadFolder(x));
+				.Select(x => FolderModel.LoadFolder(x, this));
 
 			foreach (var newChild in addFolders)
 			{
@@ -128,22 +133,22 @@ namespace ReactiveFolder.Models
 
 			// 追加されたモデル
 			var addTargetModel = loadedModels
-				.Where(x => _Models.All(y => x.Guid != y.Guid));
+				.Where(x => _Reactions.All(y => x.Guid != y.Guid));
 
 			foreach (var model in addTargetModel)
 			{
-				_Models.Add(model);
+				_Reactions.Add(model);
 			}
 
 
 			// 削除されたモデル
-			var removeTargetModels = _Models
+			var removeTargetModels = _Reactions
 				.Where(x => loadedModels.All(y => x.Guid != y.Guid))
 				.ToList();
 
 			foreach(var removeTarget in removeTargetModels)
 			{
-				_Models.Remove(removeTarget);
+				_Reactions.Remove(removeTarget);
 			}
 		}
 
@@ -155,21 +160,21 @@ namespace ReactiveFolder.Models
 				FolderReactionModel.ResetGuid(reaction);
 			}
 
-			_Models.Add(reaction);
+			_Reactions.Add(reaction);
 
 			SaveReaction(reaction);
 		}
 
 		public void RemoveReaction(Guid guid)
 		{
-			var removeTarget = _Models.SingleOrDefault(x => x.Guid == guid);
+			var removeTarget = _Reactions.SingleOrDefault(x => x.Guid == guid);
 			if (removeTarget == null)
 			{
 				// 子Folderまではチェックしない
 				throw new Exception();
 			}
 
-			_Models.Remove(removeTarget);
+			_Reactions.Remove(removeTarget);
 
 			DeleteReaction(removeTarget);
 		}
@@ -269,7 +274,7 @@ namespace ReactiveFolder.Models
 
 		public FolderReactionModel FindReaction(Guid guid)
 		{
-			var reaction = Models.SingleOrDefault(x => x.Guid == guid);
+			var reaction = Reactions.SingleOrDefault(x => x.Guid == guid);
 			if (reaction == null)
 			{
 				foreach(var child in Children)
@@ -284,7 +289,7 @@ namespace ReactiveFolder.Models
 
 		public FolderModel FindReactionParent(FolderReactionModel model)
 		{
-			if (Models.Contains(model))
+			if (Reactions.Contains(model))
 			{
 				return this;
 			}
@@ -300,7 +305,7 @@ namespace ReactiveFolder.Models
 
 		public FolderModel FindReactionParent(Guid guid)
 		{
-			if (Models.Any(x => x.Guid == guid))
+			if (Reactions.Any(x => x.Guid == guid))
 			{
 				return this;
 			}
@@ -314,7 +319,24 @@ namespace ReactiveFolder.Models
 			return null;
 		}
 
-		
+
+		public List<FolderModel> GetAllParent()
+		{
+			var stack = new List<FolderModel>();
+
+			var parentFolder = this.ParentFolder;
+
+			while (parentFolder != null)
+			{
+				stack.Add(parentFolder);
+				parentFolder = parentFolder.ParentFolder;
+			}
+
+			// 降順から昇順に
+			stack.Reverse();
+
+			return stack;
+		}
 
 		public string MakeReactionSaveFilePath(FolderReactionModel reaction)
 		{

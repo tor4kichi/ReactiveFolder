@@ -9,7 +9,8 @@ namespace ReactiveFolder.Models.AppPolicy
 {
 	public interface IAppPolicyManager
 	{
-	
+		AppPolicySecurity Security { get; }
+
 		ReadOnlyObservableCollection<ApplicationPolicy> Policies { get; }
 
 		bool HasAppPolicy(ApplicationPolicy policy);
@@ -22,6 +23,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		string SaveFolderPath { get; }
 		string GetSaveFilePath(ApplicationPolicy policy);
 
+		IEnumerable<ApplicationPolicy> FindAppPolicyOnAcceptExtentions(IEnumerable<string> extentions);
 	}
 
 	public static class AppPolicyManagerHelper

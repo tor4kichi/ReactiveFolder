@@ -44,6 +44,11 @@ namespace ReactiveFolder.Models
 
 		public string OutputPath { get; private set; }
 
+
+		public DateTime StartTime { get; private set; }
+
+		public DateTime EndTime { get; private set; }
+
 		/// <summary>
 		/// IStreamContextUpdater
 		/// </summary>
@@ -76,6 +81,9 @@ namespace ReactiveFolder.Models
 			SourcePath = OriginalPath;
 
 			Status = ReactiveStreamStatus.Running;
+
+			FailedMessage = new List<string>();
+
 		}
 
 
@@ -115,6 +123,17 @@ namespace ReactiveFolder.Models
 
 
 
+		public void OnStart()
+		{
+			StartTime = DateTime.Now;
+		}
+
+		public void OnEnd()
+		{
+			EndTime = DateTime.Now;
+		}
+
+
 
 		public void SetNextWorkingPath(string workPath)
 		{
@@ -126,6 +145,8 @@ namespace ReactiveFolder.Models
 			Status = ReactiveStreamStatus.Failed;
 
 			FailedCuaseException = e;
+
+			FailedMessage.Add(message);
 		}
 
 		public void Complete(string outputItemPath)

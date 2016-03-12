@@ -1,6 +1,7 @@
 ﻿using Microsoft.Practices.Prism.Mvvm;
 using Prism.Regions;
 using ReactiveFolder.Models;
+using ReactiveFolderStyles.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,79 +12,22 @@ namespace Modules.Main.ViewModels
 {
 	// Note: Support page to page moving.
 
-	public class PageViewModelBase : BindableBase
+	abstract public class PageViewModelBase : BindableBase, INavigationAware
 	{
-		protected IRegionManager _RegionManager { get; private set; }
+		protected PageManager PageManager { get; private set; }
 
 		protected IFolderReactionMonitorModel _MonitorModel { get; private set; }
 
-		public PageViewModelBase(IRegionManager regionManager, IFolderReactionMonitorModel monitor)
+		public PageViewModelBase(PageManager pageManager, IFolderReactionMonitorModel monitor)
 		{
-			_RegionManager = regionManager;
+			PageManager = pageManager;
 			_MonitorModel = monitor;
 
 			
 		}
 
-
-
-		public void NavigationToFolderListPage(FolderModel folderModel)
-		{
-			var param = new NavigationParameters();
-			param.Add("path", folderModel.Folder.FullName);
-			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.FolderListPage), param);
-		}
-
-
-
-		protected FolderModel FolderModelFromNavigationParameters(NavigationParameters param)
-		{
-			var folderPath = (string)param["path"];
-			if (folderPath == null)
-			{
-				throw new Exception("NavigationParameters not contains key <path>.");
-			}
-
-			// FolderModelを検索
-			var folderModel = _MonitorModel.FindFolder(folderPath);
-			if (folderModel == null)
-			{
-				throw new Exception("not exists FolderModel. path is " + folderPath);
-			}
-
-			return folderModel;
-		}
-
-
-
-
-
-
-		public void NavigationToReactionEditerPage(FolderReactionModel reaction)
-		{
-			var param = new NavigationParameters();
-			param.Add("guid", reaction.Guid);
-			this._RegionManager.RequestNavigate("MainRegion", nameof(Views.ReactionEditerPage), param);
-		}
-
-		protected FolderReactionModel ReactionModelFromNavigationParameters(NavigationParameters param)
-		{
-			var guid = (Guid)param["guid"];
-			if (guid == null)
-			{
-				throw new Exception("NavigationParameters not contains key <path>.");
-			}
-
-			var reaction = _MonitorModel.FindReaction(guid);
-			if (reaction == null)
-			{
-				throw new Exception("not exists FolderReactionModel. guid is " + guid.ToString());
-			}
-
-			return reaction;
-		}
-
-		
-		
+		public abstract void OnNavigatedTo(NavigationContext navigationContext);
+		public abstract bool IsNavigationTarget(NavigationContext navigationContext);
+		public abstract void OnNavigatedFrom(NavigationContext navigationContext);
 	}
 }

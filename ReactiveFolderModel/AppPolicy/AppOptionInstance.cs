@@ -31,21 +31,44 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 		}
 
+		public ValidationResult ValidateResult { get; private set; }
 
-		
 
-		public AppOptionInstance(int optionId, AppOptionValue[] values, AppOptionDeclarationBase decl)
+		public AppOptionInstance()
 		{
-			OptionId = optionId;
+			OptionId = -1;
+			Values = null;
+			OptionDeclaration = null;
+			ValidateResult = new ValidationResult();
+		}
+
+		public AppOptionInstance(AppOptionValue[] values, AppOptionDeclarationBase decl)
+		{
+			OptionId = decl.Id;
 			Values = values;
 			OptionDeclaration = decl;
+			ValidateResult = new ValidationResult();
 		}
 
 
 
 		public bool Validate()
 		{
-			throw new NotImplementedException();
+			ValidateResult.Clear();
+
+			if (OptionDeclaration == null)
+			{
+				ValidateResult.AddMessage("OptionDeclration is null. AppPolicy or Declaration deleted.");
+				return false;
+			}
+
+			if (false == OptionDeclaration.CheckValidateOptionValues(this.Values))
+			{
+				ValidateResult.AddMessage("Invalid option value. may be changed preview Declaration in AppPolicy (or AppPolicy deleted).");
+				return false;
+			}
+
+			return true;
 		}
 
 		public void ResetDeclaration(ApplicationPolicy appPolicy)

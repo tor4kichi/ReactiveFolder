@@ -15,9 +15,9 @@ namespace Modules.AppPolicy.ViewModels
 
 	public class PageViewModelBase : BindableBase
 	{
-		protected IRegionManager _RegionManager { get; private set; }
+		public IRegionManager _RegionManager { get; private set; }
 
-		protected IAppPolicyManager _AppPolicyManager { get; private set; }
+		public IAppPolicyManager _AppPolicyManager { get; private set; }
 
 		public PageViewModelBase(IRegionManager regionManager, IAppPolicyManager appPolicyFactory)
 		{

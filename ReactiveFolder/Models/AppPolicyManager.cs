@@ -22,19 +22,15 @@ namespace ReactiveFolder.Models
 		
 
 
-		public static AppPolicyManager CreateNew(DirectoryInfo saveFolderInfo)
+		
+		public static AppPolicyManager Load(DirectoryInfo saveFolderInfo, AppPolicySecurity security)
 		{
-			if (!saveFolderInfo.Exists)
+			if (false == saveFolderInfo.Exists)
 			{
 				saveFolderInfo.Create();
 			}
 
-			return new AppPolicyManager(saveFolderInfo);
-		}
-
-		public static AppPolicyManager Load(DirectoryInfo saveFolderInfo)
-		{
-			var factory = new AppPolicyManager(saveFolderInfo);
+			var factory = new AppPolicyManager(saveFolderInfo, security);
 
 			foreach (var fileInfo in saveFolderInfo.EnumerateFiles($"*{APP_POLICY_EXTENTION}"))
 			{
@@ -53,6 +49,7 @@ namespace ReactiveFolder.Models
 			return factory;
 		}
 
+		public AppPolicySecurity Security { get; private set; }
 
 
 		private ObservableCollection<ApplicationPolicy> _Policies { get; set; }
@@ -78,11 +75,13 @@ namespace ReactiveFolder.Models
 		}
 
 
-		public AppPolicyManager(DirectoryInfo saveFolderInfo)
+		public AppPolicyManager(DirectoryInfo saveFolderInfo, AppPolicySecurity security)
 		{
 			SaveFolderInfo = saveFolderInfo;
 			_Policies = new ObservableCollection<ApplicationPolicy>();
 			Policies = new ReadOnlyObservableCollection<ApplicationPolicy>(_Policies);
+
+			Security = security;
 		}
 
 
@@ -155,7 +154,12 @@ namespace ReactiveFolder.Models
 			{
 				fileInfo.Delete();
 			}
-		}		
+		}
 
+
+		public IEnumerable<ApplicationPolicy> FindAppPolicyOnAcceptExtentions(IEnumerable<string> extentions)
+		{
+			return this.Policies.Where(x => x.CheckCanAcceptExntentions(extentions));
+		}
 	}
 }

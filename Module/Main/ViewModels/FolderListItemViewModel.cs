@@ -13,13 +13,13 @@ namespace Modules.Main.ViewModels
 	// ReactiveFolderModel.FolderModelのVM
 	public class FolderListItemViewModel : BindableBase
 	{
-		public PageViewModelBase PageVM { get; private set; }
+		public FolderReactionManagePageViewModel PageVM { get; private set; }
 		public FolderModel FolderModel { get; private set; }
 
 		public string FolderName { get; private set; }
 
 
-		public FolderListItemViewModel(PageViewModelBase pageVM, FolderModel folderModel)
+		public FolderListItemViewModel(FolderReactionManagePageViewModel pageVM, FolderModel folderModel)
 		{
 			PageVM = pageVM;
 			FolderModel = folderModel;
@@ -29,15 +29,15 @@ namespace Modules.Main.ViewModels
 			
 		}
 
-		private DelegateCommand _OpenFolderReactionListCommand;
-		public DelegateCommand OpenFolderReactionListCommand
+		private DelegateCommand _SelectFolderCommand;
+		public DelegateCommand SelectFolderCommand
 		{
 			get
 			{
-				return _OpenFolderReactionListCommand
-					?? (_OpenFolderReactionListCommand = new DelegateCommand(() =>
+				return _SelectFolderCommand
+					?? (_SelectFolderCommand = new DelegateCommand(() =>
 					{
-						PageVM.NavigationToFolderListPage(FolderModel);
+						PageVM.SelectFolder(FolderModel);
 					}));
 			}
 		}

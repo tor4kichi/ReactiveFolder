@@ -135,6 +135,10 @@ namespace ReactiveFolder.Models.Util
 			where T : class
 			
 		{
+			if (fileInfo == null || false == fileInfo.Exists)
+			{
+				return null;
+			}
 			var format = ExtentionToContentFormat(fileInfo.Extension);
 			
 			T returnObj = null;
@@ -210,8 +214,6 @@ namespace ReactiveFolder.Models.Util
 
 				case ".meta": return ContentFormat.Json;
 
-				case ".pathtinode": return ContentFormat.Xml;
-
 				default:
 					throw new NotSupportedException(ext);
 			}
@@ -264,10 +266,20 @@ namespace ReactiveFolder.Models.Util
 				return null;
 			}
 
-			return JsonConvert.DeserializeObject<T>(jsonText, new JsonSerializerSettings()
+			try
 			{
-				TypeNameHandling = TypeNameHandling.Objects
-			});
+				return JsonConvert.DeserializeObject<T>(jsonText, new JsonSerializerSettings()
+				{
+					TypeNameHandling = TypeNameHandling.Objects
+				});
+			}
+			catch(Exception e)
+			{
+				System.Diagnostics.Debug.WriteLine(e.Message);
+				System.Diagnostics.Debugger.Break();
+
+				return null;
+			}
 		}
 		
 	}

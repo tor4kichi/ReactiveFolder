@@ -1,0 +1,178 @@
+﻿<UserControl x:Class="Modules.InstantAction.Views.ActionSelectStepControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:dd="clr-namespace:WPFBehaviorLibrary.DragDropBehavior;assembly=WPFBehaviorLibrary"
+             xmlns:local="clr-namespace:Modules.InstantAction.Views"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:sdk="http://schemas.microsoft.com/winfx/2006/xaml/presentation/sdk"
+             xmlns:vm="clr-namespace:Modules.InstantAction.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="600">
+    <UserControl.Resources>
+        
+
+
+        <DataTemplate x:Key="actionListItemTemplate">
+            <DockPanel
+                Margin="0 8"
+                Background="Transparent"
+                >
+                <DockPanel>
+                    
+                    <Border
+                        DockPanel.Dock="Top"
+                        >
+                        <DockPanel>
+                            
+                            
+                            <Button 
+                                DockPanel.Dock="Left"
+                                Command="{Binding AddOptionCommand}"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                                Margin="8 0"
+                                ToolTip="Add Option"
+                                >
+                                <materialDesign:PackIcon Kind="Plus" 
+                                                     Width="16"
+                                                     Height="16"
+                                                     />
+                            </Button>
+                           
+                            <Button DockPanel.Dock="Right"
+                                    Command="{Binding RemoveActionCommand}"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Foreground="Red"
+                                    Margin="8 0"
+                                    >
+                                <materialDesign:PackIcon Kind="Delete"></materialDesign:PackIcon>
+                            </Button>
+
+                            <TextBlock VerticalAlignment="Center">
+                                <Run Text="{Binding AppName, Mode=OneTime}"                                      
+                                     />
+                            </TextBlock>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- ItemTemplate see@ ReactiveFolderStyles.AppOptionResources  -->
+                    <ItemsControl ItemsSource="{Binding UsingOptions}" 
+                                  Margin="32 0 0 0"
+                                  HorizontalContentAlignment="Right"
+                                  />
+
+
+                </DockPanel>
+
+            </DockPanel>
+        </DataTemplate>
+
+        
+
+
+        <DataTemplate x:Key="actionListItemDragingTemplate">
+            <StackPanel Orientation="Horizontal" Margin="32 0 0 0">
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding AppName}" />
+                    <TextBlock Text="{Binding OptionName}"
+                                            Margin="2 0"
+                                            />
+                </StackPanel>
+
+                <materialDesign:PackIcon Kind="SwapVertical"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             ></materialDesign:PackIcon>
+
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+    
+    
+    
+    
+    
+    <DockPanel>
+        <Border DockPanel.Dock="Top"
+                Margin="0 0 0 16"
+                >
+            <TextBlock Text="処理方法を選択" 
+                       Style="{StaticResource MaterialDesignHeadlineTextBlock}"
+                       Foreground="{StaticResource PrimaryHueMidBrush}"
+                       
+                       />
+        </Border>
+
+        <DockPanel>
+            
+            <Border
+                >
+                <DockPanel>
+
+                    <DockPanel 
+                        DockPanel.Dock="Top"
+                         >
+
+                        <Button 
+                                DockPanel.Dock="Left"
+                                Command="{Binding AddApplicationCommand}"
+                                Style="{StaticResource MaterialDesignFloatingActionButton}"
+                                Margin="8 0"
+                                ToolTip="Add Application Action"
+                                >
+                            <materialDesign:PackIcon Kind="Plus" 
+                                                     Width="24"
+                                                     Height="24"
+                                                     />
+                        </Button>
+
+                        <TextBlock Text="Actions" 
+                               Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                       VerticalAlignment="Center"
+                               />
+                        <StackPanel
+                                Orientation="Horizontal"
+                                Margin="16 0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                            >
+    
+                            <TextBlock Text="Can Reorder"
+                                       Foreground="Gray"
+                                       />
+                            <materialDesign:PackIcon Kind="SwapVertical"
+                                             HorizontalAlignment="Center"
+                                             Background="Transparent" 
+                                             IsHitTestVisible="True"
+                                             Margin="2 0"
+                                             Foreground="Gray"
+                                             />
+
+                        </StackPanel>
+
+                    </DockPanel>
+
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding ActionVMs}" 
+                                      ItemTemplate="{StaticResource actionListItemTemplate}"
+                                      >
+                            <i:Interaction.Behaviors>
+                                <dd:DragDropBehavior ItemType="{x:Type vm:AppLaunchActionInstanceViewModel}" 
+                                                     DataTemplate="{StaticResource actionListItemDragingTemplate}" 
+                                         
+                                         />
+                            </i:Interaction.Behaviors>
+                        </ItemsControl>
+
+                    </ScrollViewer>
+
+                </DockPanel>
+            </Border>
+
+        </DockPanel>
+    </DockPanel>
+</UserControl>

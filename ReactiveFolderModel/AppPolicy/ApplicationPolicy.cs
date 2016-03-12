@@ -19,29 +19,7 @@ namespace ReactiveFolder.Models.AppPolicy
 	[DataContract]
 	public class ApplicationPolicy : BindableBase
 	{
-		public static ApplicationPolicy Create(string applicationPath)
-		{
-			if (String.IsNullOrWhiteSpace(applicationPath))
-			{
-				throw new Exception(nameof(applicationPath) + " " + nameof(String.IsNullOrWhiteSpace));
-			}
 
-			var fileInfo = new FileInfo(applicationPath);
-
-			if (false == fileInfo.Exists)
-			{
-				System.Diagnostics.Debug.WriteLine(applicationPath + " is invalid application path.");
-				return null;
-			}
-
-			if (fileInfo.Extension != ".exe")
-			{
-				System.Diagnostics.Debug.WriteLine(applicationPath + " is not executable application.");
-				return null;
-			}
-
-			return new ApplicationPolicy(applicationPath);
-		}
 
 
 		[DataMember]
@@ -72,13 +50,29 @@ namespace ReactiveFolder.Models.AppPolicy
 			}
 			set
 			{
+				// ファイルパスの正規化
+				if (false == String.IsNullOrEmpty(value))
+				{
+					var info = new FileInfo(value);
+
+					if (false == info.Exists)
+					{
+						throw new FileNotFoundException("file path can not assign to ApplicationPath", value);
+					}
+
+					value = info.FullName;
+				}
+
 				if (SetProperty(ref _ApplicationPath, value))
 				{
-					_AppName = null;
-					OnPropertyChanged(nameof(AppName));
+					if (string.IsNullOrWhiteSpace(AppName) && false == string.IsNullOrEmpty(_ApplicationPath))
+					{
+						AppName = Path.GetFileNameWithoutExtension(_ApplicationPath);
+					}
 				}
 			}
 		}
+
 
 		[DataMember]
 		private TimeSpan _MaxProcessTime;
@@ -93,6 +87,8 @@ namespace ReactiveFolder.Models.AppPolicy
 				SetProperty(ref _MaxProcessTime, value);
 			}
 		}
+
+
 
 		
 
@@ -148,10 +144,10 @@ namespace ReactiveFolder.Models.AppPolicy
 		/// 
 		/// </summary>
 		/// <param name="applicationPath"></param>
-		public ApplicationPolicy(string applicationPath)
+		public ApplicationPolicy()
 		{
-			ApplicationPath = applicationPath;
-			AppName = Path.GetFileNameWithoutExtension(ApplicationPath);
+			ApplicationPath = "";
+			AppName = "";
 
 			Guid = Guid.NewGuid();
 
@@ -274,7 +270,7 @@ namespace ReactiveFolder.Models.AppPolicy
 		public AppOutputOptionDeclaration AddOutputOptionDeclaration(string name)
 		{
 			var id = GetNextOptionDeclarationId();
-			var newOption = new AppOutputOptionDeclaration("Extention", id, FolderItemType.File);
+			var newOption = new AppOutputOptionDeclaration("OUT", id, FolderItemType.File);
 
 			newOption.Name = name;
 
@@ -349,6 +345,21 @@ namespace ReactiveFolder.Models.AppPolicy
 		}
 
 
+		/// <summary>
+		/// 渡された拡張子の"全て"が、このアプリポリシーで受け取り可能であれば true を返します。
+		/// </summary>
+		/// <param name="outerExts"></param>
+		/// <returns></returns>
+		public bool CheckCanAcceptExntentions(IEnumerable<string> outerExts)
+		{
+			var innerExts = GetOutputExtentions();
+
+			// innerExtsがouterExtsの全てを含んでいればtrue
+
+			return outerExts.All(outerExt => innerExts.Any(innerExt => outerExt.EndsWith(innerExt)));
+		}
+
+
 
 		public string AppOptionsToArgumentText(IEnumerable<AppOptionInstance> optionValues)
 		{
@@ -371,11 +382,33 @@ namespace ReactiveFolder.Models.AppPolicy
 
 			return String.Join(" ", argumentTexts);
 		}
+
+
+		public bool ValidateAppOptionInstances(IEnumerable<AppOptionInstance> options)
+		{
+			foreach (var opt in options)
+			{
+				if ( false == opt.Validate())
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		
 
-		public ApplicationExecuteSandbox CreateExecuteSandbox(AppOptionInstance[] options)
+		public ApplicationExecuteSandbox CreateExecuteSandbox(IAppPolicyManager manager, AppOptionInstance[] options)
 		{
-			return new ApplicationExecuteSandbox(this, options);
+			if (manager.Security.IsAuthorized(this.ApplicationPath))
+			{
+				return new ApplicationExecuteSandbox(this, options);
+			}
+			else
+			{
+				return null;
+			}
 		}
 		
 
