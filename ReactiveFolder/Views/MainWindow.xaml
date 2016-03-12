@@ -14,6 +14,7 @@
         mc:Ignorable="d"
         prism:ViewModelLocator.AutoWireViewModel="True"
         Title="ReactiveFolder" 
+        Icon="/ReactiveFolder;component/Resources/Icon.ico"
         MinWidth="960"
         MinHeight="600"
         Width="960"
