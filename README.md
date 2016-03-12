@@ -10,7 +10,12 @@
 
 [ReactiveFolder ver.Beta](https://github.com/tor4kichi/ReactiveFolder/releases/tag/beta)
 
+
+
+
 # Wiki
+
+[ReactiveFolderの概要とアプリ連携について](https://github.com/tor4kichi/ReactiveFolder/wiki/%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E8%80%83%E3%81%88%E6%96%B9%E3%81%A8%E3%82%A2%E3%83%97%E3%83%AA%E9%80%A3%E6%90%BA)
 
 [Q&A](https://github.com/tor4kichi/ReactiveFolder/wiki/Q&A)
 
