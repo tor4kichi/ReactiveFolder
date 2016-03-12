@@ -114,14 +114,13 @@ namespace ReactiveFolder.ViewModels
 
 			MenuItems = new List<MenuItemViewModel>()
 			{
-				AboutListItem,
-				SettingsListItem,
-
+				AppPolicyManageListItem,
 				InstantActionListItem,
 				ReactionManageListItem,
-				AppPolicyManageListItem,
 				HistoryListItem,
-				
+
+				SettingsListItem,
+				AboutListItem,
 			};
 
 
