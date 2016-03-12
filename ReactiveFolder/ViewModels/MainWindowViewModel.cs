@@ -151,6 +151,7 @@ namespace ReactiveFolder.ViewModels
 				return _OpenWindowCommand
 					?? (_OpenWindowCommand = new DelegateCommand(() =>
 					{
+						PageManager.OpenPage(AppPageType.InstantAction);
 						ShowWindow(App.Current.MainWindow);
 					}
 					));

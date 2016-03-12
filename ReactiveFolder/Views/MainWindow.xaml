@@ -105,6 +105,7 @@
 
         <tb:TaskbarIcon 
             IconSource="/ReactiveFolder;component/Resources/icon.ico"
+            DoubleClickCommand="{Binding OpenWindowCommand}"
             >
             
             
